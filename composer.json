@@ -1,0 +1,13 @@
+{
+    "name": "dallgoot/yaml-loader",
+    "description": "load yml to equivalent data structure in PHP7",
+    "type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "dallgoot",
+            "email": "stephane.rebai@gmail.com"
+        }
+    ],
+    "require": {}
+}

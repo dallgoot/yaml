@@ -1,0 +1,11 @@
+#Example 2.9.  Single Document with
+#Two Comments
+
+---
+hr: # 1998 hr ranking
+  - Mark McGwire
+  - Sammy Sosa
+rbi:
+  # 1998 rbi ranking
+  - Sammy Sosa
+  - Ken Griffey

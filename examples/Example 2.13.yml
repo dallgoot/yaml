@@ -1,0 +1,7 @@
+#Example 2.13.  In literals,
+#newlines are preserved
+
+# ASCII Art
+--- |
+  \//||\/||
+  // ||  ||__
