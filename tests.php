@@ -5,7 +5,7 @@ $folder = "./examples/";
 
 $files = array_diff(scandir($folder), array('..', '.'));
 
-$yamlLoader = new \YamlLoader\YamlLoader();
+$yamlLoader = new YamlLoader();
 
 try{
 	foreach ($files as $key => $fileName) {
