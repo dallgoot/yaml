@@ -2,28 +2,50 @@
 # <- yaml supports comments, json does not
 # did you know you can embed json in yaml?
 # try uncommenting the next line
-#{ foo: 'bar' }
-
-pasdevaleurs:
-  object: autrevaleur   kkk
-json:
-  - rigid
-  - better for data interchange
-yaml:
-  - slim and flexible
-  - better for configuration
+# { foo: 'bar' }
+keyempty:
+keysimple: ttt
+keyquoted: 'a'
+keydquoted: "b"
+keyref: &b bh
+keyrefcall: *b
+keyjsonarray: [1,2]
+keyjsonobj: {a: 2,"b": 3}
+subkey:
+ keypartial: "
+4\"
+fakekey: t
+"
 object:
-  key: value
+  key: 4
   array:
-    - null_value:
-    - boolean: true
+    - null 
+    - boo lean: &a reference_called
     - integer: 1
+emptyparagraph: >
 paragraph: >
-   Blank lines denote     
-      
+   false: qsd
+   Blank lines denote
+
    paragraph breaks
-content: |-   
+   but not linefeed
+emptycontent: |-
+content:
+|- 
    Or we
    can auto
    convert line breaks
    to save space
+array:
+  - *a #comm
+  - *a
+  - mul: 
+     qdqsdqsdq
+      qsdqsdqd
+key: 
+  - another: value
+  - lad: "fqqs\"
+  5654"
+partial: 
+  r: |-
+    "{a: 45}"

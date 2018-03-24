@@ -4,22 +4,27 @@ class NODETYPES{
     const DIRECTIVE  = 0;
     const DOC_START = 1;
     const DOC_END = 2;
-    const DOCUMENT = 40;
-    const COMMENT = 3;
-    const NULL    = 4;
-    const ROOT    = 16;
-    const KEY_NOVALUE= 32;
-    const ITEM_NOVALUE = 34;
-    const ITEM_VALUE = 35;
-    const ITEM_PARTIAL = 40;
-    const STRING    = 64;
-    const BOOLEAN = 128;
-    const NUMBER  = 256;
-    const KEY_VALUE  = 512;
-    const KEY_BLOCK = 1024;
-    const KEY_BLOCK_FOLDED = 1024;
-    const EMPTY   =  2048;
-    const KEY_PARTIAL = 4096;
+    const DOCUMENT = 4;
+    const COMMENT = 8;
+    const EMPTY   = 16;
+    const ROOT    = 32;
+    // single line or have children
+    const KEY = 42; 
+    const ITEM = 52;
+
+    const PARTIAL = 62; // have a multi line quoted  string OR json definition
+    const LITTERAL = 72;
+    const LITTERAL_FOLDED = 82;
+
+    const NULL    = 92;
+    const STRING    = 102;
+    const BOOLEAN = 112;
+    const NUMBER  = 122;
+    const TAG = 132;
+    const JSON = 142;
+    
+    const QUOTED = 148;
+    const REFERENCE = 152;
 }
 use YamlLoader\NODETYPES as NT;
 /**
@@ -42,7 +47,7 @@ class Node
         if(is_null($nodeString)){
             $this->type = NT::ROOT;
         }else{
-            $this->_parse($nodeString);
+            $this->parse($nodeString);
             $this->line = $line;
         }
     }
@@ -51,7 +56,7 @@ class Node
     {
         $cursor = $this->_parent;
         if(!is_null($indent) && is_int($indent))
-        {
+        {//TODO : make sure _parent is of following types : KEY, ITEM (COMPLEX???)
             while(!is_null($cursor) && $indent !== $cursor->indent)
             {
                 $cursor = $cursor->_parent;
@@ -87,71 +92,72 @@ class Node
     */
     //TODO : handle reference definitions/calls and tags and complex mappings
     //EVOLUTION:  if keyname contains unauthorized character for PHP property name : replace with '_'  ???
-    private function _parse(String $nodeString){
+    private function parse(String $nodeString){
         //permissive to tabs but replacement before processing
         $nodeValue = preg_replace("/\t/m", " ", $nodeString);
-        if(empty($nodeValue))//|| preg_match('/^[\r\n]$/', $nodeValue))
-        {//TODO handles KEY_BLOCK lines with only spaces
-            $this->type = NT::EMPTY;
-            $this->indent = 0;
-            return;
-        }
         $this->indent = 0;
         while ($this->indent < mb_strlen($nodeValue) && $nodeValue[$this->indent]===' ') { 
             $this->indent++;
         }
-        $this->value = $nodeValue;
-        $noIndentString = substr($nodeString, $this->indent);
-        switch(true)
-        {
-            case substr($nodeString, 0, 3) === '---': $this->type = NT::DOC_START;break;
-            case substr($nodeString, 0, 3) === '...': $this->type = NT::DOC_END;break;
-            // allowed : 'YAML', 'TAG'  AND ONLY once
-            case $nodeString[0] === '%': $this->type = NT::DIRECTIVE;break;
-            case $nodeString[0] === '#': $this->type = NT::COMMENT;break;
-            //TODO : edge case if parent is KEY_BLOCK : this is NOT an ITEM
-            case preg_match('/^-[ \t]+(.*)$/', $noIndentString, $matches):
-                $this->value = $matches[1];
-                if(empty($this->value)) {
-                    $this->type = NT::ITEM_NOVALUE; 
-                }else{
-                    $this->type = NT::ITEM_VALUE;
-                    $isKEY_VALUE = strpos($this->value,': '); 
-                    if($isKEY_VALUE !== FALSE || $this->value[-1]===':'){
-                        list($this->name, $this->value) = explode(':', $this->value);
+        $n = new Node(null, $this->line);//$nodeValue;
+        $nodeValue = ltrim($nodeValue);
+        if ($nodeValue === '') {
+            $this->type = NT::EMPTY;
+            $this->indent = 0;
+        }elseif(substr($nodeValue, 0, 3) === '...'){
+            $this->type = NT::DOC_END;
+        }elseif (preg_match('/^[ \t]*([^:#]+)\s*:[ \t]*(.+)?/', ltrim($nodeValue), $matches)) {
+            $this->type = NT::KEY; 
+            $this->name = trim($matches[1]);
+            isset($matches[2]) ? $n->parse(trim($matches[2])) : $n->type = NT::NULL; 
+            $this->value = $n;
+        }else{//can be of another type according to VALUE
+            switch ($nodeValue[0]) {
+                case '%': $this->type = NT::DIRECTIVE;break;
+                case '#': $this->type = NT::COMMENT;
+                    $this->value = $nodeValue;
+                    break;
+                 // TODO: handle tags
+                case '!': $this->type = NT::TAG;break;
+                //LITTERAL //TODO handles LITTERAL lines with only spaces
+                case '>': $this->type = NT::LITTERAL_FOLDED;break;
+                case '|': $this->type = NT::LITTERAL;break;
+                //REFERENCE  //TODO
+                case "&":
+                case "*":break;
+                case "-":
+                    if(substr($nodeValue, 0, 3) === '---'){
+                        $this->type = NT::DOC_START;
+                        $n->parse(substr($nodeValue, 3));
+                    }elseif (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)) {
+                        $this->type = NT::ITEM;
+                        $n->parse($matches[1]);
+                    }else{
+                        $this->type = NT::STRING;
+                        $n->parse($nodeValue);
                     }
-                }
-                break;
-            case preg_match('/^[ \t]*([^: ]+)\s*:[ \t]*$/', $noIndentString, $matches):
-                $this->type = NT::KEY_NOVALUE;
-                $this->name = trim($matches[1]);
-                break;
-            //TODO : edge case if parent is KEY_BLOCK : this is NOT an KEY_VALUE
-            case preg_match('/^[ \t]*([^: ]+)\s*:[ \t]*(.+)?/', $noIndentString, $matches):
-                $this->type = NT::KEY_VALUE; 
-                $this->name = trim($matches[1]);
-                $value = ltrim($matches[2]); 
-                //can be of another type according to VALUE
-                switch ($value[0]) {
-                    //TODO: handle folded (or NOT) lines
-                    case '>': $this->type = NT::KEY_BLOCK_FOLDED;break;
-                    case '|': $this->type = NT::KEY_BLOCK;break;
-                    case "&"://TODO : handle reference declaration
-                        break;
-                    case '"':
-                    case "'":
-                    case "{":
-                    case "[": //TODO: handle JSON in value
-                        $closingMatch = ["{" => "}", "[" => "]", "'" => "'", '"' => '"'][$value[0]];
-                        $this->type = ($value[-1] !== $closingMatch) ? NT::KEY_PARTIAL : NT::KEY_VALUE;
-                        if ($this->type === NT::KEY_PARTIAL) $this->delimiter = $closingMatch;
-                        break;
-                    default: // default type and value set above
-                        $this->value = $value;
-                }
-                break;
-            default :
-                $this->type = NT::STRING;
+                    $this->value = $n;//should contains any tags
+                    break;
+                case '"':
+                case "'":
+                    if($this->isProperlyQuoted($nodeValue)){
+                        $this->type = NT::QUOTED;
+                    }else{
+                        $this->type = NT::PARTIAL;
+                        $this->delimiter = $nodeValue[0];
+                    }
+                    $this->value = $nodeValue;
+                    break;
+                case "{":
+                case "[": //TODO: handle JSON in value
+                    if($this->isValidJSON($nodeValue)){
+                        $this->type = NT::JSON;
+                    }else{
+                        $this->type = NT::PARTIAL;
+                        $this->delimiter = $nodeValue[0];
+                    }
+                    $this->value = $nodeValue;
+            }
         }
     }
 
@@ -166,5 +172,19 @@ class Node
 
     public function __debugInfo() {
         return $this->serialize();
+    }
+
+    public function isProperlyQuoted($candidate)
+    {// check Node value to see if properly enclosed or formed
+        $regex = <<<'EOD'
+/(['"]).*?(?<![\\\\])\1$/ms
+EOD;
+        var_dump($candidate);
+        return preg_match($regex, $candidate);
+    }
+
+    public function isValidJSON($candidate)
+    {// check Node value to see if properly enclosed or formed
+        return json_decode($candidate) !== null;
     }
 }

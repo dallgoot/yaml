@@ -1,5 +1,4 @@
 <?php
-namespace YamlLoader;
 include 'Node.php';
 use YamlLoader\NODETYPES as NT;
 use YamlLoader\Node as Node;
@@ -8,12 +7,18 @@ class YamlLoader
 {
     public $_content = NULL;
     private $filePath = NULL;
+    private $_debug = false;
     const INCLUDE_DIRECTIVE = false;
     const INCLUDE_COMMENTS = true;
 
     public function __construct($absolutePath=null, $options=NULL)
     {
-        //TODO/ handle options
+        /*TODO: handle options:
+        - include_directive
+        - include_comments
+        - debug
+        - dont Exception on parsing Errors
+        */
         if (!is_null($absolutePath)) {
             $this->load($absolutePath);
         }
@@ -21,6 +26,7 @@ class YamlLoader
 
     public function load(String $absolutePath)
     {
+        $this->_debug && var_dump($absolutePath);
         if(!file_exists($absolutePath)) throw new Exception("YamlLoader: file '$absolutePath' does not exists (or path is incorrect?)");
         $prevADLE = ini_get("auto_detect_line_endings"); 
         !$prevADLE && ini_set("auto_detect_line_endings", true);
@@ -41,9 +47,15 @@ class YamlLoader
         $root = new Node();
         $previous = $root;
         foreach ($source as $lineNb => $lineString) {
-            $n = new Node($lineString, $lineNb);
+            // var_dump($lineString);
+            $n = new Node($lineString, $lineNb+1);
             $parent = $previous;
-            if($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS){
+            if($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS){ continue; }
+            if(//in_array($previous->type, [NT::KEY, NT::ITEM]) && 
+                is_object($previous->value) && property_exists($previous->value, 'type') &&
+                $previous->value->type === NT::PARTIAL){
+                var_dump($previous->value->value,$n->value);
+                $previous->value = new Node($previous->value->value.$n->value, $n->line);
                 continue;
             }
             if ($n->indent < $previous->indent) {
@@ -52,10 +64,8 @@ class YamlLoader
                 $parent = ($n->indent === 0) ? $root : $previous->getParent();
             }elseif ($n->indent > $previous->indent) {
                 switch ($previous->type) {
-                    case NT::KEY_BLOCK:
-                    case NT::KEY_BLOCK_FOLDED:
-                    case NT::KEY_PARTIAL:
-                    case NT::ITEM_PARTIAL:
+                    case NT::LITTERAL:
+                    case NT::LITTERAL_FOLDED:
                         $n->type = NT::STRING;
                         break;
                     case NT::STRING: $n->type = NT::STRING;
@@ -67,46 +77,38 @@ class YamlLoader
             $previous = $n;
         }
         // var_dump($root);
-        return $this->_build($root);
+        return $this->_build($this->_defineRoot($root));
     }
 
     private function _build(Node $node)
     {
-        if(!property_exists($node, 'children')){// TODO :  adapt to PHP data types
-            return $node->value;
+        if(!property_exists($node, 'children')){
+            return $node->value;// TODO :  adapt to PHP data types
+        }else{
+            switch ($node->children[0]->type) {
+                case NT::KEY:    $action = "_map";break;
+                case NT::ITEM:   $action = "_seq";break;
+                // case NT::PARTIAL:$action = "_partial";break;
+                // case NT::LITTERAL:
+                // case NT::LITTERAL_FOLDED:$action = "_paragraph";
+                //     break;
+                default: //we are dealing with SCALAR values
+            }
+            return $this->{$action}($this->_getBuildableChidren($node->children));
         }
-        $action = "_map";
-        $target = $node->children[0]; 
-        if ($node->type === NT::ROOT) {
-            $node = $this->_defineRoot($node);
-        }
-        switch ($node->children[0]->type) {
-            case NT::ITEM_VALUE:
-            case NT::ITEM_NOVALUE:$action = "_seq";
-                break;
-            case NT::KEY_VALUE:
-            case NT::KEY_NOVALUE:$action = "_map";
-                break;
-            case NT::ITEM_PARTIAL:
-            case NT::KEY_PARTIAL:return $this->_partial($node);
-                break;
-            default: 
-                $action = "_paragraph";break;
-        }
-        return $this->{$action}($this->_getBuildableChidren($node->children));
     }
 
-    //TODO: handle state : FOLDED or NOT
-    private function _paragraph(array $childrenList) {
-        $getValue = function($n){ return $n->value; };
-        return join(PHP_EOL, array_map($getValue, $childrenList)); 
-    }
+    // //TODO: handle state : FOLDED or NOT
+    // private function _paragraph(array $childrenList) {
+    //     $getValue = function($n){ return $n->value; };
+    //     return join(PHP_EOL, array_map($getValue, $childrenList)); 
+    // }
 
     private function _map(array $buildableList) {
         $out = new \StdClass;
         foreach ($buildableList as $key => $child) {
             if (empty($child->name)) {
-                throw new \Exception("YamlLoader: key has no name on line ".$this->line."for ".$this->filePath);
+                throw new \Exception("YamlLoader: NODE has no keyname on line $child->line for $this->filePath");
             }
             $out->{$child->name} = $this->_build($child);
         }
@@ -143,15 +145,15 @@ class YamlLoader
     }
 
     // TODO : implement
-    private function _partial(Node $node)
-    {
-        // var_dump('_partial');
-        # code...
-    }
+    // private function _partial(Node $node)
+    // {
+    //     // var_dump('_partial');
+    //     # code...
+    // }
 
     private function _getBuildableChidren(array $childrenList)
     {
-        $notBuildable = [NT::DIRECTIVE, NT::ROOT, NT::DOC_START, NT::DOC_END, NT::COMMENT, NT::EMPTY];
+        $notBuildable = [NT::DIRECTIVE, NT::ROOT, NT::DOC_START, NT::DOC_END, NT::COMMENT, NT::EMPTY, NT::TAG];
         $filterFunc = function($child) use($notBuildable) {return !in_array($child->type , $notBuildable);};
         return array_values(array_filter($childrenList, $filterFunc));
     }
@@ -159,7 +161,7 @@ class YamlLoader
     //TODO : make it more robust by a diff of DOC_START and DOC_END
         // determines if there are  : 
         // - mulitple documents  -> ROOT = array of docs 
-        // _ OR just one         -> ROOT = map/seq/paragraph
+        // _ OR just one         -> ROOT = map|seq|litteral|scalar
     private function _defineRoot(Node $root)
     {
         $childrenList = $root->children;
