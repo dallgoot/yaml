@@ -25,6 +25,7 @@ class NODETYPES{
     
     const QUOTED = 148;
     const REFERENCE = 152;
+    const REF_CALL = 164;
 }
 use YamlLoader\NODETYPES as NT;
 /**
@@ -32,7 +33,7 @@ use YamlLoader\NODETYPES as NT;
 */
 class Node
 {
-    private $_parent = NULL;
+    public $_parent = NULL;
     public $_nodeTypes = [];
 
     public $indent   = -1;
@@ -44,25 +45,25 @@ class Node
     function __construct($nodeString=null, $line=null)
     {
         $this->_nodeTypes = array_flip((new \ReflectionClass('YamlLoader\NODETYPES'))->getConstants());
+        $this->line = $line;
         if(is_null($nodeString)){
             $this->type = NT::ROOT;
         }else{
             $this->parse($nodeString);
-            $this->line = $line;
         }
     }
 
     public function getParent($indent=null)
-    {
-        $cursor = $this->_parent;
-        if(!is_null($indent) && is_int($indent))
-        {//TODO : make sure _parent is of following types : KEY, ITEM (COMPLEX???)
-            while(!is_null($cursor) && $indent !== $cursor->indent)
-            {
+    {   
+        if (is_null($indent)) {
+             return $this->_parent ?? $this; 
+        } else {
+            $cursor = $this;
+            while ($cursor->indent >= $indent) {
                 $cursor = $cursor->_parent;
             }
-        }
-        return $cursor; 
+            return $cursor;
+        } 
     }
 
     public function add(Node $child)
@@ -78,7 +79,7 @@ class Node
                 break;
             case NT::COMMENT:
                 property_exists($this, '_comments') || $this->_comments = [];
-                $this->_comments[(string)$child->line] = $child->value;
+                $this->_comments[$child->line] = $child->value;
                 break;
             
             default:
@@ -86,6 +87,14 @@ class Node
                 $this->children[] = $child;
                 break;
         }
+    }
+    public function getDeepestNode()
+    {
+        $cursor = $this;
+        while ($cursor->value instanceof Node) {
+            $cursor = $cursor->value;
+        }
+        return $cursor;
     }
     /**
     *  CAUTION : the types assumed here are NOT FINAL : they CAN be adjusted according to parent
@@ -95,75 +104,66 @@ class Node
     private function parse(String $nodeString){
         //permissive to tabs but replacement before processing
         $nodeValue = preg_replace("/\t/m", " ", $nodeString);
-        $this->indent = 0;
-        while ($this->indent < mb_strlen($nodeValue) && $nodeValue[$this->indent]===' ') { 
-            $this->indent++;
-        }
+        $this->indent = strspn($nodeValue , ' ');
         $n = new Node(null, $this->line);//$nodeValue;
+        $n->_parent = $this;
         $nodeValue = ltrim($nodeValue);
         if ($nodeValue === '') {
             $this->type = NT::EMPTY;
             $this->indent = 0;
-        }elseif(substr($nodeValue, 0, 3) === '...'){
+        }elseif (substr($nodeValue, 0, 3) === '...'){
             $this->type = NT::DOC_END;
-        }elseif (preg_match('/^[ \t]*([^:#]+)\s*:[ \t]*(.+)?/', ltrim($nodeValue), $matches)) {
+        }elseif (preg_match('/^([^-][^:#{["\']*)\s*:[ \t]*(.*)?/', ltrim($nodeValue), $matches)) {
             $this->type = NT::KEY; 
             $this->name = trim($matches[1]);
             isset($matches[2]) ? $n->parse(trim($matches[2])) : $n->type = NT::NULL; 
             $this->value = $n;
         }else{//can be of another type according to VALUE
-            switch ($nodeValue[0]) {
-                case '%': $this->type = NT::DIRECTIVE;break;
-                case '#': $this->type = NT::COMMENT;
-                    $this->value = $nodeValue;
-                    break;
-                 // TODO: handle tags
-                case '!': $this->type = NT::TAG;break;
-                //LITTERAL //TODO handles LITTERAL lines with only spaces
-                case '>': $this->type = NT::LITTERAL_FOLDED;break;
-                case '|': $this->type = NT::LITTERAL;break;
-                //REFERENCE  //TODO
-                case "&":
-                case "*":break;
-                case "-":
-                    if(substr($nodeValue, 0, 3) === '---'){
-                        $this->type = NT::DOC_START;
-                        $n->parse(substr($nodeValue, 3));
-                    }elseif (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)) {
-                        $this->type = NT::ITEM;
-                        $n->parse($matches[1]);
-                    }else{
-                        $this->type = NT::STRING;
-                        $n->parse($nodeValue);
-                    }
-                    $this->value = $n;//should contains any tags
-                    break;
-                case '"':
-                case "'":
-                    if($this->isProperlyQuoted($nodeValue)){
-                        $this->type = NT::QUOTED;
-                    }else{
-                        $this->type = NT::PARTIAL;
-                        $this->delimiter = $nodeValue[0];
-                    }
-                    $this->value = $nodeValue;
-                    break;
-                case "{":
-                case "[": //TODO: handle JSON in value
-                    if($this->isValidJSON($nodeValue)){
-                        $this->type = NT::JSON;
-                    }else{
-                        $this->type = NT::PARTIAL;
-                        $this->delimiter = $nodeValue[0];
-                    }
-                    $this->value = $nodeValue;
-            }
+            list($this->type, $this->value) = $this->_define($nodeValue);
+        }
+        return $this;
+    }
+
+    private function _define($nodeValue)
+    {
+        $n = new Node(null, $this->line);
+        $v = substr($nodeValue, 1);
+        $n->_parent = $this;
+        switch ($nodeValue[0]) {
+            case '%': return [NT::DIRECTIVE, $v];
+            case '#': return [NT::COMMENT, $v];
+            // TODO: handle tags
+            case '!': return [NT::TAG, $v];
+            //TODO handles LITTERAL lines with only spaces
+            case '>': return [NT::LITTERAL_FOLDED, null];
+            case '|': return [NT::LITTERAL, null];
+            //REFERENCE  //TODO
+            case "&": return [NT::REFERENCE, $v];
+            case "*": return [NT::REF_CALL, $v];
+            case "-":
+                if(substr($nodeValue, 0, 3) === '---'){
+                    return [NT::DOC_START, substr($nodeValue, 3)];
+                }elseif (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)) {
+                    return [NT::ITEM, $n->parse($matches[1])];
+                }else{
+                    return [NT::STRING, $nodeValue];
+                }
+            case '"':
+            case "'":
+            case "{":
+            case "[":
+                if ($this->isProperlyQuoted($nodeValue)) return [NT::QUOTED, $nodeValue];
+                if ($this->isValidJSON($nodeValue))      return [NT::JSON, $nodeValue];
+                return [NT::PARTIAL, $nodeValue];
+            default:
+                return [NT::STRING, $nodeValue];
         }
     }
 
     public function serialize()
     {
-        $out = ['node' => implode('|',[$this->line, $this->_nodeTypes[$this->type], "'".$this->name."'", $this->value])];
+        $value = $this->value instanceof Node ? implode('|',$this->value->serialize()) : $this->value;
+        $out = ['node' => implode('|',[$this->line, $this->_nodeTypes[$this->type], "'".$this->name."'", $value])];
         if(property_exists($this, 'children')){
             $out['children'] = array_map(function($c){return $c->serialize();}, $this->children);
         }
@@ -176,15 +176,14 @@ class Node
 
     public function isProperlyQuoted($candidate)
     {// check Node value to see if properly enclosed or formed
-        $regex = <<<'EOD'
-/(['"]).*?(?<![\\\\])\1$/ms
-EOD;
+        $regex = "/(['".'"]).*?(?<![\\\\])\1$/ms';
         var_dump($candidate);
         return preg_match($regex, $candidate);
     }
 
     public function isValidJSON($candidate)
     {// check Node value to see if properly enclosed or formed
-        return json_decode($candidate) !== null;
+        json_decode($candidate);
+        return json_last_error() === JSON_ERROR_NONE; 
     }
 }
