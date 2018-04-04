@@ -24,8 +24,16 @@ class NODETYPES{
     const JSON = 142;
     
     const QUOTED = 148;
-    const REFERENCE = 152;
+    const REF_DEF = 152;
     const REF_CALL = 164;
+    public static $NOTBUILDABLE = [self::DIRECTIVE,
+                                    self::ROOT,
+                                    self::DOC_START,
+                                    self::DOC_END,
+                                    self::COMMENT,
+                                    self::EMPTY,
+                                    self::TAG];
+    public static $LITTERALS = [self::LITTERAL, self::LITTERAL_FOLDED];
 }
 use YamlLoader\NODETYPES as NT;
 /**
@@ -69,25 +77,17 @@ class Node
     public function add(Node $child)
     {
         $child->_parent = $this;
-        //TODO : is it necessary to adjust type according to parent ???
-        switch ($child->type) {
-            //TODO:  handle those type to create new document inside ROOT
-            //ignore those types for now
-            case NT::DIRECTIVE:
-            case NT::DOC_START:
-            case NT::DOC_END:
-                break;
-            case NT::COMMENT:
-                property_exists($this, '_comments') || $this->_comments = [];
-                $this->_comments[$child->line] = $child->value;
-                break;
-            
-            default:
-                property_exists($this, 'children') || $this->children = [];
-                $this->children[] = $child;
-                break;
+        if (!($this->value instanceof \SplQueue)) {
+            $nq = new \SplQueue();
+            if ($this->value instanceof Node && $this->value->type !== NT::EMPTY) {
+                $nq->enqueue($this->value);
+            }
+            $this->value = $nq;
         }
+        $this->value->enqueue($child);
     }
+
+
     public function getDeepestNode()
     {
         $cursor = $this;
@@ -138,16 +138,12 @@ class Node
             case '>': return [NT::LITTERAL_FOLDED, null];
             case '|': return [NT::LITTERAL, null];
             //REFERENCE  //TODO
-            case "&": return [NT::REFERENCE, $v];
+            case "&": return [NT::REF_DEF, $v];
             case "*": return [NT::REF_CALL, $v];
             case "-":
-                if(substr($nodeValue, 0, 3) === '---'){
-                    return [NT::DOC_START, substr($nodeValue, 3)];
-                }elseif (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)) {
-                    return [NT::ITEM, $n->parse($matches[1])];
-                }else{
-                    return [NT::STRING, $nodeValue];
-                }
+                if(substr($nodeValue, 0, 3) === '---') return [NT::DOC_START, substr($nodeValue, 3)];
+                if (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)) return [NT::ITEM, $n->parse($matches[1])];
+                return [NT::STRING, $nodeValue];
             case '"':
             case "'":
             case "{":
@@ -160,12 +156,19 @@ class Node
         }
     }
 
-    public function serialize()
+    public function serialize():array
     {
-        $value = $this->value instanceof Node ? implode('|',$this->value->serialize()) : $this->value;
-        $out = ['node' => implode('|',[$this->line, $this->_nodeTypes[$this->type], "'".$this->name."'", $value])];
-        if(property_exists($this, 'children')){
-            $out['children'] = array_map(function($c){return $c->serialize();}, $this->children);
+        $out = ['node' => implode('|',[$this->line, $this->_nodeTypes[$this->type], "'".$this->name."'"])];
+        $v = $this->value;
+        if($v instanceof \SplQueue) {
+            $out['value'] = [];
+            for ($v->rewind(); $v->valid(); $v->next()) {
+                $out['value'][] = $v->current()->serialize();//array_map(function($c){return $c->serialize();}, $this->children);
+            }
+        }elseif($v instanceof Node){
+            $out['value'] = $v->serialize();
+        }else{
+            $out['node'] .= "|".$v;
         }
         return $out;
     }
@@ -177,7 +180,7 @@ class Node
     public function isProperlyQuoted($candidate)
     {// check Node value to see if properly enclosed or formed
         $regex = "/(['".'"]).*?(?<![\\\\])\1$/ms';
-        var_dump($candidate);
+        // var_dump($candidate);
         return preg_match($regex, $candidate);
     }
 

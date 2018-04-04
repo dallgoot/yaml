@@ -1,7 +1,5 @@
 ---
 # <- yaml supports comments, json does not
-# did you know you can embed json in yaml?
-# try uncommenting the next line
 # { foo: 'bar' }
 keyempty:
 keysimple: ttt
@@ -26,7 +24,7 @@ emptyparagraph: >
 paragraph: >
    false: qsd
    Blank lines denote
-
+   
    paragraph breaks
    but not linefeed
 emptycontent: |-

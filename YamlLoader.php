@@ -27,7 +27,6 @@ class YamlLoader {
         if (!file_exists($absolutePath)) {
             throw new Exception("YamlLoader: file '$absolutePath' does not exists (or path is incorrect?)");
         }
-
         $prevADLE = ini_get("auto_detect_line_endings");
         !$prevADLE && ini_set("auto_detect_line_endings", true);
         $this->filePath = $absolutePath;
@@ -36,7 +35,6 @@ class YamlLoader {
         if (is_bool($content)) {
             throw new Exception("YamlLoader: file '$absolutePath' fail to be loaded (permission denied ?)");
         }
-
         $this->_content = $content;
         return $this;
     }
@@ -48,32 +46,29 @@ class YamlLoader {
         if (!is_array($source)) {
             throw new Exception('YamlLoader : content is not a string(maybe a file error?)');
         }
-
-        //process structure
         $root = new Node();
         $previous = $root;
+        //process structure
         foreach ($source as $lineNb => $lineString) {
-            // var_dump($lineString);
             $n = new Node($lineString, $lineNb + 1);
-            $parent = $previous;//var_dump($n);
-            if ($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
+            $parent = $previous;
             $deepest = $previous->getDeepestNode();
-            if (in_array($n->type, [NT::LITTERAL, NT::LITTERAL_FOLDED])) {
+            if (in_array($n->type, NT::$LITTERALS)) {
                 $deepest->getParent()->value = $n;
                 continue;
             }
             if ($deepest->type === NT::PARTIAL) {
-                $newValue = new Node($deepest->value . $lineString, $n->line);
+                $newValue = new Node($deepest->value.$lineString, $n->line);
                 $mother = $deepest->getParent();
                 $newValue->_parent = $mother; 
                 $mother->value = $newValue; 
             }else{
                 if($n->indent === 0) {
-                   if($n->type === NT::EMPTY){
+                    if($n->type === NT::EMPTY){
                         if($previous->type === NT::STRING) {
                             $parent = $previous->getParent();
                             $n->indent = $previous->indent;
-                        }elseif(in_array($previous->type, [NT::LITTERAL, NT::LITTERAL_FOLDED])){
+                        }elseif(in_array($previous->type, NT::$LITTERALS)){
                             $parent = $previous;
                         }
                     }else{
@@ -104,6 +99,9 @@ class YamlLoader {
     }
 
     private function _build(Node $node) {
+        //handling of comments , directives, tags should be here
+         // if ($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
+
         if (!property_exists($node, 'children')) {
             return $this->_build($node->value); // TODO :  adapt to PHP data types
         } else {
@@ -140,7 +138,7 @@ class YamlLoader {
         return $out;
     }
 
-    private function _seq(array $buildableList) {
+    private function _seq(array $buildableList):array {
         $out = [];
         foreach ($buildableList as $key => $child) {
             switch ($child->type) {
@@ -169,16 +167,9 @@ class YamlLoader {
         return $out;
     }
 
-    // TODO : implement
-    // private function _partial(Node $node)
-    // {
-    //     // var_dump('_partial');
-    //     # code...
-    // }
 
     private function _getBuildableChidren(array $childrenList) {
-        $notBuildable = [NT::DIRECTIVE, NT::ROOT, NT::DOC_START, NT::DOC_END, NT::COMMENT, NT::EMPTY, NT::TAG];
-        $filterFunc = function ($child) use ($notBuildable) {return !in_array($child->type, $notBuildable);};
+        $filterFunc = function ($child) {return !in_array($child->type, NT::$NOTBUILDABLE);};
         return array_values(array_filter($childrenList, $filterFunc));
     }
 
