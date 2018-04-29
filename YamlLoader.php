@@ -22,18 +22,18 @@ class YamlLoader {
         }
     }
 
-    public function load(String $absolutePath) {
+    public function load(String $absolutePath):YamlLoader {
         $this->_debug && var_dump($absolutePath);
+        $this->filePath = $absolutePath;
         if (!file_exists($absolutePath)) {
             throw new Exception("YamlLoader: file '$absolutePath' does not exists (or path is incorrect?)");
         }
         $prevADLE = ini_get("auto_detect_line_endings");
         !$prevADLE && ini_set("auto_detect_line_endings", true);
-        $this->filePath = $absolutePath;
         $content = file($absolutePath, FILE_IGNORE_NEW_LINES);
         !$prevADLE && ini_set("auto_detect_line_endings", false);
         if (is_bool($content)) {
-            throw new Exception("YamlLoader: file '$absolutePath' fail to be loaded (permission denied ?)");
+            throw new Exception("YamlLoader: file '$absolutePath' failed to be loaded (permission denied ?)");
         }
         $this->_content = $content;
         return $this;
@@ -74,7 +74,7 @@ class YamlLoader {
                     }else{
                         $parent = $root;
                     }
-                }elseif ($n->indent < $previous->indent) {
+                } elseif ($n->indent < $previous->indent) {
                     $parent = $previous->getParent($n->indent);
                 } elseif ($n->indent === $previous->indent) {
                     $parent = $previous->getParent();
@@ -94,6 +94,7 @@ class YamlLoader {
             }
         }
         var_dump($root);
+        return $root;
         //exit();
         //return $this->_build($this->_defineRoot($root));
     }
@@ -101,35 +102,43 @@ class YamlLoader {
     private function _build(Node $node) {
         //handling of comments , directives, tags should be here
          // if ($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
+        $children = $node->value;
 
-        if (!property_exists($node, 'children')) {
-            return $this->_build($node->value); // TODO :  adapt to PHP data types
-        } else {
-            $this->checkChildrenCoherence($node->children);
-            switch ($node->children[0]->type) {
-                case NT::KEY:$action = "_map";
-                    break;
-                case NT::ITEM:$action = "_seq";
-                    break;
-                // case NT::PARTIAL:$action = "_partial";break;
-                // case NT::LITTERAL:
-                // case NT::LITTERAL_FOLDED:$action = "_paragraph";
-                //     break;
-                default: //we are dealing with SCALAR values
+        if ($children instanceof \SplQueue) {// TODO :  adapt to PHP data types
+            $this->_getBuildableChidren($children);
+            switch ($children->current()->type) {
+                case NT::KEY:      return $this->_map($children);
+                case NT::ITEM:     return $this->_seq($children);
+                case NT::LITTERAL: return $this->_litteral($children);
+                //we are dealing with SCALAR values
+                case NT::LITTERAL_FOLDED: 
+                default: return $this->_litteral($children, true);
             }
-            return $this->{$action}($this->_getBuildableChidren($node->children));
+        } elseif ($children instanceof Node) {
+            switch ($children->type) {
+                case 'value':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
         }
     }
 
-    // //TODO: handle state : FOLDED or NOT
-    // private function _paragraph(array $childrenList) {
-    //     $getValue = function($n){ return $n->value; };
-    //     return join(PHP_EOL, array_map($getValue, $childrenList));
-    // }
+    private function _litteral(SplQueue $children, $folded = false):string
+    {
+        $output = '';
+        for ($children->rewind(); $children->valid() ; $children->next()) { 
+            $output .= $children->current()->value.($folded ? PHP_EOL : " ");
+        }
+        return $output;
+    }
 
-    private function _map(array $buildableList):object {
+    private function _map(SplQueue $children):StdClass {
         $out = new \StdClass;
-        foreach ($buildableList as $key => $child) {
+        foreach ($children as $key => $child) {
             if (empty($child->name)) {
                 throw new \Exception("YamlLoader: NODE has no keyname on line $child->line for '$this->filePath'");
             }
@@ -138,39 +147,25 @@ class YamlLoader {
         return $out;
     }
 
-    private function _seq(array $buildableList):array {
+    private function _seq(SplQueue $children):array {
         $out = [];
-        foreach ($buildableList as $key => $child) {
-            switch ($child->type) {
-            case NT::ITEM_VALUE:
-                $n = new Node($child->value, $child->line);
-                if (property_exists($child, 'children')) {
-                    array_unshift($child->children, $n);
-                    $out[] = $this->_map($this->_getBuildableChidren($child->children));
-                } else {
-                    if (!empty($n->value)) {
-                        $out[] = $child->value;
-                    } else {
-                        $out[$child->name] = $child->value;
-                    }
-                }
-                break;
-            case NT::ITEM_NOVALUE:
-                $out[] = $this->_map($this->_getBuildableChidren($child->children));
-                break;
-            case NT::ITEM_PARTIAL:
-                $out[] = $this->_partial($child);
-                break;
-            default:
-            }
+        foreach ($children as $key => $child) {
+           if(property_exists($child, "name")){
+                $out[$child->name] = $this->_build($child);
+           }else{
+                $out[] = $this->_build($child);
+           }
         }
         return $out;
     }
 
 
-    private function _getBuildableChidren(array $childrenList) {
-        $filterFunc = function ($child) {return !in_array($child->type, NT::$NOTBUILDABLE);};
-        return array_values(array_filter($childrenList, $filterFunc));
+    private function _getBuildableChidren(SplQueue $children) {
+        for ($children->rewind();  $children->valid() ; $children->next()) { 
+            if(in_array($children->current()->type, NT::$NOTBUILDABLE)){
+                $children->dequeue();
+            } 
+        }
     }
 
     //TODO : make it more robust by a diff of DOC_START and DOC_END

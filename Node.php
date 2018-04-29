@@ -42,7 +42,7 @@ use YamlLoader\NODETYPES as NT;
 class Node
 {
     public $_parent = NULL;
-    public $_nodeTypes = [];
+    private $_nodeTypes = [];
 
     public $indent   = -1;
     public $line     = NULL;
@@ -61,7 +61,7 @@ class Node
         }
     }
 
-    public function getParent($indent=null)
+    public function getParent($indent=null):Node
     {   
         if (is_null($indent)) {
              return $this->_parent ?? $this; 
@@ -87,8 +87,7 @@ class Node
         $this->value->enqueue($child);
     }
 
-
-    public function getDeepestNode()
+    public function getDeepestNode():Node
     {
         $cursor = $this;
         while ($cursor->value instanceof Node) {
@@ -101,7 +100,8 @@ class Node
     */
     //TODO : handle reference definitions/calls and tags and complex mappings
     //EVOLUTION:  if keyname contains unauthorized character for PHP property name : replace with '_'  ???
-    private function parse(String $nodeString){
+    private function parse(String $nodeString):Node
+    {
         //permissive to tabs but replacement before processing
         $nodeValue = preg_replace("/\t/m", " ", $nodeString);
         $this->indent = strspn($nodeValue , ' ');
@@ -132,13 +132,10 @@ class Node
         switch ($nodeValue[0]) {
             case '%': return [NT::DIRECTIVE, $v];
             case '#': return [NT::COMMENT, $v];
-            // TODO: handle tags
-            case '!': return [NT::TAG, $v];
-            //TODO handles LITTERAL lines with only spaces
+            case '!': return [NT::TAG, $v];// TODO: handle tags
             case '>': return [NT::LITTERAL_FOLDED, null];
             case '|': return [NT::LITTERAL, null];
-            //REFERENCE  //TODO
-            case "&": return [NT::REF_DEF, $v];
+            case "&": return [NT::REF_DEF, $v];//REFERENCE  //TODO
             case "*": return [NT::REF_CALL, $v];
             case "-":
                 if(substr($nodeValue, 0, 3) === '---') return [NT::DOC_START, substr($nodeValue, 3)];
@@ -177,14 +174,19 @@ class Node
         return $this->serialize();
     }
 
-    public function isProperlyQuoted($candidate)
+    public function __sleep()
+    {
+        return ["value"];
+    }
+
+    public function isProperlyQuoted(string $candidate)
     {// check Node value to see if properly enclosed or formed
         $regex = "/(['".'"]).*?(?<![\\\\])\1$/ms';
         // var_dump($candidate);
         return preg_match($regex, $candidate);
     }
 
-    public function isValidJSON($candidate)
+    public function isValidJSON(string $candidate)
     {// check Node value to see if properly enclosed or formed
         json_decode($candidate);
         return json_last_error() === JSON_ERROR_NONE; 
