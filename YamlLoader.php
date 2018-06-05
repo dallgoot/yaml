@@ -100,27 +100,28 @@ class YamlLoader {
                             unset($n->name);
                             $parent = $deepest;
                             break;
-                        case NT::KEY: if ($n->type === NT::STRING) {
-                            $deepest->value .= PHP_EOL.$n->value;
-                            continue 2;
-                        }
+                        case NT::EMPTY:
+                        case NT::STRING:
+                            if ($n->type === NT::STRING) {
+                                $deepest->type = NT::STRING;
+                                $deepest->value .= PHP_EOL.$n->value;
+                                continue 2;
+                            }
                     }
                 }
                 $parent->add($n);
                 $previous = $n;
             }
         }
-        var_dump($root);
-        // return $this->_build($root);
-        //exit();
-        //return $this->_build($this->_defineRoot($root));
+        // var_dump($root);
+        return $this->_build($root);
     }
 
     private function _build(Node $node) {
         //handling of comments , directives, tags should be here
          // if ($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
         $value = $node->value;
-        var_dump($node->serialize());
+        // var_dump($node->serialize());
         if ($value instanceof Node) {
             return $this->_build($value);
         } elseif ($value instanceof \SplQueue) {

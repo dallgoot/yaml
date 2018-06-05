@@ -38,8 +38,8 @@ array2:
   - *a #comm
   - *a
   - mul: 
-     qdqsdqsdq
-      qsdqsdqd
+     aqdqsdqsdq
+      bqsdqsdqd
 arr: 
   - another: value
     interitem: 456

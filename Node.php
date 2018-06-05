@@ -86,14 +86,22 @@ class Node
     public function add(Node $child)
     {
         $child->setParent($this);
-        if (!($this->value instanceof \SplQueue)) {
-            $current = $this->value;
-            $this->value = new \SplQueue();
-            if (($current instanceof Node) && !$current->type === NT::EMPTY){
+        $current = $this->value;
+        if (is_null($current)) {
+            $this->value = $child;
+            return;
+        }elseif ($current instanceof Node){
+            if ($current->type === NT::EMPTY) {
+                $this->value = $child;
+                return;
+            }else{
+                $this->value = new \SplQueue();
                 $this->value->enqueue($current);
+                $this->value->enqueue($child);
             }
+        }elseif ($current instanceof \SplQueue) {
+            $this->value->enqueue($child);
         }
-        $this->value->enqueue($child);
     }
 
     public function getDeepestNode():Node
@@ -156,7 +164,7 @@ class Node
             case "-":
                 if(substr($nodeValue, 0, 3) === '---') return [NT::DOC_START, substr($nodeValue, 3)];
                 if (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)){
-                    $n = new Node(ltrim($matches[1]), $this->line);
+                    $n = new Node(trim($matches[1]), $this->line);
                     $n->setParent($this);
                     return [NT::ITEM, $n];
                 }
