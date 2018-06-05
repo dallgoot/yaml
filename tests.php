@@ -4,7 +4,7 @@ include 'YamlLoader.php';
 
 $folder = "./examples/";
 
-$files = array_diff(scandir($folder), array('..', '.'));
+$files = array_diff(scandir($folder), ['..', '.']);
 
 $yamlLoader = new YamlLoader();
 

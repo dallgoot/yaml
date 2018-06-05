@@ -41,52 +41,69 @@ class YamlLoader {
 
     public function parse($strContent = NULL) {
         $source = $strContent ? preg_split("/([^\n\r]+)/um", $strContent, NULL, PREG_SPLIT_DELIM_CAPTURE)
-        : $this->_content;
+                                : $this->_content;
         //TODO : be more permissive on $strContent values
         if (!is_array($source)) {
             throw new Exception('YamlLoader : content is not a string(maybe a file error?)');
         }
         $root = new Node();
         $previous = $root;
+        $emptyLines = [];
         //process structure
         foreach ($source as $lineNb => $lineString) {
             $n = new Node($lineString, $lineNb + 1);
             $parent = $previous;
             $deepest = $previous->getDeepestNode();
             if (in_array($n->type, NT::$LITTERALS)) {
-                $deepest->getParent()->value = $n;
+                $deepestParent = $deepest->getParent();
+                if ($deepest->type === NT::EMPTY && 
+                    $deepestParent->type === NT::KEY) {
+                    $deepestParent->value = $n;
+                }else{
+                    $deepest->value = $n;
+                }
                 continue;
+            }
+            if($n->type === NT::EMPTY){
+                if (in_array($deepest->type, NT::$LITTERALS)) {
+                    $n->setParent($deepest);
+                    $emptyLines[] = $n;
+                }else if($previous->type === NT::STRING){
+                    $n->setParent($previous->getParent());
+                    $emptyLines[] = $n;
+                }
+                continue;
+            }else{
+                foreach ($emptyLines as $key => $node) {
+                    $node->getParent()->add($node);
+                }
+                $emptyLines = [];
             }
             if ($deepest->type === NT::PARTIAL) {
                 $newValue = new Node($deepest->value.$lineString, $n->line);
                 $mother = $deepest->getParent();
-                $newValue->_parent = $mother; 
+                $newValue->setParent($mother); 
                 $mother->value = $newValue; 
             }else{
                 if($n->indent === 0) {
-                    if($n->type === NT::EMPTY){
-                        if($previous->type === NT::STRING) {
-                            $parent = $previous->getParent();
-                            $n->indent = $previous->indent;
-                        }elseif(in_array($previous->type, NT::$LITTERALS)){
-                            $parent = $previous;
-                        }
-                    }else{
-                        $parent = $root;
-                    }
+                    $parent = $root;
                 } elseif ($n->indent < $previous->indent) {
                     $parent = $previous->getParent($n->indent);
                 } elseif ($n->indent === $previous->indent) {
                     $parent = $previous->getParent();
                 } elseif ($n->indent > $previous->indent) {
-                    switch ($previous->type) {
+                    switch ($deepest->type) {
                         case NT::LITTERAL:
                         case NT::LITTERAL_FOLDED:
                             $n->type = NT::STRING;
+                            $n->value = trim($lineString);
+                            unset($n->name);
+                            $parent = $deepest;
                             break;
-                        case NT::STRING:$n->type = NT::STRING;
-                            $n->indent = $previous->indent;
-                            $parent = $previous->getParent();
+                        case NT::KEY: if ($n->type === NT::STRING) {
+                            $deepest->value .= PHP_EOL.$n->value;
+                            continue 2;
+                        }
                     }
                 }
                 $parent->add($n);
@@ -94,7 +111,7 @@ class YamlLoader {
             }
         }
         var_dump($root);
-        return $root;
+        // return $this->_build($root);
         //exit();
         //return $this->_build($this->_defineRoot($root));
     }
@@ -102,28 +119,24 @@ class YamlLoader {
     private function _build(Node $node) {
         //handling of comments , directives, tags should be here
          // if ($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
-        $children = $node->value;
-
-        if ($children instanceof \SplQueue) {// TODO :  adapt to PHP data types
-            $this->_getBuildableChidren($children);
-            switch ($children->current()->type) {
-                case NT::KEY:      return $this->_map($children);
-                case NT::ITEM:     return $this->_seq($children);
-                case NT::LITTERAL: return $this->_litteral($children);
+        $value = $node->value;
+        var_dump($node->serialize());
+        if ($value instanceof Node) {
+            return $this->_build($value);
+        } elseif ($value instanceof \SplQueue) {
+            $this->_getBuildableChidren($value);
+            $value->rewind();
+            switch ($value->current()->type) {
+                case NT::KEY:      return $this->_map($value);
+                case NT::ITEM:     return $this->_seq($value);
+                case NT::LITTERAL: return $this->_litteral($value);
                 //we are dealing with SCALAR values
                 case NT::LITTERAL_FOLDED: 
-                default: return $this->_litteral($children, true);
+                default: return $this->_litteral($value, true);
             }
-        } elseif ($children instanceof Node) {
-            switch ($children->type) {
-                case 'value':
-                    # code...
-                    break;
-                
-                default:
-                    # code...
-                    break;
-            }
+        }else{
+            return $node->getPhpValue();
+            // throw new Exception("Error during ".__METHOD__." not a Node or SplQueue:".get_class($node), 1);
         }
     }
 
@@ -136,6 +149,7 @@ class YamlLoader {
         return $output;
     }
 
+    //EVOLUTION:  if keyname contains unauthorized character for PHP property name : replace with '_'  ???
     private function _map(SplQueue $children):StdClass {
         $out = new \StdClass;
         foreach ($children as $key => $child) {
