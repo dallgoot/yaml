@@ -10,14 +10,16 @@ $yamlLoader = new YamlLoader();
 
 try{
 	foreach ($files as $key => $fileName) {
+		echo "\n\033[32m$fileName\033[0m";
 		$result = $yamlLoader->load($folder.$fileName)->parse();
-		$json = json_encode($result);
-		$s = serialize($result);
-		echo "\n $s";exit();
+		$s = json_encode($result);
+		// $s = json_decode($e);
+		// $s = serialize($result);
+		echo "\n $s";//exit();
 		// if ($references[$fileName] !== $json) throw new Exception("\nError Processing $filename : \n$json", 1);
 	}
 
-}catch(Exception $e)
+}catch(Error $e)
 {
 	// echo $e->message;
 	var_dump($e);

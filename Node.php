@@ -12,6 +12,9 @@ class NODETYPES{
     const KEY = 42; 
     const ITEM = 52;
 
+    const SEQUENCE = 43;
+    const MAPPING  = 53;
+
     const PARTIAL = 62; // have a multi line quoted  string OR json definition
     const LITTERAL = 72;
     const LITTERAL_FOLDED = 82;
@@ -35,10 +38,14 @@ class NODETYPES{
                                     self::TAG];
     public static $LITTERALS = [self::LITTERAL, self::LITTERAL_FOLDED];
 
+    public function __construct()
+    {
+        // self::test = 3;
+    }
     public static function getName($constant)
     {
         return array_flip((new \ReflectionClass(self::class))->getConstants())[$constant];
-            }
+    }
 }
 use YamlLoader\NODETYPES as NT;
 /**
@@ -47,24 +54,35 @@ use YamlLoader\NODETYPES as NT;
 class Node
 {
     private $_parent = NULL;
-    // private $_nodeTypes = [];
-
     public $indent   = -1;
     public $line     = NULL;
-    // public $name     = NULL;
     public $type     = NULL;
     public $value    = NULL;
 
+    private const yamlNull  = "null";
+    private const yamlFalse = "false";
+    private const yamlTrue  = "true";
+    private const yamlAN = "[\w ]+";
+    private const yamlNum = "-?[\d.e]+";
+    private const yamlSimpleValue = "(?P<sv>".self::yamlNull."|".
+                                    self::yamlFalse."|".
+                                    self::yamlTrue."|".
+                                    self::yamlAN."|".
+                                    self::yamlNum.")";
+    private const sequenceForMap = "(?P<seq>\[(?:(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+\])";
+    private const yamlMapping  = "(?P<map>{\s*(?:".self::yamlAN."\s*:\s*(?:".self::yamlSimpleValue."|".self::sequenceForMap."|(?P>map)),?\s*)+})";
+    private const mapForSequence = "(?P<map>{\s*(?:".self::yamlAN."\s*:\s*(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+})";
+    private const yamlSequence = "(?P<seq>\[(?:(?:".self::yamlSimpleValue."|".self::mapForSequence."|(?P>seq)),?\s*)+\])";
+
     function __construct($nodeString=null, $line=null)
     {
-        // $this->_nodeTypes = ;
+        // echo self::yamlSequence;exit();
         $this->line = $line;
         if(is_null($nodeString)){
             $this->type = NT::ROOT;
         }else{
             $this->parse($nodeString);
         }
-        // var_dump($this);
     }
     public function setParent(Node $node)
     {
@@ -127,7 +145,7 @@ class Node
             $this->indent = 0;
         }elseif (substr($nodeValue, 0, 3) === '...'){
             $this->type = NT::DOC_END;
-        }elseif (preg_match('/^([^-][^:#{["\']*)\s*:[ \t]*(.*)?/', $nodeValue, $matches)) {
+        }elseif (preg_match('/^([^-{[][^:#{["\'%!]*)\s*:[ \t]*(.*)?/', $nodeValue, $matches)) {
             $this->type = NT::KEY; 
             $this->name = trim($matches[1]);
             if(isset($matches[2]) && !empty(trim($matches[2]))) {
@@ -160,7 +178,10 @@ class Node
                 return $this->isProperlyQuoted($nodeValue) ? [NT::QUOTED, $nodeValue] : [NT::PARTIAL, $nodeValue];
             case "{":
             case "[":
-                return $this->isValidJSON($nodeValue) ? [NT::JSON, $nodeValue] : [NT::PARTIAL, $nodeValue];
+                if($this->isValidJSON($nodeValue))     return [NT::JSON, $nodeValue];
+                if($this->isValidMapping($nodeValue))  return [NT::MAPPING, $nodeValue];
+                if($this->isValidSequence($nodeValue)) return [NT::SEQUENCE, $nodeValue];
+                return [NT::PARTIAL, $nodeValue]; 
             case "-":
                 if(substr($nodeValue, 0, 3) === '---') return [NT::DOC_START, substr($nodeValue, 3)];
                 if (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)){
@@ -206,16 +227,24 @@ class Node
     }
 
     public function isProperlyQuoted(string $candidate)
-    {// check Node value to see if properly enclosed or formed
-        $regex = "/(['".'"]).*?(?<![\\\\])\1$/ms';
-        // var_dump($candidate);
-        return preg_match($regex, $candidate);
+    {// check Node value to see if properly enclosed
+        return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $candidate);
     }
 
     public function isValidJSON(string $candidate)
-    {// check Node value to see if properly enclosed or formed
+    {
         json_decode($candidate);
         return json_last_error() === JSON_ERROR_NONE; 
+    }
+
+    public function isValidSequence(string $candidate)
+    {
+        return (bool) preg_match("/".self::yamlSequence."/i", $candidate);
+    }
+
+    public function isValidMapping(string $candidate)
+    {
+        return (bool) preg_match("/".self::yamlMapping."/i", $candidate);
     }
 
     public function getPhpValue()
@@ -231,20 +260,22 @@ class Node
             case NT::QUOTED:
             case NT::REF_DEF:
             case NT::REF_CALL:
-            case NT::STRING: return strval($this->value);
-            
             case NT::TAG:;
+            case NT::STRING: return strval($this->value);
+
+            case NT::MAPPING:
+            case NT::SEQUENCE: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1,-1)));
+            
+            case NT::COMMENT:
             case NT::DIRECTIVE:
             case NT::DOC_START:
             case NT::DOC_END:
             case NT::DOCUMENT:
-            case NT::COMMENT:
-            case NT::EMPTY:
-            case NT::ROOT:
+            // case NT::ROOT:
             case NT::KEY:; 
             case NT::ITEM:return $this->value->getPhpValue();
             case NT::PARTIAL:; // have a multi line quoted  string OR json definition
-            default: throw new \Exception("Error can not get PHP type for ".$this->_nodeTypes[$this->type], 1);
+            default: throw new \Exception("Error can not get PHP type for ".NT::getName($this->type), 1);
         }
     }
 }

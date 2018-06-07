@@ -113,8 +113,13 @@ class YamlLoader {
                 $previous = $n;
             }
         }
-        // var_dump($root);
-        return $this->_build($root);
+        try {
+            $out = $this->_build($root);
+        } catch (Error|Exception $e){
+            var_dump($root);
+            throw new ParseError($e);
+        }
+        return $out;
     }
 
     private function _build(Node $node) {
@@ -125,27 +130,31 @@ class YamlLoader {
         if ($value instanceof Node) {
             return $this->_build($value);
         } elseif ($value instanceof \SplQueue) {
-            $this->_getBuildableChidren($value);
-            $value->rewind();
-            switch ($value->current()->type) {
-                case NT::KEY:      return $this->_map($value);
-                case NT::ITEM:     return $this->_seq($value);
-                case NT::LITTERAL: return $this->_litteral($value);
+            $children = $this->_removeUnbuildable($value);
+            switch ($children->current()->type) {
+                case NT::KEY:      return $this->_map($children);
+                case NT::ITEM:     return $this->_seq($children);
+                case NT::LITTERAL: return $this->_litteral($children);
                 //we are dealing with SCALAR values
-                case NT::LITTERAL_FOLDED: 
-                default: return $this->_litteral($value, true);
+                case NT::LITTERAL_FOLDED: return $this->_litteral($children, true);
+                default: var_dump(NT::getName($children->current()->type)." as child"); 
+                return ;
             }
         }else{
             return $node->getPhpValue();
-            // throw new Exception("Error during ".__METHOD__." not a Node or SplQueue:".get_class($node), 1);
         }
     }
 
     private function _litteral(SplQueue $children, $folded = false):string
     {
-        $output = '';
-        for ($children->rewind(); $children->valid() ; $children->next()) { 
-            $output .= $children->current()->value.($folded ? PHP_EOL : " ");
+        try{
+            $output = '';
+            for ($children->rewind(); $children->valid() ; $children->next()) { 
+                $output .= $children->current()->value.($folded ? " " : PHP_EOL);
+            }
+        }catch(Error $err) {
+                  echo "catched: ", $err->getMessage(), PHP_EOL;
+            // throw new Exception("catched: ", $err->getMessage(), PHP_EOL);
         }
         return $output;
     }
@@ -175,12 +184,15 @@ class YamlLoader {
     }
 
 
-    private function _getBuildableChidren(SplQueue $children) {
-        for ($children->rewind();  $children->valid() ; $children->next()) { 
-            if(in_array($children->current()->type, NT::$NOTBUILDABLE)){
-                $children->dequeue();
+    private function _removeUnbuildable(SplQueue $children) {
+        $out = new \SplQueue;
+        for ($children->rewind();  $children->valid(); $children->next()) { 
+            if(!in_array($children->current()->type, NT::$NOTBUILDABLE)){
+                $out->enqueue($children->current());
             } 
         }
+        $out->rewind();
+        return $out;
     }
 
     //TODO : make it more robust by a diff of DOC_START and DOC_END
@@ -196,15 +208,15 @@ class YamlLoader {
         while ($pos !== false && $pos !== 0) {
             $n = new Node();
             $n->type = NT::DOCUMENT;
-            $n->children = $this->_getBuildableChidren(array_splice($childrenList, $pos));
+            $n->children = $this->_removeUnbuildable(array_splice($childrenList, $pos));
             $r->children[] = $n;
             $childrenTypes = array_slice($childrenTypes, $pos + 1);
             $pos = array_search(NT::DOC_END, $childrenTypes);
         }
         if (property_exists($r, 'children') && count($childrenList) > 0) {
-            $r->children[] = $this->_getBuildableChidren($childrenList);
+            $r->children[] = $this->_removeUnbuildable($childrenList);
         } else {
-            $root->children = $this->_getBuildableChidren($childrenList);
+            $root->children = $this->_removeUnbuildable($childrenList);
         }
         return property_exists($r, 'children') ? $r : $root;
     }
