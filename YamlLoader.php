@@ -6,7 +6,7 @@ use YamlLoader\NODETYPES as NT;
 class YamlLoader {
     public $_content = NULL;
     private $filePath = NULL;
-    private $_debug = false;
+    private $_debug = true;
     const INCLUDE_DIRECTIVE = false;
     const INCLUDE_COMMENTS = true;
 
@@ -52,6 +52,7 @@ class YamlLoader {
         //process structure
         foreach ($source as $lineNb => $lineString) {
             $n = new Node($lineString, $lineNb + 1);
+            // $this->_debug && var_dump($n);
             $parent = $previous;
             $deepest = $previous->getDeepestNode();
             if (in_array($n->type, NT::$LITTERALS)) {
@@ -113,6 +114,7 @@ class YamlLoader {
                 $previous = $n;
             }
         }
+        $this->_debug && var_dump($root);
         try {
             $out = $this->_build($root);
         } catch (Error|Exception $e){
@@ -122,26 +124,32 @@ class YamlLoader {
         return $out;
     }
 
-    private function _build(Node $node) {
+    private function _build(Node $node, Node $parent=null) {
         //handling of comments , directives, tags should be here
          // if ($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
         $value = $node->value;
         // var_dump($node->serialize());
-        if ($value instanceof Node) {
-            return $this->_build($value);
-        } elseif ($value instanceof \SplQueue) {
-            $children = $this->_removeUnbuildable($value);
-            switch ($children->current()->type) {
-                case NT::KEY:      return $this->_map($children);
-                case NT::ITEM:     return $this->_seq($children);
-                case NT::LITTERAL: return $this->_litteral($children);
-                //we are dealing with SCALAR values
-                case NT::LITTERAL_FOLDED: return $this->_litteral($children, true);
-                default: var_dump(NT::getName($children->current()->type)." as child"); 
-                return ;
-            }
-        }else{
+        if (!($value instanceof Node) && !($value instanceof \SplQueue)) {
             return $node->getPhpValue();
+        }else {
+            $children = $value;
+            if ($children instanceof Node) {
+                $children = new SplQueue();
+                $children->enqueue($value);
+            }
+            $children->rewind();
+            $reference = $node->type;
+            if ($node->type === NT::ROOT) {
+                $children = $this->_removeUnbuildable($children);
+                $reference = $children->current()->type;
+            }
+            switch($reference) {
+                case NT::LITTERAL:        return $this->_litteral($children);
+                case NT::LITTERAL_FOLDED: return $this->_litteral($children, true);
+                case NT::MAPPING:         return $this->_map($node);
+                case NT::SEQUENCE:        return $this->_seq($children);
+                default: return $this->_build($value);
+            }
         }
     }
 
@@ -160,13 +168,17 @@ class YamlLoader {
     }
 
     //EVOLUTION:  if keyname contains unauthorized character for PHP property name : replace with '_'  ???
-    private function _map(SplQueue $children):StdClass {
+    private function _map(Node $node):StdClass {
         $out = new \StdClass;
-        foreach ($children as $key => $child) {
-            if (empty($child->name)) {
-                throw new \Exception("YamlLoader: NODE has no keyname on line $child->line for '$this->filePath'");
+        foreach ($node->value as $key => $child) {
+            if (in_array($child->type, [NT::KEY, NT::MAPPING])) {
+                if (!property_exists($child, "name")) {
+                    throw new \Exception("YamlLoader: in MAPPING ${NT::getName($child->type)} has NO NAME on line $child->line for '$this->filePath'");
+                }
+                $out->{$child->name} = $this->_build($child);           }
+            }else{
+                $this->build($child, $node);
             }
-            $out->{$child->name} = $this->_build($child);
         }
         return $out;
     }
@@ -199,30 +211,71 @@ class YamlLoader {
     // determines if there are  :
     // - mulitple documents  -> ROOT = array of docs
     // _ OR just one         -> ROOT = map|seq|litteral|scalar
-    private function _defineRoot(Node $root) {
-        $childrenList = $root->children;
-        $childrenTypes = array_map(function ($n) {return $n->type;}, $root->children);
-        $out = [];
-        $pos = array_search(NT::DOC_END, $childrenTypes);
-        $r = new Node();
-        while ($pos !== false && $pos !== 0) {
-            $n = new Node();
-            $n->type = NT::DOCUMENT;
-            $n->children = $this->_removeUnbuildable(array_splice($childrenList, $pos));
-            $r->children[] = $n;
-            $childrenTypes = array_slice($childrenTypes, $pos + 1);
-            $pos = array_search(NT::DOC_END, $childrenTypes);
-        }
-        if (property_exists($r, 'children') && count($childrenList) > 0) {
-            $r->children[] = $this->_removeUnbuildable($childrenList);
-        } else {
-            $root->children = $this->_removeUnbuildable($childrenList);
-        }
-        return property_exists($r, 'children') ? $r : $root;
-    }
+    // private function _defineRoot(Node $root) {
+    //     $childrenList = $root->children;
+    //     $childrenTypes = array_map(function ($n) {return $n->type;}, $root->children);
+    //     $out = [];
+    //     $pos = array_search(NT::DOC_END, $childrenTypes);
+    //     $r = new Node();
+    //     while ($pos !== false && $pos !== 0) {
+    //         $n = new Node();
+    //         $n->type = NT::DOCUMENT;
+    //         $n->children = $this->_removeUnbuildable(array_splice($childrenList, $pos));
+    //         $r->children[] = $n;
+    //         $childrenTypes = array_slice($childrenTypes, $pos + 1);
+    //         $pos = array_search(NT::DOC_END, $childrenTypes);
+    //     }
+    //     if (property_exists($r, 'children') && count($childrenList) > 0) {
+    //         $r->children[] = $this->_removeUnbuildable($childrenList);
+    //     } else {
+    //         $root->children = $this->_removeUnbuildable($childrenList);
+    //     }
+    //     return property_exists($r, 'children') ? $r : $root;
+    // }
 
-    public function checkChildrenCoherence(array $nodeChildren)
+    public function checkChildrenCoherence(SplQueue $children)
+    {
+        $types = [];
+        foreach ($children as $key => $child) {
+             $types[] = $child->type;
+        }
+        return array_unique($types, SORT_NUMERIC) > 1;
+    }
+}
+/**
+ * the return Object representing a YAML file content
+ */
+class YamlObject extends ArrayObject
+{
+    private $_references = [];
+    private $_comments   = [];
+    private $_documents  = [];
+    function __construct(argument)
     {
         # code...
+    }
+
+    public function getReference($referenceName = null)
+    {
+        if (array_key_exists($referenceName, $this->_references)) {
+            return $this->_references[$referenceName];
+        }
+        return $this->_references; 
+    }
+
+    public function getComment($lineNumber = null)
+    {
+        if (array_key_exists($lineNumber, $this->_comments)) {
+            return $this->_comments[$lineNumber];
+        }
+        return $this->_comments;   
+    }
+
+    public function getDocument($identifier = null)
+    {
+        if (array_key_exists($identifier, $this->_documents)) {
+            return $this->_documents[$identifier];
+        }
+        return count($this->_documents)===1 ? $this->_documents[0] : $this->_documents;
     }
 }

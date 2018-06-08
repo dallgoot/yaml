@@ -12,8 +12,11 @@ class NODETYPES{
     const KEY = 42; 
     const ITEM = 52;
 
-    const SEQUENCE = 43;
-    const MAPPING  = 53;
+    const MAPPING  = 43;
+    const SEQUENCE = 53;
+
+    const MAPPING_SHORT  = 44;
+    const SEQUENCE_SHORT = 54;
 
     const PARTIAL = 62; // have a multi line quoted  string OR json definition
     const LITTERAL = 72;
@@ -31,7 +34,7 @@ class NODETYPES{
     const REF_CALL = 164;
     public static $NOTBUILDABLE = [self::DIRECTIVE,
                                     self::ROOT,
-                                    self::DOC_START,
+                                    // self::DOC_START,
                                     self::DOC_END,
                                     self::COMMENT,
                                     self::EMPTY,
@@ -120,6 +123,13 @@ class Node
         }elseif ($current instanceof \SplQueue) {
             $this->value->enqueue($child);
         }
+        //modify type according to child
+        switch ($child->type) {
+            case NT::KEY:  $this->type = NT::MAPPING;break;
+            case NT::ITEM: $this->type = NT::SEQUENCE;break;
+            
+            default: //do nothing
+        }
     }
 
     public function getDeepestNode():Node
@@ -179,11 +189,11 @@ class Node
             case "{":
             case "[":
                 if($this->isValidJSON($nodeValue))     return [NT::JSON, $nodeValue];
-                if($this->isValidMapping($nodeValue))  return [NT::MAPPING, $nodeValue];
-                if($this->isValidSequence($nodeValue)) return [NT::SEQUENCE, $nodeValue];
+                if($this->isValidMapping($nodeValue))  return [NT::MAPPING_SHORT, $nodeValue];
+                if($this->isValidSequence($nodeValue)) return [NT::SEQUENCE_SHORT, $nodeValue];
                 return [NT::PARTIAL, $nodeValue]; 
             case "-":
-                if(substr($nodeValue, 0, 3) === '---') return [NT::DOC_START, substr($nodeValue, 3)];
+                if(substr($nodeValue, 0, 3) === '---') return [NT::DOC_START, new Node(trim(substr($nodeValue, 3)))];
                 if (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)){
                     $n = new Node(trim($matches[1]), $this->line);
                     $n->setParent($this);
@@ -263,8 +273,8 @@ class Node
             case NT::TAG:;
             case NT::STRING: return strval($this->value);
 
-            case NT::MAPPING:
-            case NT::SEQUENCE: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1,-1)));
+            case NT::MAPPING_SHORT:
+            case NT::SEQUENCE_SHORT: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1,-1)));
             
             case NT::COMMENT:
             case NT::DIRECTIVE:
