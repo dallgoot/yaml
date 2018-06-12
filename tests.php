@@ -1,12 +1,12 @@
 <?php
 include 'tests_ref.php';
-include 'YamlLoader.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 $folder = "./examples/";
 
 $files = array_diff(scandir($folder), ['..', '.']);
 
-$yamlLoader = new YamlLoader();
+$yamlLoader = new Dallgoot\Yaml\Loader();
 
 try{
 	foreach ($files as $key => $fileName) {

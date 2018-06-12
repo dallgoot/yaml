@@ -1,5 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
+
+use Dallgoot\Yaml\API as API;
 /**
  * 
  */

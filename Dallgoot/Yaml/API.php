@@ -1,6 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
 
+use Dallgoot\Yaml\Types as T;
 /**
  * the return Object representing a YAML file content
  */
@@ -10,7 +11,7 @@ class Yaml_API
     private $_comments   = [];
     private $_documents  = [];
 
-    private  $_type = NT::MAPPING;
+    private  $_type = T::MAPPING;
     /*
      *consider dumping datetime as date strings according to a format provided by user or default
     */

@@ -53,7 +53,7 @@ class Loader
                                 : $this->_content;
         //TODO : be more permissive on $strContent values
         if (!is_array($source)) {
-            throw new Exception('YamlLoader : content is not a string(maybe a file error?)');
+            throw new \Exception('YamlLoader : content is not a string(maybe a file error?)');
         }
         $root = new Node();
         $previous = $root;
@@ -269,7 +269,7 @@ var_dump($documents);exit();
         if ($this->_options->noParsingException) {
             # code...
         }else{
-            throw new ParseException($message, 1);
+            throw new \ParseException($message, 1);
         }
     }
 }
