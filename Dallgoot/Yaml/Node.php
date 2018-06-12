@@ -6,11 +6,11 @@ use Dallgoot\Yaml\Types as T;
 */
 class Node
 {
-    private $_parent = NULL;
     public $indent   = -1;
     public $line     = NULL;
     public $type     = NULL;
     public $value    = NULL;
+    private $_parent = NULL;
 
     private const yamlNull  = "null";
     private const yamlFalse = "false";
@@ -93,7 +93,6 @@ class Node
     /**
     *  CAUTION : the types assumed here are NOT FINAL : they CAN be adjusted according to parent
     */
-    //TODO : handle reference definitions/calls and tags and complex mappings
     private function parse(String $nodeString):Node
     {
         //permissive to tabs but replacement before processing
@@ -103,7 +102,7 @@ class Node
         if ($nodeValue === '') {
             $this->type = T::EMPTY;
             $this->indent = 0;
-        }elseif (substr($nodeValue, 0, 3) === '...'){
+        }elseif (substr($nodeValue, 0, 3) === '...'){//TODO: can have something after?
             $this->type = T::DOC_END;
         }elseif (preg_match('/^([^-{[][a-][^:#{["\'%!]*)\s*:[ \t]+(.*)?/', $nodeValue, $matches)) {
             $this->type = T::KEY; 
@@ -116,12 +115,20 @@ class Node
             }
             $n->setParent($this);
             $this->value = $n;
-        }else{//can be of another type according to VALUE
+        }else{//NOTE: can be of another type according to VALUE
             list($this->type, $this->value) = $this->_define($nodeValue);
         }
         return $this;
     }
 
+    /**
+     * { function_description }
+     *
+     * @param      <type>  $nodeValue  The node value
+     *
+     * @return     array   ( description_of_the_return_value )
+     *     //TODO : handle reference definitions/calls and tags and complex mappings
+     */
     private function _define($nodeValue)
     {
         $v = substr($nodeValue, 1);
@@ -157,23 +164,23 @@ class Node
         }
     }
 
-    public function serialize():array
-    {
-        $name = property_exists($this, 'name') ? "($this->name)" : null;
-        $out = ['node' => implode('|',[$this->line, $this->indent,T::getName($this->type).$name])];
-        $v = $this->value;
-        if($v instanceof \SplQueue) {
-            $out['value'] = var_export($v, true);
-            // for ($v->rewind(); $v->valid(); $v->next()) {
-            //     $out['value'][] = $v->current()->serialize();//array_map(function($c){return $c->serialize();}, $this->children);
-            // }
-        }elseif($v instanceof Node){
-            $out['value'] = $v->serialize();
-        }else{
-            $out['node'] .= "|".$v;
-        }
-        return $out;
-    }
+    // public function serialize():array
+    // {
+    //     $name = property_exists($this, 'name') ? "($this->name)" : null;
+    //     $out = ['node' => implode('|',[$this->line, $this->indent,T::getName($this->type).$name])];
+    //     $v = $this->value;
+    //     if($v instanceof \SplQueue) {
+    //         $out['value'] = var_export($v, true);
+    //         // for ($v->rewind(); $v->valid(); $v->next()) {
+    //         //     $out['value'][] = $v->current()->serialize();//array_map(function($c){return $c->serialize();}, $this->children);
+    //         // }
+    //     }elseif($v instanceof Node){
+    //         $out['value'] = $v->serialize();
+    //     }else{
+    //         $out['node'] .= "|".$v;
+    //     }
+    //     return $out;
+    // }
 
     public function __debugInfo() {
         $out = ['line'=>$this->line,
@@ -202,12 +209,12 @@ class Node
 
     public function isValidSequence(string $candidate)
     {
-        return (bool) preg_match("/".self::yamlSequence."/i", $candidate);
+        return (bool) preg_match("/".(self::yamlSequence)."/i", $candidate);
     }
 
     public function isValidMapping(string $candidate)
     {
-        return (bool) preg_match("/".self::yamlMapping."/i", $candidate);
+        return (bool) preg_match("/".(self::yamlMapping)."/i", $candidate);
     }
 
     public function getPhpValue()
@@ -226,17 +233,19 @@ class Node
             case T::TAG:;
             case T::STRING: return strval($this->value);
 
-            case T::MAPPING_SHORT:
+            case T::MAPPING_SHORT://TODO
+            //TODO : that's not robust enough, improve it
             case T::SEQUENCE_SHORT: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1,-1)));
             
             case T::COMMENT:
             case T::DIRECTIVE:
             case T::DOC_START:
-            case T::DOC_END:
             case T::DOCUMENT:
             // case T::ROOT:
             case T::KEY:; 
             case T::ITEM:return $this->value->getPhpValue();
+
+            case T::DOC_END:
             case T::PARTIAL:; // have a multi line quoted  string OR json definition
             default: throw new \Exception("Error can not get PHP type for ".T::getName($this->type), 1);
         }

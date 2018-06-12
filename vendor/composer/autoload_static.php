@@ -7,11 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInit2906926e41d4e6da5c4a99d01dd0f217
 {
     public static $classMap = array (
-        'Dallgoot\\Yaml\\Loader' => __DIR__ . '/..' . '/Dallgoot/Yaml/Loader.php',
-        'Dallgoot\\Yaml\\Node' => __DIR__ . '/..' . '/Dallgoot/Yaml/Node.php',
-        'Dallgoot\\Yaml\\Types' => __DIR__ . '/..' . '/Dallgoot/Yaml/Types.php',
-        'Dallgoot\\Yaml\\YamlObject' => __DIR__ . '/..' . '/Dallgoot/Yaml/YamlObject.php',
-        'Dallgoot\\Yaml\\Yaml_API' => __DIR__ . '/..' . '/Dallgoot/Yaml/API.php',
+        'Dallgoot\\Yaml\\Loader' => __DIR__ . '/../..' . '/Dallgoot/Yaml/Loader.php',
+        'Dallgoot\\Yaml\\Node' => __DIR__ . '/../..' . '/Dallgoot/Yaml/Node.php',
+        'Dallgoot\\Yaml\\Types' => __DIR__ . '/../..' . '/Dallgoot/Yaml/Types.php',
+        'Dallgoot\\Yaml\\YamlObject' => __DIR__ . '/../..' . '/Dallgoot/Yaml/YamlObject.php',
+        'Dallgoot\\Yaml\\Yaml_API' => __DIR__ . '/../..' . '/Dallgoot/Yaml/API.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

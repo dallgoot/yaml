@@ -6,9 +6,9 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Dallgoot\\Yaml\\Loader' => $vendorDir . '/Dallgoot/Yaml/Loader.php',
-    'Dallgoot\\Yaml\\Node' => $vendorDir . '/Dallgoot/Yaml/Node.php',
-    'Dallgoot\\Yaml\\Types' => $vendorDir . '/Dallgoot/Yaml/Types.php',
-    'Dallgoot\\Yaml\\YamlObject' => $vendorDir . '/Dallgoot/Yaml/YamlObject.php',
-    'Dallgoot\\Yaml\\Yaml_API' => $vendorDir . '/Dallgoot/Yaml/API.php',
+    'Dallgoot\\Yaml\\Loader' => $baseDir . '/Dallgoot/Yaml/Loader.php',
+    'Dallgoot\\Yaml\\Node' => $baseDir . '/Dallgoot/Yaml/Node.php',
+    'Dallgoot\\Yaml\\Types' => $baseDir . '/Dallgoot/Yaml/Types.php',
+    'Dallgoot\\Yaml\\YamlObject' => $baseDir . '/Dallgoot/Yaml/YamlObject.php',
+    'Dallgoot\\Yaml\\Yaml_API' => $baseDir . '/Dallgoot/Yaml/API.php',
 );
