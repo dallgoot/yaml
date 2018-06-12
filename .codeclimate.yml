@@ -1,0 +1,5 @@
+plugins:
+  phpcodesniffer:
+    enabled: true
+  phpmd:
+    enabled: true
