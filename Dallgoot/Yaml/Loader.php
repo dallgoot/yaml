@@ -34,7 +34,7 @@ class Loader
         $this->_debug && var_dump($absolutePath);
         $this->filePath = $absolutePath;
         if (!file_exists($absolutePath)) {
-            throw new Exception(sprintf(self::EXCEPTION_NO_FILE, $absolutePath));
+            throw new \Exception(sprintf(self::EXCEPTION_NO_FILE, $absolutePath));
         }
         $adle = "auto_detect_line_endings";
         $prevADLE = ini_get($adle);
@@ -42,7 +42,7 @@ class Loader
         $content = file($absolutePath, FILE_IGNORE_NEW_LINES);
         !$prevADLE && ini_set($adle, false);
         if (is_bool($content)) {
-            throw new Exception(sprintf(self::EXCEPTION_READ_ERROR, $absolutePath));
+            throw new \Exception(sprintf(self::EXCEPTION_READ_ERROR, $absolutePath));
         }
         $this->_content = $content;
         return $this;
@@ -126,9 +126,9 @@ class Loader
         $this->_debug && var_dump($root);
         try {
             $out = $this->_buildRoot($root);
-        } catch (Error|Exception $e){
+        } catch (\Error|\Exception $e){
             var_dump($root);
-            throw new ParseError($e);
+            throw new \ParseError($e);
         }
         return $out;
     }
@@ -143,7 +143,7 @@ class Loader
         }else {
             $children = $value;
             if ($children instanceof Node) {
-                $children = new SplQueue();
+                $children = new \SplQueue();
                 $children->enqueue($value);
             }
             $children->rewind();
@@ -163,14 +163,14 @@ class Loader
         }
     }
 
-    private function _litteral(SplQueue $children, $folded = false):string
+    private function _litteral(\SplQueue $children, $folded = false):string
     {
         try{
             $output = '';
             for ($children->rewind(); $children->valid(); $children->next()) { 
                 $output .= $children->current()->value.($folded ? " " : PHP_EOL);
             }
-        }catch(Error $err) {
+        }catch(\Error $err) {
                   echo "catched: ", $err->getMessage(), PHP_EOL;
             // throw new Exception("catched: ", $err->getMessage(), PHP_EOL);
         }
@@ -195,7 +195,7 @@ class Loader
         return $out;
     }
 
-    private function _seq(SplQueue $children):array {
+    private function _seq(\SplQueue $children):array {
         $out = [];
         foreach ($children as $key => $child) {
            if(property_exists($child, "name")){
@@ -208,7 +208,7 @@ class Loader
     }
 
 
-    private function _removeUnbuildable(SplQueue $children) {
+    private function _removeUnbuildable(\SplQueue $children) {
         $out = new \SplQueue;
         for ($children->rewind();  $children->valid(); $children->next()) { 
             if(!in_array($children->current()->type, T::$NOTBUILDABLE)){

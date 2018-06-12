@@ -43,4 +43,3 @@ class Yaml_API
         return count($this->_documents)===1 ? $this->_documents[0] : $this->_documents;
     }
 }
-

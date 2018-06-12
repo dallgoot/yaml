@@ -224,7 +224,7 @@ class Node
             case T::LITTERAL_FOLDED:;
             // case T::NULL: 
             case T::EMPTY:return null;
-            case T::BOOLEAN: return bool($this->value);
+            case T::BOOLEAN: return boolval($this->value);
             case T::NUMBER: return intval($this->value);
             case T::JSON: return json_encode($this->value);
             case T::QUOTED:
