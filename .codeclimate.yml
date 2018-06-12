@@ -1,4 +1,14 @@
-plugins:
+engines:
+  # ... CONFIG CONTENT ...
+  phpcodesniffer:
+    enabled: true
+    # ... CONFIG CONTENT ...
+    checks:
+      PSR2 Classes PropertyDeclaration Underscore:
+        enabled: false
+      PSR2 ControlStructures SwitchDeclaration BreakNotNewLine:
+        enabled: false
+# ... CONFIG CONTENT ...plugins:
   phpcodesniffer:
     enabled: true
   phpmd:

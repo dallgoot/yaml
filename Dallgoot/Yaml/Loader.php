@@ -3,8 +3,9 @@ namespace Dallgoot\Yaml;
 use Dallgoot\Yaml\Node as Node;
 use Dallgoot\Yaml\Types as T;
 
-class Loader {
-    public $_content = NULL;
+class Loader
+{
+    private $_content = NULL;
     private $filePath = NULL;
     private $_debug = true;
     const INCLUDE_DIRECTIVE = false;
@@ -16,7 +17,7 @@ class Loader {
     const EXCEPTION_NO_FILE = self::class.": file '%s' does not exists (or path is incorrect?)";
     const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
 
-    public function __construct($absolutePath = null, $options = NULL) {
+    public function __construct($absolutePath = null, $options = null) {
         /*TODO: handle options:
                     - include_directive
                     - include_comments
@@ -47,8 +48,8 @@ class Loader {
         return $this;
     }
 
-    public function parse($strContent = NULL) {
-        $source = $strContent ? preg_split("/([^\n\r]+)/um", $strContent, NULL, PREG_SPLIT_DELIM_CAPTURE)
+    public function parse($strContent = null) {
+        $source = $strContent ? preg_split("/([^\n\r]+)/um", $strContent, null, PREG_SPLIT_DELIM_CAPTURE)
                                 : $this->_content;
         //TODO : be more permissive on $strContent values
         if (!is_array($source)) {
@@ -132,7 +133,7 @@ class Loader {
         return $out;
     }
 
-    private function _build(Node $node, Node $parent=null) {
+    private function _build(Node $node, Node $parent = null) {
         //handling of comments , directives, tags should be here
          // if ($n->type === T::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
         $value = $node->value;
@@ -166,7 +167,7 @@ class Loader {
     {
         try{
             $output = '';
-            for ($children->rewind(); $children->valid() ; $children->next()) { 
+            for ($children->rewind(); $children->valid(); $children->next()) { 
                 $output .= $children->current()->value.($folded ? " " : PHP_EOL);
             }
         }catch(Error $err) {

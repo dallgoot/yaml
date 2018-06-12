@@ -15,10 +15,9 @@ class YamlObject extends ArrayObject
         $reflectAPI = new ReflectionClass(get_class($this->$__yaml__object__api));
         $getName = function($o){ return $o->name; };
         $api = array_map($getName, $reflectAPI->getMethods(ReflectionMethod::IS_PUBLIC));
-        if (array_key_exists($name, $api)) {
-            return call_user_func_array([$this->__yaml__object__api, $name], $arguments);
-        }else{
+        if (!array_key_exists($name, $api)) {
             throw new BadMethodCallException("undefined method '$name' ! valid methods are ".(implode(",",$api)), 1);
         }
+        return call_user_func_array([$this->__yaml__object__api, $name], $arguments);
     }
 }

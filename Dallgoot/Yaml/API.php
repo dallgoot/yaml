@@ -1,5 +1,6 @@
 <?php
 namespace Dallgoot\Yaml;
+
 /**
  * the return Object representing a YAML file content
  */
@@ -13,7 +14,7 @@ class Yaml_API
     /*
      *consider dumping datetime as date strings according to a format provided by user or default
     */
-    function __construct($objectTemplate)
+    public function __construct($objectTemplate)
     {
         // $this->_references = $objectTemplate->_ 
     }
