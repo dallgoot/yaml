@@ -10,8 +10,8 @@ Support:
 - tags
 - multi-line quoted (or not) values
 - complex mapping
-- short syntax for mapping and sequences
 - JSON values
+- short syntax for mapping and sequences
 
 Features:
 - recover from some parsing errors

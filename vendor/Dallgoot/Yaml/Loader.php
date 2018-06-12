@@ -1,14 +1,20 @@
 <?php
-include 'Node.php';
-use YamlLoader\Node as Node;
-use YamlLoader\NODETYPES as NT;
+namespace Dallgoot\Yaml;
+use Dallgoot\Yaml\Node as Node;
+use Dallgoot\Yaml\Types as T;
 
-class YamlLoader {
+class Loader {
     public $_content = NULL;
     private $filePath = NULL;
     private $_debug = true;
     const INCLUDE_DIRECTIVE = false;
     const INCLUDE_COMMENTS = true;
+
+    const ERROR_NO_NAME = self::class.": in MAPPING %s has NO NAME on line %d for '%s'";
+    const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
+    //Exceptions
+    const EXCEPTION_NO_FILE = self::class.": file '%s' does not exists (or path is incorrect?)";
+    const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
 
     public function __construct($absolutePath = null, $options = NULL) {
         /*TODO: handle options:
@@ -16,24 +22,26 @@ class YamlLoader {
                     - include_comments
                     - debug
                     - dont Exception on parsing Errors
+                    _ import date strings as dateTime Object
         */
         if (!is_null($absolutePath)) {
             $this->load($absolutePath);
         }
     }
 
-    public function load(String $absolutePath):YamlLoader {
+    public function load(String $absolutePath):Loader {
         $this->_debug && var_dump($absolutePath);
         $this->filePath = $absolutePath;
         if (!file_exists($absolutePath)) {
-            throw new Exception("YamlLoader: file '$absolutePath' does not exists (or path is incorrect?)");
+            throw new Exception(sprintf(self::EXCEPTION_NO_FILE, $absolutePath));
         }
-        $prevADLE = ini_get("auto_detect_line_endings");
-        !$prevADLE && ini_set("auto_detect_line_endings", true);
+        $adle = "auto_detect_line_endings";
+        $prevADLE = ini_get($adle);
+        !$prevADLE && ini_set($adle, true);
         $content = file($absolutePath, FILE_IGNORE_NEW_LINES);
-        !$prevADLE && ini_set("auto_detect_line_endings", false);
+        !$prevADLE && ini_set($adle, false);
         if (is_bool($content)) {
-            throw new Exception("YamlLoader: file '$absolutePath' failed to be loaded (permission denied ?)");
+            throw new Exception(sprintf(self::EXCEPTION_READ_ERROR, $absolutePath));
         }
         $this->_content = $content;
         return $this;
@@ -55,21 +63,21 @@ class YamlLoader {
             // $this->_debug && var_dump($n);
             $parent = $previous;
             $deepest = $previous->getDeepestNode();
-            if (in_array($n->type, NT::$LITTERALS)) {
+            if (in_array($n->type, T::$LITTERALS)) {
                 $deepestParent = $deepest->getParent();
-                if ($deepest->type === NT::EMPTY && 
-                    $deepestParent->type === NT::KEY) {
+                if ($deepest->type === T::EMPTY && 
+                    $deepestParent->type === T::KEY) {
                     $deepestParent->value = $n;
                 }else{
                     $deepest->value = $n;
                 }
                 continue;
             }
-            if($n->type === NT::EMPTY){
-                if (in_array($deepest->type, NT::$LITTERALS)) {
+            if($n->type === T::EMPTY){
+                if (in_array($deepest->type, T::$LITTERALS)) {
                     $n->setParent($deepest);
                     $emptyLines[] = $n;
-                }else if($previous->type === NT::STRING){
+                }else if($previous->type === T::STRING){
                     $n->setParent($previous->getParent());
                     $emptyLines[] = $n;
                 }
@@ -80,7 +88,7 @@ class YamlLoader {
                 }
                 $emptyLines = [];
             }
-            if ($deepest->type === NT::PARTIAL) {
+            if ($deepest->type === T::PARTIAL) {
                 $newValue = new Node($deepest->value.$lineString, $n->line);
                 $mother = $deepest->getParent();
                 $newValue->setParent($mother); 
@@ -94,17 +102,17 @@ class YamlLoader {
                     $parent = $previous->getParent();
                 } elseif ($n->indent > $previous->indent) {
                     switch ($deepest->type) {
-                        case NT::LITTERAL:
-                        case NT::LITTERAL_FOLDED:
-                            $n->type = NT::STRING;
+                        case T::LITTERAL:
+                        case T::LITTERAL_FOLDED:
+                            $n->type = T::STRING;
                             $n->value = trim($lineString);
                             unset($n->name);
                             $parent = $deepest;
                             break;
-                        case NT::EMPTY:
-                        case NT::STRING:
-                            if ($n->type === NT::STRING) {
-                                $deepest->type = NT::STRING;
+                        case T::EMPTY:
+                        case T::STRING:
+                            if ($n->type === T::STRING) {
+                                $deepest->type = T::STRING;
                                 $deepest->value .= PHP_EOL.$n->value;
                                 continue 2;
                             }
@@ -116,7 +124,7 @@ class YamlLoader {
         }
         $this->_debug && var_dump($root);
         try {
-            $out = $this->_build($root);
+            $out = $this->_buildRoot($root);
         } catch (Error|Exception $e){
             var_dump($root);
             throw new ParseError($e);
@@ -126,7 +134,7 @@ class YamlLoader {
 
     private function _build(Node $node, Node $parent=null) {
         //handling of comments , directives, tags should be here
-         // if ($n->type === NT::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
+         // if ($n->type === T::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
         $value = $node->value;
         // var_dump($node->serialize());
         if (!($value instanceof Node) && !($value instanceof \SplQueue)) {
@@ -139,15 +147,16 @@ class YamlLoader {
             }
             $children->rewind();
             $reference = $node->type;
-            if ($node->type === NT::ROOT) {
+            if ($node->type === T::ROOT) {
                 $children = $this->_removeUnbuildable($children);
                 $reference = $children->current()->type;
             }
+            var_dump($children);exit();
             switch($reference) {
-                case NT::LITTERAL:        return $this->_litteral($children);
-                case NT::LITTERAL_FOLDED: return $this->_litteral($children, true);
-                case NT::MAPPING:         return $this->_map($node);
-                case NT::SEQUENCE:        return $this->_seq($children);
+                case T::LITTERAL:        return $this->_litteral($children);
+                case T::LITTERAL_FOLDED: return $this->_litteral($children, true);
+                case T::MAPPING:         return $this->_map($node);
+                case T::SEQUENCE:        return $this->_seq($children);
                 default: return $this->_build($value);
             }
         }
@@ -168,16 +177,18 @@ class YamlLoader {
     }
 
     //EVOLUTION:  if keyname contains unauthorized character for PHP property name : replace with '_'  ???
-    private function _map(Node $node):StdClass {
+    private function _map(Node $node):StdClass
+    {
         $out = new \StdClass;
         foreach ($node->value as $key => $child) {
-            if (in_array($child->type, [NT::KEY, NT::MAPPING])) {
-                if (!property_exists($child, "name")) {
-                    throw new \Exception("YamlLoader: in MAPPING ${NT::getName($child->type)} has NO NAME on line $child->line for '$this->filePath'");
+            if (in_array($child->type, [T::KEY, T::MAPPING])) {
+                if (property_exists($child, "name")) {
+                    $out->{$child->name} = $this->_build($child);
+                }else{
+                    $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($child->type), $child->line, $this->filePath));
                 }
-                $out->{$child->name} = $this->_build($child);           }
-            }else{
-                $this->build($child, $node);
+            }else{            
+                $this->_build($child, $node);
             }
         }
         return $out;
@@ -199,7 +210,7 @@ class YamlLoader {
     private function _removeUnbuildable(SplQueue $children) {
         $out = new \SplQueue;
         for ($children->rewind();  $children->valid(); $children->next()) { 
-            if(!in_array($children->current()->type, NT::$NOTBUILDABLE)){
+            if(!in_array($children->current()->type, T::$NOTBUILDABLE)){
                 $out->enqueue($children->current());
             } 
         }
@@ -207,31 +218,41 @@ class YamlLoader {
         return $out;
     }
 
-    //TODO : make it more robust by a diff of DOC_START and DOC_END
-    // determines if there are  :
-    // - mulitple documents  -> ROOT = array of docs
-    // _ OR just one         -> ROOT = map|seq|litteral|scalar
-    // private function _defineRoot(Node $root) {
-    //     $childrenList = $root->children;
-    //     $childrenTypes = array_map(function ($n) {return $n->type;}, $root->children);
-    //     $out = [];
-    //     $pos = array_search(NT::DOC_END, $childrenTypes);
-    //     $r = new Node();
-    //     while ($pos !== false && $pos !== 0) {
-    //         $n = new Node();
-    //         $n->type = NT::DOCUMENT;
-    //         $n->children = $this->_removeUnbuildable(array_splice($childrenList, $pos));
-    //         $r->children[] = $n;
-    //         $childrenTypes = array_slice($childrenTypes, $pos + 1);
-    //         $pos = array_search(NT::DOC_END, $childrenTypes);
-    //     }
-    //     if (property_exists($r, 'children') && count($childrenList) > 0) {
-    //         $r->children[] = $this->_removeUnbuildable($childrenList);
-    //     } else {
-    //         $root->children = $this->_removeUnbuildable($childrenList);
-    //     }
-    //     return property_exists($r, 'children') ? $r : $root;
-    // }
+    private function _buildRoot(Node $node)
+    {
+        //check multiple documents
+        //split documents
+        $totalDocStart = 0;
+        $documents = [];
+        $node->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE); 
+        foreach ($node->value as $key => $child) {
+            if($child->type === T::DOC_START){
+                $totalDocStart++;
+            }
+            //if 0 or 1 DOC_START = we are still in first document
+            $currentDoc = $totalDocStart > 1 ? $totalDocStart -1 : 0; 
+            if(!array_key_exists($currentDoc, $documents)) $documents[$currentDoc] = new \SplQueue();                
+            $documents[$currentDoc]->enqueue($child);
+        }
+var_dump($documents);exit();
+        //foreach documents
+        $childTypes = $this->_getChildrenTypes($node->value);
+        if (count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0  && 
+            in_array(T::ITEM, $childTypes)) {
+            $this->_error();
+        } else if (count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0) {
+            # code...
+        }
+    }
+
+    private function _getChildrenTypes(SplQueue $children)
+    {
+        $types = [];
+        foreach ($children as $key => $child) {
+            $types[] = $child->type;
+        }
+        return array_unique($types);
+    }
 
     public function checkChildrenCoherence(SplQueue $children)
     {
@@ -241,41 +262,13 @@ class YamlLoader {
         }
         return array_unique($types, SORT_NUMERIC) > 1;
     }
-}
-/**
- * the return Object representing a YAML file content
- */
-class YamlObject extends ArrayObject
-{
-    private $_references = [];
-    private $_comments   = [];
-    private $_documents  = [];
-    function __construct(argument)
-    {
-        # code...
-    }
 
-    public function getReference($referenceName = null)
+    public function _error($message)
     {
-        if (array_key_exists($referenceName, $this->_references)) {
-            return $this->_references[$referenceName];
+        if ($this->_options->noParsingException) {
+            # code...
+        }else{
+            throw new ParseException($message, 1);
         }
-        return $this->_references; 
-    }
-
-    public function getComment($lineNumber = null)
-    {
-        if (array_key_exists($lineNumber, $this->_comments)) {
-            return $this->_comments[$lineNumber];
-        }
-        return $this->_comments;   
-    }
-
-    public function getDocument($identifier = null)
-    {
-        if (array_key_exists($identifier, $this->_documents)) {
-            return $this->_documents[$identifier];
-        }
-        return count($this->_documents)===1 ? $this->_documents[0] : $this->_documents;
     }
 }
