@@ -2,6 +2,7 @@
 namespace Dallgoot\Yaml;
 use Dallgoot\Yaml\Node as Node;
 use Dallgoot\Yaml\Types as T;
+use Dallgoot\Yaml\YamObject;
 
 class Loader
 {
@@ -133,7 +134,7 @@ class Loader
         return $out;
     }
 
-    private function _build(Node $node, Node $parent = null) {
+    private function _build(object $node, object $parent = null) {
         //handling of comments , directives, tags should be here
          // if ($n->type === T::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
         $value = $node->value;
@@ -152,7 +153,7 @@ class Loader
                 $children = $this->_removeUnbuildable($children);
                 $reference = $children->current()->type;
             }
-            var_dump($children);exit();
+            // var_dump($children);exit();
             switch($reference) {
                 case T::LITTERAL:        return $this->_litteral($children);
                 case T::LITTERAL_FOLDED: return $this->_litteral($children, true);
@@ -221,8 +222,7 @@ class Loader
 
     private function _buildRoot(Node $node)
     {
-        //check multiple documents
-        //split documents
+        //check multiple documents & split if more than one documents
         $totalDocStart = 0;
         $documents = [];
         $node->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE); 
@@ -231,22 +231,34 @@ class Loader
                 $totalDocStart++;
             }
             //if 0 or 1 DOC_START = we are still in first document
-            $currentDoc = $totalDocStart > 1 ? $totalDocStart -1 : 0; 
+            $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0; 
             if(!array_key_exists($currentDoc, $documents)) $documents[$currentDoc] = new \SplQueue();                
             $documents[$currentDoc]->enqueue($child);
         }
-var_dump($documents);exit();
+// var_dump($documents);exit();
         //foreach documents
-        $childTypes = $this->_getChildrenTypes($node->value);
-        if (count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0  && 
-            in_array(T::ITEM, $childTypes)) {
-            $this->_error();
-        } else if (count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0) {
-            # code...
+        $results = [];
+        foreach ($documents as $key => $value) {
+            $doc = new YamlObject();
+            $childTypes = $this->_getChildrenTypes($value);
+            $isMapping  = count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0;
+            $isSequence = in_array(T::ITEM, $childTypes);
+            if ($isMapping && $isSequence) {
+                $this->_error();
+            }elseif ($isMapping) {
+                $doc->type = T::MAPPING;
+            }elseif ($isSequence) {
+                $doc->type = T::SEQUENCE;
+            }else{
+                $doc->type = T::LITTERAL;
+            }
+            $doc->value = $value;
+            $results[] = $this->_build($doc);
         }
+        return $results;
     }
 
-    private function _getChildrenTypes(SplQueue $children)
+    private function _getChildrenTypes(\SplQueue $children)
     {
         $types = [];
         foreach ($children as $key => $child) {
@@ -255,7 +267,7 @@ var_dump($documents);exit();
         return array_unique($types);
     }
 
-    public function checkChildrenCoherence(SplQueue $children)
+    public function checkChildrenCoherence(\SplQueue $children)
     {
         $types = [];
         foreach ($children as $key => $child) {
@@ -269,7 +281,7 @@ var_dump($documents);exit();
         if ($this->_options->noParsingException) {
             # code...
         }else{
-            throw new \ParseException($message, 1);
+            throw new \ParseError($message, 1);
         }
     }
 }

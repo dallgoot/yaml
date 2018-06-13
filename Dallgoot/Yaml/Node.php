@@ -27,7 +27,7 @@ class Node
     private const mapForSequence = "(?P<map>{\s*(?:".self::yamlAN."\s*:\s*(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+})";
     private const yamlSequence = "(?P<seq>\[(?:(?:".self::yamlSimpleValue."|".self::mapForSequence."|(?P>seq)),?\s*)+\])";
 
-    function __construct($nodeString=null, $line=null)
+    public function __construct($nodeString=null, $line=null)
     {
         // echo self::yamlSequence;exit();
         $this->line = $line;

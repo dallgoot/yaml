@@ -5,7 +5,7 @@ use Dallgoot\Yaml\Types as T;
 /**
  * the return Object representing a YAML file content
  */
-class Yaml_API
+class API
 {
     private $_references = [];
     private $_comments   = [];
@@ -15,7 +15,7 @@ class Yaml_API
     /*
      *consider dumping datetime as date strings according to a format provided by user or default
     */
-    public function __construct($objectTemplate)
+    public function __construct()
     {
         // $this->_references = $objectTemplate->_ 
     }
