@@ -4,11 +4,11 @@ class Types{
     const DIRECTIVE  = 0;
     const DOC_START = 1;
     const DOC_END = 2;
-    const DOCUMENT = 4;
+    // const DOCUMENT = 4;
     const COMMENT = 8;
     const EMPTY   = 16;
     const ROOT    = 32;
-    // single line or have children
+
     const KEY = 42; 
     const ITEM = 52;
 

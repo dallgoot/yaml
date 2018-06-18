@@ -6,9 +6,12 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Dallgoot\\Yaml\\API' => $baseDir . '/Dallgoot/Yaml/API.php',
-    'Dallgoot\\Yaml\\Loader' => $baseDir . '/Dallgoot/Yaml/Loader.php',
-    'Dallgoot\\Yaml\\Node' => $baseDir . '/Dallgoot/Yaml/Node.php',
-    'Dallgoot\\Yaml\\Types' => $baseDir . '/Dallgoot/Yaml/Types.php',
-    'Dallgoot\\Yaml\\YamlObject' => $baseDir . '/Dallgoot/Yaml/YamlObject.php',
+    'ComposerAutoloaderInit2906926e41d4e6da5c4a99d01dd0f217' => $vendorDir . '/composer/autoload_real.php',
+    'Composer\\Autoload\\ClassLoader' => $vendorDir . '/composer/ClassLoader.php',
+    'Composer\\Autoload\\ComposerStaticInit2906926e41d4e6da5c4a99d01dd0f217' => $vendorDir . '/composer/autoload_static.php',
+    'Dallgoot\\Yaml\\API' => $baseDir . '/API.php',
+    'Dallgoot\\Yaml\\Loader' => $baseDir . '/Loader.php',
+    'Dallgoot\\Yaml\\Node' => $baseDir . '/Node.php',
+    'Dallgoot\\Yaml\\Types' => $baseDir . '/Types.php',
+    'Dallgoot\\Yaml\\YamlObject' => $baseDir . '/YamlObject.php',
 );

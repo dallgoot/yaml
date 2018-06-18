@@ -11,7 +11,10 @@ class API
     private $_comments   = [];
     private $_documents  = [];
 
-    private  $_type = T::MAPPING;
+    public  $type = T::MAPPING;
+
+    const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";
+
     /*
      *consider dumping datetime as date strings according to a format provided by user or default
     */
@@ -20,12 +23,17 @@ class API
         // $this->_references = $objectTemplate->_ 
     }
 
-    public function getReference($referenceName = null)
+    public function &getReference($referenceName)
     {
         if (array_key_exists($referenceName, $this->_references)) {
             return $this->_references[$referenceName];
         }
-        return $this->_references; 
+        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $referenceName), 1);
+    }
+
+    public function getAllReferences()
+    {
+        return $this->_references;
     }
 
     public function getComment($lineNumber = null)
@@ -42,5 +50,15 @@ class API
             return $this->_documents[$identifier];
         }
         return count($this->_documents)===1 ? $this->_documents[0] : $this->_documents;
+    }
+
+    public function addComment($index, $value)
+    {
+        $this->_comments[$index] = $value;
+    }
+
+    public function setText($string)
+    {
+        $this->value = $string;
     }
 }

@@ -6,26 +6,28 @@ use Dallgoot\Yaml\YamObject;
 
 class Loader
 {
-    private $_content = NULL;
-    private $filePath = NULL;
-    private $_debug = true;
-    const INCLUDE_DIRECTIVE = false;
-    const INCLUDE_COMMENTS = true;
-
-    const ERROR_NO_NAME = self::class.": in MAPPING %s has NO NAME on line %d for '%s'";
+    public $errors = [];
+    private $_content;
+    private $filePath;
+    private $_debug   = 0;//TODO: determine levels
+    private $_options = 0;
+    //options
+    public const EXCLUDE_DIRECTIVES = 0001;//DONT include_directive
+    public const IGNORE_COMMENTS    = 0010;//DONT include_comments
+    public const EXCEPTIONS_PARSING = 0100;//THROW Exception on parsing Errors
+    public const NO_OBJECT_FOR_DATE = 1000;//DONT import date strings as dateTime Object
+    //Errors
+    const ERROR_NO_NAME    = self::class.": in MAPPING %s has NO NAME on line %d for '%s'";
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
     //Exceptions
-    const EXCEPTION_NO_FILE = self::class.": file '%s' does not exists (or path is incorrect?)";
+    const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
     const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
 
-    public function __construct($absolutePath = null, $options = null) {
-        /*TODO: handle options:
-                    - include_directive
-                    - include_comments
-                    - debug
-                    - dont Exception on parsing Errors
-                    _ import date strings as dateTime Object
-        */
+    public function __construct($absolutePath = null, $options = null, $debug = 0) {
+        $this->_debug = is_int($debug) ? min($debug, 3) : 1; 
+        if (!is_null($options)) {
+            $this->options = $options;
+        }
         if (!is_null($absolutePath)) {
             $this->load($absolutePath);
         }
@@ -134,90 +136,57 @@ class Loader
         return $out;
     }
 
-    private function _build(object $node, object $parent = null) {
-        //handling of comments , directives, tags should be here
-         // if ($n->type === T::COMMENT && !self::INCLUDE_COMMENTS) {continue;}
+    private function _build(object $node, $root = null, $parent = null) {
+        $line  = property_exists($node, "line") ? $node->line : null;
+        $name  = property_exists($node, "name") ? $node->name : null;
+        $type  = $node->type;
         $value = $node->value;
-        // var_dump($node->serialize());
-        if (!($value instanceof Node) && !($value instanceof \SplQueue)) {
-            return $node->getPhpValue();
-        }else {
-            $children = $value;
-            if ($children instanceof Node) {
-                $children = new \SplQueue();
-                $children->enqueue($value);
-            }
-            $children->rewind();
-            $reference = $node->type;
-            if ($node->type === T::ROOT) {
-                $children = $this->_removeUnbuildable($children);
-                $reference = $children->current()->type;
-            }
-            // var_dump($children);exit();
-            switch($reference) {
-                case T::LITTERAL:        return $this->_litteral($children);
-                case T::LITTERAL_FOLDED: return $this->_litteral($children, true);
-                case T::MAPPING:         return $this->_map($node);
-                case T::SEQUENCE:        return $this->_seq($children);
-                default: return $this->_build($value);
-            }
-        }
-    }
-
-    private function _litteral(\SplQueue $children, $folded = false):string
-    {
-        try{
-            $output = '';
-            for ($children->rewind(); $children->valid(); $children->next()) { 
-                $output .= $children->current()->value.($folded ? " " : PHP_EOL);
-            }
-        }catch(\Error $err) {
-                  echo "catched: ", $err->getMessage(), PHP_EOL;
-            // throw new Exception("catched: ", $err->getMessage(), PHP_EOL);
-        }
-        return $output;
-    }
-
-    //EVOLUTION:  if keyname contains unauthorized character for PHP property name : replace with '_'  ???
-    private function _map(Node $node):StdClass
-    {
-        $out = new \StdClass;
-        foreach ($node->value as $key => $child) {
-            if (in_array($child->type, [T::KEY, T::MAPPING])) {
-                if (property_exists($child, "name")) {
-                    $out->{$child->name} = $this->_build($child);
-                }else{
-                    $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($child->type), $child->line, $this->filePath));
+        if(!is_object($value)) return $node->getPhpValue();
+        if ($value instanceof \SplQueue) {
+            if ($node instanceof YamlObject) {
+                foreach ($value as $key => $child) {
+                    $build = $this->_build($child, $root, $node);
+                    // if(is_string($build)){
+                    //     $node->value .= $build;
+                    // }
                 }
-            }else{            
-                $this->_build($child, $node);
+                return $node;
             }
+            switch ($type) {
+                case T::MAPPING:  $p = new \StdClass();break;
+                case T::SEQUENCE: $p = [];break;
+                default: $p = '';//var_dump(T::getName($type));exit();
+            }
+            foreach ($value as $key => $child) {
+                if (is_string($p)) {
+                    $p .= ($this->_build($child, $root, $p)).($type === T::LITTERAL_FOLDED ? " " : PHP_EOL);
+                }else{
+                    $this->_build($child, $root, $p);                    
+                }
+            }
+            return $p;
         }
-        return $out;
-    }
-
-    private function _seq(\SplQueue $children):array {
-        $out = [];
-        foreach ($children as $key => $child) {
-           if(property_exists($child, "name")){
-                $out[$child->name] = $this->_build($child);
-           }else{
-                $out[] = $this->_build($child);
-           }
-        }
-        return $out;
-    }
-
-
-    private function _removeUnbuildable(\SplQueue $children) {
-        $out = new \SplQueue;
-        for ($children->rewind();  $children->valid(); $children->next()) { 
-            if(!in_array($children->current()->type, T::$NOTBUILDABLE)){
-                $out->enqueue($children->current());
-            } 
-        }
-        $out->rewind();
-        return $out;
+        switch ($type) {
+            case T::LITTERAL:  
+            case T::LITTERAL_FOLDED: return $this->_litteral($value, $type);
+            case T::KEY: if (!is_null($name)) {
+                                $parent->{$name} = $this->_build($value, $root);
+                            }else{
+                                $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($type), $line, $this->filePath));
+                            }
+            case T::ITEM : if (is_null($name)) {
+                                $parent[] = $this->_build($value, $root, $parent);
+                            } else{
+                                $parent[$name] = $this->_build($value, $root, $parent);
+                            }
+            case T::DIRECTIVE: return;//TODO
+            case T::TAG:  return;//TODO
+            case T::COMMENT: $root->addComment($line, $value); return;
+            case T::REF_DEF: $root->addReference($line, $name, $this->_build($value, $root, $parent)); return;
+            case T::REF_CALL: return $root->getReference($name);
+                                
+            default: return $this->_build($value, $root, $node);
+        }   
     }
 
     private function _buildRoot(Node $node)
@@ -235,8 +204,7 @@ class Loader
             if(!array_key_exists($currentDoc, $documents)) $documents[$currentDoc] = new \SplQueue();                
             $documents[$currentDoc]->enqueue($child);
         }
-// var_dump($documents);exit();
-        //foreach documents
+        $this->_debug >= 2 && var_dump($documents);
         $results = [];
         foreach ($documents as $key => $value) {
             $doc = new YamlObject();
@@ -244,18 +212,75 @@ class Loader
             $isMapping  = count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0;
             $isSequence = in_array(T::ITEM, $childTypes);
             if ($isMapping && $isSequence) {
-                $this->_error();
+                $this->_error(sprintf(self::INVALID_DOCUMENT, $key));
             }elseif ($isMapping) {
                 $doc->type = T::MAPPING;
             }elseif ($isSequence) {
                 $doc->type = T::SEQUENCE;
             }else{
-                $doc->type = T::LITTERAL;
+                $doc->type = T::MAPPING;
             }
             $doc->value = $value;
-            $results[] = $this->_build($doc);
+            $this->_debug >= 3 && var_dump($doc);
+            $results[] = $this->_build($doc, $doc);
         }
         return $results;
+    }
+
+    private function _litteral(\SplQueue $children, $type):string
+    {
+        $folded = $type === T::LITTERAL_FOLDED;
+        try{
+            $output = '';
+            foreach ($children as $key => $child) {
+                $output .= ($child->value).($folded ? " " : PHP_EOL);
+            }
+        }catch(\Error $err) {
+                  echo "catched: ", $err->getMessage(), PHP_EOL;
+            // throw new Exception("catched: ", $err->getMessage(), PHP_EOL);
+        }
+        return $output;
+    }
+
+    //EVOLUTION:  if keyname contains unauthorized character for PHP property name : replace with '_'  ???
+    private function _map(Node $node, $target = null):Object
+    {
+        $out = is_null($target) ? new \StdClass : $target;
+        foreach ($node->value as $key => $child) {
+            if (in_array($child->type, [T::KEY, T::MAPPING])) {
+                if (property_exists($child, "name")) {
+                    $out->{$child->name} = $this->_build($child);
+                }else{
+                    $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($child->type), $child->line, $this->filePath));
+                }
+            }else{            
+                $this->_build($child, $node);
+            }
+        }
+        return $out;
+    }
+
+    private function _seq(\SplQueue $children, $target = null) {
+        $out = is_null($target) ? [] : $target;
+        foreach ($children as $key => $child) {
+           if(property_exists($child, "name")){
+                $out[$child->name] = $this->_build($child);
+           }else{
+                $out[] = $this->_build($child);
+           }
+        }
+        return $out;
+    }
+
+    private function _removeUnbuildable(\SplQueue $children) {
+        $out = new \SplQueue;
+        for ($children->rewind();  $children->valid(); $children->next()) { 
+            if(!in_array($children->current()->type, T::$NOTBUILDABLE)){
+                $out->enqueue($children->current());
+            } 
+        }
+        $out->rewind();
+        return $out;
     }
 
     private function _getChildrenTypes(\SplQueue $children)
@@ -267,21 +292,12 @@ class Loader
         return array_unique($types);
     }
 
-    public function checkChildrenCoherence(\SplQueue $children)
-    {
-        $types = [];
-        foreach ($children as $key => $child) {
-             $types[] = $child->type;
-        }
-        return array_unique($types, SORT_NUMERIC) > 1;
-    }
-
     public function _error($message)
     {
-        if ($this->_options->noParsingException) {
-            # code...
-        }else{
+        if ($this->_options & self::EXCEPTIONS_PARSING) {
             throw new \ParseError($message, 1);
+        }else{
+            $this->errors[] = $message;
         }
     }
 }

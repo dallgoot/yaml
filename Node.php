@@ -6,11 +6,11 @@ use Dallgoot\Yaml\Types as T;
 */
 class Node
 {
-    public $indent   = -1;
-    public $line     = NULL;
-    public $type     = NULL;
-    public $value    = NULL;
-    private $_parent = NULL;
+    public $indent = -1;
+    public $line;
+    public $type;
+    public $value;
+    private $_parent;
 
     private const yamlNull  = "null";
     private const yamlFalse = "false";
@@ -40,6 +40,7 @@ class Node
     public function setParent(Node $node)
     {
         $this->_parent = $node;
+        return $this;
     }
 
     public function getParent($indent=null):Node
@@ -124,10 +125,8 @@ class Node
     /**
      * { function_description }
      *
-     * @param      <type>  $nodeValue  The node value
-     *
-     * @return     array   ( description_of_the_return_value )
-     *     //TODO : handle reference definitions/calls and tags and complex mappings
+     * @param      <string>  $nodeValue  The node value
+     * @return     array   contains [node->type, final node->value]
      */
     private function _define($nodeValue)
     {
@@ -231,17 +230,16 @@ class Node
             case T::REF_DEF:
             case T::REF_CALL:
             case T::TAG:;
+            case T::COMMENT:
             case T::STRING: return strval($this->value);
 
             case T::MAPPING_SHORT://TODO
             //TODO : that's not robust enough, improve it
             case T::SEQUENCE_SHORT: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1,-1)));
             
-            case T::COMMENT:
             case T::DIRECTIVE:
             case T::DOC_START:
             case T::DOCUMENT:
-            // case T::ROOT:
             case T::KEY:; 
             case T::ITEM:return $this->value->getPhpValue();
 

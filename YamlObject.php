@@ -9,10 +9,13 @@ use Dallgoot\Yaml\API as API;
 class YamlObject extends \ArrayIterator
 {
     private $__yaml__object__api;
+    public $value;
+    
     public function __construct()
     {
         $this->__yaml__object__api = new API();
     }
+    
     public function __call($name, $arguments)
     {
         $reflectAPI = new \ReflectionClass(get_class($this->__yaml__object__api));
@@ -22,5 +25,13 @@ class YamlObject extends \ArrayIterator
             throw new \BadMethodCallException("undefined method '$name' ! valid methods are ".(implode(",",$api)), 1);
         }
         return call_user_func_array([$this->__yaml__object__api, $name], $arguments);
+    }
+
+    public function __toString()
+    {
+        if (!is_string($this->value)) {
+            return serialize($this);            
+        }
+        return $this->value;
     }
 }

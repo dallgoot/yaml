@@ -4,9 +4,13 @@ engines:
     enabled: true
     # ... CONFIG CONTENT ...
     checks:
+      PSR2 Methods MethodDeclaration Underscore:
+        enabled: false
       PSR2 Classes PropertyDeclaration Underscore:
         enabled: false
       PSR2 ControlStructures SwitchDeclaration BreakNotNewLine:
+        enabled: false
+      PSR2 ControlStructures SwitchDeclaration BodyOnNextLineCASE:
         enabled: false
 # ... CONFIG CONTENT ...plugins:
   phpcodesniffer:
