@@ -23,6 +23,23 @@ class API
         // $this->_references = $objectTemplate->_ 
     }
 
+    /**
+     * Adds a reference.  //TODO : what use for $line ???
+     *
+     * @param      <int>                     $line   The line
+     * @param      <string>                     $name   The name
+     * @param      <string>                     $value  The value
+     *
+     * @throws     \UnexpectedValueException  (description)
+     */
+    public function addReference($line, $name, $value)
+    {
+        if (is_null($name)) {
+            throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $referenceName), 1);
+        }
+        $this->_references[$name] = $value;
+    }
+
     public function &getReference($referenceName)
     {
         if (array_key_exists($referenceName, $this->_references)) {
@@ -34,6 +51,11 @@ class API
     public function getAllReferences()
     {
         return $this->_references;
+    }
+
+    public function addComment($index, $value)
+    {
+        $this->_comments[$index] = $value;
     }
 
     public function getComment($lineNumber = null)
@@ -50,11 +72,6 @@ class API
             return $this->_documents[$identifier];
         }
         return count($this->_documents)===1 ? $this->_documents[0] : $this->_documents;
-    }
-
-    public function addComment($index, $value)
-    {
-        $this->_comments[$index] = $value;
     }
 
     public function setText($string)

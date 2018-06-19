@@ -4,7 +4,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use \Dallgoot\Yaml\Loader;
 // USE CASE 1
 //load and parse if file exists
-$yaml = (new Loader('./yaml references/Example 2.13.yml', null, 0))->parse();
+$yaml = (new Loader('./references/Example 2.10.yml', null, 2))->parse();
 var_dump($yaml);
 
 // USE CASE 2

@@ -75,6 +75,7 @@ class Node
             $this->value->enqueue($child);
         }
         //modify type according to child
+        // var_dump("prev type=", T::getName($this->type));
         switch ($child->type) {
             case T::KEY:  $this->type = T::MAPPING;break;
             case T::ITEM: $this->type = T::SEQUENCE;break;
@@ -105,7 +106,7 @@ class Node
             $this->indent = 0;
         }elseif (substr($nodeValue, 0, 3) === '...'){//TODO: can have something after?
             $this->type = T::DOC_END;
-        }elseif (preg_match('/^([^-{[][a-][^:#{["\'%!]*)\s*:[ \t]+(.*)?/', $nodeValue, $matches)) {
+        }elseif (preg_match('/^([^:#{["\'%!]*\s*):([ \t].*)?/', $nodeValue, $matches)) {
             $this->type = T::KEY; 
             $this->name = trim($matches[1]);
             if(isset($matches[2]) && !empty(trim($matches[2]))) {
@@ -134,9 +135,23 @@ class Node
         switch ($nodeValue[0]) {
             case '%': return [T::DIRECTIVE, $v];
             case '#': return [T::COMMENT, $v];
-            case '!': return [T::TAG, $v];// TODO: handle tags
-            case "&": return [T::REF_DEF, $v];//REFERENCE  //TODO
-            case "*": return [T::REF_CALL, $v];
+            case '!': 
+            case "&": 
+            case "*":// TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
+                    switch ($nodeValue[0]) {
+                        case '!': $type = T::TAG;break; 
+                        case '&': $type = T::REF_DEF;break;
+                        case '*': $type = T::REF_CALL;break;
+                    }
+                    $pos = strpos($v, ' ');
+                    if (is_bool($pos)) {
+                        $this->name = $v;
+                        return [$type, null];
+                    }else{
+                        $this->name = strstr($v, ' ', true);
+                        $n = new Node(trim(substr($nodeValue, $pos+1)), $this->line);
+                        return [$type, $n->setParent($this)];
+                    }
             case '>': return [T::LITTERAL_FOLDED, null];
             case '|': return [T::LITTERAL, null];
             //TODO: complex mapping
@@ -162,24 +177,6 @@ class Node
                 return [T::STRING, $nodeValue];
         }
     }
-
-    // public function serialize():array
-    // {
-    //     $name = property_exists($this, 'name') ? "($this->name)" : null;
-    //     $out = ['node' => implode('|',[$this->line, $this->indent,T::getName($this->type).$name])];
-    //     $v = $this->value;
-    //     if($v instanceof \SplQueue) {
-    //         $out['value'] = var_export($v, true);
-    //         // for ($v->rewind(); $v->valid(); $v->next()) {
-    //         //     $out['value'][] = $v->current()->serialize();//array_map(function($c){return $c->serialize();}, $this->children);
-    //         // }
-    //     }elseif($v instanceof Node){
-    //         $out['value'] = $v->serialize();
-    //     }else{
-    //         $out['node'] .= "|".$v;
-    //     }
-    //     return $out;
-    // }
 
     public function __debugInfo() {
         $out = ['line'=>$this->line,
@@ -239,11 +236,11 @@ class Node
             
             case T::DIRECTIVE:
             case T::DOC_START:
-            case T::DOCUMENT:
+            // case T::DOCUMENT:
             case T::KEY:; 
             case T::ITEM:return $this->value->getPhpValue();
 
-            case T::DOC_END:
+            case T::DOC_END: return;
             case T::PARTIAL:; // have a multi line quoted  string OR json definition
             default: throw new \Exception("Error can not get PHP type for ".T::getName($this->type), 1);
         }

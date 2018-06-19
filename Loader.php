@@ -126,9 +126,9 @@ class Loader
                 $previous = $n;
             }
         }
-        $this->_debug && var_dump($root);
+        $this->_debug && var_dump("\033[33mParsed Structure\033[0m\n", $root);
         try {
-            $out = $this->_buildRoot($root);
+            $out = $this->_buildFile($root);
         } catch (\Error|\Exception $e){
             var_dump($root);
             throw new \ParseError($e);
@@ -141,57 +141,59 @@ class Loader
         $name  = property_exists($node, "name") ? $node->name : null;
         $type  = $node->type;
         $value = $node->value;
-        if(!is_object($value)) return $node->getPhpValue();
+        // if(!is_object($value)) return $node->getPhpValue();
         if ($value instanceof \SplQueue) {
-            if ($node instanceof YamlObject) {
-                foreach ($value as $key => $child) {
-                    $build = $this->_build($child, $root, $node);
-                    // if(is_string($build)){
-                    //     $node->value .= $build;
-                    // }
-                }
-                return $node;
-            }
             switch ($type) {
                 case T::MAPPING:  $p = new \StdClass();break;
                 case T::SEQUENCE: $p = [];break;
-                default: $p = '';//var_dump(T::getName($type));exit();
+                case T::DOC_START:
+                case T::LITTERAL:  
+                case T::LITTERAL_FOLDED: return $this->_litteral($value, $type);break;
+                default: var_dump('ERROR:',T::getName($type));exit();
             }
             foreach ($value as $key => $child) {
-                if (is_string($p)) {
-                    $p .= ($this->_build($child, $root, $p)).($type === T::LITTERAL_FOLDED ? " " : PHP_EOL);
+                if (is_null($name)) {
+                    $this->_build($child, $root, $p);
                 }else{
-                    $this->_build($child, $root, $p);                    
+                    $parent->{$name} = $this->_build($child, $root, $p);
                 }
             }
             return $p;
         }
         switch ($type) {
-            case T::LITTERAL:  
-            case T::LITTERAL_FOLDED: return $this->_litteral($value, $type);
+            case T::SEQUENCE:
             case T::KEY: if (!is_null($name)) {
-                                $parent->{$name} = $this->_build($value, $root);
+                                $parent->{$name} = $this->_build($value, $root, $parent);
                             }else{
                                 $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($type), $line, $this->filePath));
                             }
+                            return;
             case T::ITEM : if (is_null($name)) {
                                 $parent[] = $this->_build($value, $root, $parent);
                             } else{
                                 $parent[$name] = $this->_build($value, $root, $parent);
                             }
+                            return;
             case T::DIRECTIVE: return;//TODO
             case T::TAG:  return;//TODO
             case T::COMMENT: $root->addComment($line, $value); return;
-            case T::REF_DEF: $root->addReference($line, $name, $this->_build($value, $root, $parent)); return;
+            case T::REF_DEF: $root->addReference($line, $name, $value); return;
             case T::REF_CALL: return $root->getReference($name);
-                                
-            default: return $this->_build($value, $root, $node);
+            // case T::SEQUENCE:
+            // case T::DOC_START: return ;                                
+            default: return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();//return $this->_build($value, $root, $node);
         }   
     }
 
-    private function _buildRoot(Node $node)
+    /**
+     * Builds a file.  check multiple documents & split if more than one documents
+     *
+     * @param      Node   $node   The root node
+     *
+     * @return     array  representing the total of documents in the file.
+     */
+    private function _buildFile(Node $node)
     {
-        //check multiple documents & split if more than one documents
         $totalDocStart = 0;
         $documents = [];
         $node->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE); 
@@ -206,9 +208,9 @@ class Loader
         }
         $this->_debug >= 2 && var_dump($documents);
         $results = [];
-        foreach ($documents as $key => $value) {
+        foreach ($documents as $key => $children) {
             $doc = new YamlObject();
-            $childTypes = $this->_getChildrenTypes($value);
+            $childTypes = $this->_getChildrenTypes($children);
             $isMapping  = count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0;
             $isSequence = in_array(T::ITEM, $childTypes);
             if ($isMapping && $isSequence) {
@@ -220,24 +222,39 @@ class Loader
             }else{
                 $doc->type = T::MAPPING;
             }
-            $doc->value = $value;
-            $this->_debug >= 3 && var_dump($doc);
-            $results[] = $this->_build($doc, $doc);
+            // $doc->value = $value;
+            $this->_debug >= 3 && var_dump($doc, $children);
+            $results[] = $this->_buildRoot($doc, $children);
         }
         return $results;
     }
 
+    public function _buildRoot($root, $children)
+    {
+        if (!($root instanceof YamlObject)) {
+            $this->_error('NOT A YamlObject!!!');
+        }else{
+            // $root->value ='';
+            foreach ($children as $key => $child) {
+                $build = $this->_build($child, $root, $root);
+                if(is_string($build)){
+                    $root->value .= $build;
+                }
+            }
+            return $root;
+        }
+    }
+
     private function _litteral(\SplQueue $children, $type):string
     {
-        $folded = $type === T::LITTERAL_FOLDED;
+        $folded = $type === T::LITTERAL_FOLDED ? " " : PHP_EOL;
         try{
             $output = '';
             foreach ($children as $key => $child) {
-                $output .= ($child->value).($folded ? " " : PHP_EOL);
+                $output .= $child->value.$folded;
             }
         }catch(\Error $err) {
-                  echo "catched: ", $err->getMessage(), PHP_EOL;
-            // throw new Exception("catched: ", $err->getMessage(), PHP_EOL);
+            $this->error($err->getMessage());
         }
         return $output;
     }
