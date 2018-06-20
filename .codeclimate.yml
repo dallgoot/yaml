@@ -21,7 +21,7 @@ plugins:
         enabled: false
 # ... CONFIG CONTENT ...plugins:
   phpcodesniffer:
-    enabled: 
+    enabled: true
     checks:
       PSR2 ControlStructures SwitchDeclaration BreakNotNewLine:
         enabled: false
