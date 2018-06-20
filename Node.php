@@ -33,9 +33,9 @@ class Node
     {
         // echo self::yamlSequence;exit();
         $this->line = $line;
-        if(is_null($nodeString)) {
+        if (is_null($nodeString)) {
             $this->type = T::ROOT;
-        }else{
+        } else {
             $this->parse($nodeString);
         }
     }
@@ -233,10 +233,10 @@ class Node
             case T::BOOLEAN: return boolval($this->value);
             case T::NUMBER: return intval($this->value);
             case T::JSON: return json_encode($this->value);
-            case T::QUOTED:
-            case T::REF_DEF:
-            case T::REF_CALL:
-            case T::TAG:;
+            case T::QUOTED://fall through
+            case T::REF_DEF://fall through
+            case T::REF_CALL://fall through
+            case T::TAG://fall through
             case T::COMMENT: //fall through
             case T::STRING: return strval($this->value);
 
@@ -244,8 +244,8 @@ class Node
             //TODO : that's not robust enough, improve it
             case T::SEQUENCE_SHORT: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1, -1)));
             
-            case T::DIRECTIVE:
-            case T::DOC_START:
+            case T::DIRECTIVE://fall through
+            case T::DOC_START://fall through
             // case T::KEY://fall through
             case T::ITEM:return $this->value->getPhpValue();
 

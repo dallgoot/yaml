@@ -73,16 +73,16 @@ class Loader
                 if ($deepest->type === T::EMPTY && 
                     $deepestParent->type === T::KEY) {
                     $deepestParent->value = $n;
-                }else{
+                } else {
                     $deepest->value = $n;
                 }
                 continue;
             }
-            if($n->type === T::EMPTY){
+            if($n->type === T::EMPTY) {
                 if (in_array($deepest->type, T::$LITTERALS)) {
                     $n->setParent($deepest);
                     $emptyLines[] = $n;
-                }else if($previous->type === T::STRING){
+                } elseif ($previous->type === T::STRING) {
                     $n->setParent($previous->getParent());
                     $emptyLines[] = $n;
                 }
@@ -98,8 +98,8 @@ class Loader
                 $mother = $deepest->getParent();
                 $newValue->setParent($mother); 
                 $mother->value = $newValue; 
-            }else{
-                if($n->indent === 0) {
+            } else {
+                if ($n->indent === 0) {
                     $parent = $root;
                 } elseif ($n->indent < $previous->indent) {
                     $parent = $previous->getParent($n->indent);
@@ -147,7 +147,7 @@ class Loader
             }else{
                 if (!property_exists($node, "type")) {
                     $type = $parent->type;
-                }else{
+                } else {
                     $type  = $node->type;
                 }
                 switch ($type) {
@@ -209,12 +209,12 @@ class Loader
         $documents = [];
         $node->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE); 
         foreach ($node->value as $key => $child) {
-            if($child->type === T::DOC_START){
+            if ($child->type === T::DOC_START) {
                 $totalDocStart++;
             }
             //if 0 or 1 DOC_START = we are still in first document
             $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0; 
-            if(!array_key_exists($currentDoc, $documents))
+            if (!array_key_exists($currentDoc, $documents))
                 $documents[$currentDoc] = new \SplQueue();                
             $documents[$currentDoc]->enqueue($child);
         }
@@ -227,10 +227,10 @@ class Loader
             $isSequence = in_array(T::ITEM, $childTypes);
             if ($isMapping && $isSequence) {
                 $this->_error(sprintf(self::INVALID_DOCUMENT, $key));
-            }elseif ($isSequence) {
+            } elseif ($isSequence) {
                 $children->type = T::SEQUENCE;
                 // $doc->setFlags(\ArrayObject::ARRAY_AS_PROPS);
-            }else{
+            } else {
                 $children->type = T::MAPPING;
                 $doc->setFlags(\ArrayObject::STD_PROP_LIST);
             }
