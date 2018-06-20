@@ -23,9 +23,7 @@ try{
         echo "\n $s";//exit();
         // if ($references[$fileName] !== $json) throw new Exception("\nError Processing $filename : \n$json", 1);
     }
-
-}catch(Error $e)
-{
+} catch(Error $e) {
     // echo $e->message;
     var_dump($e);
 }

@@ -242,7 +242,8 @@ class Node
 
             case T::MAPPING_SHORT://TODO
             //TODO : that's not robust enough, improve it
-            case T::SEQUENCE_SHORT: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1, -1)));
+            case T::SEQUENCE_SHORT: 
+                return array_map("trim", explode(",", substr($this->value, 1, -1)));
             
             case T::DIRECTIVE://fall through
             case T::DOC_START://fall through
