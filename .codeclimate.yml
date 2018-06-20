@@ -6,10 +6,8 @@ checks:
       config:
         threshold: 10
 plugins:
-  # ... CONFIG CONTENT ...
   phpcodesniffer:
     enabled: true
-    # ... CONFIG CONTENT ...
     checks:
       PSR2 Methods MethodDeclaration Underscore:
         enabled: false
