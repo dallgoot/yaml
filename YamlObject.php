@@ -9,8 +9,8 @@ use Dallgoot\Yaml\API as API;
 class YamlObject extends \ArrayIterator
 {
     private $__yaml__object__api;
-    public $value;
-    private $_locked;
+    // public $value;
+    // private $_locked;
     
     public function __construct()
     {
@@ -42,5 +42,10 @@ class YamlObject extends \ArrayIterator
     public function lock()
     {
     	$this->_locked = true;
+    }
+
+    private function setText($value='')
+    {
+    	# code...
     }
 }

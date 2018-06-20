@@ -136,52 +136,62 @@ class Loader
         return $out;
     }
 
-    private function _build(object $node, $root = null, $parent = null) {
+    private function _build(object $node, $root = null, &$parent = null) {
         $line  = property_exists($node, "line") ? $node->line : null;
         $name  = property_exists($node, "name") ? $node->name : null;
-        $type  = $node->type;
-        $value = $node->value;
-        // if(!is_object($value)) return $node->getPhpValue();
-        if ($value instanceof \SplQueue) {
-            switch ($type) {
-                case T::MAPPING:  $p = new \StdClass();break;
-                case T::SEQUENCE: $p = [];break;
-                case T::DOC_START:
-                case T::LITTERAL:  
-                case T::LITTERAL_FOLDED: return $this->_litteral($value, $type);break;
-                default: var_dump('ERROR:',T::getName($type));exit();
+        $value = $node instanceof \SplQueue ? $node : $node->value;
+        if ($node instanceof \SplQueue) {
+            if (is_object($parent) && $parent instanceof YamlObject) {
+                $p = $parent;
+            }else{
+                if (!property_exists($node, "type")) {
+                    $type = $parent->type;
+                }else{
+                    $type  = $node->type;
+                }
+                switch ($type) {
+                    case T::MAPPING:  $p = new \StdClass();break;
+                    case T::SEQUENCE: $p = [];break;
+                    case T::LITTERAL:  
+                    case T::LITTERAL_FOLDED: return $this->_litteral($value, $type);break;
+                }
             }
             foreach ($value as $key => $child) {
-                if (is_null($name)) {
-                    $this->_build($child, $root, $p);
-                }else{
-                    $parent->{$name} = $this->_build($child, $root, $p);
-                }
+                $this->_build($child, $root, $p);
+            }
+            if (!is_null($name) && is_object($parent)) {
+                $parent->{$name} = $p;
             }
             return $p;
         }
+        $type  = $node->type;
         switch ($type) {
             case T::SEQUENCE:
             case T::KEY: if (!is_null($name)) {
-                                $parent->{$name} = $this->_build($value, $root, $parent);
+                                $parent->{$name} = $this->_build($value, $root, $parent->{$name});
                             }else{
                                 $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($type), $line, $this->filePath));
                             }
                             return;
-            case T::ITEM : if (is_null($name)) {
-                                $parent[] = $this->_build($value, $root, $parent);
-                            } else{
-                                $parent[$name] = $this->_build($value, $root, $parent);
+            case T::ITEM : if ($value instanceof Node && $value->type === T::KEY) {
+                                $parent[$value->name] = $this->_build($value, $root, $parent[$value->name]);
+                            }else{
+                                $c = count($parent);
+                                $parent[$c] = $this->_build($value, $root, $parent[$c]);
                             }
                             return;
             case T::DIRECTIVE: return;//TODO
             case T::TAG:  return;//TODO
             case T::COMMENT: $root->addComment($line, $value); return;
-            case T::REF_DEF: $root->addReference($line, $name, $value); return;
-            case T::REF_CALL: return $root->getReference($name);
-            // case T::SEQUENCE:
-            // case T::DOC_START: return ;                                
-            default: return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();//return $this->_build($value, $root, $node);
+            case T::REF_DEF: 
+                            $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
+                            $root->addReference($line, $name, $tmp); 
+                            return $tmp;
+            case T::REF_CALL: 
+                $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
+                return $root->getReference($name);
+            default: 
+                return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
         }   
     }
 
@@ -203,7 +213,8 @@ class Loader
             }
             //if 0 or 1 DOC_START = we are still in first document
             $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0; 
-            if(!array_key_exists($currentDoc, $documents)) $documents[$currentDoc] = new \SplQueue();                
+            if(!array_key_exists($currentDoc, $documents))
+                $documents[$currentDoc] = new \SplQueue();                
             $documents[$currentDoc]->enqueue($child);
         }
         $this->_debug >= 2 && var_dump($documents);
@@ -215,14 +226,13 @@ class Loader
             $isSequence = in_array(T::ITEM, $childTypes);
             if ($isMapping && $isSequence) {
                 $this->_error(sprintf(self::INVALID_DOCUMENT, $key));
-            }elseif ($isMapping) {
-                $doc->type = T::MAPPING;
             }elseif ($isSequence) {
-                $doc->type = T::SEQUENCE;
+                $children->type = T::SEQUENCE;
+                // $doc->setFlags(\ArrayObject::ARRAY_AS_PROPS);
             }else{
-                $doc->type = T::MAPPING;
+                $children->type = T::MAPPING;
+                $doc->setFlags(\ArrayObject::STD_PROP_LIST);
             }
-            // $doc->value = $value;
             $this->_debug >= 3 && var_dump($doc, $children);
             $results[] = $this->_buildRoot($doc, $children);
         }
@@ -235,13 +245,14 @@ class Loader
             $this->_error('NOT A YamlObject!!!');
         }else{
             // $root->value ='';
-            foreach ($children as $key => $child) {
-                $build = $this->_build($child, $root, $root);
-                if(is_string($build)){
-                    $root->value .= $build;
-                }
-            }
-            return $root;
+            // foreach ($children as $key => $child) {
+            //     $build = $this->_build($child, $root, $root);
+            //     if(is_string($build)){
+            //         $root->setText($build);
+            //     }
+            // }
+            // return $root;
+            return $this->_build($children, $root, $root);
         }
     }
 
@@ -257,36 +268,6 @@ class Loader
             $this->error($err->getMessage());
         }
         return $output;
-    }
-
-    //EVOLUTION:  if keyname contains unauthorized character for PHP property name : replace with '_'  ???
-    private function _map(Node $node, $target = null):Object
-    {
-        $out = is_null($target) ? new \StdClass : $target;
-        foreach ($node->value as $key => $child) {
-            if (in_array($child->type, [T::KEY, T::MAPPING])) {
-                if (property_exists($child, "name")) {
-                    $out->{$child->name} = $this->_build($child);
-                }else{
-                    $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($child->type), $child->line, $this->filePath));
-                }
-            }else{            
-                $this->_build($child, $node);
-            }
-        }
-        return $out;
-    }
-
-    private function _seq(\SplQueue $children, $target = null) {
-        $out = is_null($target) ? [] : $target;
-        foreach ($children as $key => $child) {
-           if(property_exists($child, "name")){
-                $out[$child->name] = $this->_build($child);
-           }else{
-                $out[] = $this->_build($child);
-           }
-        }
-        return $out;
     }
 
     private function _removeUnbuildable(\SplQueue $children) {
@@ -311,10 +292,7 @@ class Loader
 
     public function _error($message)
     {
-        if ($this->_options & self::EXCEPTIONS_PARSING) {
-            throw new \ParseError($message, 1);
-        }else{
-            $this->errors[] = $message;
-        }
+        if ($this->_options & self::EXCEPTIONS_PARSING) throw new \ParseError($message, 1);
+        $this->errors[] = $message;
     }
 }

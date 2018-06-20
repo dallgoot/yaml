@@ -75,12 +75,12 @@ class Node
             $this->value->enqueue($child);
         }
         //modify type according to child
-        // var_dump("prev type=", T::getName($this->type));
-        switch ($child->type) {
-            case T::KEY:  $this->type = T::MAPPING;break;
-            case T::ITEM: $this->type = T::SEQUENCE;break;
-            
-            default: //do nothing
+        if ($this->value instanceof \SplQueue) {
+            switch ($child->type) {
+                case T::KEY:  $this->value->type = T::MAPPING;break;
+                case T::ITEM: $this->value->type = T::SEQUENCE;break;
+                case T::STRING: $this->value->type = $this->type;break;
+            }
         }
     }
 
@@ -106,7 +106,7 @@ class Node
             $this->indent = 0;
         }elseif (substr($nodeValue, 0, 3) === '...'){//TODO: can have something after?
             $this->type = T::DOC_END;
-        }elseif (preg_match('/^([^:#{["\'%!]*\s*):([ \t].*)?/', $nodeValue, $matches)) {
+        }elseif (preg_match('/^([[:alpha:]][[:alpha:]-_ ]*[\s\t]*):([\s\t].*)?/', $nodeValue, $matches)) {
             $this->type = T::KEY; 
             $this->name = trim($matches[1]);
             if(isset($matches[2]) && !empty(trim($matches[2]))) {
@@ -115,9 +115,10 @@ class Node
                 $n = new Node();
                 $n->type = T::EMPTY;
             }
+            $n->indent = $this->indent + strlen($this->name);
             $n->setParent($this);
             $this->value = $n;
-        }else{//NOTE: can be of another type according to VALUE
+        }else{//NOTE: can be of another type according to parent
             list($this->type, $this->value) = $this->_define($nodeValue);
         }
         return $this;
@@ -159,7 +160,7 @@ class Node
             // case ':':
             case '"':
             case "'":
-                return $this->isProperlyQuoted($nodeValue) ? [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
+                return $this->isQuoted($nodeValue) ? [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
             case "{":
             case "[":
                 if($this->isValidJSON($nodeValue))     return [T::JSON, $nodeValue];
@@ -168,10 +169,12 @@ class Node
                 return [T::PARTIAL, $nodeValue]; 
             case "-":
                 if(substr($nodeValue, 0, 3) === '---') return [T::DOC_START, new Node(trim(substr($nodeValue, 3)))];
-                if (preg_match('/^-[ \t]*(.*)$/', $nodeValue, $matches)){
-                    $n = new Node(trim($matches[1]), $this->line);
-                    $n->setParent($this);
-                    return [T::ITEM, $n];
+                if (preg_match('/^-([\s\t]+(.*))?$/', $nodeValue, $matches)){
+                    if (isset($matches[1])) {
+                        $n = new Node(trim($matches[1]), $this->line);
+                        return [T::ITEM, $n->setParent($this)];
+                    }
+                    return [T::ITEM, null];
                 }
             default:
                 return [T::STRING, $nodeValue];
@@ -192,7 +195,7 @@ class Node
         return ["value"];
     }
 
-    public function isProperlyQuoted(string $candidate)
+    public function isQuoted(string $candidate)
     {// check Node value to see if properly enclosed
         return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $candidate);
     }
@@ -216,8 +219,8 @@ class Node
     public function getPhpValue()
     {
         switch ($this->type) {
-            case T::LITTERAL:;
-            case T::LITTERAL_FOLDED:;
+            // case T::LITTERAL:;
+            // case T::LITTERAL_FOLDED:;
             // case T::NULL: 
             case T::EMPTY:return null;
             case T::BOOLEAN: return boolval($this->value);
