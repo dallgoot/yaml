@@ -2,6 +2,7 @@
 namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml\Types as T;
+
 /**
  * the return Object representing a YAML file content
  */

@@ -1,4 +1,11 @@
-engines:
+version: "2"
+checks:
+    return-statements:
+      enabled: false
+    method-complexity:
+      config:
+        threshold: 10
+plugins:
   # ... CONFIG CONTENT ...
   phpcodesniffer:
     enabled: true
@@ -14,9 +21,16 @@ engines:
         enabled: false
 # ... CONFIG CONTENT ...plugins:
   phpcodesniffer:
-    enabled: true
+    enabled: 
+    checks:
+      PSR2 ControlStructures SwitchDeclaration BreakNotNewLine:
+        enabled: false
   phpmd:
     enabled: true
+        # ... CONFIG CONTENT ...
+    checks:
+      Controversial/CamelCasePropertyName:
+        enabled: false
   phan:
     enabled: true
     config:
