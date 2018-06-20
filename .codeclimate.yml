@@ -13,6 +13,14 @@ plugins:
   phpcodesniffer:
     enabled: true
     checks:
+      Generic Files LineLength TooLong:
+        enabled: false
+      Generic NamingConventions UpperCaseConstantName ClassConstantNotUpperCase:
+        enabled: false
+      Generic ControlStructures InlineControlStructure NotAllowed:
+        enabled: false
+      Generic Formatting DisallowMultipleStatements SameLine:
+        enabled: false
       PSR2 Methods MethodDeclaration Underscore:
         enabled: false
       PSR2 Classes PropertyDeclaration Underscore:
@@ -24,12 +32,6 @@ plugins:
       PSR2 ControlStructures SwitchDeclaration BodyOnNextLineDEFAULT:
         enabled: false
       PSR2 ControlStructures SwitchDeclaration BreakIndent:
-        enabled: false
-      Generic NamingConventions UpperCaseConstantName ClassConstantNotUpperCase:
-        enabled: false
-      Generic Formatting DisallowMultipleStatements SameLine:
-        enabled: false
-      Generic ControlStructures InlineControlStructure NotAllowed:
         enabled: false
       Squiz WhiteSpace ScopeClosingBrace ContentBefore:
         enabled: false
