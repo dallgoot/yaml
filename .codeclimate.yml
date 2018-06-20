@@ -19,15 +19,8 @@ plugins:
         enabled: false
       PSR2 ControlStructures SwitchDeclaration BodyOnNextLineCASE:
         enabled: false
-# ... CONFIG CONTENT ...plugins:
-  phpcodesniffer:
-    enabled: true
-    checks:
-      PSR2 ControlStructures SwitchDeclaration BreakNotNewLine:
-        enabled: false
   phpmd:
     enabled: true
-        # ... CONFIG CONTENT ...
     checks:
       Controversial/CamelCasePropertyName:
         enabled: false
