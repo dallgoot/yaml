@@ -1,6 +1,8 @@
 <?php
 namespace Dallgoot\Yaml;
+
 use Dallgoot\Yaml\Types as T;
+
 /**
 * 
 */
@@ -27,11 +29,11 @@ class Node
     private const mapForSequence = "(?P<map>{\s*(?:".self::yamlAN."\s*:\s*(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+})";
     private const yamlSequence = "(?P<seq>\[(?:(?:".self::yamlSimpleValue."|".self::mapForSequence."|(?P>seq)),?\s*)+\])";
 
-    public function __construct($nodeString=null, $line=null)
+    public function __construct($nodeString = null, $line = null)
     {
         // echo self::yamlSequence;exit();
         $this->line = $line;
-        if(is_null($nodeString)){
+        if(is_null($nodeString)) {
             $this->type = T::ROOT;
         }else{
             $this->parse($nodeString);
@@ -43,7 +45,7 @@ class Node
         return $this;
     }
 
-    public function getParent($indent=null):Node
+    public function getParent($indent = null):Node
     {   
         if (is_null($indent)) {
              return $this->_parent ?? $this; 
@@ -62,16 +64,16 @@ class Node
         if (is_null($current)) {
             $this->value = $child;
             return;
-        }elseif ($current instanceof Node){
+        } elseif ($current instanceof Node){
             if ($current->type === T::EMPTY) {
                 $this->value = $child;
                 return;
-            }else{
+            } else {
                 $this->value = new \SplQueue();
                 $this->value->enqueue($current);
                 $this->value->enqueue($child);
             }
-        }elseif ($current instanceof \SplQueue) {
+        } elseif ($current instanceof \SplQueue) {
             $this->value->enqueue($child);
         }
         //modify type according to child
@@ -99,26 +101,26 @@ class Node
     {
         //permissive to tabs but replacement before processing
         $nodeValue = preg_replace("/\t/m", " ", $nodeString);
-        $this->indent = strspn($nodeValue , ' ');
+        $this->indent = strspn($nodeValue, ' ');
         $nodeValue = ltrim($nodeValue);
         if ($nodeValue === '') {
             $this->type = T::EMPTY;
             $this->indent = 0;
-        }elseif (substr($nodeValue, 0, 3) === '...'){//TODO: can have something after?
+        }elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something after?
             $this->type = T::DOC_END;
         }elseif (preg_match('/^([[:alpha:]][[:alpha:]-_ ]*[\s\t]*):([\s\t].*)?/', $nodeValue, $matches)) {
-            $this->type = T::KEY; 
+            $this->type = T::KEY;
             $this->name = trim($matches[1]);
-            if(isset($matches[2]) && !empty(trim($matches[2]))) {
+            if (isset($matches[2]) && !empty(trim($matches[2]))) {
                 $n = new Node(trim($matches[2]), $this->line);
-            }else{
+            } else {
                 $n = new Node();
                 $n->type = T::EMPTY;
             }
             $n->indent = $this->indent + strlen($this->name);
             $n->setParent($this);
             $this->value = $n;
-        }else{//NOTE: can be of another type according to parent
+        } else {//NOTE: can be of another type according to parent
             list($this->type, $this->value) = $this->_define($nodeValue);
         }
         return $this;
@@ -140,7 +142,7 @@ class Node
             case "&": 
             case "*":// TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
                     switch ($nodeValue[0]) {
-                        case '!': $type = T::TAG;break; 
+                        case '!': $type = T::TAG;break;
                         case '&': $type = T::REF_DEF;break;
                         case '*': $type = T::REF_CALL;break;
                     }
@@ -148,7 +150,7 @@ class Node
                     if (is_bool($pos)) {
                         $this->name = $v;
                         return [$type, null];
-                    }else{
+                    } else {
                         $this->name = strstr($v, ' ', true);
                         $n = new Node(trim(substr($nodeValue, $pos+1)), $this->line);
                         return [$type, $n->setParent($this)];
@@ -169,7 +171,7 @@ class Node
                 return [T::PARTIAL, $nodeValue]; 
             case "-":
                 if(substr($nodeValue, 0, 3) === '---') return [T::DOC_START, new Node(trim(substr($nodeValue, 3)))];
-                if (preg_match('/^-([\s\t]+(.*))?$/', $nodeValue, $matches)){
+                if (preg_match('/^-([\s\t]+(.*))?$/', $nodeValue, $matches)) {
                     if (isset($matches[1])) {
                         $n = new Node(trim($matches[1]), $this->line);
                         return [T::ITEM, $n->setParent($this)];
@@ -181,7 +183,8 @@ class Node
         }
     }
 
-    public function __debugInfo() {
+    public function __debugInfo()
+    {
         $out = ['line'=>$this->line,
                 'indent'=>$this->indent,
                 'type' => T::getName($this->type),
@@ -195,15 +198,21 @@ class Node
         return ["value"];
     }
 
+    /**
+     * Determines if quoted.
+     *
+     * @param      string   $candidate  The candidate
+     * @return     boolean  True if quoted, False otherwise.
+     */
     public function isQuoted(string $candidate)
-    {// check Node value to see if properly enclosed
+    {
         return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $candidate);
     }
 
     public function isValidJSON(string $candidate)
     {
         json_decode($candidate);
-        return json_last_error() === JSON_ERROR_NONE; 
+        return json_last_error() === JSON_ERROR_NONE;
     }
 
     public function isValidSequence(string $candidate)
@@ -218,10 +227,8 @@ class Node
 
     public function getPhpValue()
     {
+        if (is_null($this->value)) return null;
         switch ($this->type) {
-            // case T::LITTERAL:;
-            // case T::LITTERAL_FOLDED:;
-            // case T::NULL: 
             case T::EMPTY:return null;
             case T::BOOLEAN: return boolval($this->value);
             case T::NUMBER: return intval($this->value);
@@ -230,17 +237,16 @@ class Node
             case T::REF_DEF:
             case T::REF_CALL:
             case T::TAG:;
-            case T::COMMENT:
+            case T::COMMENT: //fall through
             case T::STRING: return strval($this->value);
 
             case T::MAPPING_SHORT://TODO
             //TODO : that's not robust enough, improve it
-            case T::SEQUENCE_SHORT: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1,-1)));
+            case T::SEQUENCE_SHORT: return array_map(function($v){return trim($v);}, explode(",", substr($this->value, 1, -1)));
             
             case T::DIRECTIVE:
             case T::DOC_START:
-            // case T::DOCUMENT:
-            case T::KEY:; 
+            // case T::KEY://fall through
             case T::ITEM:return $this->value->getPhpValue();
 
             case T::DOC_END: return;

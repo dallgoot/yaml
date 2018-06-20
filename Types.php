@@ -1,10 +1,12 @@
 <?php
 namespace Dallgoot\Yaml;
-class Types{
+
+class Types
+{
     const DIRECTIVE  = 0;
     const DOC_START = 1;
     const DOC_END = 2;
-    // const DOCUMENT = 4;
+
     const COMMENT = 8;
     const EMPTY   = 16;
     const ROOT    = 32;
@@ -22,7 +24,6 @@ class Types{
     const LITTERAL = 72;
     const LITTERAL_FOLDED = 82;
 
-    // const NULL    = 92;
     const STRING    = 102;
     const BOOLEAN = 112;
     const NUMBER  = 122;
@@ -34,7 +35,6 @@ class Types{
     const REF_CALL = 164;
     public static $NOTBUILDABLE = [self::DIRECTIVE,
                                     self::ROOT,
-                                    // self::DOC_START,
                                     self::DOC_END,
                                     self::COMMENT,
                                     self::EMPTY,

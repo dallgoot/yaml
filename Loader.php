@@ -1,5 +1,6 @@
 <?php
 namespace Dallgoot\Yaml;
+
 use Dallgoot\Yaml\Node as Node;
 use Dallgoot\Yaml\Types as T;
 use Dallgoot\Yaml\YamObject;
@@ -173,13 +174,13 @@ class Loader
                                 $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($type), $line, $this->filePath));
                             }
                             return;
-            case T::ITEM : if ($value instanceof Node && $value->type === T::KEY) {
+            case T::ITEM: if ($value instanceof Node && $value->type === T::KEY) {
                                 $parent[$value->name] = $this->_build($value, $root, $parent[$value->name]);
                             }else{
                                 $c = count($parent);
                                 $parent[$c] = $this->_build($value, $root, $parent[$c]);
                             }
-                            return;
+                         return;
             case T::DIRECTIVE: return;//TODO
             case T::TAG:  return;//TODO
             case T::COMMENT: $root->addComment($line, $value); return;
@@ -272,9 +273,9 @@ class Loader
 
     private function _removeUnbuildable(\SplQueue $children) {
         $out = new \SplQueue;
-        for ($children->rewind();  $children->valid(); $children->next()) { 
-            if(!in_array($children->current()->type, T::$NOTBUILDABLE)){
-                $out->enqueue($children->current());
+        foreach ($children as $key => $child) {
+            if(!in_array($child->type, T::$NOTBUILDABLE)){
+                $out->enqueue($child);
             } 
         }
         $out->rewind();

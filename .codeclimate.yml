@@ -17,10 +17,26 @@ plugins:
         enabled: false
       PSR2 ControlStructures SwitchDeclaration BodyOnNextLineCASE:
         enabled: false
+      PSR2 ControlStructures SwitchDeclaration BodyOnNextLineDEFAULT:
+        enabled: false
+      PSR2 ControlStructures SwitchDeclaration BreakIndent:
+        enabled: false
+      Generic NamingConventions UpperCaseConstantName ClassConstantNotUpperCase:
+        enabled: false
+      Generic Formatting DisallowMultipleStatements SameLine:
+        enabled: false
+      Generic ControlStructures InlineControlStructure NotAllowed:
+        enabled: false
+      Squiz WhiteSpace ScopeClosingBrace ContentBefore:
+        enabled: false
+      Squiz Functions MultiLineFunctionDeclaration ContentAfterBrace:
+        enabled: false
   phpmd:
     enabled: true
     checks:
       Controversial/CamelCasePropertyName:
+        enabled: false
+      Naming/ShortVariable:
         enabled: false
   phan:
     enabled: true

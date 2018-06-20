@@ -12,7 +12,7 @@ class API
     private $_comments   = [];
     private $_documents  = [];
 
-    public  $type = T::MAPPING;
+    public $type = T::MAPPING;
 
     const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";
 
@@ -21,7 +21,6 @@ class API
     */
     public function __construct()
     {
-        // $this->_references = $objectTemplate->_ 
     }
 
     /**
@@ -36,7 +35,7 @@ class API
     public function addReference($line, $name, $value)
     {
         if (is_null($name)) {
-            throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $referenceName), 1);
+            throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name), 1);
         }
         $this->_references[$name] = $value;
     }
@@ -64,7 +63,7 @@ class API
         if (array_key_exists($lineNumber, $this->_comments)) {
             return $this->_comments[$lineNumber];
         }
-        return $this->_comments;   
+        return $this->_comments;
     }
 
     public function getDocument($identifier = null)
