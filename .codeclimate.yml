@@ -1,4 +1,8 @@
 version: "2"
+exclude_patterns:
+  - "references/"
+  - "vendor"
+  - "*.yml"
 checks:
     return-statements:
       enabled: false
