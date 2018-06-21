@@ -81,7 +81,7 @@ class Loader
                 }
                 continue;
             }
-            if($n->type === T::EMPTY) {
+            if ($n->type === T::EMPTY) {
                 if (in_array($deepest->type, T::$LITTERALS)) {
                     $emptyLines[] = $n->setParent($deepest);
                 } elseif ($previous->type === T::STRING) {
@@ -148,7 +148,7 @@ class Loader
         $type  = property_exists($node, "type") ? $node->type : $parent->type;
         if (is_object($parent) && $parent instanceof YamlObject) {
                 $p = $parent;
-        }else{
+        } else {
             switch ($type) {
                 case T::MAPPING:  $p = new \StdClass();break;
                 case T::SEQUENCE: $p = [];break;

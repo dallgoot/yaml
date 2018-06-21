@@ -33,6 +33,8 @@ plugins:
         enabled: false
       PSR2 ControlStructures SwitchDeclaration BreakIndent:
         enabled: false
+      PSR2 ControlStructures SwitchDeclaration TerminatingComment:
+        enabled: false
       Squiz WhiteSpace ScopeClosingBrace ContentBefore:
         enabled: false
       Squiz Functions MultiLineFunctionDeclaration ContentAfterBrace:

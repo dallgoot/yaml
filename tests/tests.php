@@ -10,7 +10,7 @@ $files = array_diff(scandir($folder), ['..', '.']);
 
 $yamlLoader = new Loader(null, Loader::EXCEPTIONS_PARSING, 0);
 
-try{
+try {
     foreach ($files as $key => $fileName) {
         echo "\n\033[32m$fileName\033[0m";
         $result = $yamlLoader->load($folder.$fileName)->parse();

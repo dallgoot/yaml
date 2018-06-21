@@ -138,20 +138,20 @@ class Node
             case '!':
             case "&":
             case "*":// TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
-                    switch ($nodeValue[0]) {
-                        case '!': $type = T::TAG;break;
-                        case '&': $type = T::REF_DEF;break;
-                        case '*': $type = T::REF_CALL;break;
-                    }
-                    $pos = strpos($v, ' ');
-                    if (is_bool($pos)) {
-                        $this->name = $v;
-                        return [$type, null];
-                    } else {
-                        $this->name = strstr($v, ' ', true);
-                        $n = new Node(trim(substr($nodeValue, $pos+1)), $this->line);
-                        return [$type, $n->setParent($this)];
-                    }
+                switch ($nodeValue[0]) {
+                    case '!': $type = T::TAG;break;
+                    case '&': $type = T::REF_DEF;break;
+                    case '*': $type = T::REF_CALL;break;
+                }
+                $pos = strpos($v, ' ');
+                if (is_bool($pos)) {
+                    $this->name = $v;
+                    return [$type, null];
+                } else {
+                    $this->name = strstr($v, ' ', true);
+                    $n = new Node(trim(substr($nodeValue, $pos+1)), $this->line);
+                    return [$type, $n->setParent($this)];
+                }
             case '>': return [T::LITTERAL_FOLDED, null];
             case '|': return [T::LITTERAL, null];
             //TODO: complex mapping
