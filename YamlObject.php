@@ -9,8 +9,7 @@ use Dallgoot\Yaml\API as API;
 class YamlObject extends \ArrayIterator
 {
     private $__yaml__object__api;
-    // public $value;
-    // private $_locked;
+
     private const UNDEFINED_METHOD = self::class.": undefined method '%s' ! valid methods are %s";
 
     public function __construct()
@@ -33,19 +32,6 @@ class YamlObject extends \ArrayIterator
 
     public function __toString()
     {
-        if (!is_string($this->value)) {
-            return serialize($this);
-        }
-        return $this->value;
-    }
-
-    public function lock()
-    {
-        $this->_locked = true;
-    }
-
-    private function setText($value)
-    {
-        # code...
+        return $this->__yaml__object__api->value ?? serialize($this);
     }
 }

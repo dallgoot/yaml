@@ -9,6 +9,10 @@ checks:
     method-complexity:
       config:
         threshold: 15
+    file-lines:
+      config:
+        threshold: 300
+
 plugins:
   phpcodesniffer:
     enabled: true

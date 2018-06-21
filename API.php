@@ -14,9 +14,10 @@ class API
     private $_documents  = [];
 
     public $type = T::MAPPING;
+    public $value = null;
 
     const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";
-    const NULL_REFERENCE    = self::class.": reference MUST have a name";
+    const UNAMED_REFERENCE    = self::class.": reference MUST have a name";
 
     public function __construct()
     {
@@ -33,17 +34,17 @@ class API
     public function addReference($name, $value)
     {
         if (is_null($name) || empty($name)) {
-            throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name), 1);
+            throw new \UnexpectedValueException(self::UNAMED_REFERENCE, 1);
         }
         $this->_references[$name] = $value;
     }
 
-    public function &getReference($referenceName)
+    public function &getReference($name)
     {
-        if (array_key_exists($referenceName, $this->_references)) {
-            return $this->_references[$referenceName];
+        if (array_key_exists($name, $this->_references)) {
+            return $this->_references[$name];
         }
-        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $referenceName), 1);
+        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name), 1);
     }
 
     public function getAllReferences()
@@ -72,8 +73,13 @@ class API
         return count($this->_documents)===1 ? $this->_documents[0] : $this->_documents;
     }
 
-    public function setText($string)
+    public function lock()
     {
-        $this->value = $string;
+        $this->locked = true;
+    }
+
+    private function setText($value)
+    {
+        $this->value .= PHP_EOL.$value;
     }
 }

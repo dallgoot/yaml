@@ -8,17 +8,18 @@ use Dallgoot\Yaml\YamObject;
 class Loader
 {
     public $errors = [];
-    private $_content;
-    private $filePath;
-    private $_debug   = 0;//TODO: determine levels
-    private $_options = 0;
     //options
     public const EXCLUDE_DIRECTIVES = 0001;//DONT include_directive
     public const IGNORE_COMMENTS    = 0010;//DONT include_comments
     public const EXCEPTIONS_PARSING = 0100;//THROW Exception on parsing Errors
     public const NO_OBJECT_FOR_DATE = 1000;//DONT import date strings as dateTime Object
+    //
+    private $_content;
+    private $filePath;
+    private $_debug   = 0;//TODO: determine levels
+    private $_options = 0;
     //Errors
-    const ERROR_NO_NAME    = self::class.": in MAPPING %s has NO NAME on line %d for '%s'";
+    const ERROR_NO_KEYNAME = self::class.": key has NO NAME on line %d";
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
     //Exceptions
     const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
@@ -169,40 +170,34 @@ class Loader
         $value = $node->value;
         $type  = $node->type;
         switch ($type) {
-            case T::KEY: $this->_buildKey($value, $name, $type, $line, $root, $parent);
-                        return;
-            case T::ITEM: $this->_buildItem($value, $root, $parent);
-                        return;
+            case T::KEY:  $this->_buildKey($node, $root, $parent);return;
+            case T::ITEM: $this->_buildItem($value, $root, $parent);return;
             case T::DIRECTIVE: return;//TODO
             case T::TAG:  return;//TODO
             case T::COMMENT: $root->addComment($line, $value); return;
             case T::REF_DEF:
             case T::REF_CALL:
                 $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
-                $type === T::REF_DEF && $root->addReference($line, $name, $tmp);
+                if ($type === T::REF_DEF) $root->addReference($line, $name, $tmp);
                 return $root->getReference($name);
             default:
                 return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
         }
     }
 
-    private function _buildKey($value, $name, $type, $line, $root, &$parent)
+    private function _buildKey($node, $root, &$parent)
     {
-        if (is_null($name)) {
-            $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($type), $line, $this->filePath));
+        if (is_null($node->name)) {
+            $this->_error(sprintf(self::ERROR_NO_KEYNAME, $node->line, $this->filePath));
         } else {
-            $parent->{$name} = $this->_build($value, $root, $parent->{$name});
+            $parent->{$node->name} = $this->_build($node->value, $root, $parent->{$node->name});
         }
     }
 
     private function _buildItem($value, $root, &$parent)
     {
-        if ($value instanceof Node && $value->type === T::KEY) {
-            $parent[$value->name] = $this->_build($value, $root, $parent[$value->name]);
-        } else {
-            $c = count($parent);
-            $parent[$c] = $this->_build($value, $root, $parent[$c]);
-        }
+        $index = ($value instanceof Node && $value->type === T::KEY) ? $value->name : count($parent);
+        $parent[$index] = $this->_build($value, $root, $parent[$index]);
     }
 
     /**
@@ -212,12 +207,12 @@ class Loader
      *
      * @return     array  representing the total of documents in the file.
      */
-    private function _buildFile(Node $node)
+    private function _buildFile(Node $root)
     {
         $totalDocStart = 0;
         $documents = [];
-        $node->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE);
-        foreach ($node->value as $key => $child) {
+        $root->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE);
+        foreach ($root->value as $key => $child) {
             if ($child->type === T::DOC_START) {
                 $totalDocStart++;
             }
@@ -228,25 +223,26 @@ class Loader
             $documents[$currentDoc]->enqueue($child);
         }
         $this->_debug >= 2 && var_dump($documents);
-        $results = [];
-        foreach ($documents as $key => $children) {
-            $doc = new YamlObject();
-            $childTypes = $this->_getChildrenTypes($children);
-            $isMapping  = count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0;
-            $isSequence = in_array(T::ITEM, $childTypes);
-            if ($isMapping && $isSequence) {
-                $this->_error(sprintf(self::INVALID_DOCUMENT, $key));
-            } elseif ($isSequence) {
-                $children->type = T::SEQUENCE;
-                // $doc->setFlags(\ArrayObject::ARRAY_AS_PROPS);
-            } else {
-                $children->type = T::MAPPING;
-                $doc->setFlags(\ArrayObject::STD_PROP_LIST);
-            }
-            $this->_debug >= 3 && var_dump($doc, $children);
-            $results[] = $this->_build($children, $doc, $doc);
+        return array_map([$this, '_buildDocument'], $documents);
+    }
+
+    private function _buildDocument(\SplQueue $queue)
+    {
+        $doc = new YamlObject();
+        $childTypes = $this->_getChildrenTypes($queue);
+        $isMapping  = count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0;
+        $isSequence = in_array(T::ITEM, $childTypes);
+        if ($isMapping && $isSequence) {
+            $this->_error(sprintf(self::INVALID_DOCUMENT, $key));
+        } elseif ($isSequence) {
+            $queue->type = T::SEQUENCE;
+            // $doc->setFlags(\ArrayObject::ARRAY_AS_PROPS);
+        } else {
+            $queue->type = T::MAPPING;
+            $doc->setFlags(\ArrayObject::STD_PROP_LIST);
         }
-        return $results;
+        $this->_debug >= 3 && var_dump($doc, $queue);
+        return $this->_build($queue, $doc, $doc);
     }
 
     private function _litteral(\SplQueue $children, $type):string
@@ -286,7 +282,8 @@ class Loader
 
     public function _error($message)
     {
-        if ($this->_options & self::EXCEPTIONS_PARSING) throw new \ParseError($message, 1);
+        if ($this->_options & self::EXCEPTIONS_PARSING)
+            throw new \ParseError($message." for '$this->filePath'", 1);
         $this->errors[] = $message;
     }
 }
