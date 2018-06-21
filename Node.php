@@ -3,15 +3,12 @@ namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml\Types as T;
 
-/**
-* 
-*/
 class Node
 {
     public $indent = -1;
     public $line;
     public $type;
-    public $value;
+    public $value;//can be Scalar, Node or SplQueue
     private $_parent;
 
     private const yamlNull  = "null";
@@ -46,9 +43,9 @@ class Node
     }
 
     public function getParent($indent = null):Node
-    {   
+    {
         if (is_null($indent)) {
-             return $this->_parent ?? $this; 
+             return $this->_parent ?? $this;
         }
         $cursor = $this;
         while ($cursor->indent >= $indent) {
@@ -64,7 +61,7 @@ class Node
         if (is_null($current)) {
             $this->value = $child;
             return;
-        } elseif ($current instanceof Node){
+        } elseif ($current instanceof Node) {
             if ($current->type === T::EMPTY) {
                 $this->value = $child;
                 return;
@@ -77,10 +74,10 @@ class Node
             $this->value->enqueue($child);
         }
         //modify type according to child
-        if ($this->value instanceof \SplQueue) {
+        if ($this->value instanceof \SplQueue && !property_exists($this->value, "type")) {
             switch ($child->type) {
-                case T::KEY:  $this->value->type = T::MAPPING;break;
-                case T::ITEM: $this->value->type = T::SEQUENCE;break;
+                case T::KEY:    $this->value->type = T::MAPPING;break;
+                case T::ITEM:   $this->value->type = T::SEQUENCE;break;
                 case T::STRING: $this->value->type = $this->type;break;
             }
         }
@@ -106,9 +103,9 @@ class Node
         if ($nodeValue === '') {
             $this->type = T::EMPTY;
             $this->indent = 0;
-        }elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something after?
+        } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something after?
             $this->type = T::DOC_END;
-        }elseif (preg_match('/^([[:alpha:]][[:alpha:]-_ ]*[\s\t]*):([\s\t].*)?/', $nodeValue, $matches)) {
+        } elseif (preg_match('/^([[:alpha:]][[:alpha:]-_ ]*[\s\t]*):([\s\t].*)?/', $nodeValue, $matches)) {
             $this->type = T::KEY;
             $this->name = trim($matches[1]);
             if (isset($matches[2]) && !empty(trim($matches[2]))) {
@@ -138,8 +135,8 @@ class Node
         switch ($nodeValue[0]) {
             case '%': return [T::DIRECTIVE, $v];
             case '#': return [T::COMMENT, $v];
-            case '!': 
-            case "&": 
+            case '!':
+            case "&":
             case "*":// TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
                     switch ($nodeValue[0]) {
                         case '!': $type = T::TAG;break;
@@ -165,12 +162,12 @@ class Node
                 return $this->isQuoted($nodeValue) ? [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
             case "{":
             case "[":
-                if($this->isValidJSON($nodeValue))     return [T::JSON, $nodeValue];
-                if($this->isValidMapping($nodeValue))  return [T::MAPPING_SHORT, $nodeValue];
-                if($this->isValidSequence($nodeValue)) return [T::SEQUENCE_SHORT, $nodeValue];
-                return [T::PARTIAL, $nodeValue]; 
+                if ($this->isValidJSON($nodeValue))     return [T::JSON, $nodeValue];
+                if ($this->isValidMapping($nodeValue))  return [T::MAPPING_SHORT, $nodeValue];
+                if ($this->isValidSequence($nodeValue)) return [T::SEQUENCE_SHORT, $nodeValue];
+                return [T::PARTIAL, $nodeValue];
             case "-":
-                if(substr($nodeValue, 0, 3) === '---') return [T::DOC_START, new Node(trim(substr($nodeValue, 3)))];
+                if (substr($nodeValue, 0, 3) === '---') return [T::DOC_START, new Node(trim(substr($nodeValue, 3)))];
                 if (preg_match('/^-([\s\t]+(.*))?$/', $nodeValue, $matches)) {
                     if (isset($matches[1])) {
                         $n = new Node(trim($matches[1]), $this->line);
@@ -242,9 +239,9 @@ class Node
 
             case T::MAPPING_SHORT://TODO
             //TODO : that's not robust enough, improve it
-            case T::SEQUENCE_SHORT: 
+            case T::SEQUENCE_SHORT:
                 return array_map("trim", explode(",", substr($this->value, 1, -1)));
-            
+
             case T::DIRECTIVE://fall through
             case T::DOC_START://fall through
             // case T::KEY://fall through

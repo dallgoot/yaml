@@ -1,4 +1,4 @@
-<?php 
+<?php
 $references = [
 'Example 2.1.yml'  => '["Mark McGwire","Sammy Sosa","Ken Griffey"]',
 'Example 2.10.yml' => '',
@@ -27,5 +27,5 @@ $references = [
 'Example 2.6.yml'  => '',
 'Example 2.7.yml'  => '',
 'Example 2.8.yml'  => '',
-'Example 2.9.yml'  => '' 
+'Example 2.9.yml'  => ''
 ];

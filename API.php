@@ -5,6 +5,7 @@ use Dallgoot\Yaml\Types as T;
 
 /**
  * the return Object representing a YAML file content
+ *  consider dumping datetime as date strings according to a format provided by user or default
  */
 class API
 {
@@ -16,9 +17,6 @@ class API
 
     const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";
 
-    /*
-     *consider dumping datetime as date strings according to a format provided by user or default
-    */
     public function __construct()
     {
     }
@@ -26,13 +24,13 @@ class API
     /**
      * Adds a reference.  //TODO : what use for $line ???
      *
-     * @param      <int>                     $line   The line
-     * @param      <string>                     $name   The name
-     * @param      <string>                     $value  The value
+     * @param      <int>    $line   The line
+     * @param      <string>     $name   The name
+     * @param      <string>     $value  The value
      *
      * @throws     \UnexpectedValueException  (description)
      */
-    public function addReference($line, $name, $value)
+    public function addReference($name, $value)
     {
         if (is_null($name)) {
             throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name), 1);

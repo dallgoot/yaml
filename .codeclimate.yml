@@ -48,3 +48,8 @@ plugins:
     enabled: true
     config:
       file_extensions: "php"
+    checks:
+        PhanUndeclaredMethod:
+          enabled: false
+        PhanUndeclaredProperty:
+          enabled: false

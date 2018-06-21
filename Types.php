@@ -11,7 +11,7 @@ class Types
     const EMPTY   = 16;
     const ROOT    = 32;
 
-    const KEY = 42; 
+    const KEY = 42;
     const ITEM = 52;
 
     const MAPPING  = 43;
@@ -29,7 +29,7 @@ class Types
     const NUMBER  = 122;
     const TAG = 132;
     const JSON = 142;
-    
+
     const QUOTED = 148;
     const REF_DEF = 152;
     const REF_CALL = 164;
@@ -45,7 +45,7 @@ class Types
     {
         // self::test = 3;
     }
-    
+
     public static function getName($constant)
     {
         return array_flip((new \ReflectionClass(self::class))->getConstants())[$constant];

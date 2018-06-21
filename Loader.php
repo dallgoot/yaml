@@ -24,8 +24,9 @@ class Loader
     const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
     const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
 
-    public function __construct($absolutePath = null, $options = null, $debug = 0) {
-        $this->_debug = is_int($debug) ? min($debug, 3) : 1; 
+    public function __construct($absolutePath = null, $options = null, $debug = 0)
+    {
+        $this->_debug = is_int($debug) ? min($debug, 3) : 1;
         if (!is_null($options)) {
             $this->options = $options;
         }
@@ -34,7 +35,8 @@ class Loader
         }
     }
 
-    public function load(String $absolutePath):Loader {
+    public function load(String $absolutePath):Loader
+    {
         $this->_debug && var_dump($absolutePath);
         $this->filePath = $absolutePath;
         if (!file_exists($absolutePath)) {
@@ -52,7 +54,8 @@ class Loader
         return $this;
     }
 
-    public function parse($strContent = null) {
+    public function parse($strContent = null)
+    {
         $source = $strContent ? preg_split("/([^\n\r]+)/um", $strContent, null, PREG_SPLIT_DELIM_CAPTURE)
                                 : $this->_content;
         //TODO : be more permissive on $strContent values
@@ -70,7 +73,7 @@ class Loader
             $deepest = $previous->getDeepestNode();
             if (in_array($n->type, T::$LITTERALS)) {
                 $deepestParent = $deepest->getParent();
-                if ($deepest->type === T::EMPTY && 
+                if ($deepest->type === T::EMPTY &&
                     $deepestParent->type === T::KEY) {
                     $deepestParent->value = $n;
                 } else {
@@ -80,14 +83,12 @@ class Loader
             }
             if($n->type === T::EMPTY) {
                 if (in_array($deepest->type, T::$LITTERALS)) {
-                    $n->setParent($deepest);
-                    $emptyLines[] = $n;
+                    $emptyLines[] = $n->setParent($deepest);
                 } elseif ($previous->type === T::STRING) {
-                    $n->setParent($previous->getParent());
-                    $emptyLines[] = $n;
+                    $emptyLines[] = $n->setParent($previous->getParent());
                 }
                 continue;
-            }else{
+            } else {
                 foreach ($emptyLines as $key => $node) {
                     $node->getParent()->add($node);
                 }
@@ -96,8 +97,7 @@ class Loader
             if ($deepest->type === T::PARTIAL) {
                 $newValue = new Node($deepest->value.$lineString, $n->line);
                 $mother = $deepest->getParent();
-                $newValue->setParent($mother); 
-                $mother->value = $newValue; 
+                $mother->value = $newValue->setParent($mother);
             } else {
                 if ($n->indent === 0) {
                     $parent = $root;
@@ -137,63 +137,72 @@ class Loader
         return $out;
     }
 
-    private function _build(object $node, $root = null, &$parent = null) {
+    private function _build(object $node, $root = null, &$parent = null)
+    {
+        $method = $node instanceof \SplQueue ? "_buildQueue" : "_buildNode";
+        return $this->{$method}($node, $root, $parent);
+    }
+
+    private function _buildQueue($node, $root, &$parent)
+    {
+        $type  = property_exists($node, "type") ? $node->type : $parent->type;
+        if (is_object($parent) && $parent instanceof YamlObject) {
+                $p = $parent;
+        }else{
+            switch ($type) {
+                case T::MAPPING:  $p = new \StdClass();break;
+                case T::SEQUENCE: $p = [];break;
+                case T::LITTERAL:
+                case T::LITTERAL_FOLDED: return $this->_litteral($node, $type);break;
+            }
+        }
+        foreach ($node as $key => $child) {
+            $this->_build($child, $root, $p);
+        }
+        return $p;
+    }
+
+    private function _buildNode($node, $root, &$parent)
+    {
         $line  = property_exists($node, "line") ? $node->line : null;
         $name  = property_exists($node, "name") ? $node->name : null;
-        $value = $node instanceof \SplQueue ? $node : $node->value;
-        if ($node instanceof \SplQueue) {
-            if (is_object($parent) && $parent instanceof YamlObject) {
-                $p = $parent;
-            }else{
-                if (!property_exists($node, "type")) {
-                    $type = $parent->type;
-                } else {
-                    $type  = $node->type;
-                }
-                switch ($type) {
-                    case T::MAPPING:  $p = new \StdClass();break;
-                    case T::SEQUENCE: $p = [];break;
-                    case T::LITTERAL:  
-                    case T::LITTERAL_FOLDED: return $this->_litteral($value, $type);break;
-                }
-            }
-            foreach ($value as $key => $child) {
-                $this->_build($child, $root, $p);
-            }
-            if (!is_null($name) && is_object($parent)) {
-                $parent->{$name} = $p;
-            }
-            return $p;
-        }
+        $value = $node->value;
         $type  = $node->type;
         switch ($type) {
-            case T::SEQUENCE:
-            case T::KEY: if (!is_null($name)) {
-                                $parent->{$name} = $this->_build($value, $root, $parent->{$name});
-                            }else{
-                                $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($type), $line, $this->filePath));
-                            }
-                            return;
-            case T::ITEM: if ($value instanceof Node && $value->type === T::KEY) {
-                                $parent[$value->name] = $this->_build($value, $root, $parent[$value->name]);
-                            }else{
-                                $c = count($parent);
-                                $parent[$c] = $this->_build($value, $root, $parent[$c]);
-                            }
-                         return;
+            case T::KEY: $this->_buildKey($value, $name, $type, $line, $root, $parent);
+                        return;
+            case T::ITEM: $this->_buildItem($value, $root, $parent);
+                        return;
             case T::DIRECTIVE: return;//TODO
             case T::TAG:  return;//TODO
             case T::COMMENT: $root->addComment($line, $value); return;
-            case T::REF_DEF: 
-                            $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
-                            $root->addReference($line, $name, $tmp); 
-                            return $tmp;
-            case T::REF_CALL: 
+            case T::REF_DEF:
+            case T::REF_CALL:
                 $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
+                $type === T::REF_DEF && $root->addReference($line, $name, $tmp);
                 return $root->getReference($name);
-            default: 
+            default:
                 return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
-        }   
+        }
+    }
+
+    private function _buildKey($value, $name, $type, $line, $root, &$parent)
+    {
+        if (is_null($name)) {
+            $this->_error(sprintf(self::ERROR_NO_NAME, T::getName($type), $line, $this->filePath));
+        } else {
+            $parent->{$name} = $this->_build($value, $root, $parent->{$name});
+        }
+    }
+
+    private function _buildItem($value, $root, &$parent)
+    {
+        if ($value instanceof Node && $value->type === T::KEY) {
+            $parent[$value->name] = $this->_build($value, $root, $parent[$value->name]);
+        } else {
+            $c = count($parent);
+            $parent[$c] = $this->_build($value, $root, $parent[$c]);
+        }
     }
 
     /**
@@ -207,15 +216,15 @@ class Loader
     {
         $totalDocStart = 0;
         $documents = [];
-        $node->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE); 
+        $node->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE);
         foreach ($node->value as $key => $child) {
             if ($child->type === T::DOC_START) {
                 $totalDocStart++;
             }
             //if 0 or 1 DOC_START = we are still in first document
-            $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0; 
+            $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0;
             if (!array_key_exists($currentDoc, $documents))
-                $documents[$currentDoc] = new \SplQueue();                
+                $documents[$currentDoc] = new \SplQueue();
             $documents[$currentDoc]->enqueue($child);
         }
         $this->_debug >= 2 && var_dump($documents);
@@ -235,26 +244,9 @@ class Loader
                 $doc->setFlags(\ArrayObject::STD_PROP_LIST);
             }
             $this->_debug >= 3 && var_dump($doc, $children);
-            $results[] = $this->_buildRoot($doc, $children);
+            $results[] = $this->_build($children, $doc, $doc);
         }
         return $results;
-    }
-
-    public function _buildRoot($root, $children)
-    {
-        if (!($root instanceof YamlObject)) {
-            $this->_error('NOT A YamlObject!!!');
-        }else{
-            // $root->value ='';
-            // foreach ($children as $key => $child) {
-            //     $build = $this->_build($child, $root, $root);
-            //     if(is_string($build)){
-            //         $root->setText($build);
-            //     }
-            // }
-            // return $root;
-            return $this->_build($children, $root, $root);
-        }
     }
 
     private function _litteral(\SplQueue $children, $type):string
@@ -271,12 +263,13 @@ class Loader
         return $output;
     }
 
-    private function _removeUnbuildable(\SplQueue $children) {
+    private function _removeUnbuildable(\SplQueue $children)
+    {
         $out = new \SplQueue;
         foreach ($children as $key => $child) {
-            if(!in_array($child->type, T::$NOTBUILDABLE)){
+            if (!in_array($child->type, T::$NOTBUILDABLE)) {
                 $out->enqueue($child);
-            } 
+            }
         }
         $out->rewind();
         return $out;

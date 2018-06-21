@@ -4,7 +4,7 @@ namespace Dallgoot\Yaml;
 use Dallgoot\Yaml\API as API;
 
 /**
- * 
+ *
  */
 class YamlObject extends \ArrayIterator
 {
@@ -17,14 +17,14 @@ class YamlObject extends \ArrayIterator
     {
         $this->__yaml__object__api = new API();
     }
-    
+
     public function __call($funcName, $arguments)
     {
         $reflectAPI = new \ReflectionClass(get_class($this->__yaml__object__api));
         $getName = function ($o) { return $o->name; };
         $publicApi  = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PUBLIC));
         $privateApi = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PRIVATE));
-        if (!in_array($funcName, $publicApi) && 
+        if (!in_array($funcName, $publicApi) &&
             (!in_array($funcName, $privateApi) || $this->_locked)) {
                 throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName, implode(",", $publicApi)), 1);
         }
