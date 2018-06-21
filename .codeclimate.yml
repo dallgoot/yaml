@@ -21,6 +21,8 @@ plugins:
         enabled: false
       Generic Formatting DisallowMultipleStatements SameLine:
         enabled: false
+      Generic Files LineEndings InvalidEOLChar:
+        enabled: false
       PSR2 Methods MethodDeclaration Underscore:
         enabled: false
       PSR2 Classes PropertyDeclaration Underscore:

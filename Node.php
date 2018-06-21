@@ -126,7 +126,7 @@ class Node
     /**
      * { function_description }
      *
-     * @param      <string>  $nodeValue  The node value
+     * @param      string  $nodeValue  The node value
      * @return     array   contains [node->type, final node->value]
      */
     private function _define($nodeValue)

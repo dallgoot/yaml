@@ -252,12 +252,12 @@ class Loader
     private function _litteral(\SplQueue $children, $type):string
     {
         $folded = $type === T::LITTERAL_FOLDED ? " " : PHP_EOL;
-        try{
+        try {
             $output = '';
             foreach ($children as $key => $child) {
                 $output .= $child->value.$folded;
             }
-        } catch(\Error $err) {
+        } catch (\Error $err) {
             $this->error($err->getMessage());
         }
         return $output;

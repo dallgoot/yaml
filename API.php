@@ -16,23 +16,23 @@ class API
     public $type = T::MAPPING;
 
     const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";
+    const NULL_REFERENCE    = self::class.": reference MUST have a name";
 
     public function __construct()
     {
     }
 
     /**
-     * Adds a reference.  //TODO : what use for $line ???
+     * Adds a reference.
      *
-     * @param      <int>    $line   The line
-     * @param      <string>     $name   The name
-     * @param      <string>     $value  The value
+     * @param      string                    $name   The name
+     * @param      mixed                     $value  The value
      *
      * @throws     \UnexpectedValueException  (description)
      */
     public function addReference($name, $value)
     {
-        if (is_null($name)) {
+        if (is_null($name) || empty($name)) {
             throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name), 1);
         }
         $this->_references[$name] = $value;
