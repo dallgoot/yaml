@@ -14,6 +14,7 @@ class YamlObject extends \ArrayIterator
 
     public function __construct()
     {
+        parent::__construct([], 1);//1 = Array indices can be accessed as properties in read/write.
         $this->__yaml__object__api = new API();
     }
 

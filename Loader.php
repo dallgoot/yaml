@@ -178,7 +178,7 @@ class Loader
             case T::REF_DEF:
             case T::REF_CALL:
                 $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
-                if ($type === T::REF_DEF) $root->addReference($line, $name, $tmp);
+                if ($type === T::REF_DEF) $root->addReference($name, $tmp);
                 return $root->getReference($name);
             default:
                 return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
@@ -203,11 +203,11 @@ class Loader
     /**
      * Builds a file.  check multiple documents & split if more than one documents
      *
-     * @param      Node   $node   The root node
+     * @param      Node   $root   The root node
      *
      * @return     array  representing the total of documents in the file.
      */
-    private function _buildFile(Node $root)
+    private function _buildFile(Node $root):array
     {
         $totalDocStart = 0;
         $documents = [];
@@ -223,10 +223,10 @@ class Loader
             $documents[$currentDoc]->enqueue($child);
         }
         $this->_debug >= 2 && var_dump($documents);
-        return array_map([$this, '_buildDocument'], $documents);
+        return array_map([$this, '_buildDocument'], $documents, array_keys($documents));
     }
 
-    private function _buildDocument(\SplQueue $queue)
+    private function _buildDocument(\SplQueue $queue, $key):YamlObject
     {
         $doc = new YamlObject();
         $childTypes = $this->_getChildrenTypes($queue);
@@ -234,12 +234,8 @@ class Loader
         $isSequence = in_array(T::ITEM, $childTypes);
         if ($isMapping && $isSequence) {
             $this->_error(sprintf(self::INVALID_DOCUMENT, $key));
-        } elseif ($isSequence) {
-            $queue->type = T::SEQUENCE;
-            // $doc->setFlags(\ArrayObject::ARRAY_AS_PROPS);
         } else {
-            $queue->type = T::MAPPING;
-            $doc->setFlags(\ArrayObject::STD_PROP_LIST);
+            $queue->type = $isSequence ? T::SEQUENCE : T::MAPPING;
         }
         $this->_debug >= 3 && var_dump($doc, $queue);
         return $this->_build($queue, $doc, $doc);
@@ -259,7 +255,7 @@ class Loader
         return $output;
     }
 
-    private function _removeUnbuildable(\SplQueue $children)
+    private function _removeUnbuildable(\SplQueue $children):\SplQueue
     {
         $out = new \SplQueue;
         foreach ($children as $key => $child) {
@@ -271,7 +267,7 @@ class Loader
         return $out;
     }
 
-    private function _getChildrenTypes(\SplQueue $children)
+    private function _getChildrenTypes(\SplQueue $children):array
     {
         $types = [];
         foreach ($children as $key => $child) {

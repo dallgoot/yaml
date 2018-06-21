@@ -28,7 +28,6 @@ class Node
 
     public function __construct($nodeString = null, $line = null)
     {
-        // echo self::yamlSequence;exit();
         $this->line = $line;
         if (is_null($nodeString)) {
             $this->type = T::ROOT;

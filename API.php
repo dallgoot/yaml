@@ -78,7 +78,7 @@ class API
         $this->locked = true;
     }
 
-    private function setText($value)
+    public function setText($value)
     {
         $this->value .= PHP_EOL.$value;
     }
