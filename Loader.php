@@ -130,7 +130,7 @@ class Loader
         $this->_debug && var_dump("\033[33mParsed Structure\033[0m\n", $root);
         try {
             $out = $this->_buildFile($root);
-        } catch (\Error|\Exception $e){
+        } catch (\Error|\Exception $e) {
             var_dump($root);
             throw new \ParseError($e);
         }
@@ -257,7 +257,7 @@ class Loader
             foreach ($children as $key => $child) {
                 $output .= $child->value.$folded;
             }
-        }catch(\Error $err) {
+        } catch(\Error $err) {
             $this->error($err->getMessage());
         }
         return $output;
