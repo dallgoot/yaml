@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml\Node as Node;
@@ -45,9 +47,9 @@ class Loader
         }
         $adle = "auto_detect_line_endings";
         $prevADLE = ini_get($adle);
-        !$prevADLE && ini_set($adle, true);
+        !$prevADLE && ini_set($adle, "true");
         $content = file($absolutePath, FILE_IGNORE_NEW_LINES);
-        !$prevADLE && ini_set($adle, false);
+        !$prevADLE && ini_set($adle, "false");
         if (is_bool($content)) {
             throw new \Exception(sprintf(self::EXCEPTION_READ_ERROR, $absolutePath));
         }
@@ -74,13 +76,10 @@ class Loader
             $deepest = $previous->getDeepestNode();
             if (in_array($n->type, T::$LITTERALS)) {
                 $deepestParent = $deepest->getParent();
-                if ($deepest->type === T::EMPTY &&
-                    $deepestParent->type === T::KEY) {
+                if ($deepest->type === T::EMPTY && $deepestParent->type === T::KEY) {
                     $deepestParent->value = $n;
-                } else {
-                    $deepest->value = $n;
+                    // continue;
                 }
-                continue;
             }
             if ($n->type === T::EMPTY) {
                 if (in_array($deepest->type, T::$LITTERALS)) {
@@ -117,10 +116,15 @@ class Loader
                             break;
                         case T::EMPTY:
                         case T::STRING:
-                            if ($n->type === T::STRING) {
+                            if ($n->type === T::STRING &&
+                                !in_array($deepest->getParent()->type, T::$LITTERALS) ) {
                                 $deepest->type = T::STRING;
                                 $deepest->value .= PHP_EOL.$n->value;
                                 continue 2;
+                            } else {
+                                if ($previous->type !== T::ITEM) {
+                                    $parent = $deepest->getParent();
+                                }
                             }
                     }
                 }
@@ -133,7 +137,7 @@ class Loader
             $out = $this->_buildFile($root);
         } catch (\Error|\Exception $e) {
             var_dump($root);
-            throw new \ParseError($e);
+            throw new \ParseError($e->getMessage().$e->getLine());
         }
         return $out;
     }
@@ -144,26 +148,30 @@ class Loader
         return $this->{$method}($node, $root, $parent);
     }
 
-    private function _buildQueue($node, $root, &$parent)
+    private function _buildQueue(\SplQueue $node, $root, &$parent)
     {
-        $type  = property_exists($node, "type") ? $node->type : $parent->type;
+        $type  = property_exists($node, "type") ? $node->type : null;//$parent->type;
         if (is_object($parent) && $parent instanceof YamlObject) {
-                $p = $parent;
+            $p = $parent;
         } else {
             switch ($type) {
                 case T::MAPPING:  $p = new \StdClass();break;
                 case T::SEQUENCE: $p = [];break;
-                case T::LITTERAL:
-                case T::LITTERAL_FOLDED: return $this->_litteral($node, $type);break;
             }
         }
+        if (in_array($type, T::$LITTERALS)) {
+            return $this->_litteral($node, $type);
+        }
         foreach ($node as $key => $child) {
-            $this->_build($child, $root, $p);
+            $result = $this->_build($child, $root, $p);
+            if ($p instanceof YamlObject && is_string($result)) {
+                $p->setText($result);
+            }
         }
         return $p;
     }
 
-    private function _buildNode($node, $root, &$parent)
+    private function _buildNode(Node $node, $root, &$parent)
     {
         $line  = property_exists($node, "line") ? $node->line : null;
         $name  = property_exists($node, "name") ? $node->name : null;
@@ -185,7 +193,7 @@ class Loader
         }
     }
 
-    private function _buildKey($node, $root, &$parent)
+    private function _buildKey($node, $root, &$parent):void
     {
         if (is_null($node->name)) {
             $this->_error(sprintf(self::ERROR_NO_KEYNAME, $node->line, $this->filePath));
@@ -194,7 +202,7 @@ class Loader
         }
     }
 
-    private function _buildItem($value, $root, &$parent)
+    private function _buildItem($value, $root, &$parent):void
     {
         $index = ($value instanceof Node && $value->type === T::KEY) ? $value->name : count($parent);
         $parent[$index] = $this->_build($value, $root, $parent[$index]);
@@ -243,12 +251,25 @@ class Loader
 
     private function _litteral(\SplQueue $children, $type):string
     {
-        $folded = $type === T::LITTERAL_FOLDED ? " " : PHP_EOL;
         try {
             $output = '';
-            foreach ($children as $key => $child) {
-                $output .= $child->value.$folded;
+            $children->rewind();
+            $refIndent = $children->current()->indent;
+            if ($type === T::LITTERAL_FOLDED) {
+                $separator = ' ';
+                $action = function ($c) use($refIndent) {
+                    return $c->indent > $refIndent || $c->type === T::EMPTY ? PHP_EOL.$c->value : $c->value;
+                };
+            }else{
+                $separator = PHP_EOL;
+                $action = function ($c) { return $c->value; };
             }
+            $tmp = [];
+            $children->rewind();
+            foreach ($children as $key => $child) {
+                $tmp[]= $action($child);
+            }
+            $output = implode($separator, $tmp);
         } catch (\Error $err) {
             $this->error($err->getMessage());
         }

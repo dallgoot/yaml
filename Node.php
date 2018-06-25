@@ -35,7 +35,7 @@ class Node
             $this->parse($nodeString);
         }
     }
-    public function setParent(Node $node)
+    public function setParent(Node $node):Node
     {
         $this->_parent = $node;
         return $this;
@@ -53,7 +53,7 @@ class Node
         return $cursor;
     }
 
-    public function add(Node $child)
+    public function add(Node $child):void
     {
         $child->setParent($this);
         $current = $this->value;
@@ -128,7 +128,7 @@ class Node
      * @param      string  $nodeValue  The node value
      * @return     array   contains [node->type, final node->value]
      */
-    private function _define($nodeValue)
+    private function _define($nodeValue):array
     {
         $v = substr($nodeValue, 1);
         switch ($nodeValue[0]) {
@@ -179,7 +179,7 @@ class Node
         }
     }
 
-    public function __debugInfo()
+    public function __debugInfo():array
     {
         $out = ['line'=>$this->line,
                 'indent'=>$this->indent,
@@ -200,23 +200,23 @@ class Node
      * @param      string   $candidate  The candidate
      * @return     boolean  True if quoted, False otherwise.
      */
-    public function isQuoted(string $candidate)
+    public function isQuoted(string $candidate):bool
     {
         return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $candidate);
     }
 
-    public function isValidJSON(string $candidate)
+    public function isValidJSON(string $candidate):bool
     {
         json_decode($candidate);
         return json_last_error() === JSON_ERROR_NONE;
     }
 
-    public function isValidSequence(string $candidate)
+    public function isValidSequence(string $candidate):bool
     {
         return (bool) preg_match("/".(self::yamlSequence)."/i", $candidate);
     }
 
-    public function isValidMapping(string $candidate)
+    public function isValidMapping(string $candidate):bool
     {
         return (bool) preg_match("/".(self::yamlMapping)."/i", $candidate);
     }

@@ -31,7 +31,7 @@ class API
      *
      * @throws     \UnexpectedValueException  (description)
      */
-    public function addReference($name, $value)
+    public function addReference($name, $value):void
     {
         if (is_null($name) || empty($name)) {
             throw new \UnexpectedValueException(self::UNAMED_REFERENCE, 1);
@@ -47,12 +47,12 @@ class API
         throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name), 1);
     }
 
-    public function getAllReferences()
+    public function getAllReferences():array
     {
         return $this->_references;
     }
 
-    public function addComment($index, $value)
+    public function addComment($index, $value):void
     {
         $this->_comments[$index] = $value;
     }
@@ -73,13 +73,13 @@ class API
         return count($this->_documents)===1 ? $this->_documents[0] : $this->_documents;
     }
 
-    public function lock()
+    public function lock():void
     {
         $this->locked = true;
     }
 
-    public function setText($value)
+    public function setText($value):void
     {
-        $this->value .= PHP_EOL.$value;
+        $this->value .= $value;
     }
 }
