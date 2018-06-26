@@ -6,6 +6,7 @@ namespace Dallgoot\Yaml;
 use Dallgoot\Yaml\Node as Node;
 use Dallgoot\Yaml\Types as T;
 use Dallgoot\Yaml\YamObject;
+use Dallgoot\Yaml\Tag;
 
 class Loader
 {
@@ -81,6 +82,9 @@ class Loader
                     // continue;
                 }
             }
+            if ($n->type === T::SET_VALUE) {
+                $parent = $deepest;
+            }
             if ($n->type === T::EMPTY) {
                 if (in_array($deepest->type, T::$LITTERALS)) {
                     $emptyLines[] = $n->setParent($deepest);
@@ -107,6 +111,10 @@ class Loader
                     $parent = $previous->getParent();
                 } elseif ($n->indent > $previous->indent) {
                     switch ($deepest->type) {
+                        case T::REF_DEF:
+                        case T::TAG:
+                            $parent = $deepest;
+                            break;
                         case T::LITTERAL:
                         case T::LITTERAL_FOLDED:
                             $n->type = T::STRING;
@@ -137,26 +145,28 @@ class Loader
             $out = $this->_buildFile($root);
         } catch (\Error|\Exception $e) {
             var_dump($root);
-            throw new \ParseError($e->getMessage().$e->getLine());
+            throw new \ParseError($e->getMessage()." on line ".$e->getLine());
         }
         return $out;
     }
 
     private function _build(object $node, $root = null, &$parent = null)
     {
-        $method = $node instanceof \SplQueue ? "_buildQueue" : "_buildNode";
-        return $this->{$method}($node, $root, $parent);
+        return $node instanceof \SplQueue ?
+                    $this->_buildQueue($node, $root, $parent) : $this->_buildNode($node, $root, $parent);
     }
 
     private function _buildQueue(\SplQueue $node, $root, &$parent)
     {
-        $type  = property_exists($node, "type") ? $node->type : null;//$parent->type;
+        $type = property_exists($node, "type") ? $node->type : null;
         if (is_object($parent) && $parent instanceof YamlObject) {
             $p = $parent;
         } else {
             switch ($type) {
-                case T::MAPPING:  $p = new \StdClass();break;
+                case T::MAPPING:  $p = new \StdClass;break;
                 case T::SEQUENCE: $p = [];break;
+                case T::KEY: $p = $parent;break;
+                case T::SET: $p = new \SplObjectStorage;
             }
         }
         if (in_array($type, T::$LITTERALS)) {
@@ -164,8 +174,12 @@ class Loader
         }
         foreach ($node as $key => $child) {
             $result = $this->_build($child, $root, $p);
-            if ($p instanceof YamlObject && is_string($result)) {
-                $p->setText($result);
+            if (is_string($result)) {
+                if ($p instanceof YamlObject) {
+                    $p->setText($result);
+                } else {
+                    $p .= $result;
+                }
             }
         }
         return $p;
@@ -181,13 +195,14 @@ class Loader
             case T::KEY:  $this->_buildKey($node, $root, $parent);return;
             case T::ITEM: $this->_buildItem($value, $root, $parent);return;
             case T::DIRECTIVE: return;//TODO
-            case T::TAG:  return;//TODO
+            case T::TAG: return new Tag($name, $this->_build($value, $root, $parent));
             case T::COMMENT: $root->addComment($line, $value); return;
-            case T::REF_DEF:
+            case T::REF_DEF: //fall through
             case T::REF_CALL:
                 $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
                 if ($type === T::REF_DEF) $root->addReference($name, $tmp);
                 return $root->getReference($name);
+            case T::SET_KEY: $parent->offsetSet($name, $this->_build($value, $root, $parent));return;
             default:
                 return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
         }
@@ -212,7 +227,6 @@ class Loader
      * Builds a file.  check multiple documents & split if more than one documents
      *
      * @param      Node   $root   The root node
-     *
      * @return     array  representing the total of documents in the file.
      */
     private function _buildFile(Node $root):array

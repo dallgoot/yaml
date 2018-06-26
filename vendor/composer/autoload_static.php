@@ -11,8 +11,10 @@ class ComposerStaticInit2906926e41d4e6da5c4a99d01dd0f217
         'Composer\\Autoload\\ClassLoader' => __DIR__ . '/..' . '/composer/ClassLoader.php',
         'Composer\\Autoload\\ComposerStaticInit2906926e41d4e6da5c4a99d01dd0f217' => __DIR__ . '/..' . '/composer/autoload_static.php',
         'Dallgoot\\Yaml\\API' => __DIR__ . '/../..' . '/API.php',
+        'Dallgoot\\Yaml\\Dumper' => __DIR__ . '/../..' . '/Dumper.php',
         'Dallgoot\\Yaml\\Loader' => __DIR__ . '/../..' . '/Loader.php',
         'Dallgoot\\Yaml\\Node' => __DIR__ . '/../..' . '/Node.php',
+        'Dallgoot\\Yaml\\Tag' => __DIR__ . '/../..' . '/Tag.php',
         'Dallgoot\\Yaml\\Types' => __DIR__ . '/../..' . '/Types.php',
         'Dallgoot\\Yaml\\YamlObject' => __DIR__ . '/../..' . '/YamlObject.php',
     );

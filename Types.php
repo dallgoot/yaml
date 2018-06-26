@@ -33,6 +33,11 @@ class Types
     const QUOTED = 148;
     const REF_DEF = 152;
     const REF_CALL = 164;
+
+    const SET = 172;
+    const SET_KEY = 180;
+    const SET_VALUE = 196;
+
     public static $NOTBUILDABLE = [self::DIRECTIVE,
                                     self::ROOT,
                                     self::DOC_END,

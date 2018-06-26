@@ -75,6 +75,7 @@ class Node
         //modify type according to child
         if ($this->value instanceof \SplQueue && !property_exists($this->value, "type")) {
             switch ($child->type) {
+                case T::SET_KEY:$this->value->type = T::SET;break;
                 case T::KEY:    $this->value->type = T::MAPPING;break;
                 case T::ITEM:   $this->value->type = T::SEQUENCE;break;
                 case T::STRING: $this->value->type = $this->type;break;
@@ -104,20 +105,29 @@ class Node
             $this->indent = 0;
         } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something after?
             $this->type = T::DOC_END;
-        } elseif (preg_match('/^([[:alpha:]][[:alpha:]-_ ]*[\s\t]*):([\s\t].*)?/', $nodeValue, $matches)) {
+        } elseif (preg_match('/^([[:alnum:]][[:alnum:]-_ ]*[ \t]*)(?::[ \t](.*)|:)$/', $nodeValue, $matches)) {
             $this->type = T::KEY;
             $this->name = trim($matches[1]);
-            if (isset($matches[2]) && !empty(trim($matches[2]))) {
-                $n = new Node(trim($matches[2]), $this->line);
+            $keyValue = isset($matches[2]) ? trim($matches[2]) : null;
+            if (is_null($keyValue)) {
+                $n = new Node('', $this->line);// $n->type = T::EMPTY;
             } else {
-                $n = new Node();
-                $n->type = T::EMPTY;
+                $n = new Node($keyValue, $this->line);
+                $hasComment = strpos($keyValue, ' #');
+                if (!is_bool($hasComment)) {
+                    $tmpNode = new Node(trim(substr($keyValue, 0, $hasComment)), $this->line);
+                    if ($tmpNode->type !== T::PARTIAL) {
+                        $comment = new Node(trim(substr($keyValue, $hasComment+1)), $this->line);
+                        $this->add($comment);
+                        $n = $tmpNode;
+                    }
+                }
             }
             $n->indent = $this->indent + strlen($this->name);
-            $n->setParent($this);
-            $this->value = $n;
+            $this->add($n);
         } else {//NOTE: can be of another type according to parent
-            list($this->type, $this->value) = $this->_define($nodeValue);
+            list($this->type, $value) = $this->_define($nodeValue);
+            is_object($value) ? $this->add($value) : $this->value = $value;
         }
         return $this;
     }
@@ -132,8 +142,8 @@ class Node
     {
         $v = substr($nodeValue, 1);
         switch ($nodeValue[0]) {
-            case '%': return [T::DIRECTIVE, $v];
-            case '#': return [T::COMMENT, $v];
+            case '%': return [T::DIRECTIVE, ltrim($v)];
+            case '#': return [T::COMMENT, ltrim($v)];
             case '!':
             case "&":
             case "*":// TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
@@ -145,17 +155,17 @@ class Node
                 $pos = strpos($v, ' ');
                 if (is_bool($pos)) {
                     $this->name = $v;
-                    return [$type, null];
+                    $n = null;
                 } else {
                     $this->name = strstr($v, ' ', true);
-                    $n = new Node(trim(substr($nodeValue, $pos+1)), $this->line);
-                    return [$type, $n->setParent($this)];
+                    $n = (new Node(trim(substr($nodeValue, $pos+1)), $this->line))->setParent($this);
                 }
+                return [$type, $n];
             case '>': return [T::LITTERAL_FOLDED, null];
             case '|': return [T::LITTERAL, null];
             //TODO: complex mapping
-            // case '?': //don't confuse with '!!set'
-            // case ':':
+            case '?': $this->name = new Node(ltrim($v), $this->line); return [T::SET_KEY, null];
+            case ':': return [T::SET_VALUE, new Node(ltrim($v), $this->line)];
             case '"':
             case "'":
                 return $this->isQuoted($nodeValue) ? [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
@@ -166,8 +176,12 @@ class Node
                 if ($this->isValidSequence($nodeValue)) return [T::SEQUENCE_SHORT, $nodeValue];
                 return [T::PARTIAL, $nodeValue];
             case "-":
-                if (substr($nodeValue, 0, 3) === '---') return [T::DOC_START, new Node(trim(substr($nodeValue, 3)))];
-                if (preg_match('/^-([\s\t]+(.*))?$/', $nodeValue, $matches)) {
+                if (substr($nodeValue, 0, 3) === '---'){
+                  $n = new Node(trim(substr($nodeValue, 3)), $this->line);
+                  $n->indent = $this->indent+4;
+                  return [T::DOC_START, $n->setParent($this)];
+                }
+                if (preg_match('/^-([ \t]+(.*))?$/', $nodeValue, $matches)) {
                     if (isset($matches[1])) {
                         $n = new Node(trim($matches[1]), $this->line);
                         return [T::ITEM, $n->setParent($this)];
@@ -223,17 +237,13 @@ class Node
 
     public function getPhpValue()
     {
-        if (is_null($this->value)) return null;
         switch ($this->type) {
             case T::EMPTY:return null;
             case T::BOOLEAN: return boolval($this->value);
             case T::NUMBER: return intval($this->value);
             case T::JSON: return json_encode($this->value);
             case T::QUOTED://fall through
-            case T::REF_DEF://fall through
             case T::REF_CALL://fall through
-            case T::TAG://fall through
-            case T::COMMENT: //fall through
             case T::STRING: return strval($this->value);
 
             case T::MAPPING_SHORT://TODO
@@ -241,10 +251,7 @@ class Node
             case T::SEQUENCE_SHORT:
                 return array_map("trim", explode(",", substr($this->value, 1, -1)));
 
-            case T::DIRECTIVE://fall through
             case T::DOC_START://fall through
-            // case T::KEY://fall through
-            case T::ITEM:return $this->value->getPhpValue();
 
             case T::DOC_END: return;
             case T::PARTIAL:; // have a multi line quoted  string OR json definition
