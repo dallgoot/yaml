@@ -96,8 +96,7 @@ class Node
     */
     private function parse(String $nodeString):Node
     {
-        //permissive to tabs but replacement before processing
-        $nodeValue = preg_replace("/\t/m", " ", $nodeString);
+        $nodeValue = preg_replace("/\t/m", " ", $nodeString);//permissive to tabs but replacement
         $this->indent = strspn($nodeValue, ' ');
         $nodeValue = ltrim($nodeValue);
         if ($nodeValue === '') {
@@ -167,8 +166,7 @@ class Node
             case '?': $this->name = new Node(ltrim($v), $this->line); return [T::SET_KEY, null];
             case ':': return [T::SET_VALUE, new Node(ltrim($v), $this->line)];
             case '"':
-            case "'":
-                return $this->isQuoted($nodeValue) ? [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
+            case "'": return $this->isQuoted($nodeValue) ? [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
             case "{":
             case "[":
                 if ($this->isValidJSON($nodeValue))     return [T::JSON, $nodeValue];
@@ -176,7 +174,7 @@ class Node
                 if ($this->isValidSequence($nodeValue)) return [T::SEQUENCE_SHORT, $nodeValue];
                 return [T::PARTIAL, $nodeValue];
             case "-":
-                if (substr($nodeValue, 0, 3) === '---'){
+                if (substr($nodeValue, 0, 3) === '---') {
                   $n = new Node(trim(substr($nodeValue, 3)), $this->line);
                   $n->indent = $this->indent+4;
                   return [T::DOC_START, $n->setParent($this)];

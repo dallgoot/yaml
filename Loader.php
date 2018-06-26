@@ -271,10 +271,10 @@ class Loader
             $refIndent = $children->current()->indent;
             if ($type === T::LITTERAL_FOLDED) {
                 $separator = ' ';
-                $action = function ($c) use($refIndent) {
+                $action = function ($c) use ($refIndent) {
                     return $c->indent > $refIndent || $c->type === T::EMPTY ? PHP_EOL.$c->value : $c->value;
                 };
-            }else{
+            } else {
                 $separator = PHP_EOL;
                 $action = function ($c) { return $c->value; };
             }
