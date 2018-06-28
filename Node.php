@@ -132,7 +132,7 @@ class Node
     }
 
     /**
-     * { function_description }
+     *  Set the type and value according to first character
      *
      * @param      string  $nodeValue  The node value
      * @return     array   contains [node->type, final node->value]
@@ -145,45 +145,65 @@ class Node
             case '#': return [T::COMMENT, ltrim($v)];
             case '!':
             case "&":
-            case "*":// TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
-                switch ($nodeValue[0]) {
-                    case '!': $type = T::TAG;break;
-                    case '&': $type = T::REF_DEF;break;
-                    case '*': $type = T::REF_CALL;break;
-                }
-                $pos = strpos($v, ' ');
-                $this->name = is_bool($pos) ? $v : strstr($v, ' ', true);
-                $n = is_bool($pos) ? null : (new Node(trim(substr($nodeValue, $pos+1)), $this->line))->setParent($this);
-                return [$type, $n];
+            case "*": return $this->_onNodeAction($nodeValue);
             case '>': return [T::LITTERAL_FOLDED, null];
             case '|': return [T::LITTERAL, null];
             //TODO: complex mapping
             case '?': $this->name = new Node(ltrim($v), $this->line); return [T::SET_KEY, null];
             case ':': return [T::SET_VALUE, new Node(ltrim($v), $this->line)];
             case '"':
-            case "'": return $this->isQuoted($nodeValue) ? [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
+            case "'": return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $nodeValue) ?
+                                [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
             case "{":
-            case "[":
-                if ($this->isValidJSON($nodeValue))     return [T::JSON, $nodeValue];
-                if ($this->isValidMapping($nodeValue))  return [T::MAPPING_SHORT, $nodeValue];
-                if ($this->isValidSequence($nodeValue)) return [T::SEQUENCE_SHORT, $nodeValue];
-                return [T::PARTIAL, $nodeValue];
-            case "-":
-                if (substr($nodeValue, 0, 3) === '---') {
-                    $n = new Node(trim(substr($nodeValue, 3)), $this->line);
-                    $n->indent = $this->indent+4;
-                    return [T::DOC_START, $n->setParent($this)];
-                }
-                if (preg_match('/^-([ \t]+(.*))?$/', $nodeValue, $matches)) {
-                    if (isset($matches[1])) {
-                        $n = new Node(trim($matches[1]), $this->line);
-                        return [T::ITEM, $n->setParent($this)];
-                    }
-                    return [T::ITEM, null];
-                }
+            case "[": return $this->_onObject($nodeValue);
+            case "-": return $this->_onMinus($nodeValue);
             default:
                 return [T::STRING, $nodeValue];
         }
+    }
+
+    private function _onObject($nodeValue):array
+    {
+        json_decode($nodeValue);
+        if (json_last_error() === JSON_ERROR_NONE)
+            return [T::JSON, $nodeValue];
+        if ((bool) preg_match("/".(self::yamlMapping)."/i", $nodeValue))
+            return [T::MAPPING_SHORT, $nodeValue];
+        if ((bool) preg_match("/".(self::yamlSequence)."/i", $nodeValue))
+            return [T::SEQUENCE_SHORT, $nodeValue];
+        return [T::PARTIAL, $nodeValue];
+    }
+
+    private function _onMinus($nodeValue):array
+    {
+        if (substr($nodeValue, 0, 3) === '---') {
+            $n = new Node(trim(substr($nodeValue, 3)), $this->line);
+            $n->indent = $this->indent+4;
+            return [T::DOC_START, $n->setParent($this)];
+        }
+        if (preg_match('/^-([ \t]+(.*))?$/', $nodeValue, $matches)) {
+            if (isset($matches[1])) {
+                $n = new Node(trim($matches[1]), $this->line);
+                return [T::ITEM, $n->setParent($this)];
+            }
+            return [T::ITEM, null];
+        }
+        return [T::STRING, $nodeValue];
+    }
+
+    private function _onNodeAction($nodeValue):array
+    {
+        // TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
+        $v = substr($nodeValue, 1);
+        switch ($nodeValue[0]) {
+            case '!': $type = T::TAG;break;
+            case '&': $type = T::REF_DEF;break;
+            case '*': $type = T::REF_CALL;break;
+        }
+        $pos = strpos($v, ' ');
+        $this->name = is_bool($pos) ? $v : strstr($v, ' ', true);
+        $n = is_bool($pos) ? null : (new Node(trim(substr($nodeValue, $pos+1)), $this->line))->setParent($this);
+        return [$type, $n];
     }
 
     public function __debugInfo():array
@@ -201,32 +221,6 @@ class Node
         return ["value"];
     }
 
-    /**
-     * Determines if quoted.
-     *
-     * @param      string   $candidate  The candidate
-     * @return     boolean  True if quoted, False otherwise.
-     */
-    public function isQuoted(string $candidate):bool
-    {
-        return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $candidate);
-    }
-
-    public function isValidJSON(string $candidate):bool
-    {
-        json_decode($candidate);
-        return json_last_error() === JSON_ERROR_NONE;
-    }
-
-    public function isValidSequence(string $candidate):bool
-    {
-        return (bool) preg_match("/".(self::yamlSequence)."/i", $candidate);
-    }
-
-    public function isValidMapping(string $candidate):bool
-    {
-        return (bool) preg_match("/".(self::yamlMapping)."/i", $candidate);
-    }
 
     public function getPhpValue()
     {
