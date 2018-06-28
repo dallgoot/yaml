@@ -27,6 +27,7 @@ class Loader
     //Exceptions
     const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
     const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
+    const EXCEPTION_LINE_SPLIT = self::class.": content is not a string(maybe a file error?)";
 
     public function __construct($absolutePath = null, $options = null, $debug = 0)
     {
@@ -58,51 +59,38 @@ class Loader
         return $this;
     }
 
+    /**
+     * Parse Yaml lines into an hierarchy of Node
+     *
+     * @param      <string>       $strContent  The string content
+     * @throws     \Exception    if content is not available as $strContent or as $this->content (from file)
+     * @throws     \ParseError  if any error during parsing or building
+     *
+     * @return     <array>      the hierarchy built = an array of YamlObject
+     */
     public function parse($strContent = null)
     {
-        $source = $strContent ? preg_split("/([^\n\r]+)/um", $strContent, null, PREG_SPLIT_DELIM_CAPTURE)
-                                : $this->_content;
+        $source = is_null($strContent) ? $this->_content :
+                                    preg_split("/([^\n\r]+)/um", $strContent, null, PREG_SPLIT_DELIM_CAPTURE);
         //TODO : be more permissive on $strContent values
-        if (!is_array($source)) {
-            throw new \Exception('YamlLoader : content is not a string(maybe a file error?)');
-        }
-        $root = new Node();
-        $previous = $root;
+        if (!is_array($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
+        $previous = $root = new Node();
         $emptyLines = [];
-        //process structure
+        $specialTypes = [T::LITTERAL, T::LITTERAL_FOLDED, T::SET_VALUE, T::EMPTY];
         foreach ($source as $lineNb => $lineString) {
-            $n = new Node($lineString, $lineNb + 1);
-            // $this->_debug && var_dump($n);
+            $n = new Node($lineString, $lineNb + 1);//TODO: useful???-> $this->_debug && var_dump($n);
             $parent = $previous;
             $deepest = $previous->getDeepestNode();
-            if (in_array($n->type, T::$LITTERALS)) {
-                $deepestParent = $deepest->getParent();
-                if ($deepest->type === T::EMPTY && $deepestParent->type === T::KEY) {
-                    $deepestParent->value = $n;
-                    // continue;
-                }
-            }
-            if ($n->type === T::SET_VALUE) {
-                $parent = $deepest;
-            }
-            if ($n->type === T::EMPTY) {
-                if (in_array($deepest->type, T::$LITTERALS)) {
-                    $emptyLines[] = $n->setParent($deepest);
-                } elseif ($previous->type === T::STRING) {
-                    $emptyLines[] = $n->setParent($previous->getParent());
-                }
-                continue;
+            if ($deepest->type === T::PARTIAL) {
+                $deepest->parse($deepest->value.$lineString);
             } else {
+                if (in_array($n->type, $specialTypes)) {
+                   if ($this->_onSpecialType($n, $deepest, $parent, $previous, $emptyLines)) continue;
+                }
                 foreach ($emptyLines as $key => $node) {
                     $node->getParent()->add($node);
                 }
                 $emptyLines = [];
-            }
-            if ($deepest->type === T::PARTIAL) {
-                $newValue = new Node($deepest->value.$lineString, $n->line);
-                $mother = $deepest->getParent();
-                $mother->value = $newValue->setParent($mother);
-            } else {
                 if ($n->indent === 0) {
                     $parent = $root;
                 } elseif ($n->indent < $previous->indent) {
@@ -110,37 +98,13 @@ class Loader
                 } elseif ($n->indent === $previous->indent) {
                     $parent = $previous->getParent();
                 } elseif ($n->indent > $previous->indent) {
-                    switch ($deepest->type) {
-                        case T::REF_DEF:
-                        case T::TAG:
-                            $parent = $deepest;
-                            break;
-                        case T::LITTERAL:
-                        case T::LITTERAL_FOLDED:
-                            $n->type = T::STRING;
-                            $n->value = trim($lineString);
-                            unset($n->name);
-                            $parent = $deepest;
-                            break;
-                        case T::EMPTY:
-                        case T::STRING:
-                            if ($n->type === T::STRING &&
-                                !in_array($deepest->getParent()->type, T::$LITTERALS) ) {
-                                $deepest->type = T::STRING;
-                                $deepest->value .= PHP_EOL.$n->value;
-                                continue 2;
-                            } else {
-                                if ($previous->type !== T::ITEM) {
-                                    $parent = $deepest->getParent();
-                                }
-                            }
-                    }
+                    if ($this->_onDeepestType($n, $lineString, $deepest, $parent)) continue;
                 }
                 $parent->add($n);
                 $previous = $n;
             }
         }
-        $this->_debug && var_dump("\033[33mParsed Structure\033[0m\n", $root);
+        $this->_debug > 2 && var_dump("\033[33mParsed Structure\033[0m\n", $root);
         try {
             $out = $this->_buildFile($root);
         } catch (\Error|\Exception $e) {
@@ -148,6 +112,60 @@ class Loader
             throw new \ParseError($e->getMessage()." on line ".$e->getLine());
         }
         return $out;
+    }
+
+    private function _onSpecialType(&$n, &$deepest, &$parent, &$previous, &$emptyLines):bool
+    {
+        switch ($n->type) {
+            case T::REF_DEF://fall through
+            case T::SET_VALUE://fall through
+            case T::TAG:
+                $parent = $deepest;
+                break;
+            case T::LITTERAL://fall through
+            case T::LITTERAL_FOLDED:
+                $deepestParent = $deepest->getParent();
+                if ($deepest->type === T::EMPTY && $deepestParent->type === T::KEY) {
+                    $parent = $deepestParent;
+                }
+                break;
+            case T::EMPTY:
+                if ($previous->type === T::STRING || in_array($deepest->type, T::$LITTERALS)) {
+                    $target = $previous->type === T::STRING ? $previous->getParent() : $deepest;
+                }
+                $emptyLines[] = $n->setParent($target);
+                return true;
+                break;
+            default://do nothing
+                break;
+        }
+        return false;
+    }
+
+    private function _onDeepestType(&$n, $lineString, &$deepest, &$parent):bool
+    {
+         switch ($deepest->type) {
+            case T::LITTERAL:
+            case T::LITTERAL_FOLDED:
+                $n->type = T::STRING;
+                $n->value = trim($lineString);
+                unset($n->name);
+                $parent = $deepest;
+                break;
+            case T::EMPTY:
+            case T::STRING:
+                if ($n->type === T::STRING &&
+                    !in_array($deepest->getParent()->type, T::$LITTERALS) ) {
+                    $deepest->type = T::STRING;
+                    $deepest->value .= PHP_EOL.$n->value;
+                    return true;
+                } else {
+                    if ($previous->type !== T::ITEM) {
+                        $parent = $deepest->getParent();
+                    }
+                }
+        }
+        return false;
     }
 
     private function _build(object $node, $root = null, &$parent = null)

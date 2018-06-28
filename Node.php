@@ -94,7 +94,7 @@ class Node
     /**
     *  CAUTION : the types assumed here are NOT FINAL : they CAN be adjusted according to parent
     */
-    private function parse(String $nodeString):Node
+    public function parse(String $nodeString):Node
     {
         $nodeValue = preg_replace("/\t/m", " ", $nodeString);//permissive to tabs but replacement
         $this->indent = strspn($nodeValue, ' ');
@@ -152,13 +152,8 @@ class Node
                     case '*': $type = T::REF_CALL;break;
                 }
                 $pos = strpos($v, ' ');
-                if (is_bool($pos)) {
-                    $this->name = $v;
-                    $n = null;
-                } else {
-                    $this->name = strstr($v, ' ', true);
-                    $n = (new Node(trim(substr($nodeValue, $pos+1)), $this->line))->setParent($this);
-                }
+                $this->name = is_bool($pos) ? $v : strstr($v, ' ', true);
+                $n = is_bool($pos) ? null : (new Node(trim(substr($nodeValue, $pos+1)), $this->line))->setParent($this);
                 return [$type, $n];
             case '>': return [T::LITTERAL_FOLDED, null];
             case '|': return [T::LITTERAL, null];
@@ -175,9 +170,9 @@ class Node
                 return [T::PARTIAL, $nodeValue];
             case "-":
                 if (substr($nodeValue, 0, 3) === '---') {
-                  $n = new Node(trim(substr($nodeValue, 3)), $this->line);
-                  $n->indent = $this->indent+4;
-                  return [T::DOC_START, $n->setParent($this)];
+                    $n = new Node(trim(substr($nodeValue, 3)), $this->line);
+                    $n->indent = $this->indent+4;
+                    return [T::DOC_START, $n->setParent($this)];
                 }
                 if (preg_match('/^-([ \t]+(.*))?$/', $nodeValue, $matches)) {
                     if (isset($matches[1])) {
