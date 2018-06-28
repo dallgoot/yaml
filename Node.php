@@ -105,25 +105,7 @@ class Node
         } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something after?
             $this->type = T::DOC_END;
         } elseif (preg_match('/^([[:alnum:]][[:alnum:]-_ ]*[ \t]*)(?::[ \t](.*)|:)$/', $nodeValue, $matches)) {
-            $this->type = T::KEY;
-            $this->name = trim($matches[1]);
-            $keyValue = isset($matches[2]) ? trim($matches[2]) : null;
-            if (is_null($keyValue)) {
-                $n = new Node('', $this->line);// $n->type = T::EMPTY;
-            } else {
-                $n = new Node($keyValue, $this->line);
-                $hasComment = strpos($keyValue, ' #');
-                if (!is_bool($hasComment)) {
-                    $tmpNode = new Node(trim(substr($keyValue, 0, $hasComment)), $this->line);
-                    if ($tmpNode->type !== T::PARTIAL) {
-                        $comment = new Node(trim(substr($keyValue, $hasComment+1)), $this->line);
-                        $this->add($comment);
-                        $n = $tmpNode;
-                    }
-                }
-            }
-            $n->indent = $this->indent + strlen($this->name);
-            $this->add($n);
+            $this->_onKey($nodeValue, $matches);
         } else {//NOTE: can be of another type according to parent
             list($this->type, $value) = $this->_define($nodeValue);
             is_object($value) ? $this->add($value) : $this->value = $value;
@@ -160,6 +142,29 @@ class Node
             default:
                 return [T::STRING, $nodeValue];
         }
+    }
+
+    private function _onKey($nodeValue, $matches)
+    {
+        $this->type = T::KEY;
+        $this->name = trim($matches[1]);
+        $keyValue = isset($matches[2]) ? trim($matches[2]) : null;
+        if (is_null($keyValue)) {
+            $n = new Node('', $this->line);// $n->type = T::EMPTY;
+        } else {
+            $n = new Node($keyValue, $this->line);
+            $hasComment = strpos($keyValue, ' #');
+            if (!is_bool($hasComment)) {
+                $tmpNode = new Node(trim(substr($keyValue, 0, $hasComment)), $this->line);
+                if ($tmpNode->type !== T::PARTIAL) {
+                    $comment = new Node(trim(substr($keyValue, $hasComment+1)), $this->line);
+                    $this->add($comment);
+                    $n = $tmpNode;
+                }
+            }
+        }
+        $n->indent = $this->indent + strlen($this->name);
+        $this->add($n);
     }
 
     private function _onObject($nodeValue):array
