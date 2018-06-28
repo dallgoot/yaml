@@ -62,11 +62,11 @@ class Loader
     /**
      * Parse Yaml lines into an hierarchy of Node
      *
-     * @param      <string>       $strContent  The string content
+     * @param      string       $strContent  The string content
      * @throws     \Exception    if content is not available as $strContent or as $this->content (from file)
      * @throws     \ParseError  if any error during parsing or building
      *
-     * @return     <array>      the hierarchy built = an array of YamlObject
+     * @return     array      the hierarchy built = an array of YamlObject
      */
     public function parse($strContent = null)
     {
@@ -85,7 +85,7 @@ class Loader
                 $deepest->parse($deepest->value.$lineString);
             } else {
                 if (in_array($n->type, $specialTypes)) {
-                   if ($this->_onSpecialType($n, $deepest, $parent, $previous, $emptyLines)) continue;
+                    if ($this->_onSpecialType($n, $parent, $previous, $emptyLines)) continue;
                 }
                 foreach ($emptyLines as $key => $node) {
                     $node->getParent()->add($node);
@@ -98,7 +98,7 @@ class Loader
                 } elseif ($n->indent === $previous->indent) {
                     $parent = $previous->getParent();
                 } elseif ($n->indent > $previous->indent) {
-                    if ($this->_onDeepestType($n, $lineString, $deepest, $parent)) continue;
+                    if ($this->_onDeepestType($n, $lineString, $parent, $previous)) continue;
                 }
                 $parent->add($n);
                 $previous = $n;
@@ -114,8 +114,9 @@ class Loader
         return $out;
     }
 
-    private function _onSpecialType(&$n, &$deepest, &$parent, &$previous, &$emptyLines):bool
+    private function _onSpecialType(&$n, &$parent, &$previous, &$emptyLines):bool
     {
+        $deepest = $previous->getDeepestNode();
         switch ($n->type) {
             case T::REF_DEF://fall through
             case T::SET_VALUE://fall through
@@ -130,10 +131,8 @@ class Loader
                 }
                 break;
             case T::EMPTY:
-                if ($previous->type === T::STRING || in_array($deepest->type, T::$LITTERALS)) {
-                    $target = $previous->type === T::STRING ? $previous->getParent() : $deepest;
-                }
-                $emptyLines[] = $n->setParent($target);
+                if ($previous->type === T::STRING) $emptyLines[] = $n->setParent($previous->getParent());
+                if (in_array($deepest->type, T::$LITTERALS)) $emptyLines[] = $n->setParent($deepest);
                 return true;
                 break;
             default://do nothing
@@ -142,9 +141,10 @@ class Loader
         return false;
     }
 
-    private function _onDeepestType(&$n, $lineString, &$deepest, &$parent):bool
+    private function _onDeepestType(&$n, $lineString, &$parent, &$previous):bool
     {
-         switch ($deepest->type) {
+        $deepest = $previous->getDeepestNode();
+        switch ($deepest->type) {
             case T::LITTERAL:
             case T::LITTERAL_FOLDED:
                 $n->type = T::STRING;
