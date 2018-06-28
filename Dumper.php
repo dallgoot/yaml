@@ -9,7 +9,6 @@ use Dallgoot\Yaml\Types as T;
 class Dumper //extends AnotherClass
 {
     private $options = 00000;
-    private $content = null;
 
     //options
     const EXPAND_SHORT = 00001;
@@ -20,27 +19,18 @@ class Dumper //extends AnotherClass
         if (!is_null($options)) {
             $this->options = $options;
         }
-        if (!is_null($candidate)) {
-            $this->content = $candidate;
-        }
     }
 
     public static function toString($value, $options)
     {
-        if (is_null($value) && is_null($this->content)) {
+        if (is_null($value)) {
             throw new \Exception("No content to convert to Yaml", 1);
         }
-        $value = is_null($value) ? $this->content : $value;
-        $options = is_null($options) ? $this->options : $options;
+        $options = is_null($options) ? self::options : $options;
     }
 
     public static function toFile($file, $value, $options)
     {
-        if (!is_null($value)) {
-            $string = $this->toString($value, $options);
-        } elseif (!is_null($this->content)) {
-            $string = $this->toString($this->content, $options);
-        }
-        return !is_bool(file_put_contents($file, $string));
+        return !is_bool(file_put_contents($file, self::toString($value, $options)));
     }
 }
