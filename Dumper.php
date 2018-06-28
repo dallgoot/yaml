@@ -8,13 +8,13 @@ use Dallgoot\Yaml\Types as T;
  */
 class Dumper //extends AnotherClass
 {
-    private $options = 00000;
+    private const options = 00000;
 
     //options
-    const EXPAND_SHORT = 00001;
-    const SERIALIZE_CUSTOM_OBJECTS = 00010;
+    public const EXPAND_SHORT = 00001;
+    public const SERIALIZE_CUSTOM_OBJECTS = 00010;
 
-    public function __construct($candidate = null, $options = null)
+    public function __construct($options = null)
     {
         if (!is_null($options)) {
             $this->options = $options;
