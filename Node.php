@@ -8,7 +8,8 @@ class Node
     public $indent = -1;
     public $line;
     public $type;
-    public $value;//can be Scalar, Node or SplQueue
+    /** @var Node|SplQueue|null|string */
+    public $value;
     private $_parent;
 
     private const yamlNull  = "null";
@@ -125,18 +126,18 @@ class Node
         switch ($nodeValue[0]) {
             case '%': return [T::DIRECTIVE, ltrim($v)];
             case '#': return [T::COMMENT, ltrim($v)];
-            case '!':
-            case "&":
+            case '!': //fall through
+            case "&": //fall through
             case "*": return $this->_onNodeAction($nodeValue);
             case '>': return [T::LITTERAL_FOLDED, null];
             case '|': return [T::LITTERAL, null];
             //TODO: complex mapping
             case '?': $this->name = new Node(ltrim($v), $this->line); return [T::SET_KEY, null];
             case ':': return [T::SET_VALUE, new Node(ltrim($v), $this->line)];
-            case '"':
+            case '"': //fall through
             case "'": return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $nodeValue) ?
                                 [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
-            case "{":
+            case "{": //fall through
             case "[": return $this->_onObject($nodeValue);
             case "-": return $this->_onMinus($nodeValue);
             default:
