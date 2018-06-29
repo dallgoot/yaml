@@ -8,7 +8,7 @@ class Node
     public $indent = -1;
     public $line;
     public $type;
-    /** @var Node|SplQueue|null|string */
+    /** @var Node|\SplQueue|null|string */
     public $value;
     private $_parent;
 
