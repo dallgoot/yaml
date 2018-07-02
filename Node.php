@@ -105,7 +105,7 @@ class Node
             $this->indent = 0;
         } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something after?
             $this->type = T::DOC_END;
-        } elseif (preg_match('/^([[:alnum:]][[:alnum:]-_ ]*[ \t]*)(?::[ \t](.*)|:)$/', $nodeValue, $matches)) {
+        } elseif (preg_match('/^([[:alnum:]][[:alnum:]_- ]*[ \t]*)(?::[ \t](.*)|:)$/', $nodeValue, $matches)) {
             $this->_onKey($nodeValue, $matches);
         } else {//NOTE: can be of another type according to parent
             list($this->type, $value) = $this->_define($nodeValue);
