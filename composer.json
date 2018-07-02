@@ -17,5 +17,8 @@
     "require": {
         "php" : ">=7.2.2",
         "lib-pcre" : "*"
+    },
+    "require-dev": {
+        "atoum/atoum": "^3.3"
     }
 }
