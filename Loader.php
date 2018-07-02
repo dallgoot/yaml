@@ -62,13 +62,13 @@ class Loader
     /**
      * Parse Yaml lines into an hierarchy of Node
      *
-     * @param      string       $strContent  The string content
+     * @param      string       $strContent  The Yaml string or null to parse loaded content
      * @throws     \Exception    if content is not available as $strContent or as $this->content (from file)
      * @throws     \ParseError  if any error during parsing or building
      *
      * @return     array      the hierarchy built = an array of YamlObject
      */
-    public function parse($strContent = null)
+    public function parse($strContent = null):array
     {
         $source = is_null($strContent) ? $this->_content :
                                     preg_split("/([^\n\r]+)/um", $strContent, null, PREG_SPLIT_DELIM_CAPTURE);
@@ -308,17 +308,17 @@ class Loader
         return $output;
     }
 
-    private function _removeUnbuildable(\SplQueue $children):\SplQueue
-    {
-        $out = new \SplQueue;
-        foreach ($children as $key => $child) {
-            if (!in_array($child->type, T::$NOTBUILDABLE)) {
-                $out->enqueue($child);
-            }
-        }
-        $out->rewind();
-        return $out;
-    }
+    // private function _removeUnbuildable(\SplQueue $children):\SplQueue
+    // {
+    //     $out = new \SplQueue;
+    //     foreach ($children as $key => $child) {
+    //         if (!in_array($child->type, T::$NOTBUILDABLE)) {
+    //             $out->enqueue($child);
+    //         }
+    //     }
+    //     $out->rewind();
+    //     return $out;
+    // }
 
     private function _getChildrenTypes(\SplQueue $children):array
     {

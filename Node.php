@@ -230,6 +230,7 @@ class Node
 
     public function getPhpValue()
     {
+        if (is_null($this->value)) return null;
         switch ($this->type) {
             case T::EMPTY:return null;
             case T::BOOLEAN: return boolval($this->value);
