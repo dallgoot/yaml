@@ -1,4 +1,4 @@
-# yamloader WORK IN PROGRESS !!! [![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability)
+# yamloader WORK IN PROGRESS !!! [![Build Status](https://travis-ci.org/dallgoot/yaml.svg?branch=master)](https://travis-ci.org/dallgoot/yaml) [![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability)
 PHP library to load and parse YAML file to PHP datatypes equivalent
 
 Support:
