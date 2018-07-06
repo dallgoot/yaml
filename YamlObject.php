@@ -40,12 +40,8 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     {
         $prop = get_object_vars($this);
         unset($prop["__yaml__object__api"]);
-        if (count($prop) > 0) {
-            return $prop;
-        } elseif (count($this) > 0) {
-            return iterator_to_array($this);
-        } else {
-            return $this->__yaml__object__api->value;
-        }
+        if (count($prop) > 0) return $prop;
+        if (count($this) > 0) return iterator_to_array($this);
+        return $this->__yaml__object__api->value;
     }
 }

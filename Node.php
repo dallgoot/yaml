@@ -67,6 +67,7 @@ class Node
                 return;
             } else {
                 $this->value = new \SplQueue();
+                $this->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_KEEP);
                 $this->value->enqueue($current);
                 $this->value->enqueue($child);
             }
@@ -76,7 +77,6 @@ class Node
         //modify type according to child
         if ($this->value instanceof \SplQueue && !property_exists($this->value, "type")) {
             switch ($child->type) {
-                case T::SET_KEY:$this->value->type = T::SET;break;
                 case T::KEY:    $this->value->type = T::MAPPING;break;
                 case T::ITEM:   $this->value->type = T::SEQUENCE;break;
                 case T::STRING: $this->value->type = $this->type;break;
@@ -132,8 +132,8 @@ class Node
             case '>': return [T::LITTERAL_FOLDED, null];
             case '|': return [T::LITTERAL, null];
             //TODO: complex mapping
-            case '?': $this->name = new Node(ltrim($v), $this->line); return [T::SET_KEY, null];
-            case ':': return [T::SET_VALUE, new Node(ltrim($v), $this->line)];
+            case '?': return [T::SET_KEY, new Node(ltrim($v), $this->line)];
+            case ':': return [T::SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)];
             case '"': //fall through
             case "'": return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $nodeValue) ?
                                 [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
@@ -168,16 +168,13 @@ class Node
         $this->add($n);
     }
 
-    private function _onObject($nodeValue):array
+    private function _onObject($value):array
     {
-        json_decode($nodeValue);
-        if (json_last_error() === JSON_ERROR_NONE)
-            return [T::JSON, $nodeValue];
-        if ((bool) preg_match("/".(self::yamlMapping)."/i", $nodeValue))
-            return [T::MAPPING_SHORT, $nodeValue];
-        if ((bool) preg_match("/".(self::yamlSequence)."/i", $nodeValue))
-            return [T::SEQUENCE_SHORT, $nodeValue];
-        return [T::PARTIAL, $nodeValue];
+        json_decode($value);
+        if (json_last_error() === JSON_ERROR_NONE) return [T::JSON, $value];
+        if ((bool) preg_match("/".(self::yamlMapping)."/i", $value))  return [T::MAPPING_SHORT, $value];
+        if ((bool) preg_match("/".(self::yamlSequence)."/i", $value)) return [T::SEQUENCE_SHORT, $value];
+        return [T::PARTIAL, $value];
     }
 
     private function _onMinus($nodeValue):array
@@ -240,9 +237,9 @@ class Node
             case T::REF_CALL://fall through
             case T::STRING: return strval($this->value);
 
-            case T::MAPPING_SHORT://TODO
-            //TODO : that's not robust enough, improve it
-            case T::SEQUENCE_SHORT:
+            case T::MAPPING_SHORT://TODO : that's not robust enough, improve it
+                return $this->getShortMapping(substr($this->value, 1, -1));
+            case T::SEQUENCE_SHORT://TODO : that's not robust enough, improve it
                 return array_map("trim", explode(",", substr($this->value, 1, -1)));
 
             case T::DOC_START://fall through
@@ -251,5 +248,15 @@ class Node
             case T::PARTIAL:; // have a multi line quoted  string OR json definition
             default: throw new \Exception("Error can not get PHP type for ".T::getName($this->type), 1);
         }
+    }
+
+    private function getShortMapping($mappingString)
+    {
+        $out = new \StdClass();
+        foreach (explode(',', $mappingString) as $key => $value) {
+            list($keyName, $keyValue) = explode(':', $value);
+            $out->{trim($keyName)} = trim($keyValue);
+        }
+        return $out;
     }
 }

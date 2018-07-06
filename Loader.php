@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Node as Node;
+use Dallgoot\Yaml\Node as   Node;
 use Dallgoot\Yaml\Types as T;
 use Dallgoot\Yaml\YamObject;
 use Dallgoot\Yaml\Tag;
@@ -76,13 +76,15 @@ class Loader
         if (!is_array($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
         $previous = $root = new Node();
         $emptyLines = [];
-        $specialTypes = [T::LITTERAL, T::LITTERAL_FOLDED, T::SET_VALUE, T::EMPTY];
+        $specialTypes = [T::LITTERAL, T::LITTERAL_FOLDED, T::EMPTY];
         foreach ($source as $lineNb => $lineString) {
             $n = new Node($lineString, $lineNb + 1);//TODO: useful???-> $this->_debug && var_dump($n);
             $parent = $previous;
             $deepest = $previous->getDeepestNode();
-            if ($deepest->type === T::PARTIAL) {
-                $deepest->parse($deepest->value.$lineString);
+            if ($deepest->type === T::PARTIAL ||
+                ($deepest->value instanceof \SplQueue && $deepest->value->top()->type === T::PARTIAL)) {
+                $target = $deepest->type === T::PARTIAL ? $deepest : $deepest->value->top();
+                $target->parse($target->value.$lineString);
             } else {
                 if (in_array($n->type, $specialTypes)) {
                     if ($this->_onSpecialType($n, $parent, $previous, $emptyLines)) continue;
@@ -98,13 +100,16 @@ class Loader
                 } elseif ($n->indent === $previous->indent) {
                     $parent = $previous->getParent();
                 } elseif ($n->indent > $previous->indent) {
-                    if ($this->_onDeepestType($n, $lineString, $parent, $previous)) continue;
+                    if ($this->_onDeepestType($n, $parent, $previous, $lineString)) continue;
                 }
                 $parent->add($n);
                 $previous = $n;
             }
         }
-        $this->_debug > 2 && var_dump("\033[33mParsed Structure\033[0m\n", $root);
+        if ($this->_debug > 2) {
+            var_dump("\033[33mParsed Structure\033[0m\n", $root);
+            exit(0);
+        }
         try {
             $out = $this->_buildFile($root);
         } catch (\Error|\Exception $e) {
@@ -118,11 +123,6 @@ class Loader
     {
         $deepest = $previous->getDeepestNode();
         switch ($n->type) {
-            case T::REF_DEF://fall through
-            case T::SET_VALUE://fall through
-            case T::TAG:
-                $parent = $deepest;
-                break;
             case T::LITTERAL://fall through
             case T::LITTERAL_FOLDED:
                 $deepestParent = $deepest->getParent();
@@ -141,10 +141,15 @@ class Loader
         return false;
     }
 
-    private function _onDeepestType(&$n, $lineString, &$parent, &$previous):bool
+    private function _onDeepestType(&$n, &$parent, &$previous, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
         switch ($deepest->type) {
+            case T::REF_DEF://fall through
+            case T::SET_VALUE://fall through
+            case T::TAG:
+                $parent = $deepest;
+                break;
             case T::LITTERAL:
             case T::LITTERAL_FOLDED:
                 $n->type = T::STRING;
@@ -160,7 +165,7 @@ class Loader
                     $deepest->value .= PHP_EOL.$n->value;
                     return true;
                 } else {
-                    if ($previous->type !== T::ITEM) {
+                    if (!in_array($previous->type, [T::ITEM, T::SET_KEY])) {
                         $parent = $deepest->getParent();
                     }
                 }
@@ -181,10 +186,10 @@ class Loader
             $p = $parent;
         } else {
             switch ($type) {
-                case T::MAPPING:  $p = new \StdClass;break;
+                case T::MAPPING: //fall through
+                case T::SET:  $p = new \StdClass;break;
                 case T::SEQUENCE: $p = [];break;
                 case T::KEY: $p = $parent;break;
-                case T::SET: $p = new \SplObjectStorage;
             }
         }
         if (in_array($type, T::$LITTERALS)) {
@@ -213,14 +218,34 @@ class Loader
             case T::KEY:  $this->_buildKey($node, $root, $parent);return;
             case T::ITEM: $this->_buildItem($value, $root, $parent);return;
             case T::DIRECTIVE: return;//TODO
-            case T::TAG: return new Tag($name, $this->_build($value, $root, $parent));
-            case T::COMMENT: $root->addComment($line, $value); return;
+            case T::TAG:
+                return is_null($value) ? new Tag($name, null) :
+                                         new Tag($name, $this->_build($value, $root, $parent));
+            case T::COMMENT: $root->addComment($line, $value);
+                return;
             case T::REF_DEF: //fall through
             case T::REF_CALL:
                 $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
                 if ($type === T::REF_DEF) $root->addReference($name, $tmp);
                 return $root->getReference($name);
-            case T::SET_KEY: $parent->offsetSet($name, $this->_build($value, $root, $parent));return;
+            case T::SET_KEY: $key = json_encode($this->_build($value, $root, $parent));
+                if(empty($key)) throw new Exception("Cant determine ".var_export($value,true), 1);
+                $parent->{$key} = null;
+                return;
+            case T::SET_VALUE:
+                $prop = array_keys(get_object_vars($parent));
+                $key = end($prop);
+                if (property_exists($value, "type") && in_array($value->type, [T::ITEM, T::MAPPING])) {
+                    switch ($value->type) {
+                        case T::ITEM:$p = [];break;
+                        default:$p = new \StdClass;
+                    }
+                    $this->_build($value, $root, $p);
+                } else {
+                    $p = $this->_build($value, $root, $parent->{$key});
+                }
+                $parent->{$key} = $p;
+                return;
             default:
                 return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
         }
@@ -272,10 +297,16 @@ class Loader
         $childTypes = $this->_getChildrenTypes($queue);
         $isMapping  = count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0;
         $isSequence = in_array(T::ITEM, $childTypes);
+        $isSet      = in_array(T::SET_VALUE, $childTypes);
         if ($isMapping && $isSequence) {
             $this->_error(sprintf(self::INVALID_DOCUMENT, $key));
         } else {
-            $queue->type = $isSequence ? T::SEQUENCE : T::MAPPING;
+            switch (true) {
+                case $isSequence: $queue->type = T::SEQUENCE;break;
+                case $isSet: $queue->type = T::SET;break;
+                case $isMapping:
+                default:$queue->type = T::MAPPING;
+            }
         }
         $this->_debug >= 3 && var_dump($doc, $queue);
         return $this->_build($queue, $doc, $doc);
@@ -307,18 +338,6 @@ class Loader
         }
         return $output;
     }
-
-    // private function _removeUnbuildable(\SplQueue $children):\SplQueue
-    // {
-    //     $out = new \SplQueue;
-    //     foreach ($children as $key => $child) {
-    //         if (!in_array($child->type, T::$NOTBUILDABLE)) {
-    //             $out->enqueue($child);
-    //         }
-    //     }
-    //     $out->rewind();
-    //     return $out;
-    // }
 
     private function _getChildrenTypes(\SplQueue $children):array
     {
