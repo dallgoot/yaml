@@ -3,10 +3,7 @@ declare(strict_types=1);
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Node as   Node;
-use Dallgoot\Yaml\Types as T;
-use Dallgoot\Yaml\YamObject;
-use Dallgoot\Yaml\Tag;
+use Dallgoot\Yaml\{Node as Node, Types as T, YamlObject, Tag};
 
 class Loader
 {
