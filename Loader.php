@@ -81,10 +81,8 @@ class Loader
             $n = new Node($lineString, $lineNb + 1);//TODO: useful???-> $this->_debug && var_dump($n);
             $parent = $previous;
             $deepest = $previous->getDeepestNode();
-            if ($deepest->type === T::PARTIAL ||
-                ($deepest->value instanceof \SplQueue && $deepest->value->top()->type === T::PARTIAL)) {
-                $target = $deepest->type === T::PARTIAL ? $deepest : $deepest->value->top();
-                $target->parse($target->value.$lineString);
+            if ($deepest->type === T::PARTIAL) {
+                $deepest->parse($deepest->value.$lineString);
             } else {
                 if (in_array($n->type, $specialTypes)) {
                     if ($this->_onSpecialType($n, $parent, $previous, $emptyLines)) continue;
@@ -123,38 +121,32 @@ class Loader
     {
         $deepest = $previous->getDeepestNode();
         switch ($n->type) {
-            case T::LITTERAL://fall through
-            case T::LITTERAL_FOLDED:
-                $deepestParent = $deepest->getParent();
-                if ($deepest->type === T::EMPTY && $deepestParent->type === T::KEY) {
-                    $parent = $deepestParent;
-                }
-                break;
             case T::EMPTY:
                 if ($previous->type === T::STRING) $emptyLines[] = $n->setParent($previous->getParent());
                 if (in_array($deepest->type, T::$LITTERALS)) $emptyLines[] = $n->setParent($deepest);
                 return true;
                 break;
-            default://do nothing
-                break;
+            case T::LITTERAL://fall through
+            case T::LITTERAL_FOLDED:
+                $deepestParent = $deepest->getParent();
+                if ($deepest->type === T::EMPTY && $deepestParent->type === T::KEY) {
+                    $parent = $deepestParent;
+                }//fall through
+            default:
+                return false;
         }
-        return false;
     }
 
     private function _onDeepestType(&$n, &$parent, &$previous, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
         switch ($deepest->type) {
+            case T::LITTERAL:
+            case T::LITTERAL_FOLDED:
+                $n->value = trim($lineString);//fall through
             case T::REF_DEF://fall through
             case T::SET_VALUE://fall through
             case T::TAG:
-                $parent = $deepest;
-                break;
-            case T::LITTERAL:
-            case T::LITTERAL_FOLDED:
-                $n->type = T::STRING;
-                $n->value = trim($lineString);
-                unset($n->name);
                 $parent = $deepest;
                 break;
             case T::EMPTY:
@@ -228,8 +220,9 @@ class Loader
                 $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
                 if ($type === T::REF_DEF) $root->addReference($name, $tmp);
                 return $root->getReference($name);
-            case T::SET_KEY: $key = json_encode($this->_build($value, $root, $parent));
-                if(empty($key)) throw new Exception("Cant determine ".var_export($value,true), 1);
+            case T::SET_KEY:
+                $key = json_encode($this->_build($value, $root, $parent));
+                if (empty($key)) throw new \Exception("Cant determine ".var_export($value, true), 1);
                 $parent->{$key} = null;
                 return;
             case T::SET_VALUE:
@@ -304,7 +297,7 @@ class Loader
             switch (true) {
                 case $isSequence: $queue->type = T::SEQUENCE;break;
                 case $isSet: $queue->type = T::SET;break;
-                case $isMapping:
+                case $isMapping://fall through
                 default:$queue->type = T::MAPPING;
             }
         }
@@ -314,29 +307,22 @@ class Loader
 
     private function _litteral(\SplQueue $children, $type):string
     {
-        try {
-            $output = '';
-            $children->rewind();
-            $refIndent = $children->current()->indent;
-            if ($type === T::LITTERAL_FOLDED) {
-                $separator = ' ';
-                $action = function ($c) use ($refIndent) {
-                    return $c->indent > $refIndent || $c->type === T::EMPTY ? PHP_EOL.$c->value : $c->value;
-                };
-            } else {
-                $separator = PHP_EOL;
-                $action = function ($c) { return $c->value; };
-            }
-            $tmp = [];
-            $children->rewind();
-            foreach ($children as $key => $child) {
-                $tmp[]= $action($child);
-            }
-            $output = implode($separator, $tmp);
-        } catch (\Error $err) {
-            $this->error($err->getMessage());
+        $children->rewind();
+        $refIndent = $children->current()->indent;
+        $separator = PHP_EOL;
+        $action = function ($c) { return $c->value; };
+        if ($type === T::LITTERAL_FOLDED) {
+            $separator = ' ';
+            $action = function ($c) use ($refIndent) {
+                return $c->indent > $refIndent || $c->type === T::EMPTY ? PHP_EOL.$c->value : $c->value;
+            };
         }
-        return $output;
+        $tmp = [];
+        $children->rewind();
+        foreach ($children as $key => $child) {
+            $tmp[] = $action($child);
+        }
+        return implode($separator, $tmp);
     }
 
     private function _getChildrenTypes(\SplQueue $children):array

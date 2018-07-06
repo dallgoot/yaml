@@ -58,6 +58,10 @@ class Node
     {
         $child->setParent($this);
         $current = $this->value;
+        if (in_array($this->type, T::$LITTERALS)) {
+            $child->type = T::STRING;
+            unset($child->name);
+        }
         if (is_null($current)) {
             $this->value = $child;
             return;
