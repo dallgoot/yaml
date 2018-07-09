@@ -248,28 +248,28 @@ class Node
                     case '.inf':  return INF;
                     case '-.inf': return -INF;
                     case '.nan':  return NAN;
-                    default: //make number type detection more robust
+                    default: //TODO: make number type detection more robust
                         switch (true) {
                             case preg_match("/^(0o\d+)$/i", $v):
                                 return intval(base_convert($v, 8, 10));
                             case preg_match("/^(0x[\da-f]+)$/i", $v):
                                 return intval(base_convert($v, 16, 10));
-                            case preg_match("/^([\d.]+e[-+]\d{1,2})$/", $v):
+                            case preg_match("/^([\d.]+e[-+]\d{1,2})$/", $v)://fall through
                             case preg_match("/^([-+]?(?:\d+|\d*.\d+))$/", $v):
-                                    return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
+                                return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
                             default:
                         }
                         return strval($v);
                 }
+                break;
             case T::MAPPING_SHORT://TODO : that's not robust enough, improve it
                 return $this->getShortMapping(substr($this->value, 1, -1));
             case T::SEQUENCE_SHORT://TODO : that's not robust enough, improve it
                 return array_map("trim", explode(",", substr($this->value, 1, -1)));
 
             case T::DOC_START://fall through
-
-            case T::DOC_END: return;
-            case T::PARTIAL:; // have a multi line quoted  string OR json definition
+            case T::DOC_END://fall through
+            case T::PARTIAL:
             default: throw new \Exception("Error can not get PHP type for ".T::getName($this->type), 1);
         }
     }
