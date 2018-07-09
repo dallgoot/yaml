@@ -186,11 +186,15 @@ class Loader
         }
         foreach ($node as $key => $child) {
             $result = $this->_build($child, $root, $p);
-            if (is_string($result)) {
-                if ($p instanceof YamlObject) {
-                    $p->setText($result);
+            if (!is_null($result)) {
+                if (is_string($result)) {
+                    if ($p instanceof YamlObject) {
+                        $p->setText($result);
+                    } else {
+                        $p .= $result;
+                    }
                 } else {
-                    $p .= $result;
+                    return $result;
                 }
             }
         }
@@ -204,21 +208,18 @@ class Loader
         $value = $node->value;
         $type  = $node->type;
         switch ($type) {
-            case T::KEY:  $this->_buildKey($node, $root, $parent);return;
-            case T::ITEM: $this->_buildItem($value, $root, $parent);return;
-            case T::DIRECTIVE: return;//TODO
-            case T::TAG:
-                return is_null($value) ? new Tag($name, null) :
-                                         new Tag($name, $this->_build($value, $root, $parent));
             case T::COMMENT: $root->addComment($line, $value);
                 return;
+            case T::DIRECTIVE: return;//TODO
+            case T::ITEM: $this->_buildItem($value, $root, $parent);return;
+            case T::KEY:  $this->_buildKey($node, $root, $parent);return;
             case T::REF_DEF: //fall through
             case T::REF_CALL:
                 $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
                 if ($type === T::REF_DEF) $root->addReference($name, $tmp);
                 return $root->getReference($name);
             case T::SET_KEY:
-                $key = json_encode($this->_build($value, $root, $parent));
+                $key = json_encode($this->_build($value, $root, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR);
                 if (empty($key)) throw new \Exception("Cant determine ".var_export($value, true), 1);
                 $parent->{$key} = null;
                 return;
@@ -236,6 +237,13 @@ class Loader
                 }
                 $parent->{$key} = $p;
                 return;
+            case T::TAG:
+                if ($parent === $root) {
+                    $root->addTag($name);return;
+                }else{
+                    return is_null($value) ? new Tag($name, null) :
+                                             new Tag($name, $this->_build($value, $root, $parent));
+                }
             default:
                 return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
         }
@@ -252,8 +260,12 @@ class Loader
 
     private function _buildItem($value, $root, &$parent):void
     {
-        $index = ($value instanceof Node && $value->type === T::KEY) ? $value->name : count($parent);
-        $parent[$index] = $this->_build($value, $root, $parent[$index]);
+        if ($value instanceof Node && $value->type === T::KEY) {
+            $parent[$value->name] = $this->_build($value->value, $root, $parent[$value->name]);
+        } else {
+            $index = count($parent);
+            $parent[$index] = $this->_build($value, $root, $parent[$index]);
+        }
     }
 
     /**

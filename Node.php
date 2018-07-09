@@ -231,15 +231,36 @@ class Node
 
     public function getPhpValue()
     {
-        if (is_null($this->value)) return null;
+        $v = $this->value;
+        if (is_null($v)) return null;
         switch ($this->type) {
             case T::EMPTY:return null;
-            case T::BOOLEAN: return boolval($this->value);
-            case T::NUMBER: return intval($this->value);
-            case T::JSON: return json_encode($this->value);
-            case T::QUOTED://fall through
+            case T::JSON: return json_encode($v, JSON_PARTIAL_OUTPUT_ON_ERROR);
+            case T::QUOTED: return substr($v, 1, -1);
             case T::REF_CALL://fall through
-            case T::STRING: return strval($this->value);
+            case T::STRING:
+                switch (strtolower($v)) {
+                    case 'yes':   return true;break;
+                    case "no":    return false;break;
+                    case 'true'://fall through
+                    case 'false': return bool($v);break;
+                    case 'null':  return null;break;
+                    case '.inf':  return INF;break;
+                    case '-.inf': return -INF;break;
+                    case '.nan':  return NAN;break;
+                    default: //make number type detection more robust
+                        switch (true) {
+                            case preg_match("/^(0o\d+)$/i", $v):
+                                return intval(base_convert($v, 8, 10));
+                            case preg_match("/^(0x[\da-f]+)$/i", $v):
+                                return intval(base_convert($v, 16, 10));
+                            case preg_match("/^([\d.]+e[-+]\d{1,2})$/", $v):
+                            case preg_match("/^([-+]?(?:\d+|\d*.\d+))$/", $v):
+                                    return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
+                            default:
+                        }
+                        return strval($v);
+                 }
 
             case T::MAPPING_SHORT://TODO : that's not robust enough, improve it
                 return $this->getShortMapping(substr($this->value, 1, -1));

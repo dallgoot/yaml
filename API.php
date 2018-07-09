@@ -12,6 +12,7 @@ class API
     private $_references = [];
     private $_comments   = [];
     private $_documents  = [];
+    private $tags = [];
 
     public $type = T::MAPPING;
     public $value = null;
@@ -81,5 +82,10 @@ class API
     public function setText($value):void
     {
         $this->value .= $value;
+    }
+
+    public function addTag($value)
+    {
+        $this->tags[] = $value;
     }
 }
