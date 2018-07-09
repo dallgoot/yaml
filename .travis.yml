@@ -6,4 +6,4 @@ before_script:
   # - phpenv config-rm xdebug.ini
   - composer require atoum/atoum
 # script: vendor/bin/atoum
-script: php example.php
+script: php tests/tests.php

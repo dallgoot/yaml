@@ -240,7 +240,7 @@ class Loader
             case T::TAG:
                 if ($parent === $root) {
                     $root->addTag($name);return;
-                }else{
+                } else {
                     return is_null($value) ? new Tag($name, null) :
                                              new Tag($name, $this->_build($value, $root, $parent));
                 }

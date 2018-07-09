@@ -243,7 +243,7 @@ class Node
                     case 'yes':   return true;break;
                     case "no":    return false;break;
                     case 'true'://fall through
-                    case 'false': return bool($v);break;
+                    case 'false': return boolval($v);break;
                     case 'null':  return null;break;
                     case '.inf':  return INF;break;
                     case '-.inf': return -INF;break;
@@ -260,8 +260,7 @@ class Node
                             default:
                         }
                         return strval($v);
-                 }
-
+            }
             case T::MAPPING_SHORT://TODO : that's not robust enough, improve it
                 return $this->getShortMapping(substr($this->value, 1, -1));
             case T::SEQUENCE_SHORT://TODO : that's not robust enough, improve it

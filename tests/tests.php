@@ -20,7 +20,7 @@ try {
         $s = json_encode($result, 512);
         // $s = json_decode($e);
         // $s = serialize($result);
-        if ( !in_array(json_last_error(), [JSON_ERROR_INF_OR_NAN, JSON_ERROR_NONE ])) {
+        if (!in_array(json_last_error(), [JSON_ERROR_INF_OR_NAN, JSON_ERROR_NONE ])) {
             throw new Exception(json_last_error_msg()." on $fileName", 1);
         }
         echo "\n $s";
