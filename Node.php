@@ -240,14 +240,14 @@ class Node
             case T::REF_CALL://fall through
             case T::STRING:
                 switch (strtolower($v)) {
-                    case 'yes':   return true;break;
-                    case "no":    return false;break;
+                    case 'yes':   return true;
+                    case "no":    return false;
                     case 'true'://fall through
-                    case 'false': return boolval($v);break;
-                    case 'null':  return null;break;
-                    case '.inf':  return INF;break;
-                    case '-.inf': return -INF;break;
-                    case '.nan':  return NAN;break;
+                    case 'false': return boolval($v);
+                    case 'null':  return null;
+                    case '.inf':  return INF;
+                    case '-.inf': return -INF;
+                    case '.nan':  return NAN;
                     default: //make number type detection more robust
                         switch (true) {
                             case preg_match("/^(0o\d+)$/i", $v):
@@ -260,7 +260,7 @@ class Node
                             default:
                         }
                         return strval($v);
-            }
+                }
             case T::MAPPING_SHORT://TODO : that's not robust enough, improve it
                 return $this->getShortMapping(substr($this->value, 1, -1));
             case T::SEQUENCE_SHORT://TODO : that's not robust enough, improve it

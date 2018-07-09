@@ -248,7 +248,13 @@ class Loader
                 return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
         }
     }
-
+    /**
+     * Builds a key and set the property + value to the parent given
+     *
+     * @param      Node   $node    The node
+     * @param      YamlObject   $root    The root
+     * @param      object|array  $parent  The parent
+     */
     private function _buildKey($node, $root, &$parent):void
     {
         if (is_null($node->name)) {
