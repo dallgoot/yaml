@@ -22,34 +22,34 @@ PHP library to load and parse YAML file to PHP datatypes equivalent
 ## What's different from other PHP Yaml libraries
     support multiple documents in one YAML content (string or file)
     coherent types support : other libraries don't provide types distinction between:
-    ```yaml
-    sequence:
-        - string_key: 1
-    #and
-    mapping:
-        string_key: 1
-    ```
-    For these libraries same type is returned :
-    ```php
-    array("string_key"=> 1)
-    ```
-    That is an issue when parsing YAML but also when dumping YAML content.
-    Take this example from Symfony/Yaml:
-    ```php
-        $object = new \stdClass();
-        $object->foo = 'bar';
+```yaml
+sequence:
+    - string_key: 1
+#and
+mapping:
+    string_key: 1
+```
+For these libraries same type is returned :
+```php
+array("string_key"=> 1)
+```
+That is an issue when parsing YAML but also when dumping YAML content.
+Take this example from Symfony/Yaml:
+```php
+    $object = new \stdClass();
+    $object->foo = 'bar';
 
-        $dumped = Yaml::dump(array('data' => $object), 2, 4, Yaml::DUMP_OBJECT_AS_MAP);
-        // $dumped = "data:\n    foo: bar"
-    ```
-    The dumped result is wrong respecting to datatypes : object->mapping,array->sequence
-    So this should dump document as:
-    ```yaml
-    - data:
-        foo: bar
-    ```
-    Note the "-" hyphen which makes possible to distinguish between a mapping key VS a sequence entry.
-    This distinction is crucial to allow respecting original YAML structure when content is loaded and dumped.
+    $dumped = Yaml::dump(array('data' => $object), 2, 4, Yaml::DUMP_OBJECT_AS_MAP);
+    // $dumped = "data:\n    foo: bar"
+```
+The dumped result is wrong respecting to datatypes : object->mapping,array->sequence
+So this should dump document as:
+```yaml
+- data:
+    foo: bar
+```
+Note the "-" hyphen which makes possible to distinguish between a mapping key VS a sequence entry.
+This distinction is crucial to allow respecting original YAML structure when content is loaded and dumped.
 
 ## TODO:
 - tags: default handling for common tags, and user-customized process for custom ones
