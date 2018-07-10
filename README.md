@@ -20,8 +20,9 @@ PHP library to load and parse YAML file to PHP datatypes equivalent
 - tags (partial implementation)
 
 ## What's different from other PHP Yaml libraries
-support multiple documents in one YAML content (string or file)
-coherent types support : other libraries don't provide types distinction between:
+- support multiple documents in one YAML content (string or file)
+- complex mapping
+- coherent types support : other libraries don't provide types distinction between:
 ```yaml
 sequence:
     - string_key: 1
