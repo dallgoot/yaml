@@ -18,7 +18,7 @@ class API
     public $value = null;
 
     const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";
-    const UNAMED_REFERENCE    = self::class.": reference MUST have a name";
+    const UNAMED_REFERENCE  = self::class.": reference MUST have a name";
 
     public function __construct()
     {
@@ -34,7 +34,7 @@ class API
      */
     public function addReference($name, $value):void
     {
-        if (is_null($name) || empty($name)) {
+        if (empty($name)) {
             throw new \UnexpectedValueException(self::UNAMED_REFERENCE, 1);
         }
         $this->_references[$name] = $value;

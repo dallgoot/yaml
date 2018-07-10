@@ -3,30 +3,72 @@
 
 PHP library to load and parse YAML file to PHP datatypes equivalent
 
-## Support:
-- YAML specifications version 1.2 http://yaml.org/spec/1.2/spec.html
-- multiple document in a file
-- directives (to be implemented)
-- references (option : enabled by default)
-- comments (option : enabled by default)
-- tags (partial implementation)
-- multi-line quoted (or not) values
-- complex mapping (keys as json strings)
-- JSON values
-- short syntax for mapping and sequences
-
 ## Features:
+- define apropriate PHP datatypes for values ie. object for mappings, array for sequences, JSON, DateTime, integers, floats, etc.
 - recover from some parsing errors
 - tolerance to tabulations
-- rename key names that are not valid PHP property name (to be implemented)
+
+## Support:
+- YAML specifications version 1.2 http://yaml.org/spec/1.2/spec.html
+- comments (option : enabled by default)
+- complex mapping (Note: keys are JSON encoded strings)
+- JSON values
+- multi-line values (simple/doubled quoted or not, mapping, sequence or JSON)
+- multiple document in a file
+- references (option : enabled by default)
+- short syntax for mapping and sequences
+- tags (partial implementation)
+
+## What's different from other PHP Yaml libraries
+    support multiple documents in one YAML content (string or file)
+    coherent types support : other libraries don't provide types distinction between:
+    ```yaml
+    sequence:
+        - string_key: 1
+    #and
+    mapping:
+        string_key: 1
+    ```
+    For these libraries same type is returned :
+    ```php
+    array("string_key"=> 1)
+    ```
+    That is an issue when parsing YAML but also when dumping YAML content.
+    Take this example from Symfony/Yaml:
+    ```php
+        $object = new \stdClass();
+        $object->foo = 'bar';
+
+        $dumped = Yaml::dump(array('data' => $object), 2, 4, Yaml::DUMP_OBJECT_AS_MAP);
+        // $dumped = "data:\n    foo: bar"
+    ```
+    The dumped result is wrong respecting to datatypes : object->mapping,array->sequence
+    So this should dump document as:
+    ```yaml
+    - data:
+        foo: bar
+    ```
+    Note the "-" hyphen which makes possible to distinguish between a mapping key VS a sequence entry.
+    This distinction is crucial to allow respecting original YAML structure when content is loaded and dumped.
+
+## TODO:
+- tags: default handling for common tags, and user-customized process for custom ones
+- directives (to be implemented) : currently ignored
+- IMPROVE : rename key names that are not valid PHP property name (to be implemented)
+- IMPROVE : identifying errors in YAML content
 
 ## API
-	Loader : Return an array of YAMLOBJECT
+    Dallgoot\Yaml\Loader : Return an array of *YamlObject* for multiple document, or *YamlObject* for one document
+    Dallgoot\Yaml\Dumper : create YAML structure according to data types provided :
+        a YamlObject is a document
+        an array of YamlObject is a multi-documents YAML file.
+        any other datatypes is a one YAML Document
+    Dallgoot\Yaml\Tag : an object with properties _tagname_, _value_
 
 
 ## Performances
 
-	memory usage:
+
 
 
 Thanks to https://www.json2yaml.com/convert-yaml-to-json
