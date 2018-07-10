@@ -20,8 +20,8 @@ PHP library to load and parse YAML file to PHP datatypes equivalent
 - tags (partial implementation)
 
 ## What's different from other PHP Yaml libraries
-    support multiple documents in one YAML content (string or file)
-    coherent types support : other libraries don't provide types distinction between:
+support multiple documents in one YAML content (string or file)
+coherent types support : other libraries don't provide types distinction between:
 ```yaml
 sequence:
     - string_key: 1
@@ -36,11 +36,11 @@ array("string_key"=> 1)
 That is an issue when parsing YAML but also when dumping YAML content.
 Take this example from Symfony/Yaml:
 ```php
-    $object = new \stdClass();
-    $object->foo = 'bar';
+$object = new \stdClass();
+$object->foo = 'bar';
 
-    $dumped = Yaml::dump(array('data' => $object), 2, 4, Yaml::DUMP_OBJECT_AS_MAP);
-    // $dumped = "data:\n    foo: bar"
+$dumped = Yaml::dump(array('data' => $object), 2, 4, Yaml::DUMP_OBJECT_AS_MAP);
+// $dumped = "data:\n    foo: bar"
 ```
 The dumped result is wrong respecting to datatypes : object->mapping,array->sequence
 So this should dump document as:
@@ -58,17 +58,18 @@ This distinction is crucial to allow respecting original YAML structure when con
 - IMPROVE : identifying errors in YAML content
 
 ## API
-    Dallgoot\Yaml\Loader : Return an array of *YamlObject* for multiple document, or *YamlObject* for one document
-    Dallgoot\Yaml\Dumper : create YAML structure according to data types provided :
-        a YamlObject is a document
-        an array of YamlObject is a multi-documents YAML file.
-        any other datatypes is a one YAML Document
-    Dallgoot\Yaml\Tag : an object with properties _tagname_, _value_
+- Dallgoot\Yaml\Loader : Return an array of *YamlObject* for multiple document, or *YamlObject* for one document
+- Dallgoot\Yaml\Dumper : create YAML structure according to data types provided :
+    - a YamlObject is a document
+    - an array of YamlObject is a multi-documents YAML file.
+    - any other datatypes is a one YAML Document
+- Dallgoot\Yaml\Tag : an object with properties _tagname_, _value_
 
 
 ## Performances
+    TBD
 
 
 
-
-Thanks to https://www.json2yaml.com/convert-yaml-to-json
+## Thanks
+https://www.json2yaml.com/convert-yaml-to-json
