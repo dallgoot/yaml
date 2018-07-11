@@ -24,9 +24,9 @@ class Types
     const LITTERAL = 72;
     const LITTERAL_FOLDED = 82;
 
-    const STRING    = 102;
-    const BOOLEAN = 112;
-    const NUMBER  = 122;
+    const SCALAR    = 102;
+    // const BOOLEAN = 112;
+    // const NUMBER  = 122;
     const TAG = 132;
     const JSON = 142;
 
@@ -38,18 +38,14 @@ class Types
     const SET_KEY = 180;
     const SET_VALUE = 196;
 
-    public static $NOTBUILDABLE = [self::DIRECTIVE,
-                                    self::ROOT,
-                                    self::DOC_END,
-                                    self::COMMENT,
-                                    self::EMPTY,
-                                    self::TAG];
-    public static $LITTERALS = [self::LITTERAL, self::LITTERAL_FOLDED];
+    // public static $NOTBUILDABLE = [self::DIRECTIVE,
+    //                                 self::ROOT,
+    //                                 self::DOC_END,
+    //                                 self::COMMENT,
+    //                                 self::EMPTY,
+    //                                 self::TAG];
 
-    public function __construct()
-    {
-        // self::test = 3;
-    }
+    public static $LITTERALS = [self::LITTERAL, self::LITTERAL_FOLDED];
 
     public static function getName($constant)
     {

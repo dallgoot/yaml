@@ -6,12 +6,22 @@ use \Dallgoot\Yaml\Loader;
 /* USE CASE 1
 * load and parse if file exists
 */
-// $yaml = (new Loader('./references/Example 2.19.yml', null,2))->parse();
+// $yaml = (new Loader('./references/Example 2.10.yml', null,2))->parse();
 $yaml = (new Loader('./dummy.yml', null, 2))->parse();
 var_dump($yaml);
-
+exit(0);
 // USE CASE 2
-// $yaml = (new Loader())->parse('SOME YAML STRING');
+$a = <<<EOF
+sequence:
+    - string_key: 1
+EOF;
+$b = <<<EOF
+#2
+mapping:
+    string_key: 1
+EOF;
+var_dump((new Loader(null, Loader::EXCEPTIONS_PARSING))->parse($a));
+var_dump((new Loader(null, Loader::EXCEPTIONS_PARSING))->parse($b));
 
 // USE CASE 3
 // $yamlObjList = [];

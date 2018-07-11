@@ -16,6 +16,7 @@ class ComposerStaticInit2906926e41d4e6da5c4a99d01dd0f217
         'Dallgoot\\Yaml\\Dumper' => __DIR__ . '/../..' . '/Dumper.php',
         'Dallgoot\\Yaml\\Loader' => __DIR__ . '/../..' . '/Loader.php',
         'Dallgoot\\Yaml\\Node' => __DIR__ . '/../..' . '/Node.php',
+        'Dallgoot\\Yaml\\Regex' => __DIR__ . '/../..' . '/Regex.php',
         'Dallgoot\\Yaml\\Tag' => __DIR__ . '/../..' . '/Tag.php',
         'Dallgoot\\Yaml\\Types' => __DIR__ . '/../..' . '/Types.php',
         'Dallgoot\\Yaml\\YamlObject' => __DIR__ . '/../..' . '/YamlObject.php',

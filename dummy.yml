@@ -17,19 +17,19 @@ fakekey: t
 object:
   key: 4
   array:
-    - null 
+    - null
     - boo lean: &a reference_called
     - integer: 1
 emptyparagraph: >
 paragraph: >
    false: qsd
    Blank lines denote
-   
+
    paragraph breaks
    but not linefeed
 emptycontent: |-
 content:
-|- 
+|-
    Or we
    can auto
    convert line breaks
@@ -37,15 +37,15 @@ content:
 array2:
   - *a #comm
   - *a
-  - mul: 
+  - mul:
      aqdqsdqsdq
       bqsdqsdqd
-arr: 
+arr:
   - another: value
     interitem: 456
   - lad: "fqqs\"
   5654"
-partial: 
+partial:
   r: |-
     "{a: 45}"
     stupdtxt

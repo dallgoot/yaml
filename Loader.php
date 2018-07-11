@@ -68,10 +68,11 @@ class Loader
     public function parse($strContent = null):array
     {
         $source = is_null($strContent) ? $this->_content :
-                                    preg_split("/([^\n\r]+)/um", $strContent, null, PREG_SPLIT_DELIM_CAPTURE);
+                                    preg_split("/([^\n\r]+)/um", $strContent, 0, PREG_SPLIT_DELIM_CAPTURE);
         //TODO : be more permissive on $strContent values
         if (!is_array($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
         $previous = $root = new Node();
+        // $root->add(new Node(null));
         $emptyLines = [];
         $specialTypes = [T::LITTERAL, T::LITTERAL_FOLDED, T::EMPTY];
         foreach ($source as $lineNb => $lineString) {
@@ -101,7 +102,7 @@ class Loader
                 $previous = $n;
             }
         }
-        if ($this->_debug > 2) {
+        if ($this->_debug === 2) {
             var_dump("\033[33mParsed Structure\033[0m\n", $root);
             exit(0);
         }
@@ -119,16 +120,17 @@ class Loader
         $deepest = $previous->getDeepestNode();
         switch ($n->type) {
             case T::EMPTY:
-                if ($previous->type === T::STRING) $emptyLines[] = $n->setParent($previous->getParent());
+                if ($previous->type === T::SCALAR) $emptyLines[] = $n->setParent($previous->getParent());
                 if (in_array($deepest->type, T::$LITTERALS)) $emptyLines[] = $n->setParent($deepest);
                 return true;
                 break;
             case T::LITTERAL://fall through
-            case T::LITTERAL_FOLDED:
-                $deepestParent = $deepest->getParent();
-                if ($deepest->type === T::EMPTY && $deepestParent->type === T::KEY) {
-                    $parent = $deepestParent;
-                }//fall through
+            case T::LITTERAL_FOLDED://var_dump($deepest);exit();
+                if ($deepest->type === T::KEY && is_null($deepest->value)) {
+                    $deepest->add($n);
+                    $previous = $n;
+                    return true;
+                }
             default:
                 return false;
         }
@@ -147,10 +149,10 @@ class Loader
                 $parent = $deepest;
                 break;
             case T::EMPTY:
-            case T::STRING:
-                if ($n->type === T::STRING &&
+            case T::SCALAR:
+                if ($n->type === T::SCALAR &&
                     !in_array($deepest->getParent()->type, T::$LITTERALS) ) {
-                    $deepest->type = T::STRING;
+                    $deepest->type = T::SCALAR;
                     $deepest->value .= PHP_EOL.$n->value;
                     return true;
                 } else {
@@ -255,12 +257,21 @@ class Loader
      * @param      YamlObject   $root    The root
      * @param      object|array  $parent  The parent
      */
-    private function _buildKey($node, $root, &$parent):void
+    private function _buildKey($node, $root, &$parent)
     {
-        if (is_null($node->name)) {
+        $name  = $node->name;
+        $value = $node->value;
+        if (is_null($name)) {
             $this->_error(sprintf(self::ERROR_NO_KEYNAME, $node->line, $this->filePath));
         } else {
-            $parent->{$node->name} = $this->_build($node->value, $root, $parent->{$node->name});
+            if ($value instanceof Node && in_array($value->type, [T::KEY, T::ITEM])) {
+                $parent->{$name} = $value->type === T::KEY ? new \StdClass : [];
+                $this->_build($value, $root, $parent->{$name});
+            } elseif (!is_object($value)) {
+                $parent->{$name} = $node->getPhpValue();
+            } else {
+                $parent->{$name} = $this->_build($value, $root, $parent->{$name});
+            }
         }
     }
 
@@ -284,6 +295,11 @@ class Loader
     {
         $totalDocStart = 0;
         $documents = [];
+        if ($root->value instanceof Node) {
+            $q = new \SplQueue;
+            $q->enqueue($root->value);
+            return [$this->_buildDocument($q, [0])];
+        }
         $root->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE);
         foreach ($root->value as $key => $child) {
             if ($child->type === T::DOC_START) {

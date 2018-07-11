@@ -15,6 +15,7 @@ return array(
     'Dallgoot\\Yaml\\Dumper' => $baseDir . '/Dumper.php',
     'Dallgoot\\Yaml\\Loader' => $baseDir . '/Loader.php',
     'Dallgoot\\Yaml\\Node' => $baseDir . '/Node.php',
+    'Dallgoot\\Yaml\\Regex' => $baseDir . '/Regex.php',
     'Dallgoot\\Yaml\\Tag' => $baseDir . '/Tag.php',
     'Dallgoot\\Yaml\\Types' => $baseDir . '/Types.php',
     'Dallgoot\\Yaml\\YamlObject' => $baseDir . '/YamlObject.php',
