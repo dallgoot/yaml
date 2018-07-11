@@ -21,6 +21,7 @@ class Loader
     //Errors
     const ERROR_NO_KEYNAME = self::class.": key has NO NAME on line %d";
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
+    const BUILDING_ERROR   = self::class.": fatal error during building in %s : %s";
     //Exceptions
     const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
     const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
@@ -65,42 +66,43 @@ class Loader
      *
      * @return     array      the hierarchy built = an array of YamlObject
      */
-    public function parse($strContent = null):array
+    public function parse($strContent = null)
     {
         $source = is_null($strContent) ? $this->_content :
                                     preg_split("/([^\n\r]+)/um", $strContent, 0, PREG_SPLIT_DELIM_CAPTURE);
         //TODO : be more permissive on $strContent values
         if (!is_array($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
         $previous = $root = new Node();
-        // $root->add(new Node(null));
         $emptyLines = [];
         $specialTypes = [T::LITTERAL, T::LITTERAL_FOLDED, T::EMPTY];
-        foreach ($source as $lineNb => $lineString) {
-            $n = new Node($lineString, $lineNb + 1);//TODO: useful???-> $this->_debug && var_dump($n);
-            $parent = $previous;
-            $deepest = $previous->getDeepestNode();
-            if ($deepest->type === T::PARTIAL) {
-                $deepest->parse($deepest->value.$lineString);
-            } else {
-                if (in_array($n->type, $specialTypes)) {
-                    if ($this->_onSpecialType($n, $parent, $previous, $emptyLines)) continue;
+        try {
+            foreach ($source as $lineNb => $lineString) {
+                $n = new Node($lineString, $lineNb + 1);//TODO: useful???-> $this->_debug && var_dump($n);
+                $parent  = $previous;
+                $deepest = $previous->getDeepestNode();
+                if ($deepest->type === T::PARTIAL) {
+                    $deepest->parse($deepest->value.$lineString);
+                } else {
+                    if (in_array($n->type, $specialTypes)) {
+                        if ($this->_onSpecialType($n, $parent, $previous, $emptyLines)) continue;
+                    }
+                    foreach ($emptyLines as $key => $node) {
+                        $node->getParent()->add($node);
+                    }
+                    $emptyLines = [];
+                    if ($n->indent < $previous->indent) {
+                        $parent = $previous->getParent($n->indent);
+                    } elseif ($n->indent === $previous->indent) {
+                        $parent = $previous->getParent();
+                    } elseif ($n->indent > $previous->indent) {
+                        if ($this->_onDeepestType($n, $parent, $previous, $lineString)) continue;
+                    }
+                    $parent->add($n);
+                    $previous = $n;
                 }
-                foreach ($emptyLines as $key => $node) {
-                    $node->getParent()->add($node);
-                }
-                $emptyLines = [];
-                if ($n->indent === 0) {
-                    $parent = $root;
-                } elseif ($n->indent < $previous->indent) {
-                    $parent = $previous->getParent($n->indent);
-                } elseif ($n->indent === $previous->indent) {
-                    $parent = $previous->getParent();
-                } elseif ($n->indent > $previous->indent) {
-                    if ($this->_onDeepestType($n, $parent, $previous, $lineString)) continue;
-                }
-                $parent->add($n);
-                $previous = $n;
             }
+        } catch (\Error|\Exception $e) {
+            $this->_error($e->getMessage()." on line ".$e->getLine());
         }
         if ($this->_debug === 2) {
             var_dump("\033[33mParsed Structure\033[0m\n", $root);
@@ -110,7 +112,7 @@ class Loader
             $out = $this->_buildFile($root);
         } catch (\Error|\Exception $e) {
             var_dump($root);
-            throw new \ParseError($e->getMessage()." on line ".$e->getLine());
+            throw new \Exception(sprintf(self::BUILDING_ERROR, $this->filePath, $e->getMessage()));
         }
         return $out;
     }
@@ -205,13 +207,10 @@ class Loader
 
     private function _buildNode(Node $node, $root, &$parent)
     {
-        $line  = property_exists($node, "line") ? $node->line : null;
+        list($line, $type, $value) = [$node->line, $node->type, $node->value];
         $name  = property_exists($node, "name") ? $node->name : null;
-        $value = $node->value;
-        $type  = $node->type;
         switch ($type) {
-            case T::COMMENT: $root->addComment($line, $value);
-                return;
+            case T::COMMENT: $root->addComment($line, $value);return;
             case T::DIRECTIVE: return;//TODO
             case T::ITEM: $this->_buildItem($value, $root, $parent);return;
             case T::KEY:  $this->_buildKey($node, $root, $parent);return;
@@ -222,17 +221,14 @@ class Loader
                 return $root->getReference($name);
             case T::SET_KEY:
                 $key = json_encode($this->_build($value, $root, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR);
-                if (empty($key)) throw new \Exception("Cant determine ".var_export($value, true), 1);
+                if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($value, true), 1);
                 $parent->{$key} = null;
                 return;
             case T::SET_VALUE:
                 $prop = array_keys(get_object_vars($parent));
                 $key = end($prop);
                 if (property_exists($value, "type") && in_array($value->type, [T::ITEM, T::MAPPING])) {
-                    switch ($value->type) {
-                        case T::ITEM:$p = [];break;
-                        default:$p = new \StdClass;
-                    }
+                    $p = $value->type === T::ITEM  ? [] : new \StdClass;
                     $this->_build($value, $root, $p);
                 } else {
                     $p = $this->_build($value, $root, $parent->{$key});
@@ -243,8 +239,8 @@ class Loader
                 if ($parent === $root) {
                     $root->addTag($name);return;
                 } else {
-                    return is_null($value) ? new Tag($name, null) :
-                                             new Tag($name, $this->_build($value, $root, $parent));
+                    $val = is_null($value) ? null : $this->_build($value, $root, $parent);
+                    return new Tag($name, $val);
                 }
             default:
                 return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
@@ -267,10 +263,10 @@ class Loader
             if ($value instanceof Node && in_array($value->type, [T::KEY, T::ITEM])) {
                 $parent->{$name} = $value->type === T::KEY ? new \StdClass : [];
                 $this->_build($value, $root, $parent->{$name});
-            } elseif (!is_object($value)) {
-                $parent->{$name} = $node->getPhpValue();
-            } else {
+            } elseif (is_object($value)) {
                 $parent->{$name} = $this->_build($value, $root, $parent->{$name});
+            } else {
+                $parent->{$name} = $node->getPhpValue();
             }
         }
     }
@@ -291,7 +287,7 @@ class Loader
      * @param      Node   $root   The root node
      * @return     array  representing the total of documents in the file.
      */
-    private function _buildFile(Node $root):array
+    private function _buildFile(Node $root)
     {
         $totalDocStart = 0;
         $documents = [];
@@ -312,7 +308,8 @@ class Loader
             $documents[$currentDoc]->enqueue($child);
         }
         $this->_debug >= 2 && var_dump($documents);
-        return array_map([$this, '_buildDocument'], $documents, array_keys($documents));
+        $content = array_map([$this, '_buildDocument'], $documents, array_keys($documents));
+        return count($content) === 1 ? $content[0] : $content;
     }
 
     private function _buildDocument(\SplQueue $queue, $key):YamlObject

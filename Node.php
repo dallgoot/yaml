@@ -47,7 +47,6 @@ class Node
             $child->type = T::SCALAR;
             unset($child->name);
         }
-        $specialTypes = [T::ITEM, T::KEY, T::LITTERAL, T::LITTERAL_FOLDED];
         if (is_null($current)) {
             $this->value = $child;
             return;
@@ -88,8 +87,8 @@ class Node
             $this->indent = 0;
         } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something after?
             $this->type = T::DOC_END;
-        } elseif (preg_match('/^([[:alnum:]][[:alnum:]_ -]*[ \t]*)(?::[ \t](.*)|:)$/', $nodeValue, $matches)) {
-            $this->_onKey($nodeValue, $matches);
+        } elseif (preg_match('/^([[:alnum:]_][[:alnum:]_ -]*[ \t]*)(?::[ \t](.*)|:)$/', $nodeValue, $matches)) {
+            $this->_onKey($matches);
         } else {//NOTE: can be of another type according to parent
             list($this->type, $value) = $this->_define($nodeValue);
             is_object($value) ? $this->add($value) : $this->value = $value;
@@ -127,7 +126,7 @@ class Node
         }
     }
 
-    private function _onKey($nodeValue, $matches)
+    private function _onKey($matches)
     {
         $this->type = T::KEY;
         $this->name = trim($matches[1]);
@@ -236,15 +235,15 @@ class Node
         }
     }
 
-    private function getNumber($v)
-    {
+    // private function getNumber($v)
+    // {
 
-    }
+    // }
 
     private function getShortMapping($mappingString)
     {
         $out = new \StdClass();
-        foreach (explode(',', $mappingString) as $key => $value) {
+        foreach (explode(',', $mappingString) as $value) {
             list($keyName, $keyValue) = explode(':', $value);
             $out->{trim($keyName)} = trim($keyValue);
         }

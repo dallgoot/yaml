@@ -50,6 +50,10 @@ plugins:
   phpmd:
     enabled: true
     checks:
+      CleanCode/ElseExpression:
+        enabled: false
+      CleanCode/StaticAccess:
+        enabled: false
       Controversial/CamelCasePropertyName:
         enabled: false
       Naming/ShortVariable:
