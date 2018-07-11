@@ -1,5 +1,5 @@
 <?php
-$references = [
+return $references = [
 'Example 2.1.yml'  => '["Mark McGwire","Sammy Sosa","Ken Griffey"]',
 'Example 2.10.yml' => '{"hr":["Mark McGwire","Sammy Sosa"],"rbi":["Sammy Sosa","Ken Griffey"]}',
 'Example 2.11.yml' => '{"[\"Detroit Tigers\",\"Chicago cubs\"]":["2001-07-23"],"[\"New York Yankees\",\"Atlanta Braves\"]":["2001-07-02","2001-08-12","2001-08-14"]}',

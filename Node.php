@@ -105,22 +105,20 @@ class Node
     private function _define($nodeValue):array
     {
         $v = substr($nodeValue, 1);
+        if (in_array($nodeValue[0], ['"', "'"])) {
+            $type = preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $nodeValue) ? T::QUOTED : T::PARTIAL;
+            return [$type, $nodeValue];
+        }
+        if (in_array($nodeValue[0], ['{', '['])) return $this->_onObject($nodeValue);
+        if (in_array($nodeValue[0], ['!', '&', '*'])) return $this->_onNodeAction($nodeValue);
         switch ($nodeValue[0]) {
             case '#': return [T::COMMENT, ltrim($v)];
             case "-": return $this->_onMinus($nodeValue);
-            case '"': //fall through
-            case "'": return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $nodeValue) ?
-                                [T::QUOTED, $nodeValue] : [T::PARTIAL, $nodeValue];
-            case "{": //fall through
-            case "[": return $this->_onObject($nodeValue);
-            case '!': //fall through
-            case "&": //fall through
-            case "*": return $this->_onNodeAction($nodeValue);
             case '%': return [T::DIRECTIVE, ltrim($v)];
             case '?': return [T::SET_KEY,   empty($v) ? null : new Node(ltrim($v), $this->line)];
             case ':': return [T::SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)];
-            case '>': $this->value = new \SplQueue;return [T::LITTERAL_FOLDED, null];
-            case '|': $this->value = new \SplQueue;return [T::LITTERAL, null];
+            case '>': return [T::LITTERAL_FOLDED, null];
+            case '|': return [T::LITTERAL, null];
             default:
                 return [T::SCALAR, $nodeValue];
         }
@@ -196,7 +194,7 @@ class Node
         if (is_null($v)) return null;
         switch ($this->type) {
             case T::EMPTY:  return null;
-            case T::JSON:   return json_decode($v, null, null, JSON_PARTIAL_OUTPUT_ON_ERROR);
+            case T::JSON:   return json_decode($v, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR);
             case T::QUOTED: return substr($v, 1, -1);
             case T::REF_CALL://fall through
             case T::SCALAR: return $this->getScalar($v);

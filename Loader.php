@@ -294,7 +294,7 @@ class Loader
         if ($root->value instanceof Node) {
             $q = new \SplQueue;
             $q->enqueue($root->value);
-            return [$this->_buildDocument($q, [0])];
+            return [$this->_buildDocument($q, 0)];
         }
         $root->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE);
         foreach ($root->value as $key => $child) {
