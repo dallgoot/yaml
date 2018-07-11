@@ -285,7 +285,7 @@ class Loader
      * Builds a file.  check multiple documents & split if more than one documents
      *
      * @param      Node   $root   The root node
-     * @return     array  representing the total of documents in the file.
+     * @return     array|YamlObject  list of documents or juste one.
      */
     private function _buildFile(Node $root)
     {
@@ -312,7 +312,7 @@ class Loader
         return count($content) === 1 ? $content[0] : $content;
     }
 
-    private function _buildDocument(\SplQueue $queue, $key):YamlObject
+    private function _buildDocument(\SplQueue $queue, int $key):YamlObject
     {
         $doc = new YamlObject();
         $childTypes = $this->_getChildrenTypes($queue);

@@ -196,7 +196,7 @@ class Node
         if (is_null($v)) return null;
         switch ($this->type) {
             case T::EMPTY:  return null;
-            case T::JSON:   return json_decode($v, JSON_PARTIAL_OUTPUT_ON_ERROR);
+            case T::JSON:   return json_decode($v, null, null, JSON_PARTIAL_OUTPUT_ON_ERROR);
             case T::QUOTED: return substr($v, 1, -1);
             case T::REF_CALL://fall through
             case T::SCALAR: return $this->getScalar($v);
