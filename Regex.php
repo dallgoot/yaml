@@ -27,7 +27,7 @@ class Regex
     const KEY  = '/^([[:alnum:]_][[:alnum:]_ -]*[ \t]*)(?::[ \t](.*)|:)$/';
     const ITEM = '/^-([ \t]+(.*))?$/';
 
-    
+
     public static function isDate($v):bool
     {
         $d         = "\\d{4}([-\\/])\\d{2}\\1\\d{2}";
@@ -40,7 +40,7 @@ class Regex
             is_bool(preg_match($canonical, $v)) ||
             is_bool(preg_match($spaced, $v)) ||
             is_bool(preg_match($iso8601, $v)))
-          throw new Exception("Regex date error");
+          throw new \Exception("Regex date error");
 
         return preg_match($date, $v) || preg_match($canonical, $v) || preg_match($spaced, $v) || preg_match($iso8601, $v);
     }

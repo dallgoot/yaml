@@ -168,5 +168,4 @@ class Loader
         }
         return false;
     }
-
 }

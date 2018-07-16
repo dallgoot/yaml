@@ -4,13 +4,12 @@ namespace Dallgoot\Yaml;
 use Dallgoot\Yaml\{Types as T, Regex as R};
 use \SplDoublyLinkedList as DLL;
 
-
 class Node
 {
     public $indent = -1;
     public $line;
     public $type;
-    /** @var Node|\DLL|null|string */
+    /** @var Node|\SplDoublyLinkedList|DLL|null|string */
     public $value;
     private $_parent;
 
@@ -200,7 +199,7 @@ class Node
             case T::MAPPING_SHORT:  return $this->getShortMapping(substr($this->value, 1, -1));
             //TODO : that's not robust enough, improve it
             case T::SEQUENCE_SHORT:
-                $f = function($e) { return self::getScalar(trim($e));};
+                $f = function ($e) { return self::getScalar(trim($e));};
                 return array_map($f, explode(",", substr($this->value, 1, -1)));
             default:
                 throw new \Exception("Error can not get PHP type for ".T::getName($this->type), 1);
@@ -226,7 +225,7 @@ class Node
 
     private function getNumber($v)
     {
-        if (preg_match("/^(0o\d+)$/i", $v) )     return intval(base_convert($v, 8, 10));
+        if (preg_match("/^(0o\d+)$/i", $v))      return intval(base_convert($v, 8, 10));
         if (preg_match("/^(0x[\da-f]+)$/i", $v)) return intval(base_convert($v, 16, 10));
         // if preg_match("/^([\d.]+e[-+]\d{1,2})$/", $v)://fall through
         // if preg_match("/^([-+]?(?:\d+|\d*.\d+))$/", $v):
@@ -253,5 +252,4 @@ class Node
         property_exists($this, 'name') ? $out['type'] .= "($this->name)" : null;
         return $out;
     }
-
 }

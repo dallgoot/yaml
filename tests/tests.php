@@ -13,7 +13,7 @@ $out = 0;
 try {
     foreach ($files as $key => $fileName) {
         $result = $yamlLoader->load($folder.$fileName)->parse();
-        $s = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR );
+        $s = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR);
         if (!in_array(json_last_error(), [JSON_ERROR_INF_OR_NAN, JSON_ERROR_NONE ])) {
             throw new Exception(json_last_error_msg()." on $fileName", 1);
         }

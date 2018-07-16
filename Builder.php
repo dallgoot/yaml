@@ -10,10 +10,10 @@ use \SplDoublyLinkedList as DLL;
  */
 class Builder
 {
-	private static $root;
-	private static $debug;
+    private static $root;
+    private static $debug;
 
-	const ERROR_NO_KEYNAME = self::class.": key has NO NAME on line %d";
+    const ERROR_NO_KEYNAME = self::class.": key has NO NAME on line %d";
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
 
 
@@ -73,7 +73,7 @@ class Builder
             case T::SET_KEY:
                 $key = json_encode(self::build($value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
                 if (empty($key))
-                	throw new \Exception("Cant serialize complex key: ".var_export($value, true), 1);
+                    throw new \Exception("Cant serialize complex key: ".var_export($value, true), 1);
                 $parent->{$key} = null;
                 return;
             case T::SET_VALUE:
@@ -91,10 +91,10 @@ class Builder
                 if ($parent === self::$root) {
                     $parent->addTag($name);return;
                 } else {
-                	if (in_array($name, ['!binary', '!str'])) {
-                		if (is_object($value->value) ) $value->value->type = T::RAW;
-                			else $value->type = T::RAW;
-                	}
+                    if (in_array($name, ['!binary', '!str'])) {
+                        if (is_object($value->value)) $value->value->type = T::RAW;
+                        else $value->type = T::RAW;
+                    }
                     $val = is_null($value) ? null : self::build($value, $node);
                     return new Tag($name, $val);
                 }
@@ -114,7 +114,7 @@ class Builder
     {
         list($name, $value) = [$node->name, $node->value];
         if (is_null($name)) {
-        	throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $node->line));
+            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $node->line));
         } else {
             if ($value instanceof Node && in_array($value->type, [T::KEY, T::ITEM])) {
                 $parent->{$name} = $value->type === T::KEY ? new \StdClass : [];
@@ -145,7 +145,7 @@ class Builder
      */
     public static function buildContent(Node $root, int $debug)
     {
-    	self::$debug = $debug;
+        self::$debug = $debug;
         $totalDocStart = 0;
         $documents = [];
         if ($root->value instanceof Node) {
@@ -201,7 +201,7 @@ class Builder
         }
         $tmp = [];
         $children->rewind();
-        foreach ($children as $key => $child) {
+        foreach ($children as $child) {
             $tmp[] = $action($child);
         }
         return implode($separator, $tmp);
@@ -215,5 +215,4 @@ class Builder
         }
         return array_unique($types);
     }
-
 }
