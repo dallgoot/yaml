@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Node as Node, Types as T, YamlObject, Tag};
+use Dallgoot\Yaml\{Node as Node, Types as T, Builder};
 
 class Loader
 {
@@ -18,11 +18,8 @@ class Loader
     private $filePath;
     private $_debug   = 0;//TODO: determine levels
     private $_options = 0;
-    //Errors
-    const ERROR_NO_KEYNAME = self::class.": key has NO NAME on line %d";
-    const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
-    const BUILDING_ERROR   = self::class.": fatal error during building in %s : %s";
     //Exceptions
+    const INVALID_VALUE        = self::class.": at line %d";
     const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
     const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
     const EXCEPTION_LINE_SPLIT = self::class.": content is not a string(maybe a file error?)";
@@ -64,12 +61,12 @@ class Loader
      * @throws     \Exception    if content is not available as $strContent or as $this->content (from file)
      * @throws     \ParseError  if any error during parsing or building
      *
-     * @return     array      the hierarchy built = an array of YamlObject
+     * @return     array|YamlObject      the hierarchy built an array of YamlObject or just YamlObject
      */
     public function parse($strContent = null)
     {
-        $source = is_null($strContent) ? $this->_content :
-                                    preg_split("/([^\n\r]+)/um", $strContent, 0, PREG_SPLIT_DELIM_CAPTURE);
+        $source = $this->_content;
+        if (is_null($source)) $source = preg_split("/([^\n\r]+)/um", $strContent, 0, PREG_SPLIT_DELIM_CAPTURE);
         //TODO : be more permissive on $strContent values
         if (!is_array($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
         $previous = $root = new Node();
@@ -81,7 +78,11 @@ class Loader
                 $parent  = $previous;
                 $deepest = $previous->getDeepestNode();
                 if ($deepest->type === T::PARTIAL) {
-                    $deepest->parse($deepest->value.$lineString);
+                    //TODO:verify this edge case
+                    // if ($n->type === T::KEY && $n->indent === $previous->indent) {
+                    //     throw new \ParseError(sprintf(self::INVALID_VALUE, $lineNb), 1);
+                    // }
+                    $deepest->parse($deepest->value.' '.ltrim($lineString));
                 } else {
                     if (in_array($n->type, $specialTypes)) {
                         if ($this->_onSpecialType($n, $parent, $previous, $emptyLines)) continue;
@@ -101,18 +102,20 @@ class Loader
                     $previous = $n;
                 }
             }
+            if ($this->_debug === 2) {
+                var_dump("\033[33mParsed Structure\033[0m\n", $root);
+                exit(0);
+            }
+            $out = Builder::buildContent($root, $this->_debug);
+        } catch (\ParseError $pe) {
+            $message = $pe->getMessage()." on line ".$pe->getLine();
+            if ($this->_options & self::EXCEPTIONS_PARSING) {
+                var_dump($root);
+                throw new \Exception($message, 1);
+            }
+            $this->errors[] = $message;
         } catch (\Error|\Exception $e) {
-            $this->_error($e->getMessage()." on line ".$e->getLine());
-        }
-        if ($this->_debug === 2) {
-            var_dump("\033[33mParsed Structure\033[0m\n", $root);
-            exit(0);
-        }
-        try {
-            $out = $this->_buildFile($root);
-        } catch (\Error|\Exception $e) {
-            var_dump($root);
-            throw new \Exception(sprintf(self::BUILDING_ERROR, $this->filePath, $e->getMessage()));
+            throw new \Exception($e->getMessage()." for '$this->filePath'", 1);
         }
         return $out;
     }
@@ -166,206 +169,4 @@ class Loader
         return false;
     }
 
-    private function _build(object $node, $root = null, &$parent = null)
-    {
-        return $node instanceof \SplQueue ?
-                    $this->_buildQueue($node, $root, $parent) : $this->_buildNode($node, $root, $parent);
-    }
-
-    private function _buildQueue(\SplQueue $node, $root, &$parent)
-    {
-        $type = property_exists($node, "type") ? $node->type : null;
-        if (is_object($parent) && $parent instanceof YamlObject) {
-            $p = $parent;
-        } else {
-            switch ($type) {
-                case T::MAPPING: //fall through
-                case T::SET:  $p = new \StdClass;break;
-                case T::SEQUENCE: $p = [];break;
-                case T::KEY: $p = $parent;break;
-            }
-        }
-        if (in_array($type, T::$LITTERALS)) {
-            return $this->_litteral($node, $type);
-        }
-        foreach ($node as $key => $child) {
-            $result = $this->_build($child, $root, $p);
-            if (!is_null($result)) {
-                if (is_string($result)) {
-                    if ($p instanceof YamlObject) {
-                        $p->setText($result);
-                    } else {
-                        $p .= $result;
-                    }
-                } else {
-                    return $result;
-                }
-            }
-        }
-        return $p;
-    }
-
-    private function _buildNode(Node $node, $root, &$parent)
-    {
-        list($line, $type, $value) = [$node->line, $node->type, $node->value];
-        $name  = property_exists($node, "name") ? $node->name : null;
-        switch ($type) {
-            case T::COMMENT: $root->addComment($line, $value);return;
-            case T::DIRECTIVE: return;//TODO
-            case T::ITEM: $this->_buildItem($value, $root, $parent);return;
-            case T::KEY:  $this->_buildKey($node, $root, $parent);return;
-            case T::REF_DEF: //fall through
-            case T::REF_CALL:
-                $tmp = is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
-                if ($type === T::REF_DEF) $root->addReference($name, $tmp);
-                return $root->getReference($name);
-            case T::SET_KEY:
-                $key = json_encode($this->_build($value, $root, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR);
-                if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($value, true), 1);
-                $parent->{$key} = null;
-                return;
-            case T::SET_VALUE:
-                $prop = array_keys(get_object_vars($parent));
-                $key = end($prop);
-                if (property_exists($value, "type") && in_array($value->type, [T::ITEM, T::MAPPING])) {
-                    $p = $value->type === T::ITEM  ? [] : new \StdClass;
-                    $this->_build($value, $root, $p);
-                } else {
-                    $p = $this->_build($value, $root, $parent->{$key});
-                }
-                $parent->{$key} = $p;
-                return;
-            case T::TAG:
-                if ($parent === $root) {
-                    $root->addTag($name);return;
-                } else {
-                    $val = is_null($value) ? null : $this->_build($value, $root, $parent);
-                    return new Tag($name, $val);
-                }
-            default:
-                return is_object($value) ? $this->_build($value, $root, $parent) : $node->getPhpValue();
-        }
-    }
-    /**
-     * Builds a key and set the property + value to the parent given
-     *
-     * @param      Node   $node    The node
-     * @param      YamlObject   $root    The root
-     * @param      object|array  $parent  The parent
-     */
-    private function _buildKey($node, $root, &$parent)
-    {
-        $name  = $node->name;
-        $value = $node->value;
-        if (is_null($name)) {
-            $this->_error(sprintf(self::ERROR_NO_KEYNAME, $node->line, $this->filePath));
-        } else {
-            if ($value instanceof Node && in_array($value->type, [T::KEY, T::ITEM])) {
-                $parent->{$name} = $value->type === T::KEY ? new \StdClass : [];
-                $this->_build($value, $root, $parent->{$name});
-            } elseif (is_object($value)) {
-                $parent->{$name} = $this->_build($value, $root, $parent->{$name});
-            } else {
-                $parent->{$name} = $node->getPhpValue();
-            }
-        }
-    }
-
-    private function _buildItem($value, $root, &$parent):void
-    {
-        if ($value instanceof Node && $value->type === T::KEY) {
-            $parent[$value->name] = $this->_build($value->value, $root, $parent[$value->name]);
-        } else {
-            $index = count($parent);
-            $parent[$index] = $this->_build($value, $root, $parent[$index]);
-        }
-    }
-
-    /**
-     * Builds a file.  check multiple documents & split if more than one documents
-     *
-     * @param      Node   $root   The root node
-     * @return     array|YamlObject  list of documents or juste one.
-     */
-    private function _buildFile(Node $root)
-    {
-        $totalDocStart = 0;
-        $documents = [];
-        if ($root->value instanceof Node) {
-            $q = new \SplQueue;
-            $q->enqueue($root->value);
-            return [$this->_buildDocument($q, 0)];
-        }
-        $root->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_DELETE);
-        foreach ($root->value as $key => $child) {
-            if ($child->type === T::DOC_START) {
-                $totalDocStart++;
-            }
-            //if 0 or 1 DOC_START = we are still in first document
-            $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0;
-            if (!array_key_exists($currentDoc, $documents))
-                $documents[$currentDoc] = new \SplQueue();
-            $documents[$currentDoc]->enqueue($child);
-        }
-        $this->_debug >= 2 && var_dump($documents);
-        $content = array_map([$this, '_buildDocument'], $documents, array_keys($documents));
-        return count($content) === 1 ? $content[0] : $content;
-    }
-
-    private function _buildDocument(\SplQueue $queue, int $key):YamlObject
-    {
-        $doc = new YamlObject();
-        $childTypes = $this->_getChildrenTypes($queue);
-        $isMapping  = count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0;
-        $isSequence = in_array(T::ITEM, $childTypes);
-        $isSet      = in_array(T::SET_VALUE, $childTypes);
-        if ($isMapping && $isSequence) {
-            $this->_error(sprintf(self::INVALID_DOCUMENT, $key));
-        } else {
-            switch (true) {
-                case $isSequence: $queue->type = T::SEQUENCE;break;
-                case $isSet: $queue->type = T::SET;break;
-                case $isMapping://fall through
-                default:$queue->type = T::MAPPING;
-            }
-        }
-        $this->_debug >= 3 && var_dump($doc, $queue);
-        return $this->_build($queue, $doc, $doc);
-    }
-
-    private function _litteral(\SplQueue $children, $type):string
-    {
-        $children->rewind();
-        $refIndent = $children->current()->indent;
-        $separator = PHP_EOL;
-        $action = function ($c) { return $c->value; };
-        if ($type === T::LITTERAL_FOLDED) {
-            $separator = ' ';
-            $action = function ($c) use ($refIndent) {
-                return $c->indent > $refIndent || $c->type === T::EMPTY ? PHP_EOL.$c->value : $c->value;
-            };
-        }
-        $tmp = [];
-        $children->rewind();
-        foreach ($children as $key => $child) {
-            $tmp[] = $action($child);
-        }
-        return implode($separator, $tmp);
-    }
-
-    private function _getChildrenTypes(\SplQueue $children):array
-    {
-        $types = [];
-        foreach ($children as $key => $child) {
-            $types[] = $child->type;
-        }
-        return array_unique($types);
-    }
-
-    public function _error($message)
-    {
-        if ($this->_options & self::EXCEPTIONS_PARSING)
-            throw new \ParseError($message." for '$this->filePath'", 1);
-        $this->errors[] = $message;
-    }
 }

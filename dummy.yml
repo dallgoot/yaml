@@ -17,6 +17,7 @@ fakekey: t
 object:
   key: 4
   array:
+    - 324
     - null
     - boo lean: &a reference_called
     - integer: 1

@@ -23,4 +23,35 @@ class Regex
 
     const MAPPING  = "/(?P<map>{\s*(?:".self::AN."\s*:\s*(?:".self::SIMPLE."|".self::seqForMap."|(?P>map)),?\s*)+})/i";
     const SEQUENCE = "/(?P<seq>\[(?:(?:".self::SIMPLE."|".self::mapForSeq."|(?P>seq)),?\s*)+\])/i";
+
+    const KEY  = '/^([[:alnum:]_][[:alnum:]_ -]*[ \t]*)(?::[ \t](.*)|:)$/';
+    const ITEM = '/^-([ \t]+(.*))?$/';
+
+    
+    public static function isDate($v):bool
+    {
+        $d         = "\\d{4}([-\\/])\\d{2}\\1\\d{2}";
+        $h         = "\\d{2}(:)\\d{2}\\2\\d{2}";
+        $date      =  "/^$d$/";// 2002-12-14, 2002/12/14
+        $canonical =  "/^$d(?:t| )$h\\.\\dz?$/im";// 2001-12-15T02:59:43.1Z
+        $spaced    =  "/^$d(?:t| )$h\\.\\d{2} [-+]\\d$/im";// 2001-12-14 21:59:43.10 -5
+        $iso8601   =  "/^$d(?:t| )$h\\.\\d{2}[-+]\\d{2}\\2\\d{2}/im";// 2001-12-14t21:59:43.10-05:00
+        if (is_bool(preg_match($date, $v)) ||
+            is_bool(preg_match($canonical, $v)) ||
+            is_bool(preg_match($spaced, $v)) ||
+            is_bool(preg_match($iso8601, $v)))
+          throw new Exception("Regex date error");
+
+        return preg_match($date, $v) || preg_match($canonical, $v) || preg_match($spaced, $v) || preg_match($iso8601, $v);
+    }
+
+    public static function isNumber(string $var):bool
+    {
+        return (bool) preg_match("/^((0o\d+)|(0x[\da-f]+)|([\d.]+e[-+]\d{1,2})|([-+]?(\d*\.?\d+)))$/i", $var);
+    }
+
+    public static function isProperlyQuoted(String $var):bool
+    {
+        return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $var);
+    }
 }

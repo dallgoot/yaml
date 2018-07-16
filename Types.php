@@ -29,6 +29,7 @@ class Types
     const JSON = 142;
 
     const QUOTED = 148;
+    const RAW    = 150;
     const REF_DEF = 152;
     const REF_CALL = 164;
 

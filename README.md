@@ -76,7 +76,7 @@ This distinction is crucial to allow respecting original YAML structure when con
 ## API
 - Dallgoot\Yaml\Loader : Return an array of *YamlObject* for multiple document, or *YamlObject* for one document
 - Dallgoot\Yaml\Dumper : create YAML structure according to data types provided :
-    - a YamlObject is a document
+    - a YamlObject is a document (with Comments, References, Directives)
     - an array of YamlObject is a multi-documents YAML file.
     - any other datatypes is a one YAML Document
 - Dallgoot\Yaml\Tag : an object with properties _tagname_, _value_
@@ -89,7 +89,7 @@ This distinction is crucial to allow respecting original YAML structure when con
 - directives (to be implemented) : currently ignored
 - IMPROVE : rename key names that are not valid PHP property name (to be implemented)
 - IMPROVE : identifying errors in YAML content
-
+- UNICODE checking
 
 ## Performances
     TBD
