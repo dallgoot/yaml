@@ -191,12 +191,12 @@ class Builder
     {
         $children->rewind();
         $refIndent = $children->current()->indent;
-        $separator = $type === T::RAW ? '' : PHP_EOL;
+        $separator = $type === T::RAW ? '' : "\n";
         $action = function ($c) { return $c->value; };
         if ($type === T::LITTERAL_FOLDED) {
             $separator = ' ';
             $action = function ($c) use ($refIndent) {
-                return $c->indent > $refIndent || $c->type === T::EMPTY ? PHP_EOL.$c->value : $c->value;
+                return $c->indent > $refIndent || $c->type === T::EMPTY ? "\n".$c->value : $c->value;
             };
         }
         $tmp = [];

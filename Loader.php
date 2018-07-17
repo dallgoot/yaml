@@ -158,7 +158,7 @@ class Loader
                 if ($n->type === T::SCALAR &&
                     !in_array($deepest->getParent()->type, T::$LITTERALS) ) {
                     $deepest->type = T::SCALAR;
-                    $deepest->value .= PHP_EOL.$n->value;
+                    $deepest->value .= "\n".$n->value;
                     return true;
                 } else {
                     if (!in_array($previous->type, [T::ITEM, T::SET_KEY])) {
