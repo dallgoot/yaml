@@ -148,7 +148,7 @@ class Node
 
     private function _onObject($value):array
     {
-        json_decode($value, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
+        json_decode($value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
         if (json_last_error() === JSON_ERROR_NONE)  return [T::JSON, $value];
         if (preg_match(R::MAPPING, $value))         return [T::MAPPING_SHORT, $value];
         if (preg_match(R::SEQUENCE, $value))        return [T::SEQUENCE_SHORT, $value];
@@ -190,7 +190,6 @@ class Node
         $v = $this->value;
         if (is_null($v)) return null;
         switch ($this->type) {
-            case T::EMPTY:  return null;
             case T::JSON:   return json_decode($v, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR);
             case T::QUOTED: return substr($v, 1, -1);
             case T::RAW:    return strval($v);
@@ -202,7 +201,8 @@ class Node
                 $f = function ($e) { return self::getScalar(trim($e));};
                 return array_map($f, explode(",", substr($this->value, 1, -1)));
             default:
-                throw new \Exception("Error can not get PHP type for ".T::getName($this->type), 1);
+                trigger_error("Error can not get PHP type for ".T::getName($this->type), E_USER_WARNING);
+                return null;
         }
     }
 
