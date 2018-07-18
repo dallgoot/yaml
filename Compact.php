@@ -10,8 +10,12 @@ use Dallgoot\Yaml\Types as T;
 class Compact extends ArrayIterator
 {
 
-    function __construct($argument)
+    public function __construct($argument)
     {
-        # code...
+        if ($argument instanceof Countable && count($argument) > 0) {
+            # it's an array-like
+        } else {
+            //it's an object-like
+        }
     }
 }

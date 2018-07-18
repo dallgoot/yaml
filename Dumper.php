@@ -36,7 +36,7 @@ class Dumper //extends AnotherClass
         if ($dataType instanceof YamlObject) {
             return self::dumpYamlObject($dataType);
         } elseif (is_array($dataType) && $dataType[0] instanceof YamlObject) {
-            array_map(self::dumpYamlObject, $dataType);
+            array_map([self, dumpYamlObject], $dataType);
         } else {
             self::dump($value, 0);
         }
@@ -103,7 +103,7 @@ class Dumper //extends AnotherClass
         }
     }
 
-    public static function dumpCompact($value='')
+    public static function dumpCompact($value)
     {
         # code...
     }

@@ -48,7 +48,7 @@ plugins:
       Squiz Functions MultiLineFunctionDeclaration ContentAfterBrace:
         enabled: false
   phpmd:
-    enabled: true
+    enabled: false
     checks:
       CleanCode/ElseExpression:
         enabled: false
@@ -64,7 +64,7 @@ plugins:
     enabled: true
     config:
       file_extensions: "php"
-      dead-code-detection: false
+      # dead-code-detection: false
     checks:
         PhanUndeclaredMethod:
           enabled: false
