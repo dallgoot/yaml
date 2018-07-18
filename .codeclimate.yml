@@ -64,6 +64,7 @@ plugins:
     enabled: true
     config:
       file_extensions: "php"
+      dead-code-detection: true
     checks:
         PhanUndeclaredMethod:
           enabled: false

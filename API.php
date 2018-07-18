@@ -11,7 +11,7 @@ class API
 {
     private $_references = [];
     private $_comments   = [];
-    private $_documents  = [];
+    // private $_documents  = [];
     private $tags = [];
 
     public $type = T::MAPPING;
@@ -20,17 +20,13 @@ class API
     const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";
     const UNAMED_REFERENCE  = self::class.": reference MUST have a name";
 
-    public function __construct()
-    {
-    }
 
     /**
      * Adds a reference.
      *
-     * @param      string                    $name   The name
-     * @param      mixed                     $value  The value
-     *
-     * @throws     \UnexpectedValueException  (description)
+     * @param   string                    $name   The name
+     * @param   mixed                     $value  The value
+     * @throws  \UnexpectedValueException  (description)
      */
     public function addReference($name, $value):void
     {
@@ -40,6 +36,12 @@ class API
         $this->_references[$name] = $value;
     }
 
+    /**
+     *  return the reference saved by $name
+     *  @param  string  nameof the reference
+     *  @return mixed   the value of the reference
+     *  @throws UnexpectedValueException    if there's no reference by that $name
+     */
     public function &getReference($name)
     {
         if (array_key_exists($name, $this->_references)) {
@@ -58,7 +60,7 @@ class API
         $this->_comments[$index] = $value;
     }
 
-    public function getComment($lineNumber = null)
+    public function getComment($lineNumber = null):string
     {
         if (array_key_exists($lineNumber, $this->_comments)) {
             return $this->_comments[$lineNumber];
@@ -66,25 +68,12 @@ class API
         return $this->_comments;
     }
 
-    public function getDocument($identifier = null)
-    {
-        if (array_key_exists($identifier, $this->_documents)) {
-            return $this->_documents[$identifier];
-        }
-        return count($this->_documents)===1 ? $this->_documents[0] : $this->_documents;
-    }
-
-    public function lock():void
-    {
-        $this->locked = true;
-    }
-
     public function setText($value):void
     {
         $this->value .= $value;
     }
 
-    public function addTag($value)
+    public function addTag($value):void
     {
         $this->tags[] = $value;
     }

@@ -125,7 +125,7 @@ class Node
         }
     }
 
-    private function _onKey($matches)
+    private function _onKey($matches):void
     {
         $this->type = T::KEY;
         $this->name = trim($matches[1]);
@@ -233,7 +233,7 @@ class Node
     }
 
     //TODO : that's not robust enough, improve it
-    private function getShortMapping($mappingString)
+    private function getShortMapping($mappingString):object
     {
         $out = new \StdClass();
         foreach (explode(',', $mappingString) as $value) {

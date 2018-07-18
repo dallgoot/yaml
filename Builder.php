@@ -26,34 +26,29 @@ class Builder
     private static function buildDLL(DLL $node, &$parent)
     {
         $type = property_exists($node, "type") ? $node->type : null;
-        if (is_object($parent) && $parent instanceof YamlObject) {
-            $p = $parent;
-        } else {
-            switch ($type) {
-                case T::MAPPING: //fall through
-                case T::SET:  $p = new \StdClass;break;
-                case T::SEQUENCE: $p = [];break;
-                case T::KEY: $p = $parent;break;
-            }
-        }
         if (in_array($type, [T::RAW, T::LITTERAL, T::LITTERAL_FOLDED])) {
             return self::litteral($node, $type);
         }
-        foreach ($node as $child) {
+        $p = $parent;
+        switch ($type) {
+            case T::MAPPING: //fall through
+            case T::SET:      $p = new \StdClass;break;
+            case T::SEQUENCE: $p = [];break;
+            // case T::KEY: $p = $parent;break;
+        }
+        $out = null;
+        foreach ($node as $key => $child) {
             $result = self::build($child, $p);
-            if (!is_null($result)) {
+            if (!is_null($result))
+            {
                 if (is_string($result)) {
-                    if ($p instanceof YamlObject) {
-                        $p->setText($result);
-                    } else {
-                        $p .= ' '.$result;
-                    }
+                    $out .= $result.' ';
                 } else {
                     return $result;
                 }
             }
         }
-        return is_string($p) ? trim($p) : $p;
+        return is_null($out) ? $p : rtrim($out);
     }
 
     private static function buildNode(Node $node, &$parent)
@@ -110,7 +105,7 @@ class Builder
      * @param      object|array  $parent  The parent
      * @throws \ParseError if Key has no name
      */
-    private static function buildKey($node, &$parent)
+    private static function buildKey($node, &$parent):void
     {
         list($name, $value) = [$node->name, $node->value];
         if (is_null($name)) {
@@ -184,7 +179,17 @@ class Builder
             }
         }
         self::$debug >= 3 && var_dump(self::$root, $list);
-        return self::build($list, self::$root);
+        $string = '';
+        foreach ($list as $key => $child) {
+            $result = self::build($child, self::$root);
+            if (is_string($result)) {
+                $string .= $result.' ';
+            }
+        }
+        if (!empty($string)) {
+            self::$root->setText(rtrim($string));
+        }
+        return self::$root;
     }
 
     private static function litteral(DLL $children, $type):string

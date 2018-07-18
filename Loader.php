@@ -107,6 +107,7 @@ class Loader
                 exit(0);
             }
             $out = Builder::buildContent($root, $this->_debug);
+            return $out;
         } catch (\ParseError $pe) {
             $message = $pe->getMessage()." on line ".$pe->getLine();
             if ($this->_options & self::EXCEPTIONS_PARSING) {
@@ -117,7 +118,6 @@ class Loader
         } catch (\Error|\Exception $e) {
             throw new \Exception($e->getMessage()." for '$this->filePath'", 1);
         }
-        return $out;
     }
 
     private function _onSpecialType(&$n, &$parent, &$previous, &$emptyLines):bool

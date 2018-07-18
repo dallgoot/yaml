@@ -36,13 +36,14 @@ class Regex
         $canonical =  "/^$d(?:t| )$h\\.\\dz?$/im";// 2001-12-15T02:59:43.1Z
         $spaced    =  "/^$d(?:t| )$h\\.\\d{2} [-+]\\d$/im";// 2001-12-14 21:59:43.10 -5
         $iso8601   =  "/^$d(?:t| )$h\\.\\d{2}[-+]\\d{2}\\2\\d{2}/im";// 2001-12-14t21:59:43.10-05:00
-        if (is_bool(preg_match($date, $v)) ||
-            is_bool(preg_match($canonical, $v)) ||
-            is_bool(preg_match($spaced, $v)) ||
-            is_bool(preg_match($iso8601, $v)))
+        $matchDate      = preg_match($date, $v);
+        $matchCanonical = preg_match($canonical, $v);
+        $matchSpaced    = preg_match($spaced, $v);
+        $matchIso       = preg_match($iso8601, $v);
+        if (is_bool($matchDate) || is_bool($matchCanonical) || is_bool($matchSpaced) || is_bool($matchIso))
           throw new \Exception("Regex date error");
 
-        return preg_match($date, $v) || preg_match($canonical, $v) || preg_match($spaced, $v) || preg_match($iso8601, $v);
+        return $matchDate || $matchCanonical || $matchSpaced || $matchIso;
     }
 
     public static function isNumber(string $var):bool
