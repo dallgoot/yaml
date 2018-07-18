@@ -37,10 +37,9 @@ class Builder
             // case T::KEY: $p = $parent;break;
         }
         $out = null;
-        foreach ($node as $key => $child) {
+        foreach ($node as $child) {
             $result = self::build($child, $p);
-            if (!is_null($result))
-            {
+            if (!is_null($result)) {
                 if (is_string($result)) {
                     $out .= $result.' ';
                 } else {
@@ -180,7 +179,7 @@ class Builder
         }
         self::$debug >= 3 && var_dump(self::$root, $list);
         $string = '';
-        foreach ($list as $key => $child) {
+        foreach ($list as $child) {
             $result = self::build($child, self::$root);
             if (is_string($result)) {
                 $string .= $result.' ';

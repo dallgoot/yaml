@@ -13,7 +13,7 @@ class Dumper //extends AnotherClass
     private const width = 160;
     private const options = 00000;
 
-    private $result;
+    private static $result;
     //options
     public const EXPAND_SHORT = 00001;
     public const SERIALIZE_CUSTOM_OBJECTS = 00010;
@@ -25,7 +25,7 @@ class Dumper //extends AnotherClass
         }
     }
 
-    public static function toString(mixed $dataType, int $options):string
+    public static function toString($dataType, int $options):string
     {
         if (is_null($dataType)) {
             throw new \Exception(self::class.": No content to convert to Yaml", 1);
@@ -43,12 +43,12 @@ class Dumper //extends AnotherClass
         return implode("\n", self::$result);
     }
 
-    public static function toFile(string $file, mixed $dataType, int $options):bool
+    public static function toFile(string $file, $dataType, int $options):bool
     {
         return !is_bool(file_put_contents($file, self::toString($dataType, $options)));
     }
 
-    private static function dump(mixed $dataType, int $indent)
+    private static function dump($dataType, int $indent)
     {
         if (is_object($dataType)) {
             if ($dataType instanceof Tag) {
@@ -57,11 +57,7 @@ class Dumper //extends AnotherClass
                 }
             }
             if ($dataType instanceof Compact) {
-                if (count($dataType) > 0) {
-                    self::dumpShortSequence($dataType, $indent);
-                } else {
-                    self::dumpShortObject($dataType, $indent);
-                }
+                self::dumpCompact($dataType, $indent);
             }
             if ($dataType instanceof \DateTime) {
                 # code...
@@ -80,10 +76,10 @@ class Dumper //extends AnotherClass
 
     private static function split($string, $indent):array
     {
-        return str_split(str_pad($string, $indent, " ", STR_PAD_LEFT) , self::width);
+        return str_split(str_pad($string, $indent, " ", STR_PAD_LEFT), self::width);
     }
 
-    private function dumpSequence(array $array, int $indent):void
+    private static function dumpSequence(array $array, int $indent):void
     {
         $refKeys = range(0, count($array));
         foreach ($array as $key => $item) {
@@ -105,5 +101,10 @@ class Dumper //extends AnotherClass
         foreach ($commentsArray as $lineNb => $comment) {
             self::$result->add($lineNb, $comment);
         }
+    }
+
+    public static function dumpCompact($value='')
+    {
+        # code...
     }
 }

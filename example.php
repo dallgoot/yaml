@@ -6,7 +6,7 @@ use \Dallgoot\Yaml\Loader;
 /* USE CASE 1
 * load and parse if file exists
 */
-$yaml = (new Loader('./references/Example 2.18.yml', null,3))->parse();
+$yaml = (new Loader('./references/Example 2.18.yml', null, 3))->parse();
 // $yaml = (new Loader('./dummy.yml', null, 3))->parse();
 var_dump($yaml);
 exit(0);

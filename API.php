@@ -60,7 +60,7 @@ class API
         $this->_comments[$index] = $value;
     }
 
-    public function getComment($lineNumber = null):string
+    public function getComment($lineNumber = null)
     {
         if (array_key_exists($lineNumber, $this->_comments)) {
             return $this->_comments[$lineNumber];
