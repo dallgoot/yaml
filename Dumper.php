@@ -2,7 +2,7 @@
 namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml\{Types as T, YamlObject, Tag, Compact};
-use \SpldDoublyLinkedList as DLL;
+use \SplDoublyLinkedList as DLL;
 
 /**
  *
@@ -36,9 +36,9 @@ class Dumper //extends AnotherClass
         if ($dataType instanceof YamlObject) {
             return self::dumpYamlObject($dataType);
         } elseif (is_array($dataType) && $dataType[0] instanceof YamlObject) {
-            array_map([self, dumpYamlObject], $dataType);
+            array_map([self::class, 'dumpYamlObject'], $dataType);
         } else {
-            self::dump($value, 0);
+            self::dump($dataType, 0);
         }
         return implode("\n", self::$result);
     }
@@ -103,7 +103,7 @@ class Dumper //extends AnotherClass
         }
     }
 
-    public static function dumpCompact($value)
+    public static function dumpCompact($dataType, int $indent)
     {
         # code...
     }
