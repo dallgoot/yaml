@@ -15,7 +15,7 @@
         ]
     },
     "require": {
-        "php" : ">=7.2.2",
+        "php" : ">=7.2",
         "lib-pcre" : "*"
     },
     "require-dev": {
