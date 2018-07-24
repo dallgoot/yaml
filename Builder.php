@@ -13,7 +13,7 @@ class Builder
     private static $root;
     private static $debug;
 
-    const ERROR_NO_KEYNAME = self::class.": key has NO NAME on line %d";
+    const ERROR_NO_KEYNAME = self::class.": key has NO IDENTIFIER on line %d";
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
 
 
@@ -52,18 +52,17 @@ class Builder
 
     private static function buildNode(Node $node, &$parent)
     {
-        list($line, $type, $value) = [$node->line, $node->type, $node->value];
-        $name  = property_exists($node, "name") ? $node->name : null;
+        list($line, $type, $value, $identifier) = [$node->line, $node->type, $node->value, $node->identifier];
         switch ($type) {
             case T::COMMENT: self::$root->addComment($line, $value);return;
             case T::DIRECTIVE: return;//TODO
             case T::ITEM: self::buildItem($value, $parent);return;
             case T::KEY:  self::buildKey($node, $parent);return;
             case T::REF_DEF: //fall through
-            case T::REF_CALL:
+            case T::REF_CALL://TODO: self::build returns what ?
                 $tmp = is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
-                if ($type === T::REF_DEF) self::$root->addReference($name, $tmp);
-                return self::$root->getReference($name);
+                if ($type === T::REF_DEF) self::$root->addReference($identifier, $tmp);
+                return self::$root->getReference($identifier);
             case T::SET_KEY:
                 $key = json_encode(self::build($value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
                 if (empty($key))
@@ -83,14 +82,14 @@ class Builder
                 return;
             case T::TAG:
                 if ($parent === self::$root) {
-                    $parent->addTag($name);return;
+                    $parent->addTag($identifier);return;
                 } else {
-                    if (in_array($name, ['!binary', '!str'])) {
-                        if (is_object($value->value)) $value->value->type = T::RAW;
+                    if (in_array($identifier, ['!binary', '!str'])) {
+                        if ($value->value instanceof DLL) $value->value->type = T::RAW;
                         else $value->type = T::RAW;
                     }
                     $val = is_null($value) ? null : self::build($value, $node);
-                    return new Tag($name, $val);
+                    return new Tag($identifier, $val);
                 }
             default:
                 return is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
@@ -102,21 +101,21 @@ class Builder
      *
      * @param      Node   $node    The node
      * @param      object|array  $parent  The parent
-     * @throws \ParseError if Key has no name
+     * @throws \ParseError if Key has no name(identifier)
      */
     private static function buildKey($node, &$parent):void
     {
-        list($name, $value) = [$node->name, $node->value];
-        if (is_null($name)) {
+        list($identifier, $value) = [$node->identifier, $node->value];
+        if (is_null($identifier)) {
             throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $node->line));
         } else {
             if ($value instanceof Node && in_array($value->type, [T::KEY, T::ITEM])) {
-                $parent->{$name} = $value->type === T::KEY ? new \StdClass : [];
-                self::build($value, $parent->{$name});
+                $parent->{$identifier} = $value->type === T::KEY ? new \StdClass : [];
+                self::build($value, $parent->{$identifier});
             } elseif (is_object($value)) {
-                $parent->{$name} = self::build($value, $parent->{$name});
+                $parent->{$identifier} = self::build($value, $parent->{$identifier});
             } else {
-                $parent->{$name} = $node->getPhpValue();
+                $parent->{$identifier} = $node->getPhpValue();
             }
         }
     }
@@ -124,7 +123,7 @@ class Builder
     private static function buildItem($value, &$parent):void
     {
         if ($value instanceof Node && $value->type === T::KEY) {
-            $parent[$value->name] = self::build($value->value, $parent[$value->name]);
+            $parent[$value->identifier] = self::build($value->value, $parent[$value->identifier]);
         } else {
             $index = count($parent);
             $parent[$index] = self::build($value, $parent[$index]);

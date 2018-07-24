@@ -48,6 +48,7 @@ class Regex
 
     public static function isNumber(string $var):bool
     {
+        //TODO: https://secure.php.net/manual/en/function.is-numeric.php
         return (bool) preg_match("/^((0o\d+)|(0x[\da-f]+)|([\d.]+e[-+]\d{1,2})|([-+]?(\d*\.?\d+)))$/i", $var);
     }
 

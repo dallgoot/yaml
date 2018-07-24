@@ -38,7 +38,7 @@ class API
 
     /**
      *  return the reference saved by $name
-     *  @param  string  nameof the reference
+     *  @param  string  $name of the reference
      *  @return mixed   the value of the reference
      *  @throws UnexpectedValueException    if there's no reference by that $name
      */
@@ -57,23 +57,23 @@ class API
 
     public function addComment($index, $value):void
     {
-        $this->_comments[$index] = $value;
+        $this->_comments[(int) $index] = $value;
     }
 
-    public function getComment($lineNumber = null)
+    public function getComment(int $lineNumber = null)
     {
-        if (array_key_exists($lineNumber, $this->_comments)) {
+        if (array_key_exists((int) $lineNumber, $this->_comments)) {
             return $this->_comments[$lineNumber];
         }
         return $this->_comments;
     }
 
-    public function setText($value):void
+    public function setText(string $value):void
     {
         $this->value .= $value;
     }
 
-    public function addTag($value):void
+    public function addTag(string $value):void
     {
         $this->tags[] = $value;
     }

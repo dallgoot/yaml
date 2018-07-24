@@ -6,12 +6,19 @@ use \SplDoublyLinkedList as DLL;
 
 class Node
 {
+    /** @var int */
     public $indent = -1;
+    /** @var int */
     public $line;
+    /** @var int */
     public $type;
-    /** @var Node|\SplDoublyLinkedList|DLL|null|string */
+    /** @var null|string|boolean */
+    public $identifier;
+    /** @var Node|DLL|null|string */
     public $value;
-    private $_parent;
+
+    /** @var null|Node */
+    private $parent;
 
     public function __construct($nodeString = null, $line = null)
     {
@@ -22,20 +29,19 @@ class Node
             $this->parse($nodeString);
         }
     }
+
     public function setParent(Node $node):Node
     {
-        $this->_parent = $node;
+        $this->parent = $node;
         return $this;
     }
 
     public function getParent($indent = null):Node
     {
-        if (is_null($indent)) {
-             return $this->_parent ?? $this;
-        }
+        if (is_null($indent)) return $this->parent ?? $this;
         $cursor = $this;
         while ($cursor->indent >= $indent) {
-            $cursor = $cursor->_parent;
+            $cursor = $cursor->parent;
         }
         return $cursor;
     }
@@ -44,10 +50,7 @@ class Node
     {
         $child->setParent($this);
         $current = $this->value;
-        if (in_array($this->type, T::$LITTERALS)) {
-            $child->type = T::SCALAR;
-            unset($child->name);
-        }
+        if (in_array($this->type, T::$LITTERALS)) $child->type = T::SCALAR;
         if (is_null($current)) {
             $this->value = $child;
             return;
@@ -75,6 +78,7 @@ class Node
         }
         return $cursor;
     }
+
     /**
     *  CAUTION : the types assumed here are NOT FINAL : they CAN be adjusted according to parent
     */
@@ -85,13 +89,13 @@ class Node
         $nodeValue = ltrim($nodeValue);
         if ($nodeValue === '') {
             $this->type = T::EMPTY;
-            $this->indent = 0;
-        } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something after?
+            // $this->indent = 0; // remove if no bugs
+        } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something on same line ?
             $this->type = T::DOC_END;
         } elseif (preg_match(R::KEY, $nodeValue, $matches)) {
-            $this->_onKey($matches);
+            $this->onKey($matches);
         } else {//NOTE: can be of another type according to parent
-            list($this->type, $value) = $this->_define($nodeValue);
+            list($this->type, $value) = $this->define($nodeValue);
             is_object($value) ? $this->add($value) : $this->value = $value;
         }
         return $this;
@@ -103,18 +107,18 @@ class Node
      * @param      string  $nodeValue  The node value
      * @return     array   contains [node->type, node->value]
      */
-    private function _define($nodeValue):array
+    private function define($nodeValue):array
     {
         $v = substr($nodeValue, 1);
         if (in_array($nodeValue[0], ['"', "'"])) {
             $type = R::isProperlyQuoted($nodeValue) ? T::QUOTED : T::PARTIAL;
             return [$type, $nodeValue];
         }
-        if (in_array($nodeValue[0], ['{', '[']))      return $this->_onObject($nodeValue);
-        if (in_array($nodeValue[0], ['!', '&', '*'])) return $this->_onNodeAction($nodeValue);
+        if (in_array($nodeValue[0], ['{', '[']))      return $this->onObject($nodeValue);
+        if (in_array($nodeValue[0], ['!', '&', '*'])) return $this->onNodeAction($nodeValue);
         switch ($nodeValue[0]) {
             case '#': return [T::COMMENT, ltrim($v)];
-            case "-": return $this->_onMinus($nodeValue);
+            case "-": return $this->onHyphen($nodeValue);
             case '%': return [T::DIRECTIVE, ltrim($v)];
             case '?': return [T::SET_KEY,   empty($v) ? null : new Node(ltrim($v), $this->line)];
             case ':': return [T::SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)];
@@ -125,10 +129,10 @@ class Node
         }
     }
 
-    private function _onKey($matches):void
+    private function onKey($matches):void
     {
         $this->type = T::KEY;
-        $this->name = trim($matches[1]);
+        $this->identifier = trim($matches[1]);
         $keyValue = isset($matches[2]) ? trim($matches[2]) : null;
         if (!empty($keyValue)) {
             $n = new Node($keyValue, $this->line);
@@ -137,16 +141,17 @@ class Node
                 $tmpNode = new Node(trim(substr($keyValue, 0, $hasComment)), $this->line);
                 if ($tmpNode->type !== T::PARTIAL) {
                     $comment = new Node(trim(substr($keyValue, $hasComment+1)), $this->line);
+                    //TODO: modify "identifier" to specify if fullline comment or not
                     $this->add($comment);
                     $n = $tmpNode;
                 }
             }
-            $n->indent = $this->indent + strlen($this->name);
+            $n->indent = $this->indent + strlen($this->identifier);
             $this->add($n);
         }
     }
 
-    private function _onObject($value):array
+    private function onObject($value):array
     {
         json_decode($value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
         if (json_last_error() === JSON_ERROR_NONE)  return [T::JSON, $value];
@@ -155,7 +160,7 @@ class Node
         return [T::PARTIAL, $value];
     }
 
-    private function _onMinus($nodeValue):array
+    private function onHyphen($nodeValue):array
     {
         if (substr($nodeValue, 0, 3) === '---') {
             $rest = trim(substr($nodeValue, 3));
@@ -174,13 +179,13 @@ class Node
         return [T::SCALAR, $nodeValue];
     }
 
-    private function _onNodeAction($nodeValue):array
+    private function onNodeAction($nodeValue):array
     {
         // TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
         $v = substr($nodeValue, 1);
         $type = ['!' => T::TAG, '&' => T::REF_DEF, '*' => T::REF_CALL][$nodeValue[0]];
         $pos = strpos($v, ' ');
-        $this->name = is_bool($pos) ? $v : strstr($v, ' ', true);
+        $this->identifier = is_bool($pos) ? $v : strstr($v, ' ', true);
         $n = is_bool($pos) ? null : (new Node(trim(substr($nodeValue, $pos+1)), $this->line))->setParent($this);
         return [$type, $n];
     }
@@ -194,19 +199,19 @@ class Node
             case T::QUOTED: return substr($v, 1, -1);
             case T::RAW:    return strval($v);
             case T::REF_CALL://fall through
-            case T::SCALAR: return $this->getScalar($v);
-            case T::MAPPING_SHORT:  return $this->getShortMapping(substr($this->value, 1, -1));
+            case T::SCALAR: return self::getScalar($v);
+            case T::MAPPING_SHORT:  return self::getShortMapping(substr($v, 1, -1));
             //TODO : that's not robust enough, improve it
             case T::SEQUENCE_SHORT:
                 $f = function ($e) { return self::getScalar(trim($e));};
-                return array_map($f, explode(",", substr($this->value, 1, -1)));
+                return array_map($f, explode(",", substr($v, 1, -1)));
             default:
                 trigger_error("Error can not get PHP type for ".T::getName($this->type), E_USER_WARNING);
                 return null;
         }
     }
 
-    private function getScalar($v)
+    private static function getScalar($v)
     {
         $types = ['yes'   => true,
                   'no'    => false,
@@ -219,11 +224,11 @@ class Node
         ];
         if (in_array(strtolower($v), array_keys($types))) return $types[strtolower($v)];
         if (R::isDate($v))   return date_create($v);
-        if (R::isNumber($v)) return $this->getNumber($v);
+        if (R::isNumber($v)) return self::getNumber($v);
         return strval($v);
     }
 
-    private function getNumber($v)
+    private static function getNumber($v)
     {
         if (preg_match("/^(0o\d+)$/i", $v))      return intval(base_convert($v, 8, 10));
         if (preg_match("/^(0x[\da-f]+)$/i", $v)) return intval(base_convert($v, 16, 10));
@@ -233,12 +238,12 @@ class Node
     }
 
     //TODO : that's not robust enough, improve it
-    private function getShortMapping($mappingString):object
+    private static function getShortMapping($mappingString):object
     {
         $out = new \StdClass();
         foreach (explode(',', $mappingString) as $value) {
             list($keyName, $keyValue) = explode(':', $value);
-            $out->{trim($keyName)} = $this->getScalar(trim($keyValue));
+            $out->{trim($keyName)} = self::getScalar(trim($keyValue));
         }
         return $out;
     }
@@ -249,7 +254,7 @@ class Node
                 'indent'=> $this->indent,
                 'type'  => T::getName($this->type),
                 'value' => $this->value];
-        property_exists($this, 'name') ? $out['type'] .= "($this->name)" : null;
+        if (!is_null($this->identifier)) $out['type'] .= "($this->identifier)";
         return $out;
     }
 }

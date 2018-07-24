@@ -4,7 +4,13 @@ namespace Dallgoot\Yaml;
 use Dallgoot\Yaml\API as API;
 
 /**
- *
+  * @method void addReference(string $name, $value)
+  * @method mixed getReference(string $name)
+  * @method array getAllReferences()
+  * @method void addComment($index, $value)
+  * @method string|rray getComment($lineNumber)
+  * @method void setText(string $value)
+  * @method void addTag(string $value)
  */
 class YamlObject extends \ArrayIterator implements \JsonSerializable
 {
@@ -18,14 +24,14 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         $this->__yaml__object__api = new API();
     }
 
+    //TODO: determine accessible methods : private OR public
     public function __call($funcName, $arguments)
     {
         $reflectAPI = new \ReflectionClass(get_class($this->__yaml__object__api));
         $getName = function ($o) { return $o->name; };
         $publicApi  = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PUBLIC));
         $privateApi = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PRIVATE));
-        if (!in_array($funcName, $publicApi) &&
-            (!in_array($funcName, $privateApi) || $this->__yaml__object__api->_locked)) {
+        if (!in_array($funcName, $publicApi) && !in_array($funcName, $privateApi)) {
                 throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName, implode(",", $publicApi)), 1);
         }
         return call_user_func_array([$this->__yaml__object__api, $funcName], $arguments);

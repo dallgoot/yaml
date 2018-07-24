@@ -10,58 +10,58 @@ use \SplDoublyLinkedList as DLL;
 class Dumper //extends AnotherClass
 {
     private const indent = 2;
-    private const width = 160;
+    private const width = 120;
     private const options = 00000;
 
     private static $result;
+    private static $options;
     //options
     public const EXPAND_SHORT = 00001;
     public const SERIALIZE_CUSTOM_OBJECTS = 00010;
 
     public function __construct(int $options = null)
     {
-        if (!is_null($options)) {
-            $this->options = $options;
-        }
+        if (is_int($options)) self::$options = $options;
     }
 
     public static function toString($dataType, int $options):string
     {
-        if (is_null($dataType)) {
-            throw new \Exception(self::class.": No content to convert to Yaml", 1);
-        }
-        $options = is_null($options) ? self::options : $options;
+        if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml", 1);
+        self::options = is_int($options) ? $options : self::options;
         self::$result = new DLL;
         self::$result->setIteratorMode(DLL::IT_MODE_FIFO | DLL::IT_MODE_DELETE);
         if ($dataType instanceof YamlObject) {
-            return self::dumpYamlObject($dataType);
+            self::dumpYamlObject($dataType);
         } elseif (is_array($dataType) && $dataType[0] instanceof YamlObject) {
             array_map([self::class, 'dumpYamlObject'], $dataType);
         } else {
             self::dump($dataType, 0);
         }
-        return implode("\n", self::$result);
+        $out = '';
+        foreach (self::$result as $value) {
+            $out .= $value."\n";
+        }
+        self::$result = null;
+        return $out;
     }
 
-    public static function toFile(string $file, $dataType, int $options):bool
+    public static function toFile(string $filePath, $dataType, int $options):bool
     {
-        return !is_bool(file_put_contents($file, self::toString($dataType, $options)));
+        return !is_bool(file_put_contents($filePath, self::toString($dataType, $options)));
     }
 
     private static function dump($dataType, int $indent)
     {
-        if (is_object($dataType)) {
-            if ($dataType instanceof Tag) {
-                foreach (self::split("!".$dataType->tagName.' '.$dataType->value, $indent) as $chunks) {
-                    self::$result->push($chunks);
-                }
+        if (is_scalar($dataType)) {
+            switch (gettype($dataType)) {
+                case 'boolean': return $dataType ? 'true' : 'false';break;
+                case 'float': if (is_infinite($dataType)) return $dataType > 0 ? '.inf' : '-.inf';
+                case 'double': if (is_nan($dataType)) return '.nan';
+                default:
+                    return $dataType;
             }
-            if ($dataType instanceof Compact) {
-                self::dumpCompact($dataType, $indent);
-            }
-            if ($dataType instanceof \DateTime) {
-                # code...
-            }
+        } elseif (is_object($dataType)) {
+            self::dumpObject($dataType, $indent);
         } elseif (is_array($dataType)) {
             self::dumpSequence($dataType, $indent);
         }
@@ -69,14 +69,18 @@ class Dumper //extends AnotherClass
 
     private static function dumpYamlObject(YamlObject $dataType)
     {
-        self::dump($dataType, 0);
-        self::insertComments($dataType->getComment());
+        self::$result->push("---");
+        return self::dump($dataType, 0);
+        // self::insertComments($dataType->getComment());
         //TODO: $references = $dataType->getAllReferences();
     }
 
-    private static function split($string, $indent):array
+    private static function add($value, $indent)
     {
-        return str_split(str_pad($string, $indent, " ", STR_PAD_LEFT), self::width);
+        $newVal = str_repeat(" ", $indent).$value;
+        foreach (str_split($newVal, self::width) as $chunks) {
+            self::$result->push($chunks);
+        }
     }
 
     private static function dumpSequence(array $array, int $indent):void
@@ -84,27 +88,53 @@ class Dumper //extends AnotherClass
         $refKeys = range(0, count($array));
         foreach ($array as $key => $item) {
             $lineStart = current($refKeys) === $key ? "- " : "- $key: ";
-            $value     = self::dump($item, $indent + self::indent);
-            if (is_null($value)) {
-                self::$result->push(self::split($lineStart, $indent + self::indent)[0]);
+            if (is_scalar($item)) {
+                self::add($lineStart.$item, $indent );
             } else {
-                foreach (self::split($lineStart.$value, $indent + self::indent) as $chunks) {
-                    self::$result->push($chunks);
-                }
+                self::add($lineStart, $indent );
+                self::dump($item, $indent + self::indent);
             }
             next($refKeys);
         }
     }
 
-    private static function insertComments($commentsArray):void
+    private static function insertComments(array $commentsArray):void
     {
         foreach ($commentsArray as $lineNb => $comment) {
             self::$result->add($lineNb, $comment);
         }
     }
 
-    public static function dumpCompact($dataType, int $indent)
+    private function dumpObject(object $object, int $indent)
     {
-        # code...
+        if ($dataType instanceof Tag) {
+            if (is_scalar($dataType->value)) {
+                return "!".$dataType->tagName.' '.$dataType->value;
+            } else{
+                yield "!".$dataType->tagName;
+                self::dump($dataType->value, $indent + self::indent);
+            }
+        }
+        if ($dataType instanceof Compact) {//TODO
+            self::dumpCompact($dataType, $indent);
+        }
+        if ($dataType instanceof \DateTime) {
+            # code...
+        }
+        $propList = get_object_vars($dataType);
+        foreach ($propList as $property => $value) {
+            if (is_scalar($value)) {
+                self::add("$property: ".$value, $indent);
+            } else {
+                self::add("$property: ", $indent);
+                self::dump($value, $indent + self::indent);
+            }
+        }
+    }
+
+    public static function dumpCompact(Compact $object, int $indent)
+    {
+        // if (empty($object)) return "{}";
+        // if (empty($object)) return "[]";
     }
 }

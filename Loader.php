@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Node as Node, Types as T, Builder};
+use Dallgoot\Yaml\{Node, Builder, Types as T};
 
 class Loader
 {
@@ -14,10 +14,10 @@ class Loader
     public const EXCEPTIONS_PARSING = 0100;//THROW Exception on parsing Errors
     public const NO_OBJECT_FOR_DATE = 1000;//DONT import date strings as dateTime Object
     //
-    private $_content;
+    private $content;
     private $filePath;
-    private $_debug   = 0;//TODO: determine levels
-    private $_options = 0;
+    private $debug  = 0;//TODO: determine levels
+    private $options = 0;
     //Exceptions
     const INVALID_VALUE        = self::class.": at line %d";
     const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
@@ -26,7 +26,7 @@ class Loader
 
     public function __construct($absolutePath = null, $options = null, $debug = 0)
     {
-        $this->_debug = is_int($debug) ? min($debug, 3) : 1;
+        $this->debug = is_int($debug) ? min($debug, 3) : 1;
         if (!is_null($options)) {
             $this->options = $options;
         }
@@ -37,7 +37,7 @@ class Loader
 
     public function load(String $absolutePath):Loader
     {
-        $this->_debug && var_dump($absolutePath);
+        $this->debug && var_dump($absolutePath);
         $this->filePath = $absolutePath;
         if (!file_exists($absolutePath)) {
             throw new \Exception(sprintf(self::EXCEPTION_NO_FILE, $absolutePath));
@@ -50,7 +50,7 @@ class Loader
         if (is_bool($content)) {
             throw new \Exception(sprintf(self::EXCEPTION_READ_ERROR, $absolutePath));
         }
-        $this->_content = $content;
+        $this->content = $content;
         return $this;
     }
 
@@ -65,7 +65,7 @@ class Loader
      */
     public function parse($strContent = null)
     {
-        $source = $this->_content;
+        $source = $this->content;
         if (is_null($source)) $source = preg_split("/([^\n\r]+)/um", $strContent, 0, PREG_SPLIT_DELIM_CAPTURE);
         //TODO : be more permissive on $strContent values
         if (!is_array($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
@@ -74,7 +74,7 @@ class Loader
         $specialTypes = [T::LITTERAL, T::LITTERAL_FOLDED, T::EMPTY];
         try {
             foreach ($source as $lineNb => $lineString) {
-                $n = new Node($lineString, $lineNb + 1);//TODO: useful???-> $this->_debug && var_dump($n);
+                $n = new Node($lineString, $lineNb + 1);//TODO: useful???-> $this->debug && var_dump($n);
                 $parent  = $previous;
                 $deepest = $previous->getDeepestNode();
                 if ($deepest->type === T::PARTIAL) {
@@ -85,7 +85,7 @@ class Loader
                     $deepest->parse($deepest->value.' '.ltrim($lineString));
                 } else {
                     if (in_array($n->type, $specialTypes)) {
-                        if ($this->_onSpecialType($n, $parent, $previous, $emptyLines)) continue;
+                        if ($this->onSpecialType($n, $parent, $previous, $emptyLines)) continue;
                     }
                     foreach ($emptyLines as $key => $node) {
                         $node->getParent()->add($node);
@@ -96,21 +96,21 @@ class Loader
                     } elseif ($n->indent === $previous->indent) {
                         $parent = $previous->getParent();
                     } elseif ($n->indent > $previous->indent) {
-                        if ($this->_onDeepestType($n, $parent, $previous, $lineString)) continue;
+                        if ($this->onDeepestType($n, $parent, $previous, $lineString)) continue;
                     }
                     $parent->add($n);
                     $previous = $n;
                 }
             }
-            if ($this->_debug === 2) {
+            if ($this->debug === 2) {
                 var_dump("\033[33mParsed Structure\033[0m\n", $root);
                 exit(0);
             }
-            $out = Builder::buildContent($root, $this->_debug);
+            $out = Builder::buildContent($root, $this->debug);
             return $out;
         } catch (\ParseError $pe) {
             $message = $pe->getMessage()." on line ".$pe->getLine();
-            if ($this->_options & self::EXCEPTIONS_PARSING) {
+            if ($this->options & self::EXCEPTIONS_PARSING) {
                 var_dump($root);
                 throw new \Exception($message, 1);
             }
@@ -120,7 +120,7 @@ class Loader
         }
     }
 
-    private function _onSpecialType(&$n, &$parent, &$previous, &$emptyLines):bool
+    private function onSpecialType(&$n, &$parent, &$previous, &$emptyLines):bool
     {
         $deepest = $previous->getDeepestNode();
         switch ($n->type) {
@@ -128,7 +128,6 @@ class Loader
                 if ($previous->type === T::SCALAR) $emptyLines[] = $n->setParent($previous->getParent());
                 if (in_array($deepest->type, T::$LITTERALS)) $emptyLines[] = $n->setParent($deepest);
                 return true;
-                break;
             case T::LITTERAL://fall through
             case T::LITTERAL_FOLDED://var_dump($deepest);exit();
                 if ($deepest->type === T::KEY && is_null($deepest->value)) {
@@ -141,7 +140,7 @@ class Loader
         }
     }
 
-    private function _onDeepestType(&$n, &$parent, &$previous, $lineString):bool
+    private function onDeepestType(&$n, &$parent, &$previous, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
         switch ($deepest->type) {
