@@ -27,7 +27,7 @@ class Dumper //extends AnotherClass
     public static function toString($dataType, int $options):string
     {
         if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml", 1);
-        self::options = is_int($options) ? $options : self::options;
+        self::$options = is_int($options) ? $options : self::$options;
         self::$result = new DLL;
         self::$result->setIteratorMode(DLL::IT_MODE_FIFO | DLL::IT_MODE_DELETE);
         if ($dataType instanceof YamlObject) {

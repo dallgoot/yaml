@@ -8,7 +8,7 @@ use Dallgoot\Yaml\API as API;
   * @method mixed getReference(string $name)
   * @method array getAllReferences()
   * @method void addComment($index, $value)
-  * @method string|rray getComment($lineNumber)
+  * @method string|array getComment($lineNumber)
   * @method void setText(string $value)
   * @method void addTag(string $value)
  */
