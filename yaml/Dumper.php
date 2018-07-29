@@ -1,7 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Types as T, YamlObject, Tag, Compact};
+use Dallgoot\Yaml\Types as T;
 use \SplDoublyLinkedList as DLL;
 
 /**
@@ -9,9 +9,9 @@ use \SplDoublyLinkedList as DLL;
  */
 class Dumper //extends AnotherClass
 {
-    private const indent = 2;
-    private const width = 120;
-    private const options = 00000;
+    private const INDENT = 2;
+    private const WIDTH = 120;
+    private const OPTIONS = 00000;
 
     private static $result;
     private static $options;
@@ -24,10 +24,20 @@ class Dumper //extends AnotherClass
         if (is_int($options)) self::$options = $options;
     }
 
+    /**
+     * Returns the YAML representation as a string of the $dataType provided
+     *
+     * @param      mixed      $dataType  The data type
+     * @param      integer     $options   The options
+     *
+     * @throws     \Exception  datatype cannot be null
+     *
+     * @return     string      The Yaml string content
+     */
     public static function toString($dataType, int $options):string
     {
         if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml", 1);
-        self::$options = is_int($options) ? $options : self::$options;
+        self::$options = is_int($options) ? $options : self::OPTIONS;
         self::$result = new DLL;
         self::$result->setIteratorMode(DLL::IT_MODE_FIFO | DLL::IT_MODE_DELETE);
         if ($dataType instanceof YamlObject) {
@@ -45,6 +55,15 @@ class Dumper //extends AnotherClass
         return $out;
     }
 
+    /**
+     * Calls and saves the result of Dumper::toString to the file $filePath provided
+     *
+     * @param      string   $filePath  The file path
+     * @param      mixed   $dataType  The data type
+     * @param      integer  $options   The options
+     *
+     * @return     boolean  true = if the file has been correctly saved  (according to return from 'file_put_contents')
+     */
     public static function toFile(string $filePath, $dataType, int $options):bool
     {
         return !is_bool(file_put_contents($filePath, self::toString($dataType, $options)));
@@ -54,7 +73,7 @@ class Dumper //extends AnotherClass
     {
         if (is_scalar($dataType)) {
             switch (gettype($dataType)) {
-                case 'boolean': return $dataType ? 'true' : 'false';break;
+                case 'boolean': return $dataType ? 'true' : 'false';
                 case 'float': if (is_infinite($dataType)) return $dataType > 0 ? '.inf' : '-.inf';
                 case 'double': if (is_nan($dataType)) return '.nan';
                 default:
@@ -70,7 +89,7 @@ class Dumper //extends AnotherClass
     private static function dumpYamlObject(YamlObject $dataType)
     {
         self::$result->push("---");
-        return self::dump($dataType, 0);
+        self::dump($dataType, 0);
         // self::insertComments($dataType->getComment());
         //TODO: $references = $dataType->getAllReferences();
     }
@@ -78,7 +97,7 @@ class Dumper //extends AnotherClass
     private static function add($value, $indent)
     {
         $newVal = str_repeat(" ", $indent).$value;
-        foreach (str_split($newVal, self::width) as $chunks) {
+        foreach (str_split($newVal, self::WIDTH) as $chunks) {
             self::$result->push($chunks);
         }
     }
@@ -92,7 +111,7 @@ class Dumper //extends AnotherClass
                 self::add($lineStart.$item, $indent );
             } else {
                 self::add($lineStart, $indent );
-                self::dump($item, $indent + self::indent);
+                self::dump($item, $indent + self::INDENT);
             }
             next($refKeys);
         }
@@ -105,29 +124,30 @@ class Dumper //extends AnotherClass
         }
     }
 
-    private function dumpObject(object $object, int $indent)
+    private static function dumpObject(object $object, int $indent)
     {
-        if ($dataType instanceof Tag) {
-            if (is_scalar($dataType->value)) {
-                return "!".$dataType->tagName.' '.$dataType->value;
+        if ($object instanceof Tag) {
+            if (is_scalar($object->value)) {
+                return "!".$object->tagName.' '.$object->value;
             } else{
-                yield "!".$dataType->tagName;
-                self::dump($dataType->value, $indent + self::indent);
+                yield "!".$object->tagName;
+                self::dump($object->value, $indent + self::INDENT);
             }
         }
-        if ($dataType instanceof Compact) {//TODO
-            self::dumpCompact($dataType, $indent);
+        if ($object instanceof Compact) {//TODO
+            self::dumpCompact($object, $indent);
         }
-        if ($dataType instanceof \DateTime) {
+        //TODO:  consider dumping datetime as date strings according to a format provided by user or default
+        if ($object instanceof \DateTime) {
             # code...
         }
-        $propList = get_object_vars($dataType);
+        $propList = get_object_vars($object);
         foreach ($propList as $property => $value) {
             if (is_scalar($value)) {
                 self::add("$property: ".$value, $indent);
             } else {
                 self::add("$property: ", $indent);
-                self::dump($value, $indent + self::indent);
+                self::dump($value, $indent + self::INDENT);
             }
         }
     }

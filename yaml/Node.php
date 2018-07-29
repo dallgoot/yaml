@@ -1,9 +1,14 @@
 <?php
+
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Types as T, Regex as R};
+use Dallgoot\Yaml as Y;
+use Dallgoot\Yaml\Regex as R;
 use \SplDoublyLinkedList as DLL;
 
+/**
+ * Class for node.
+ */
 class Node
 {
     /** @var int */
@@ -24,48 +29,72 @@ class Node
     {
         $this->line = $line;
         if (is_null($nodeString)) {
-            $this->type = T::ROOT;
+            $this->type = Y\ROOT;
         } else {
             $this->parse($nodeString);
         }
     }
 
+    /**
+     * Sets the parent of the current Node
+     * @param      Node       $node   The node
+     *
+     * @return     Node|self  The currentNode
+     */
     public function setParent(Node $node):Node
     {
         $this->parent = $node;
         return $this;
     }
 
-    public function getParent($indent = null):Node
+    /**
+     * Gets the ancestor with specified $indent or the direct $parent OR the current Node itself
+     *
+     * @param      integer    $indent  The indent
+     *
+     * @return     Node|self  The parent.
+     */
+    public function getParent(int $indent = null):Node
     {
-        if (is_null($indent)) return $this->parent ?? $this;
+        if (!is_int($indent)) return $this->parent ?? $this;
         $cursor = $this;
-        while ($cursor->indent >= $indent) {
+        while ($cursor instanceof Node && $cursor->indent >= $indent) {
             $cursor = $cursor->parent;
         }
         return $cursor;
     }
 
+    /**
+     * Set the value for the current Node :
+     * - if value is null , then value = $child (Node)
+     * - if value is Node, then value is a DLL with (previous value AND $child)
+     * - if value is a DLL, simply push $child into
+     *
+     * @param      Node  $child  The child
+     */
     public function add(Node $child):void
     {
         $child->setParent($this);
         $current = $this->value;
-        if (in_array($this->type, T::$LITTERALS)) $child->type = T::SCALAR;
+        if ($this->type & Y\LITTERALS) $child->type = Y\SCALAR;
         if (is_null($current)) {
             $this->value = $child;
             return;
-        } elseif ($current instanceof Node) {
-            $this->value = new DLL();
-            $this->value->setIteratorMode(DLL::IT_MODE_KEEP);
-            $this->value->push($current);
+        } else {
+            var_dump($this->value);
+            if ($current instanceof Node) {
+                $this->value = new DLL();
+                $this->value->setIteratorMode(DLL::IT_MODE_KEEP);
+                $this->value->push($current);
+            }
+            $this->value->push($child);
         }
-        $this->value->push($child);
         //modify type according to child
         if ($this->value instanceof DLL && !property_exists($this->value, "type")) {
             switch ($child->type) {
-                case T::KEY:    $this->value->type = T::MAPPING;break;
-                case T::ITEM:   $this->value->type = T::SEQUENCE;break;
-                case T::SCALAR: $this->value->type = $this->type;break;
+                case Y\KEY:    $this->value->type = Y\MAPPING;break;
+                case Y\ITEM:   $this->value->type = Y\SEQUENCE;break;
+                case Y\SCALAR: $this->value->type = $this->type;break;
             }
         }
     }
@@ -80,18 +109,22 @@ class Node
     }
 
     /**
-    *  CAUTION : the types assumed here are NOT FINAL : they CAN be adjusted according to parent
-    */
-    public function parse(String $nodeString):Node
+     * Parses the string (assumed to be a line from a valid YAML)
+     *
+     * @param      string     $nodeString  The node string
+     *
+     * @return     Node|self  ( description_of_the_return_value )
+     */
+    public function parse(string $nodeString):Node
     {
         $nodeValue = preg_replace("/^\t+/m", " ", $nodeString);//permissive to tabs but replacement
         $this->indent = strspn($nodeValue, ' ');
         $nodeValue = ltrim($nodeValue);
         if ($nodeValue === '') {
-            $this->type = T::EMPTY;
+            $this->type = Y\BLANK;
             // $this->indent = 0; // remove if no bugs
         } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something on same line ?
-            $this->type = T::DOC_END;
+            $this->type = Y\DOC_END;
         } elseif (preg_match(R::KEY, $nodeValue, $matches)) {
             $this->onKey($matches);
         } else {//NOTE: can be of another type according to parent
@@ -111,27 +144,32 @@ class Node
     {
         $v = substr($nodeValue, 1);
         if (in_array($nodeValue[0], ['"', "'"])) {
-            $type = R::isProperlyQuoted($nodeValue) ? T::QUOTED : T::PARTIAL;
+            $type = R::isProperlyQuoted($nodeValue) ? Y\QUOTED : Y\PARTIAL;
             return [$type, $nodeValue];
         }
         if (in_array($nodeValue[0], ['{', '[']))      return $this->onObject($nodeValue);
         if (in_array($nodeValue[0], ['!', '&', '*'])) return $this->onNodeAction($nodeValue);
         switch ($nodeValue[0]) {
-            case '#': return [T::COMMENT, ltrim($v)];
+            case '#': return [Y\COMMENT, ltrim($v)];
             case "-": return $this->onHyphen($nodeValue);
-            case '%': return [T::DIRECTIVE, ltrim($v)];
-            case '?': return [T::SET_KEY,   empty($v) ? null : new Node(ltrim($v), $this->line)];
-            case ':': return [T::SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)];
-            case '>': return [T::LITTERAL_FOLDED, null];
-            case '|': return [T::LITTERAL, null];
+            case '%': return [Y\DIRECTIVE, ltrim($v)];
+            case '?': return [Y\SET_KEY,   empty($v) ? null : new Node(ltrim($v), $this->line)];
+            case ':': return [Y\SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)];
+            case '>': return [Y\LITT_FOLDED, null];
+            case '|': return [Y\LITT, null];
             default:
-                return [T::SCALAR, $nodeValue];
+                return [Y\SCALAR, $nodeValue];
         }
     }
 
-    private function onKey($matches):void
+    /**
+     * Process when a "key: value" syntax is found in the parsed string
+     * Note : key is match 1, value is match 2 as per regex from R::KEY
+     * @param      array  $matches  The matches provided by 'preg_match' function
+     */
+    private function onKey(array $matches):void
     {
-        $this->type = T::KEY;
+        $this->type = Y\KEY;
         $this->identifier = trim($matches[1]);
         $keyValue = isset($matches[2]) ? trim($matches[2]) : null;
         if (!empty($keyValue)) {
@@ -139,7 +177,7 @@ class Node
             $hasComment = strpos($keyValue, ' #');
             if (!is_bool($hasComment)) {
                 $tmpNode = new Node(trim(substr($keyValue, 0, $hasComment)), $this->line);
-                if ($tmpNode->type !== T::PARTIAL) {
+                if ($tmpNode->type !== Y\PARTIAL) {
                     $comment = new Node(trim(substr($keyValue, $hasComment+1)), $this->line);
                     //TODO: modify "identifier" to specify if fullline comment or not
                     $this->add($comment);
@@ -151,67 +189,103 @@ class Node
         }
     }
 
+    /**
+     * Determines the correct type and value when a short object/array syntax is found
+     *
+     * @param      string  $value  The value assumed to start with { or ( or characters
+     *
+     * @return     array   array with the type and $value (unchanged for now)
+     * @see self:define
+     */
     private function onObject($value):array
     {
         json_decode($value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        if (json_last_error() === JSON_ERROR_NONE)  return [T::JSON, $value];
-        if (preg_match(R::MAPPING, $value))         return [T::MAPPING_SHORT, $value];
-        if (preg_match(R::SEQUENCE, $value))        return [T::SEQUENCE_SHORT, $value];
-        return [T::PARTIAL, $value];
+        if (json_last_error() === JSON_ERROR_NONE)  return [Y\JSON, $value];
+        if (preg_match(R::MAPPING, $value))         return [Y\MAPPING_SHORT, $value];
+        if (preg_match(R::SEQUENCE, $value))        return [Y\SEQUENCE_SHORT, $value];
+        return [Y\PARTIAL, $value];
     }
 
+    /**
+     * Determines type and value when an hyphen "-" is found
+     *
+     * @param      string $nodeValue  The node value
+     *
+     * @return     array   array with the type and $value
+     */
     private function onHyphen($nodeValue):array
     {
         if (substr($nodeValue, 0, 3) === '---') {
             $rest = trim(substr($nodeValue, 3));
-            if (empty($rest)) return [T::DOC_START, null];
+            if (empty($rest)) return [Y\DOC_START, null];
             $n = new Node($rest, $this->line);
             $n->indent = $this->indent + 4;
-            return [T::DOC_START, $n->setParent($this)];
+            return [Y\DOC_START, $n->setParent($this)];
         }
         if (preg_match(R::ITEM, $nodeValue, $matches)) {
             if (isset($matches[1]) && !empty(trim($matches[1]))) {
                 $n = new Node(trim($matches[1]), $this->line);
-                return [T::ITEM, $n->setParent($this)];
+                return [Y\ITEM, $n->setParent($this)];
             }
-            return [T::ITEM, null];
+            return [Y\ITEM, null];
         }
-        return [T::SCALAR, $nodeValue];
+        return [Y\SCALAR, $nodeValue];
     }
 
+    /**
+     * Determines the type and value according to $nodeValue when one of these characters is found : !,&,*
+     *
+     * @param      string  $nodeValue  The node value
+     *
+     * @return     array   array with the type and $value
+     * @see self::define
+     */
     private function onNodeAction($nodeValue):array
     {
         // TODO: handle tags like  <tag:clarkevans.com,2002:invoice>
         $v = substr($nodeValue, 1);
-        $type = ['!' => T::TAG, '&' => T::REF_DEF, '*' => T::REF_CALL][$nodeValue[0]];
+        $type = ['!' => Y\TAG, '&' => Y\REF_DEF, '*' => Y\REF_CALL][$nodeValue[0]];
         $pos = strpos($v, ' ');
         $this->identifier = is_bool($pos) ? $v : strstr($v, ' ', true);
         $n = is_bool($pos) ? null : (new Node(trim(substr($nodeValue, $pos+1)), $this->line))->setParent($this);
         return [$type, $n];
     }
 
+    /**
+     * Returns the correct PHP datatype for the value of the current Node
+     * (simple value Node assumed -> $value is a scalar)
+     *
+     * @return     mixed  The value as PHP type.
+     */
     public function getPhpValue()
     {
         $v = $this->value;
         if (is_null($v)) return null;
         switch ($this->type) {
-            case T::JSON:   return json_decode($v, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR);
-            case T::QUOTED: return substr($v, 1, -1);
-            case T::RAW:    return strval($v);
-            case T::REF_CALL://fall through
-            case T::SCALAR: return self::getScalar($v);
-            case T::MAPPING_SHORT:  return self::getShortMapping(substr($v, 1, -1));
+            case Y\JSON:   return json_decode($v, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR);
+            case Y\QUOTED: return substr($v, 1, -1);
+            case Y\RAW:    return strval($v);
+            case Y\REF_CALL://fall through
+            case Y\SCALAR: return self::getScalar($v);
+            case Y\MAPPING_SHORT:  return self::getShortMapping(substr($v, 1, -1));
             //TODO : that's not robust enough, improve it
-            case T::SEQUENCE_SHORT:
+            case Y\SEQUENCE_SHORT:
                 $f = function ($e) { return self::getScalar(trim($e));};
                 return array_map($f, explode(",", substr($v, 1, -1)));
             default:
-                trigger_error("Error can not get PHP type for ".T::getName($this->type), E_USER_WARNING);
+                trigger_error("Error can not get PHP type for ".Y\getName($this->type), E_USER_WARNING);
                 return null;
         }
     }
 
-    private static function getScalar($v)
+    /**
+     * Returns the correct PHP type according to the string value
+     *
+     * @param      string  $v      a string value
+     *
+     * @return     mixed   The scalar value with appropriate PHP type
+     */
+    private static function getScalar(string $v)
     {
         $types = ['yes'   => true,
                   'no'    => false,
@@ -222,16 +296,24 @@ class Node
                   '-.inf' => -INF,
                   '.nan'  => NAN
         ];
-        if (in_array(strtolower($v), array_keys($types))) return $types[strtolower($v)];
+        if (isset($types[strtolower($v)])) return $types[strtolower($v)];
         if (R::isDate($v))   return date_create($v);
         if (R::isNumber($v)) return self::getNumber($v);
         return strval($v);
     }
 
-    private static function getNumber($v)
+    /**
+     * Returns the correct PHP type according to the string value
+     *
+     * @param      string  $v      a string value
+     *
+     * @return     int|float   The scalar value with appropriate PHP type
+     */
+    private static function getNumber(string $v)
     {
         if (preg_match("/^(0o\d+)$/i", $v))      return intval(base_convert($v, 8, 10));
         if (preg_match("/^(0x[\da-f]+)$/i", $v)) return intval(base_convert($v, 16, 10));
+        // TODO: remove these if not needed
         // if preg_match("/^([\d.]+e[-+]\d{1,2})$/", $v)://fall through
         // if preg_match("/^([-+]?(?:\d+|\d*.\d+))$/", $v):
             return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
@@ -248,13 +330,18 @@ class Node
         return $out;
     }
 
+    /**
+     * PHP internal function for debugging purpose : simplify output provided by 'var_dump'
+     *
+     * @return     array  the Node properties and respective values displayed by 'var_dump'
+     */
     public function __debugInfo():array
     {
         $out = ['line'  => $this->line,
                 'indent'=> $this->indent,
-                'type'  => T::getName($this->type),
+                'type'  => Y::getName($this->type).($this->identifier ? "($this->identifier)" : ''),
                 'value' => $this->value];
-        if (!is_null($this->identifier)) $out['type'] .= "($this->identifier)";
+        ;
         return $out;
     }
 }

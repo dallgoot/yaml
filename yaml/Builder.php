@@ -2,7 +2,7 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Node as Node, Types as T, YamlObject, Tag, Builder};
+use Dallgoot\Yaml as Y;
 use \SplDoublyLinkedList as DLL;
 
 /**
@@ -10,8 +10,8 @@ use \SplDoublyLinkedList as DLL;
  */
 class Builder
 {
-    private static $root;
-    private static $debug;
+    private static $_root;
+    private static $_debug;
 
     const ERROR_NO_KEYNAME = self::class.": key has NO IDENTIFIER on line %d";
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
@@ -26,15 +26,15 @@ class Builder
     private static function buildDLL(DLL $node, &$parent)
     {
         $type = property_exists($node, "type") ? $node->type : null;
-        if (in_array($type, [T::RAW, T::LITTERAL, T::LITTERAL_FOLDED])) {
+        if ($type & (Y\RAW | Y\LITTERALS)) {
             return self::litteral($node, $type);
         }
         $p = $parent;
         switch ($type) {
-            case T::MAPPING: //fall through
-            case T::SET:      $p = new \StdClass;break;
-            case T::SEQUENCE: $p = [];break;
-            // case T::KEY: $p = $parent;break;
+            case Y\MAPPING: //fall through
+            case Y\SET:      $p = new \StdClass;break;
+            case Y\SEQUENCE: $p = [];break;
+            // case Y\KEY: $p = $parent;break;
         }
         $out = null;
         foreach ($node as $child) {
@@ -54,39 +54,39 @@ class Builder
     {
         list($line, $type, $value, $identifier) = [$node->line, $node->type, $node->value, $node->identifier];
         switch ($type) {
-            case T::COMMENT: self::$root->addComment($line, $value);return;
-            case T::DIRECTIVE: return;//TODO
-            case T::ITEM: self::buildItem($value, $parent);return;
-            case T::KEY:  self::buildKey($node, $parent);return;
-            case T::REF_DEF: //fall through
-            case T::REF_CALL://TODO: self::build returns what ?
+            case Y\COMMENT: self::$_root->addComment($line, $value);return;
+            case Y\DIRECTIVE: return;//TODO
+            case Y\ITEM: self::buildItem($value, $parent);return;
+            case Y\KEY:  self::buildKey($node, $parent);return;
+            case Y\REF_DEF: //fall through
+            case Y\REF_CALL://TODO: self::build returns what ?
                 $tmp = is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
-                if ($type === T::REF_DEF) self::$root->addReference($identifier, $tmp);
-                return self::$root->getReference($identifier);
-            case T::SET_KEY:
+                if ($type === Y\REF_DEF) self::$_root->addReference($identifier, $tmp);
+                return self::$_root->getReference($identifier);
+            case Y\SET_KEY:
                 $key = json_encode(self::build($value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
                 if (empty($key))
                     throw new \Exception("Cant serialize complex key: ".var_export($value, true), 1);
                 $parent->{$key} = null;
                 return;
-            case T::SET_VALUE:
+            case Y\SET_VALUE:
                 $prop = array_keys(get_object_vars($parent));
                 $key = end($prop);
-                if (property_exists($value, "type") && in_array($value->type, [T::ITEM, T::MAPPING])) {
-                    $p = $value->type === T::ITEM  ? [] : new \StdClass;
+                if (property_exists($value, "type") && ($value->type & (Y\ITEM | Y\MAPPING))) {
+                    $p = $value->type === Y\ITEM  ? [] : new \StdClass;
                     self::build($value, $p);
                 } else {
                     $p = self::build($value, $parent->{$key});
                 }
                 $parent->{$key} = $p;
                 return;
-            case T::TAG:
-                if ($parent === self::$root) {
+            case Y\TAG:
+                if ($parent === self::$_root) {
                     $parent->addTag($identifier);return;
                 } else {
                     if (in_array($identifier, ['!binary', '!str'])) {
-                        if ($value->value instanceof DLL) $value->value->type = T::RAW;
-                        else $value->type = T::RAW;
+                        if ($value->value instanceof DLL) $value->value->type = Y\RAW;
+                        else $value->type = Y\RAW;
                     }
                     $val = is_null($value) ? null : self::build($value, $node);
                     return new Tag($identifier, $val);
@@ -99,8 +99,9 @@ class Builder
     /**
      * Builds a key and set the property + value to the parent given
      *
-     * @param      Node   $node    The node
-     * @param      object|array  $parent  The parent
+     * @param Node $node   The node
+     * @param object|array $parent   The parent
+     *
      * @throws \ParseError if Key has no name(identifier)
      */
     private static function buildKey($node, &$parent):void
@@ -109,8 +110,8 @@ class Builder
         if (is_null($identifier)) {
             throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $node->line));
         } else {
-            if ($value instanceof Node && in_array($value->type, [T::KEY, T::ITEM])) {
-                $parent->{$identifier} = $value->type === T::KEY ? new \StdClass : [];
+            if ($value instanceof Node && ($value->type & (Y\KEY | Y\ITEM)) {
+                $parent->{$identifier} = $value->type === Y\KEY ? new \StdClass : [];
                 self::build($value, $parent->{$identifier});
             } elseif (is_object($value)) {
                 $parent->{$identifier} = self::build($value, $parent->{$identifier});
@@ -122,7 +123,7 @@ class Builder
 
     private static function buildItem($value, &$parent):void
     {
-        if ($value instanceof Node && $value->type === T::KEY) {
+        if ($value instanceof Node && $value->type === Y\KEY) {
             $parent[$value->identifier] = self::build($value->value, $parent[$value->identifier]);
         } else {
             $index = count($parent);
@@ -133,73 +134,75 @@ class Builder
     /**
      * Builds a file.  check multiple documents & split if more than one documents
      *
-     * @param      Node   $root   The root node
-     * @return     array|YamlObject  list of documents or juste one.
+     * @param Node $_root   The root node
+     * @param int $debug   the level of debugging requested
+     *
+     * @return array|YamlObject   list of documents or juste one.
      */
-    public static function buildContent(Node $root, int $debug)
+    public static function buildContent(Node $_root, int $_debug)
     {
-        self::$debug = $debug;
+        self::$_debug = $_debug;
         $totalDocStart = 0;
         $documents = [];
-        if ($root->value instanceof Node) {
+        if ($_root->value instanceof Node) {
             $q = new DLL;
-            $q->push($root->value);
+            $q->push($_root->value);
             return [self::buildDocument($q, 0)];
         }
-        $root->value->setIteratorMode(DLL::IT_MODE_DELETE);
-        foreach ($root->value as $child) {
-            if ($child->type === T::DOC_START) $totalDocStart++;
+        $_root->value->setIteratorMode(DLL::IT_MODE_DELETE);
+        foreach ($_root->value as $child) {
+            if ($child->type & Y\DOC_START) $totalDocStart++;
             //if 0 or 1 DOC_START = we are still in first document
             $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0;
             if (!isset($documents[$currentDoc])) $documents[$currentDoc] = new DLL();
             $documents[$currentDoc]->push($child);
         }
-        $debug >= 2 && var_dump($documents);
+        $_debug >= 2 && var_dump($documents);//var_dump($documents);die("documents");
         $content = array_map([self::class, 'buildDocument'], $documents, array_keys($documents));
         return count($content) === 1 ? $content[0] : $content;
     }
 
     private static function buildDocument(DLL $list, int $key):YamlObject
     {
-        self::$root = new YamlObject();
+        self::$_root = new YamlObject();
         $childTypes = self::getChildrenTypes($list);
-        $isMapping  = count(array_intersect($childTypes, [T::KEY, T::MAPPING])) > 0;
-        $isSequence = in_array(T::ITEM, $childTypes);
-        $isSet      = in_array(T::SET_VALUE, $childTypes);
+        $isMapping  = count(array_intersect($childTypes, [Y\KEY, Y\MAPPING])) > 0;
+        $isSequence = in_array(Y\ITEM, $childTypes);
+        $isSet      = in_array(Y\SET_VALUE, $childTypes);
         if ($isMapping && $isSequence) {
             throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $key));
         } else {
             switch (true) {
-                case $isSequence: $list->type = T::SEQUENCE;break;
-                case $isSet: $list->type = T::SET;break;
+                case $isSequence: $list->type = Y\SEQUENCE;break;
+                case $isSet:      $list->type = Y\SET;break;
                 case $isMapping://fall through
-                default:$list->type = T::MAPPING;
+                default:          $list->type = Y\MAPPING;
             }
         }
-        self::$debug >= 3 && var_dump(self::$root, $list);
+        self::$_debug >= 3 && var_dump(self::$_root, $list);
         $string = '';
         foreach ($list as $child) {
-            $result = self::build($child, self::$root);
+            $result = self::build($child, self::$_root);
             if (is_string($result)) {
                 $string .= $result.' ';
             }
         }
         if (!empty($string)) {
-            self::$root->setText(rtrim($string));
+            self::$_root->setText(rtrim($string));
         }
-        return self::$root;
+        return self::$_root;
     }
 
     private static function litteral(DLL $children, $type):string
     {
         $children->rewind();
         $refIndent = $children->current()->indent;
-        $separator = $type === T::RAW ? '' : "\n";
+        $separator = $type === Y\RAW ? '' : "\n";
         $action = function ($c) { return $c->value; };
-        if ($type === T::LITTERAL_FOLDED) {
+        if ($type & Y\LITT_FOLDED) {
             $separator = ' ';
             $action = function ($c) use ($refIndent) {
-                return $c->indent > $refIndent || $c->type === T::EMPTY ? "\n".$c->value : $c->value;
+                return $c->indent > $refIndent || ($c->type & Y\EMPTY) ? "\n".$c->value : $c->value;
             };
         }
         $tmp = [];

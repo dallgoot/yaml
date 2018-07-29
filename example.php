@@ -1,13 +1,13 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
-use \Dallgoot\Yaml\Loader;
+use \Dallgoot\Yaml as Y;
 
 /* USE CASE 1
 * load and parse if file exists
 */
-// $yaml = (new Loader('./references/Example 2.18.yml', null, 3))->parse();
-$yaml = (new Loader('./dummy.yml', null, 3))->parse();
+// $yaml = Y::loadFile('./dummy.yml');//->parse();
+$yaml = Y::parseFile('./references/Example 2.18.yml');//->parse();
 var_dump($yaml);
 exit(0);
 // USE CASE 2
@@ -20,8 +20,8 @@ $b = <<<EOF
 mapping:
     string_key: 1
 EOF;
-var_dump((new Loader(null, Loader::EXCEPTIONS_PARSING))->parse($a));
-var_dump((new Loader(null, Loader::EXCEPTIONS_PARSING))->parse($b));
+var_dump(Y::parse($a));
+var_dump(Y::parse($b));
 
 // USE CASE 3
 // $yamlObjList = [];

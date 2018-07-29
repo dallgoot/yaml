@@ -1,9 +1,9 @@
 <?php
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\API as API;
-
 /**
+  *  The returned object representing a YAML file content
+  *
   * @method void addReference(string $name, $value)
   * @method mixed getReference(string $name)
   * @method array getAllReferences()
