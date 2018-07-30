@@ -13,8 +13,8 @@ $TYPES = ['DIRECTIVE',
             'ITEM',
             'MAPPING',
             'SEQUENCE',
-            'MAPPING_SHORT',
-            'SEQUENCE_SHORT',
+            'COMPACT_MAPPING',
+            'COMPACT_SEQUENCE',
             'PARTIAL',
             'LITT', //litteral
             'LITT_FOLDED',//litteral
@@ -39,7 +39,7 @@ const LITTERALS = Y\LITT | Y\LITT_FOLDED;
 
 namespace Dallgoot;
 
-class Yaml
+final class Yaml
 {
     /* @var null|array */
     private static $TYPE_NAMES = null;
@@ -67,9 +67,9 @@ class Yaml
      * @return     YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
      * documents as an array of YamlObject )
      */
-    public static function parse(string $someYaml)
+    public static function parse(string $someYaml, $options = null, $debug = null)
     {
-        return (new Yaml\Loader)->parse($someYaml);
+        return (new Yaml\Loader(null, $options, $debug))->parse($someYaml);
     }
 
     /**
@@ -80,9 +80,9 @@ class Yaml
      * @return     YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
      * documents as an array of YamlObject )
      */
-    public static function parseFile(string $fileName)
+    public static function parseFile(string $fileName, $options = null, $debug = null)
     {
-        return (new Yaml\Loader($fileName))->parse();
+        return (new Yaml\Loader($fileName, $options, $debug))->parse();
     }
 
     /**

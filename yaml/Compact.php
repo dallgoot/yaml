@@ -2,20 +2,38 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Types as T;
 
 /**
  *
  */
-class Compact extends \ArrayIterator
+class Compact extends \ArrayIterator implements \JsonSerializable
 {
-
-    public function __construct($argument)
+	// private static $value;
+ //    public function __construct($argument)
+ //    {
+ //    	self::$value = $argument;
+ //        // if ($argument instanceof \Countable && count($argument) > 0) {
+ //        //     # it's an array-like
+ //        // } else {
+ //        //     //it's an object-like
+ //        // }
+ //    }
+	//
+	public function __construct()
     {
-        if ($argument instanceof \Countable && count($argument) > 0) {
-            # it's an array-like
-        } else {
-            //it's an object-like
-        }
+        parent::__construct([], 1);//1 = Array indices can be accessed as properties in read/write.
+    }
+
+    public function jsonSerialize()
+    {
+        $prop = get_object_vars($this);
+        if (count($prop) > 0) return $prop;
+        if (count($this) > 0) return iterator_to_array($this);
+    }
+
+    public static function wrap($arrayOrObject)
+    {
+    	//
+    	return $this;
     }
 }

@@ -4,12 +4,11 @@ namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml as Y;
 use Dallgoot\Yaml\Regex as R;
-use \SplDoublyLinkedList as DLL;
 
 /**
  * Class for node.
  */
-class Node
+final class Node
 {
     /** @var int */
     public $indent = -1;
@@ -19,7 +18,7 @@ class Node
     public $type;
     /** @var null|string|boolean */
     public $identifier;
-    /** @var Node|DLL|null|string */
+    /** @var Node|NodeList|null|string */
     public $value;
 
     /** @var null|Node */
@@ -67,8 +66,8 @@ class Node
     /**
      * Set the value for the current Node :
      * - if value is null , then value = $child (Node)
-     * - if value is Node, then value is a DLL with (previous value AND $child)
-     * - if value is a DLL, simply push $child into
+     * - if value is Node, then value is a NodeList with (previous value AND $child)
+     * - if value is a NodeList, simply push $child into
      *
      * @param      Node  $child  The child
      */
@@ -76,27 +75,26 @@ class Node
     {
         $child->setParent($this);
         $current = $this->value;
-        if ($this->type & Y\LITTERALS) $child->type = Y\SCALAR;
         if (is_null($current)) {
             $this->value = $child;
             return;
         } else {
-            var_dump($this->value);
             if ($current instanceof Node) {
-                $this->value = new DLL();
-                $this->value->setIteratorMode(DLL::IT_MODE_KEEP);
+                $this->value = new NodeList();
+                $this->value->type = Y\LITT_FOLDED;
+                $this->value->setIteratorMode(NodeList::IT_MODE_KEEP);
                 $this->value->push($current);
             }
             $this->value->push($child);
-        }
-        //modify type according to child
-        if ($this->value instanceof DLL && !property_exists($this->value, "type")) {
+            //modify type according to child
             switch ($child->type) {
-                case Y\KEY:    $this->value->type = Y\MAPPING;break;
-                case Y\ITEM:   $this->value->type = Y\SEQUENCE;break;
-                case Y\SCALAR: $this->value->type = $this->type;break;
+                case Y\COMMENT: //fall through
+                case Y\KEY:     $this->value->type = Y\MAPPING;break;
+                case Y\ITEM:    $this->value->type = Y\SEQUENCE;break;
+                // case Y\COMMENT: $this->value->type = Y\RAW;break;
             }
         }
+        // if ($this->type & Y\LITTERALS) $child->type = Y\SCALAR;
     }
 
     public function getDeepestNode():Node
@@ -143,13 +141,14 @@ class Node
     private function define($nodeValue):array
     {
         $v = substr($nodeValue, 1);
-        if (in_array($nodeValue[0], ['"', "'"])) {
+        $first = $nodeValue[0];
+        if (in_array($first, ['"', "'"])) {
             $type = R::isProperlyQuoted($nodeValue) ? Y\QUOTED : Y\PARTIAL;
             return [$type, $nodeValue];
         }
-        if (in_array($nodeValue[0], ['{', '[']))      return $this->onObject($nodeValue);
-        if (in_array($nodeValue[0], ['!', '&', '*'])) return $this->onNodeAction($nodeValue);
-        switch ($nodeValue[0]) {
+        if (in_array($first, ['{', '[']))      return $this->onObject($nodeValue);
+        if (in_array($first, ['!', '&', '*'])) return $this->onNodeAction($nodeValue);
+        switch ($first) {
             case '#': return [Y\COMMENT, ltrim($v)];
             case "-": return $this->onHyphen($nodeValue);
             case '%': return [Y\DIRECTIVE, ltrim($v)];
@@ -201,8 +200,8 @@ class Node
     {
         json_decode($value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
         if (json_last_error() === JSON_ERROR_NONE)  return [Y\JSON, $value];
-        if (preg_match(R::MAPPING, $value))         return [Y\MAPPING_SHORT, $value];
-        if (preg_match(R::SEQUENCE, $value))        return [Y\SEQUENCE_SHORT, $value];
+        if (preg_match(R::MAPPING, $value))         return [Y\COMPACT_MAPPING, $value];
+        if (preg_match(R::SEQUENCE, $value))        return [Y\COMPACT_SEQUENCE, $value];
         return [Y\PARTIAL, $value];
     }
 
@@ -261,17 +260,12 @@ class Node
     {
         $v = $this->value;
         if (is_null($v)) return null;
+        if ($this->type & (Y\REF_CALL | Y\SCALAR)) return self::getScalar($v);
+        if ($this->type & (Y\COMPACT_MAPPING | Y\COMPACT_SEQUENCE)) return self::getCompact(substr($v, 1, -1), $this->type);
         switch ($this->type) {
             case Y\JSON:   return json_decode($v, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR);
             case Y\QUOTED: return substr($v, 1, -1);
             case Y\RAW:    return strval($v);
-            case Y\REF_CALL://fall through
-            case Y\SCALAR: return self::getScalar($v);
-            case Y\MAPPING_SHORT:  return self::getShortMapping(substr($v, 1, -1));
-            //TODO : that's not robust enough, improve it
-            case Y\SEQUENCE_SHORT:
-                $f = function ($e) { return self::getScalar(trim($e));};
-                return array_map($f, explode(",", substr($v, 1, -1)));
             default:
                 trigger_error("Error can not get PHP type for ".Y\getName($this->type), E_USER_WARNING);
                 return null;
@@ -319,13 +313,22 @@ class Node
             return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
     }
 
-    //TODO : that's not robust enough, improve it
-    private static function getShortMapping($mappingString):object
+    private static function getCompact(string $mappingOrSeqString, int $type):object
     {
-        $out = new \StdClass();
-        foreach (explode(',', $mappingString) as $value) {
-            list($keyName, $keyValue) = explode(':', $value);
-            $out->{trim($keyName)} = self::getScalar(trim($keyValue));
+        $out = new Compact();
+        if ($type === Y\COMPACT_SEQUENCE) {
+            $f = function ($e) { return self::getScalar(trim($e));};
+            //TODO : that's not robust enough, improve it
+            foreach (array_map($f, explode(",", $mappingOrSeqString)) as $key => $value) {
+                $out[$key] = $value;
+            }
+        }
+        if ($type === Y\COMPACT_MAPPING) {
+            //TODO : that's not robust enough, improve it
+            foreach (explode(',', $mappingOrSeqString) as $value) {
+                list($keyName, $keyValue) = explode(':', $value);
+                $out->{trim($keyName)} = self::getScalar(trim($keyValue));
+            }
         }
         return $out;
     }
@@ -337,11 +340,9 @@ class Node
      */
     public function __debugInfo():array
     {
-        $out = ['line'  => $this->line,
+        return ['line'  => $this->line,
                 'indent'=> $this->indent,
                 'type'  => Y::getName($this->type).($this->identifier ? "($this->identifier)" : ''),
                 'value' => $this->value];
-        ;
-        return $out;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Types as T;
+use Dallgoot\Yaml as Y;
 
 class API
 {
@@ -11,7 +11,7 @@ class API
     // private $_documents  = [];
     private $_tags = [];
 
-    public $type = T::MAPPING;
+    public $type = Y\MAPPING;
     public $value = null;
 
     const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";

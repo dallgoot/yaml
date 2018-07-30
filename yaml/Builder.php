@@ -3,12 +3,11 @@
 namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml as Y;
-use \SplDoublyLinkedList as DLL;
 
 /**
  *
  */
-class Builder
+final class Builder
 {
     private static $_root;
     private static $_debug;
@@ -19,11 +18,11 @@ class Builder
 
     private static function build(object $node, &$parent = null)
     {
-        if ($node instanceof DLL) return self::buildDLL($node, $parent);
+        if ($node instanceof NodeList) return self::buildNodeList($node, $parent);
         return self::buildNode($node, $parent);
     }
 
-    private static function buildDLL(DLL $node, &$parent)
+    private static function buildNodeList(NodeList $node, &$parent)
     {
         $type = property_exists($node, "type") ? $node->type : null;
         if ($type & (Y\RAW | Y\LITTERALS)) {
@@ -83,9 +82,9 @@ class Builder
             case Y\TAG:
                 if ($parent === self::$_root) {
                     $parent->addTag($identifier);return;
-                } else {
+                } else {//TODO: have somewhere a list of common tags and their treatment
                     if (in_array($identifier, ['!binary', '!str'])) {
-                        if ($value->value instanceof DLL) $value->value->type = Y\RAW;
+                        if ($value->value instanceof NodeList) $value->value->type = Y\RAW;
                         else $value->type = Y\RAW;
                     }
                     $val = is_null($value) ? null : self::build($value, $node);
@@ -110,8 +109,8 @@ class Builder
         if (is_null($identifier)) {
             throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $node->line));
         } else {
-            if ($value instanceof Node && ($value->type & (Y\KEY | Y\ITEM)) {
-                $parent->{$identifier} = $value->type === Y\KEY ? new \StdClass : [];
+            if ($value instanceof Node && ($value->type & (Y\KEY | Y\ITEM))) {
+                $parent->{$identifier} = $value->type & Y\KEY ? new \StdClass : [];
                 self::build($value, $parent->{$identifier});
             } elseif (is_object($value)) {
                 $parent->{$identifier} = self::build($value, $parent->{$identifier});
@@ -123,6 +122,9 @@ class Builder
 
     private static function buildItem($value, &$parent):void
     {
+        if(!is_array($parent) && !($parent instanceof \ArrayIterator)) {
+            throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
+        }
         if ($value instanceof Node && $value->type === Y\KEY) {
             $parent[$value->identifier] = self::build($value->value, $parent[$value->identifier]);
         } else {
@@ -145,24 +147,24 @@ class Builder
         $totalDocStart = 0;
         $documents = [];
         if ($_root->value instanceof Node) {
-            $q = new DLL;
+            $q = new NodeList;
             $q->push($_root->value);
             return [self::buildDocument($q, 0)];
         }
-        $_root->value->setIteratorMode(DLL::IT_MODE_DELETE);
+        $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
         foreach ($_root->value as $child) {
             if ($child->type & Y\DOC_START) $totalDocStart++;
             //if 0 or 1 DOC_START = we are still in first document
             $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0;
-            if (!isset($documents[$currentDoc])) $documents[$currentDoc] = new DLL();
+            if (!isset($documents[$currentDoc])) $documents[$currentDoc] = new NodeList();
             $documents[$currentDoc]->push($child);
         }
-        $_debug >= 2 && var_dump($documents);//var_dump($documents);die("documents");
+        // $_debug >= 2 && var_dump($documents);//var_dump($documents);die("documents");
         $content = array_map([self::class, 'buildDocument'], $documents, array_keys($documents));
         return count($content) === 1 ? $content[0] : $content;
     }
 
-    private static function buildDocument(DLL $list, int $key):YamlObject
+    private static function buildDocument(NodeList $list, int $key):YamlObject
     {
         self::$_root = new YamlObject();
         $childTypes = self::getChildrenTypes($list);
@@ -179,7 +181,7 @@ class Builder
                 default:          $list->type = Y\MAPPING;
             }
         }
-        self::$_debug >= 3 && var_dump(self::$_root, $list);
+        // self::$_debug >= 3 && var_dump(self::$_root, $list);
         $string = '';
         foreach ($list as $child) {
             $result = self::build($child, self::$_root);
@@ -193,7 +195,7 @@ class Builder
         return self::$_root;
     }
 
-    private static function litteral(DLL $children, $type):string
+    private static function litteral(NodeList $children, $type):string
     {
         $children->rewind();
         $refIndent = $children->current()->indent;
@@ -202,7 +204,7 @@ class Builder
         if ($type & Y\LITT_FOLDED) {
             $separator = ' ';
             $action = function ($c) use ($refIndent) {
-                return $c->indent > $refIndent || ($c->type & Y\EMPTY) ? "\n".$c->value : $c->value;
+                return $c->indent > $refIndent || ($c->type & Y\BLANK) ? "\n".$c->value : $c->value;
             };
         }
         $tmp = [];
@@ -213,7 +215,7 @@ class Builder
         return implode($separator, $tmp);
     }
 
-    private static function getChildrenTypes(DLL $children):array
+    private static function getChildrenTypes(NodeList $children):array
     {
         $types = [];
         foreach ($children as $child) {
