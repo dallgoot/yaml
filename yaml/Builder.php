@@ -122,7 +122,7 @@ final class Builder
 
     private static function buildItem($value, &$parent):void
     {
-        if(!is_array($parent) && !($parent instanceof \ArrayIterator)) {
+        if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
             throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
         }
         if ($value instanceof Node && $value->type === Y\KEY) {
@@ -137,7 +137,7 @@ final class Builder
      * Builds a file.  check multiple documents & split if more than one documents
      *
      * @param Node $_root   The root node
-     * @param int $debug   the level of debugging requested
+     * @param int $_debug   the level of debugging requested
      *
      * @return array|YamlObject   list of documents or juste one.
      */

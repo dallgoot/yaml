@@ -56,7 +56,7 @@ class API
     /**
      * Adds a comment.
      *
-     * @param int $index  The line number at which thecomment should appear
+     * @param int $lineNumber  The line number at which thecomment should appear
      * @param string $value  The comment
      */
     public function addComment(int $lineNumber, $value):void
@@ -67,9 +67,9 @@ class API
     /**
      * Gets the comment at $lineNumber
      *
-     * @param integer  $lineNumber  The line number
+     * @param int|null  $lineNumber  The line number
      *
-     * @return string The comment.
+     * @return string|array The comment à $lineNumber OR ALL comments.
      */
     public function getComment(int $lineNumber = null)
     {

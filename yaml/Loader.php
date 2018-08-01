@@ -112,9 +112,9 @@ final class Loader
             }
             if ($this->debug === 2) {
                 var_dump("\033[33mParsed Structure\033[0m\n", $root);
-                die("Debug of root structure requested (remove debug level to suppress these)");
+                die("Debug of root structure requested (remove debug level to suppress this)");
             }
-            $out = Builder::buildContent($root, $this->debug);//var_dump($out);exit();
+            $out = Builder::buildContent($root, $this->debug);
             return $out;
         } catch (\Error|\Exception|\ParseError $e) {
             $file = basename($this->filePath);
@@ -131,6 +131,9 @@ final class Loader
     private function onSpecialType(&$n, &$previous, &$emptyLines):bool
     {
         $deepest = $previous->getDeepestNode();
+        if ($n->type & Y\KEY && $previous->type & Y\ITEM) {
+
+        }
         if ($n->type & Y\LITTERALS) {
             if ($deepest->type & Y\KEY && is_null($deepest->value)) {
                 $deepest->add($n);
@@ -152,9 +155,12 @@ final class Loader
         // if ($deepest->type & Y\LITTERALS) {
         //     $n->value = trim($lineString);//fall through
         // }
-        // if ($deepest->type & (Y\LITTERALS | Y\REF_DEF | Y\SET_VALUE | Y\TAG) && is_null($deepest->value)) {
-        //     $parent = $deepest;
-        // }
+        if (($n->type & Y\SCALAR) && ($deepest->type & (Y\LITTERALS | Y\REF_DEF | Y\SET_VALUE)) && is_null($deepest->value)) {
+            $previous = $deepest;
+        }
+        if (($deepest->type & Y\TAG) && is_null($deepest->value)) {
+            $previous = $deepest;
+        }
         // // if ($previous->type & Y\ITEM && $n->type & Y\KEY) {
         // //     $previous
         // // }

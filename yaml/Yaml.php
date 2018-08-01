@@ -52,7 +52,7 @@ final class Yaml
      */
     public static function getName($typeInteger)
     {
-        if(is_null(self::$TYPE_NAMES)) {
+        if (is_null(self::$TYPE_NAMES)) {
             $f = function ($v) { return str_replace('Dallgoot\Yaml\\', '', $v);};
             self::$TYPE_NAMES = array_map($f, array_flip(get_defined_constants(true)['user']));
         }
@@ -77,7 +77,7 @@ final class Yaml
      *
      * @param      string  $someYaml  Some yaml
      *
-     * @return     YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
+     * @return     Yaml\YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
      * documents as an array of YamlObject )
      */
     public static function parseFile(string $fileName, $options = null, $debug = null)
@@ -89,14 +89,15 @@ final class Yaml
      * Returns the YAML representation corresponding to given PHP variable
      *
      * @param      mixed  $somePhpVar  Some php variable
+     * @param   int|null $options  Dumper::constants as options
      *
      * @return     string  ( the representation of $somePhpVar as a YAML content (single or multiple document according to argument) )
      * @throws   Exception on errors during building YAML string
      * @see Dumper::toString
      */
-    public static function dump($somePhpVar):string
+    public static function dump($somePhpVar, $options = null):string
     {
-        return Yaml\Dumper::toString($somePhpVar);
+        return Yaml\Dumper::toString($somePhpVar, $options);
     }
 
     /**
@@ -105,12 +106,13 @@ final class Yaml
      *
      * @param      string   $fileName    The file name
      * @param      mixed   $somePhpVar  Some php variable
+     * @param    int|null $options    Dumper::constants as options
      *
      * @return     boolean  true if YAML built and saved , false otherwise
      * @throws   Exception on errors during building YAML string
      */
-    public static function dumpFile(string $fileName, $somePhpVar):boolean
+    public static function dumpFile(string $fileName, $somePhpVar, $options = null):bool
     {
-        return Yaml\Dumper::toFile($fileName, $somePhpVar);
+        return Yaml\Dumper::toFile($fileName, $somePhpVar, $options);
     }
 }

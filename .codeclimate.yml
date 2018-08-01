@@ -70,3 +70,5 @@ plugins:
           enabled: false
         PhanUndeclaredProperty:
           enabled: false
+        PhanUndeclaredConstant:
+          enabled: false

@@ -74,8 +74,8 @@ class Dumper //extends AnotherClass
         if (is_scalar($dataType)) {
             switch (gettype($dataType)) {
                 case 'boolean': return $dataType ? 'true' : 'false';
-                case 'float': if (is_infinite($dataType)) return $dataType > 0 ? '.inf' : '-.inf';
-                case 'double': if (is_nan($dataType)) return '.nan';
+                case 'float': if (is_infinite((float) $dataType)) return $dataType > 0 ? '.inf' : '-.inf';
+                case 'double': if (is_nan((float) $dataType)) return '.nan';
                 default:
                     return $dataType;
             }
@@ -108,9 +108,9 @@ class Dumper //extends AnotherClass
         foreach ($array as $key => $item) {
             $lineStart = current($refKeys) === $key ? "- " : "- $key: ";
             if (is_scalar($item)) {
-                self::add($lineStart.$item, $indent );
+                self::add($lineStart.$item, $indent);
             } else {
-                self::add($lineStart, $indent );
+                self::add($lineStart, $indent);
                 self::dump($item, $indent + self::INDENT);
             }
             next($refKeys);

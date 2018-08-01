@@ -49,7 +49,7 @@ final class Node
     /**
      * Gets the ancestor with specified $indent or the direct $parent OR the current Node itself
      *
-     * @param      integer    $indent  The indent
+     * @param      int|null    $indent  The indent
      *
      * @return     Node|self  The parent.
      */
@@ -267,7 +267,7 @@ final class Node
             case Y\QUOTED: return substr($v, 1, -1);
             case Y\RAW:    return strval($v);
             default:
-                trigger_error("Error can not get PHP type for ".Y\getName($this->type), E_USER_WARNING);
+                trigger_error("Error can not get PHP type for ".Y::getName($this->type), E_USER_WARNING);
                 return null;
         }
     }
