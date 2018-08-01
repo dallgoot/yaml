@@ -6,7 +6,11 @@ use Dallgoot\Yaml as Y;
 use Dallgoot\Yaml\Regex as R;
 
 /**
- * Class for node.
+ * TODO
+ * @category tag in class comment
+ * @package tag in class comment
+ * @author tag in class comment
+ * @license tag in class comment
  */
 final class Node
 {
@@ -49,9 +53,9 @@ final class Node
     /**
      * Gets the ancestor with specified $indent or the direct $parent OR the current Node itself
      *
-     * @param      int|null    $indent  The indent
+     * @param int|null    $indent        The indent
      *
-     * @return     Node|self  The parent.
+     * @return Node|self        The parent.
      */
     public function getParent(int $indent = null):Node
     {

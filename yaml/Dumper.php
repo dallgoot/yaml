@@ -6,6 +6,10 @@ use \SplDoublyLinkedList as DLL;
 
 /**
  *
+ * @category tag in class comment
+ * @package tag in class comment
+ * @author tag in class comment
+ * @license tag in class comment
  */
 class Dumper //extends AnotherClass
 {
@@ -27,8 +31,8 @@ class Dumper //extends AnotherClass
     /**
      * Returns the YAML representation as a string of the $dataType provided
      *
-     * @param      mixed      $dataType  The data type
-     * @param      int|null     $options   The options
+     * @param mixed      $dataType     The data type
+     * @param int|null     $options      The options
      *
      * @throws     \Exception  datatype cannot be null
      *
@@ -58,9 +62,9 @@ class Dumper //extends AnotherClass
     /**
      * Calls and saves the result of Dumper::toString to the file $filePath provided
      *
-     * @param      string   $filePath  The file path
-     * @param      mixed   $dataType  The data type
-     * @param      int|null  $options   The options
+     * @param string   $filePath      The file path
+     * @param mixed   $dataType      The data type
+     * @param int|null  $options      The options
      *
      * @return     boolean  true = if the file has been correctly saved  (according to return from 'file_put_contents')
      */

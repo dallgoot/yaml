@@ -40,6 +40,13 @@ const LITTERALS = Y\LITT | Y\LITT_FOLDED;
 
 namespace Dallgoot;
 
+/**
+ * TODO
+ * @category tag in class comment
+ * @package tag in class comment
+ * @author tag in class comment
+ * @license tag in class comment
+ */
 final class Yaml
 {
     /* @var null|array */
@@ -47,7 +54,7 @@ final class Yaml
 
     /**
      * Gets the name for a given constant declared in the Dallgoot\Yaml namespace
-     * @param      integer  $typeInteger  The constant value
+     * @param      integer  $typeInteger       The constant value
      *
      * @return     string    The name.
      */
@@ -63,7 +70,7 @@ final class Yaml
     /**
      * Parse the given Yaml string to a PHP type
      *
-     * @param      string  $someYaml  Some yaml
+     * @param      string  $someYaml        Some yaml
      *
      * @return     YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
      * documents as an array of YamlObject )
@@ -76,9 +83,9 @@ final class Yaml
     /**
      * Load the given file and parse its content (assumed YAML) to a PHP type
      *
-     * @param      string  $someYaml  Some yaml
+     * @param string  $someYaml      Some yaml
      *
-     * @return     Yaml\YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
+     * @return Yaml\YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
      * documents as an array of YamlObject )
      */
     public static function parseFile(string $fileName, $options = null, $debug = null)
@@ -89,8 +96,8 @@ final class Yaml
     /**
      * Returns the YAML representation corresponding to given PHP variable
      *
-     * @param      mixed  $somePhpVar  Some php variable
-     * @param   int|null $options  Dumper::constants as options
+     * @param mixed  $somePhpVar       Some php variable
+     * @param int|null $options       Dumper::constants as options
      *
      * @return     string  ( the representation of $somePhpVar as a YAML content (single or multiple document according to argument) )
      * @throws   Exception on errors during building YAML string
@@ -105,9 +112,9 @@ final class Yaml
      * Builds the YAML representation corresponding to given PHP variable ($somePhpVar)
      * AND save it as file with the $fileName provided.
      *
-     * @param      string   $fileName    The file name
-     * @param      mixed   $somePhpVar  Some php variable
-     * @param    int|null $options    Dumper::constants as options
+     * @param string   $fileName       The file name
+     * @param mixed   $somePhpVar     Some php variable
+     * @param int|null $options       Dumper::constants as options
      *
      * @return     boolean  true if YAML built and saved , false otherwise
      * @throws   Exception on errors during building YAML string

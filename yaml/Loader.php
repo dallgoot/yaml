@@ -5,6 +5,13 @@ namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml as Y;
 
+/**
+ * TODO
+ * @category tag in class comment
+ * @package tag in class comment
+ * @author tag in class comment
+ * @license tag in class comment
+ */
 final class Loader
 {
     //public
@@ -19,9 +26,9 @@ final class Loader
     private $content;
     /* @var null|string */
     private $filePath;
-    /* @var int */
+    /* @var integer */
     private $debug = 0;///TODO: determine levels
-    /* @var int */
+    /* @var integer */
     private $options = 0;
     //Exceptions messages
     private const INVALID_VALUE        = self::class.": at line %d";

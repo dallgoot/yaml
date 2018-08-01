@@ -3,6 +3,10 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use \Dallgoot\Yaml as Y;
 
+/**
+ * Display some use cases for Yaml library
+ */
+
 /* USE CASE 1
 * load and parse if file exists
 */

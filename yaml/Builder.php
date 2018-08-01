@@ -5,7 +5,11 @@ namespace Dallgoot\Yaml;
 use Dallgoot\Yaml as Y;
 
 /**
- *
+ * Constructs the result (YamlObject or array) according to every Node and respecting value
+ * @category tag in class comment
+ * @package tag in class comment
+ * @author tag in class comment
+ * @license tag in class comment
  */
 final class Builder
 {
@@ -87,7 +91,7 @@ final class Builder
                         if ($value->value instanceof NodeList) $value->value->type = Y\RAW;
                         else $value->type = Y\RAW;
                     }
-                    $val = is_null($value) ? null : self::build($value, $node);
+                    $val = is_null($value) ? null : self::build(/** @scrutinizer ignore-type */ $value, $node);
                     return new Tag($identifier, $val);
                 }
             default:
@@ -98,10 +102,11 @@ final class Builder
     /**
      * Builds a key and set the property + value to the parent given
      *
-     * @param Node $node   The node
-     * @param object|array $parent   The parent
+     * @param Node $node       The node
+     * @param object|array $parent       The parent
      *
      * @throws \ParseError if Key has no name(identifier)
+     * @return null
      */
     private static function buildKey($node, &$parent):void
     {
@@ -113,7 +118,7 @@ final class Builder
                 $parent->{$identifier} = $value->type & Y\KEY ? new \StdClass : [];
                 self::build($value, $parent->{$identifier});
             } elseif (is_object($value)) {
-                $parent->{$identifier} = self::build($value, $parent->{$identifier});
+                $parent->{$identifier} = self::build(/** @scrutinizer ignore-type */ $value, $parent->{$identifier});
             } else {
                 $parent->{$identifier} = $node->getPhpValue();
             }
@@ -136,10 +141,10 @@ final class Builder
     /**
      * Builds a file.  check multiple documents & split if more than one documents
      *
-     * @param Node $_root   The root node
-     * @param int $_debug   the level of debugging requested
+     * @param   Node   $_root      The root node
+     * @param   int   $_debug      the level of debugging requested
      *
-     * @return array|YamlObject   list of documents or juste one.
+     * @return array|YamlObject      list of documents or juste one.
      */
     public static function buildContent(Node $_root, int $_debug)
     {

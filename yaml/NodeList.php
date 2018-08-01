@@ -4,7 +4,11 @@ namespace Dallgoot\Yaml;
 use Dallgoot\Yaml as Y;
 
 /**
- *
+ * TODO
+ * @category tag in class comment
+ * @package tag in class comment
+ * @author tag in class comment
+ * @license tag in class comment
  */
 class NodeList extends \SplDoublyLinkedList
 {

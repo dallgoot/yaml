@@ -3,14 +3,18 @@ namespace Dallgoot\Yaml;
 
 /**
   *  The returned object representing a YAML file content
-  *
-  * @method void addReference(string $name, $value)
-  * @method mixed getReference(string $name)
-  * @method array getAllReferences()
-  * @method void addComment($index, $value)
-  * @method string|array getComment($lineNumber)
-  * @method void setText(string $value)
-  * @method void addTag(string $value)
+ * @category tag in class comment
+ * @package tag in class comment
+ * @author tag in class comment
+ * @license tag in class comment
+ *
+ * @method void addReference(string $name, $value)
+ * @method mixed getReference(string $name)
+ * @method array getAllReferences()
+ * @method void addComment($index, $value)
+ * @method string|array getComment($lineNumber)
+ * @method void setText(string $value)
+ * @method void addTag(string $value)
  */
 class YamlObject extends \ArrayIterator implements \JsonSerializable
 {

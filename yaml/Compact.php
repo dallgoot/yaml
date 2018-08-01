@@ -5,6 +5,10 @@ namespace Dallgoot\Yaml;
 
 /**
  *
+ * @category tag in class comment
+ * @package tag in class comment
+ * @author tag in class comment
+ * @license tag in class comment
  */
 class Compact extends \ArrayIterator implements \JsonSerializable
 {
@@ -34,6 +38,6 @@ class Compact extends \ArrayIterator implements \JsonSerializable
     public static function wrap($arrayOrObject)
     {
         //
-        return $this;
+        return self;
     }
 }
