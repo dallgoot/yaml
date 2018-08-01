@@ -38,8 +38,8 @@ final class Loader
 
     public function __construct($absolutePath = null, $options = null, $debug = 0)
     {
-        $this->debug   = is_int($debug)   ? min($debug, 3) : 1;
-        $this->options = is_int($options) ? $options       : $this->options;
+        $this->debug   = is_int($debug) ? min($debug, 3) : 1;
+        $this->options = is_int($options) ? $options : $this->options;
         if (is_string($absolutePath)) {
             $this->load($absolutePath);
         }
@@ -90,10 +90,10 @@ final class Loader
         if (!is_array($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
         $previous = $root = new Node();
         $emptyLines = [];
-        $specialTypes = Y\LITTERALS | Y\BLANK;
+        $specialTypes = Y\LITTERALS|Y\BLANK;
         try {
             foreach ($source as $lineNb => $lineString) {
-                $n = new Node($lineString, $lineNb + 1);//TODO: useful???-> $this->debug && var_dump($n);
+                $n = new Node($lineString, $lineNb + 1); //TODO: useful???-> $this->debug && var_dump($n);
                 $deepest = $previous->getDeepestNode();
                 if ($deepest->type & Y\PARTIAL) {
                     //TODO:verify this edge case
@@ -129,7 +129,7 @@ final class Loader
             return $out;
         } catch (\Error|\Exception|\ParseError $e) {
             $file = basename($this->filePath);
-            $message = basename($e->getFile())."@".$e->getLine().":".$e->getMessage()." in '$file' @".($lineNb+1)."\n";
+            $message = basename($e->getFile())."@".$e->getLine().":".$e->getMessage()." in '$file' @".($lineNb + 1)."\n";
             if ($e instanceof \ParseError && ($this->options & self::NO_PARSING_EXCEPTIONS)) {
                 trigger_error($message, E_USER_WARNING);
                 $this->errors[] = $message;
@@ -167,7 +167,7 @@ final class Loader
         // if ($deepest->type & Y\LITTERALS) {
         //     $n->value = trim($lineString);//fall through
         // }
-        if (($n->type & Y\SCALAR) && ($deepest->type & (Y\LITTERALS | Y\REF_DEF | Y\SET_VALUE)) && is_null($deepest->value)) {
+        if (($n->type & Y\SCALAR) && ($deepest->type & (Y\LITTERALS|Y\REF_DEF|Y\SET_VALUE)) && is_null($deepest->value)) {
             $previous = $deepest;
         }
         if (($deepest->type & Y\TAG) && is_null($deepest->value)) {

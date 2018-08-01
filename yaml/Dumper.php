@@ -43,7 +43,7 @@ class Dumper //extends AnotherClass
         if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml", 1);
         self::$options = is_int($options) ? $options : self::OPTIONS;
         self::$result = new DLL;
-        self::$result->setIteratorMode(DLL::IT_MODE_FIFO | DLL::IT_MODE_DELETE);
+        self::$result->setIteratorMode(DLL::IT_MODE_FIFO|DLL::IT_MODE_DELETE);
         if ($dataType instanceof YamlObject) {
             self::dumpYamlObject($dataType);
         } elseif (is_array($dataType) && $dataType[0] instanceof YamlObject) {
