@@ -25,14 +25,14 @@ final class Builder
     private static function buildNodeList(NodeList $node, &$parent)
     {
         $type = property_exists($node, "type") ? $node->type : null;
-        if ($type & (Y\RAW | Y\LITTERALS)) {
+        if ($type&(Y\RAW|Y\LITTERALS)) {
             return self::litteral($node, $type);
         }
         $p = $parent;
         switch ($type) {
             case Y\MAPPING: //fall through
-            case Y\SET:      $p = new \StdClass;break;
-            case Y\SEQUENCE: $p = [];break;
+            case Y\SET:      $p = new \StdClass; break;
+            case Y\SEQUENCE: $p = []; break;
             // case Y\KEY: $p = $parent;break;
         }
         $out = null;
@@ -53,10 +53,10 @@ final class Builder
     {
         list($line, $type, $value, $identifier) = [$node->line, $node->type, $node->value, $node->identifier];
         switch ($type) {
-            case Y\COMMENT: self::$_root->addComment($line, $value);return;
-            case Y\DIRECTIVE: return;//TODO
-            case Y\ITEM: self::buildItem($value, $parent);return;
-            case Y\KEY:  self::buildKey($node, $parent);return;
+            case Y\COMMENT: self::$_root->addComment($line, $value); return;
+            case Y\DIRECTIVE: return; //TODO
+            case Y\ITEM: self::buildItem($value, $parent); return;
+            case Y\KEY:  self::buildKey($node, $parent); return;
             case Y\REF_DEF: //fall through
             case Y\REF_CALL://TODO: self::build returns what ?
                 $tmp = is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
@@ -71,8 +71,8 @@ final class Builder
             case Y\SET_VALUE:
                 $prop = array_keys(get_object_vars($parent));
                 $key = end($prop);
-                if (property_exists($value, "type") && ($value->type & (Y\ITEM | Y\MAPPING))) {
-                    $p = $value->type === Y\ITEM  ? [] : new \StdClass;
+                if (property_exists($value, "type") && ($value->type & (Y\ITEM|Y\MAPPING))) {
+                    $p = $value->type === Y\ITEM ? [] : new \StdClass;
                     self::build($value, $p);
                 } else {
                     $p = self::build($value, $parent->{$key});
@@ -81,7 +81,7 @@ final class Builder
                 return;
             case Y\TAG:
                 if ($parent === self::$_root) {
-                    $parent->addTag($identifier);return;
+                    $parent->addTag($identifier); return;
                 } else {//TODO: have somewhere a list of common tags and their treatment
                     if (in_array($identifier, ['!binary', '!str'])) {
                         if ($value->value instanceof NodeList) $value->value->type = Y\RAW;
@@ -109,7 +109,7 @@ final class Builder
         if (is_null($identifier)) {
             throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $node->line));
         } else {
-            if ($value instanceof Node && ($value->type & (Y\KEY | Y\ITEM))) {
+            if ($value instanceof Node && ($value->type & (Y\KEY|Y\ITEM))) {
                 $parent->{$identifier} = $value->type & Y\KEY ? new \StdClass : [];
                 self::build($value, $parent->{$identifier});
             } elseif (is_object($value)) {

@@ -18,7 +18,7 @@ $TYPES = ['DIRECTIVE',
             'COMPACT_SEQUENCE',
             'PARTIAL',
             'LITT', //litteral
-            'LITT_FOLDED',//litteral
+            'LITT_FOLDED', //litteral
             'SCALAR',
             'TAG',
             'JSON',
@@ -35,7 +35,7 @@ foreach ($TYPES as $power => $name) {
     define(__NAMESPACE__."\\$name", 2**$power);
 }
 
-const LITTERALS = Y\LITT | Y\LITT_FOLDED;
+const LITTERALS = Y\LITT|Y\LITT_FOLDED;
 // print_r(get_defined_constants(true)['user']);
 
 namespace Dallgoot;

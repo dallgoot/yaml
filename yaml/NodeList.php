@@ -18,6 +18,6 @@ class NodeList extends \SplDoublyLinkedList
 
     public function __debugInfo():array
     {
-        return ['type' => Y::getName($this->type) , "dllist" => $this->dllist];
+        return ['type' => Y::getName($this->type), "dllist" => $this->dllist];
     }
 }
