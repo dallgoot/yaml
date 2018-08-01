@@ -1,7 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Types as T;
+use Dallgoot\Yaml as Y;
 use \SplDoublyLinkedList as DLL;
 
 /**
@@ -28,13 +28,13 @@ class Dumper //extends AnotherClass
      * Returns the YAML representation as a string of the $dataType provided
      *
      * @param      mixed      $dataType  The data type
-     * @param      integer     $options   The options
+     * @param      int|null     $options   The options
      *
      * @throws     \Exception  datatype cannot be null
      *
      * @return     string      The Yaml string content
      */
-    public static function toString($dataType, int $options):string
+    public static function toString($dataType, int $options = null):string
     {
         if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml", 1);
         self::$options = is_int($options) ? $options : self::OPTIONS;
@@ -60,11 +60,11 @@ class Dumper //extends AnotherClass
      *
      * @param      string   $filePath  The file path
      * @param      mixed   $dataType  The data type
-     * @param      integer  $options   The options
+     * @param      int|null  $options   The options
      *
      * @return     boolean  true = if the file has been correctly saved  (according to return from 'file_put_contents')
      */
-    public static function toFile(string $filePath, $dataType, int $options):bool
+    public static function toFile(string $filePath, $dataType, int $options = null):bool
     {
         return !is_bool(file_put_contents($filePath, self::toString($dataType, $options)));
     }
@@ -129,7 +129,7 @@ class Dumper //extends AnotherClass
         if ($object instanceof Tag) {
             if (is_scalar($object->value)) {
                 return "!".$object->tagName.' '.$object->value;
-            } else{
+            } else {
                 yield "!".$object->tagName;
                 self::dump($object->value, $indent + self::INDENT);
             }

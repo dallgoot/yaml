@@ -2,6 +2,7 @@
 namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml as Y;
+
 // declaring constants for Dallgoot\Yaml
 $TYPES = ['DIRECTIVE',
             'DOC_START',

@@ -177,11 +177,9 @@ final class Builder
             switch (true) {
                 case $isSequence: $list->type = Y\SEQUENCE;break;
                 case $isSet:      $list->type = Y\SET;break;
-                case $isMapping://fall through
                 default:          $list->type = Y\MAPPING;
             }
         }
-        // self::$_debug >= 3 && var_dump(self::$_root, $list);
         $string = '';
         foreach ($list as $child) {
             $result = self::build($child, self::$_root);

@@ -15,10 +15,14 @@ final class Loader
     public const NO_PARSING_EXCEPTIONS = 4;//THROW Exception on parsing Errors
     public const NO_OBJECT_FOR_DATE = 8;//DONT import date strings as dateTime Object
     //privates
-    private $content;/* @var null|string */
-    private $filePath;/* @var null|string */
-    private $debug = 0;//TODO: determine levels
-    private $options = 0;/* @var int */
+    /* @var null|string */
+    private $content;
+    /* @var null|string */
+    private $filePath;
+    /* @var int */
+    private $debug = 0;///TODO: determine levels
+    /* @var int */
+    private $options = 0;
     //Exceptions messages
     private const INVALID_VALUE        = self::class.": at line %d";
     private const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
@@ -102,7 +106,7 @@ final class Loader
                     $emptyLines = [];
                     switch ($n->indent <=> $previous->indent) {
                         case -1: $previous->getParent($n->indent)->add($n);break;
-                        case  0: $previous->getParent()->add($n);break;
+                        case 0: $previous->getParent()->add($n);break;
                         default:
                             if ($this->onDeepestType($n, $previous, $lineString)) continue 2;
                             $previous->add($n);
@@ -122,8 +126,9 @@ final class Loader
             if ($e instanceof \ParseError && ($this->options & self::NO_PARSING_EXCEPTIONS)) {
                 trigger_error($message, E_USER_WARNING);
                 $this->errors[] = $message;
-                var_dump($root);
+                return null;
             }
+            var_dump($root);
             throw new \Exception($message, 3);
         }
     }
@@ -164,7 +169,7 @@ final class Loader
         // // if ($previous->type & Y\ITEM && $n->type & Y\KEY) {
         // //     $previous
         // // }
-        if ($deepest->type & (Y\BLANK | Y\SCALAR) ) {//|| ($previous->type & (Y\ITEM | Y\SET_KEY))) {
+        if ($deepest->type & (Y\BLANK | Y\SCALAR)) {//|| ($previous->type & (Y\ITEM | Y\SET_KEY))) {
                 $previous = $deepest->getParent();
         //     // if ($n->type === Y\SCALAR && ($deepest->getParent()->type & Y\LITTERALS)) {
         //     //     // $deepest->type = Y\SCALAR;

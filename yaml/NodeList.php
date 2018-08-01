@@ -8,6 +8,9 @@ use Dallgoot\Yaml as Y;
  */
 class NodeList extends \SplDoublyLinkedList
 {
+    /* @var null|int */
+    public $type;
+
     public function __construct()
     {
         //do nothing
