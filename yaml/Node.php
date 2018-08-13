@@ -83,10 +83,11 @@ final class Node
             $this->value = $child;
             return;
         } else {
+            if (is_scalar($current)) {
+                $current = new Node($current, $this->line);
+            }
             if ($current instanceof Node) {
                 $this->value = new NodeList();
-                $this->value->type = Y\LITT_FOLDED;
-                $this->value->setIteratorMode(NodeList::IT_MODE_KEEP);
                 $this->value->push($current);
             }
             $this->value->push($child);
@@ -95,10 +96,9 @@ final class Node
                 case Y\COMMENT: //fall through
                 case Y\KEY:     $this->value->type = Y\MAPPING;break;
                 case Y\ITEM:    $this->value->type = Y\SEQUENCE;break;
-                // case Y\COMMENT: $this->value->type = Y\RAW;break;
             }
+            $this->type & Y\LITTERALS && $this->value->type = $this->type;
         }
-        // if ($this->type & Y\LITTERALS) $child->type = Y\SCALAR;
     }
 
     public function getDeepestNode():Node
@@ -174,15 +174,15 @@ final class Node
     {
         $this->type = Y\KEY;
         $this->identifier = trim($matches[1]);
-        $keyValue = isset($matches[2]) ? trim($matches[2]) : null;
-        if (!empty($keyValue)) {
-            $n = new Node($keyValue, $this->line);
-            $hasComment = strpos($keyValue, ' #');
+        $value = isset($matches[2]) ? trim($matches[2]) : null;
+        if (!empty($value)) {
+            $n = new Node($value, $this->line);
+            $hasComment = strpos($value, ' #');
             if (!is_bool($hasComment)) {
-                $tmpNode = new Node(trim(substr($keyValue, 0, $hasComment)), $this->line);
+                $tmpNode = new Node(trim(substr($value, 0, $hasComment)), $this->line);
                 if ($tmpNode->type !== Y\PARTIAL) {
-                    $comment = new Node(trim(substr($keyValue, $hasComment+1)), $this->line);
-                    //TODO: modify "identifier" to specify if fullline comment or not
+                    $comment = new Node(trim(substr($value, $hasComment+1)), $this->line);
+                    $comment->identifier = true;//to specify it is NOT a fullline comment
                     $this->add($comment);
                     $n = $tmpNode;
                 }

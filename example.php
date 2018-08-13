@@ -11,7 +11,7 @@ use \Dallgoot\Yaml as Y;
 * load and parse if file exists
 */
 // $yaml = Y::loadFile('./dummy.yml');//->parse();
-$yaml = Y::parseFile('./references/Example 2.12.yml', null, 2);
+$yaml = Y::parseFile('./references/Example 2.27.yml', null, 1);
 var_dump($yaml);
 exit(0);
 // USE CASE 2

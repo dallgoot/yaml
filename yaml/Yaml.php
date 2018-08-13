@@ -50,7 +50,7 @@ namespace Dallgoot;
 final class Yaml
 {
     /* @var null|array */
-    private static $TYPE_NAMES = null;
+    public static $TYPE_NAMES = null;
 
     /**
      * Gets the name for a given constant declared in the Dallgoot\Yaml namespace

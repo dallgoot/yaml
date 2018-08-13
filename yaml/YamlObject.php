@@ -36,7 +36,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         $publicApi  = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PUBLIC));
         $privateApi = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PRIVATE));
         if (!in_array($funcName, $publicApi) && !in_array($funcName, $privateApi)) {
-                throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName, implode(",", $publicApi)), 1);
+            throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName, implode(",", $publicApi)), 1);
         }
         return call_user_func_array([$this->__yaml__object__api, $funcName], $arguments);
     }

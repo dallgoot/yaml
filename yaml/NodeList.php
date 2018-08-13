@@ -13,15 +13,31 @@ use Dallgoot\Yaml as Y;
 class NodeList extends \SplDoublyLinkedList
 {
     /* @var null|int */
-    public $type;
+    public $type = null;//Y\LITT_FOLDED;
 
     public function __construct()
     {
-        //do nothing
+        $this->setIteratorMode(NodeList::IT_MODE_KEEP);
     }
 
-    public function __debugInfo():array
+    // public function __debugInfo():array
+    // {
+    //     return ['type' => Y::getName($this->type), "dllist" => $this->dllist];
+    // }
+
+    // public static function __set_state($an_array)
+    // {
+    //     $o = new stdClass;
+    //     $o->type = Y::getName($this->type);
+    //     return $o;
+    // }
+
+    public function getTypes():int
     {
-        return ['type' => Y::getName($this->type), "dllist" => $this->dllist];
+        $types = 0;
+        foreach ($this as $child) {
+            $types &= $child->type;
+        }
+        return $types;
     }
 }

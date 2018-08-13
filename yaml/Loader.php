@@ -56,7 +56,6 @@ final class Loader
      */
     public function load(string $absolutePath):Loader
     {
-        $this->debug > 1 && var_dump($absolutePath);
         $this->filePath = $absolutePath;
         if (!file_exists($absolutePath)) {
             throw new \Exception(sprintf(self::EXCEPTION_NO_FILE, $absolutePath));
@@ -74,13 +73,13 @@ final class Loader
     }
 
     /**
-     * Parse Yaml lines into an hierarchy of Node
+     * Parse Yaml lines into a hierarchy of Node
      *
      * @param      string       $strContent  The Yaml string or null to parse loaded content
      * @throws     \Exception    if content is not available as $strContent or as $this->content (from file)
      * @throws     \ParseError  if any error during parsing or building
      *
-     * @return     array|YamlObject      the hierarchy built an array of YamlObject or just YamlObject
+     * @return     array|YamlObject|null      null on errors if NO_PARSING_EXCEPTIONS is set, otherwise an array of YamlObject or just YamlObject
      */
     public function parse($strContent = null)
     {
@@ -92,8 +91,9 @@ final class Loader
         $emptyLines = [];
         $specialTypes = Y\LITTERALS|Y\BLANK;
         try {
+            $source = array_combine(range(1, count($source)), array_values($source));
             foreach ($source as $lineNb => $lineString) {
-                $n = new Node($lineString, $lineNb + 1); //TODO: useful???-> $this->debug && var_dump($n);
+                $n = new Node($lineString, $lineNb);
                 $deepest = $previous->getDeepestNode();
                 if ($deepest->type & Y\PARTIAL) {
                     //TODO:verify this edge case
@@ -113,7 +113,7 @@ final class Loader
                     $emptyLines = [];
                     switch ($n->indent <=> $previous->indent) {
                         case -1: $previous->getParent($n->indent)->add($n);break;
-                        case 0: $previous->getParent()->add($n);break;
+                        case 0:  $previous->getParent()->add($n);break;
                         default:
                             if ($this->onDeepestType($n, $previous, $lineString)) continue 2;
                             $previous->add($n);
@@ -122,14 +122,15 @@ final class Loader
                 }
             }
             if ($this->debug === 2) {
-                var_dump("\033[33mParsed Structure\033[0m\n", $root);
+                Y::getName(1);
+                var_dump("\033[33mParsed Structure\033[0m\n", Y::$TYPE_NAMES, $root);
                 die("Debug of root structure requested (remove debug level to suppress this)");
             }
             $out = Builder::buildContent($root, $this->debug);
             return $out;
         } catch (\Error|\Exception|\ParseError $e) {
             $file = basename($this->filePath);
-            $message = basename($e->getFile())."@".$e->getLine().":".$e->getMessage()." in '$file' @".($lineNb + 1)."\n";
+            $message = basename($e->getFile())."@".$e->getLine().":".$e->getMessage()." in '$file' @".($lineNb)."\n";
             if ($e instanceof \ParseError && ($this->options & self::NO_PARSING_EXCEPTIONS)) {
                 trigger_error($message, E_USER_WARNING);
                 $this->errors[] = $message;
@@ -143,9 +144,9 @@ final class Loader
     private function onSpecialType(&$n, &$previous, &$emptyLines):bool
     {
         $deepest = $previous->getDeepestNode();
-        if ($n->type & Y\KEY && $previous->type & Y\ITEM) {
+        // if ($n->type & Y\KEY && $previous->type & Y\ITEM) {
 
-        }
+        // }
         if ($n->type & Y\LITTERALS) {
             if ($deepest->type & Y\KEY && is_null($deepest->value)) {
                 $deepest->add($n);
@@ -164,30 +165,11 @@ final class Loader
     private function onDeepestType(&$n, &$previous, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
-        // if ($deepest->type & Y\LITTERALS) {
-        //     $n->value = trim($lineString);//fall through
-        // }
-        if (($n->type & Y\SCALAR) && ($deepest->type & (Y\LITTERALS|Y\REF_DEF|Y\SET_VALUE)) && is_null($deepest->value)) {
+        if (($deepest->type & (Y\LITTERALS|Y\REF_DEF|Y\SET_VALUE)) && is_null($deepest->value)) {
             $previous = $deepest;
         }
         if (($deepest->type & Y\TAG) && is_null($deepest->value)) {
             $previous = $deepest;
-        }
-        // // if ($previous->type & Y\ITEM && $n->type & Y\KEY) {
-        // //     $previous
-        // // }
-        if ($deepest->type & (Y\BLANK | Y\SCALAR)) {//|| ($previous->type & (Y\ITEM | Y\SET_KEY))) {
-                $previous = $deepest->getParent();
-        //     // if ($n->type === Y\SCALAR && ($deepest->getParent()->type & Y\LITTERALS)) {
-        //     //     // $deepest->type = Y\SCALAR;
-        //     //     // $deepest->value .= "\n".$n->value;
-        //     //     // ->add($n);
-        //     //     // return true;
-        //     // } else {
-        //     //     if ($previous->type & (Y\ITEM | Y\SET_KEY)) {
-        //     //         $parent = $deepest->getParent();
-        //     //     }
-        //     // }
         }
         return false;
     }

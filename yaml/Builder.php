@@ -28,8 +28,8 @@ final class Builder
 
     private static function buildNodeList(NodeList $node, &$parent)
     {
-        $type = property_exists($node, "type") ? $node->type : null;
-        if ($type&(Y\RAW|Y\LITTERALS)) {
+        $type = &$node->type;
+        if ($type & (Y\RAW | Y\LITTERALS)) {
             return self::litteral($node, $type);
         }
         $p = $parent;
@@ -55,7 +55,7 @@ final class Builder
 
     private static function buildNode(Node $node, &$parent)
     {
-        list($line, $type, $value, $identifier) = [$node->line, $node->type, $node->value, $node->identifier];
+        extract((array) $node, EXTR_REFS);
         switch ($type) {
             case Y\COMMENT: self::$_root->addComment($line, $value); return;
             case Y\DIRECTIVE: return; //TODO
@@ -63,7 +63,17 @@ final class Builder
             case Y\KEY:  self::buildKey($node, $parent); return;
             case Y\REF_DEF: //fall through
             case Y\REF_CALL://TODO: self::build returns what ?
-                $tmp = is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
+                if (is_object($value)) {
+                    $result = self::build($value, $parent);
+                    if (is_null($result)) {
+                        $tmp = $parent;
+                    } else {
+                        $tmp = $result;
+                    }
+                } else {
+                    $tmp = $node->getPhpValue();
+                }
+                // $tmp = is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
                 if ($type === Y\REF_DEF) self::$_root->addReference($identifier, $tmp);
                 return self::$_root->getReference($identifier);
             case Y\SET_KEY:
@@ -100,7 +110,7 @@ final class Builder
     }
 
     /**
-     * Builds a key and set the property + value to the parent given
+     * Builds a key and set the property + value to the given parent
      *
      * @param Node $node       The node
      * @param object|array $parent       The parent
@@ -110,15 +120,15 @@ final class Builder
      */
     private static function buildKey($node, &$parent):void
     {
-        list($identifier, $value) = [$node->identifier, $node->value];
+        extract((array) $node, EXTR_REFS);
         if (is_null($identifier)) {
-            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $node->line));
+            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $line));
         } else {
             if ($value instanceof Node && ($value->type & (Y\KEY|Y\ITEM))) {
                 $parent->{$identifier} = $value->type & Y\KEY ? new \StdClass : [];
                 self::build($value, $parent->{$identifier});
             } elseif (is_object($value)) {
-                $parent->{$identifier} = self::build(/** @scrutinizer ignore-type */ $value, $parent->{$identifier});
+                $parent->{$identifier} = self::build($value, $parent->{$identifier});
             } else {
                 $parent->{$identifier} = $node->getPhpValue();
             }
@@ -154,7 +164,7 @@ final class Builder
         if ($_root->value instanceof Node) {
             $q = new NodeList;
             $q->push($_root->value);
-            return [self::buildDocument($q, 0)];
+            return self::buildDocument($q, 0);
         }
         $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
         foreach ($_root->value as $child) {
@@ -164,7 +174,6 @@ final class Builder
             if (!isset($documents[$currentDoc])) $documents[$currentDoc] = new NodeList();
             $documents[$currentDoc]->push($child);
         }
-        // $_debug >= 2 && var_dump($documents);//var_dump($documents);die("documents");
         $content = array_map([self::class, 'buildDocument'], $documents, array_keys($documents));
         return count($content) === 1 ? $content[0] : $content;
     }
@@ -172,10 +181,10 @@ final class Builder
     private static function buildDocument(NodeList $list, int $key):YamlObject
     {
         self::$_root = new YamlObject();
-        $childTypes = self::getChildrenTypes($list);
-        $isMapping  = count(array_intersect($childTypes, [Y\KEY, Y\MAPPING])) > 0;
-        $isSequence = in_array(Y\ITEM, $childTypes);
-        $isSet      = in_array(Y\SET_VALUE, $childTypes);
+        $childTypes = $list->getTypes();
+        $isMapping  = (Y\KEY | Y\MAPPING) & $childTypes;
+        $isSequence = Y\ITEM & $childTypes;
+        $isSet      = Y\SET_VALUE & $childTypes;
         if ($isMapping && $isSequence) {
             throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $key));
         } else {
@@ -213,17 +222,8 @@ final class Builder
         $tmp = [];
         $children->rewind();
         foreach ($children as $child) {
-            $tmp[] = $action($child);
+            $tmp[] = $child->value instanceof NodeList ? self::litteral($child->value, $type) : $action($child);
         }
         return implode($separator, $tmp);
-    }
-
-    private static function getChildrenTypes(NodeList $children):array
-    {
-        $types = [];
-        foreach ($children as $child) {
-            $types[] = $child->type;
-        }
-        return array_unique($types);
     }
 }
