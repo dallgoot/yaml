@@ -91,7 +91,7 @@ final class Loader
         $previous = $root = new Node();
         $emptyLines = [];
         try {
-            $gen = function() use($source) {
+            $gen = function () use($source) {
                 foreach ($source as $key => $value) {
                     yield ++$key => $value;
                 }
@@ -155,7 +155,7 @@ final class Loader
             $deepest->parse($deepest->value.' '.ltrim($lineString));
             return true;
         }
-        if(($previous->type & Y::LITTERALS) || (($deepest->type & Y::LITTERALS) && is_null($deepest->value))) {
+        if (($previous->type & Y::LITTERALS) || (($deepest->type & Y::LITTERALS) && is_null($deepest->value))) {
             $n->type = Y::SCALAR;
             $n->identifier = null;
             $n->value = trim($lineString);

@@ -257,7 +257,7 @@ final class Node
     /**
      * Returns the correct PHP datatype for the value of the current Node
      *
-     * @return     mixed  The value as PHP type : scalar, array or Compact, DateTime
+     * @return mixed  The value as PHP type : scalar, array or Compact, DateTime
      */
     public function getPhpValue()
     {

@@ -77,7 +77,7 @@ final class Yaml
      *
      * @param string  $someYaml      Some yaml
      *
-     * @return Yaml\YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
+     * @return YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
      * documents as an array of YamlObject )
      */
     public static function parseFile(string $fileName, $options = null, $debug = null)

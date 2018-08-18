@@ -26,7 +26,7 @@ class NodeList extends \SplDoublyLinkedList
     /**
      * Gets the types of the elements in this NodeList
      *
-     * @return     integer  The &-sum of all the types.
+     * @return integer  The &-sum of all the types.
      */
     public function getTypes():int
     {

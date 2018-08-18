@@ -37,7 +37,19 @@ class Compact extends \ArrayIterator implements \JsonSerializable
 
     public static function wrap($arrayOrObject)
     {
-        //TODO : implement adaptation to new Compact
-        return self;
+        $out = new Compact;
+        if (is_array($arrayOrObject) || is_subclass_of($arrayOrObject, 'Iterator')) {
+            foreach ($arrayOrObject as $key => $value) {
+                $out[$key] = $value;
+            }
+        } elseif (is_object($arrayOrObject)){
+            $propList = get_object_vars($arrayOrObject);
+            foreach ($propList as $prop => $value) {
+                $arrayOrObject->{$prop} = $value;
+            }
+        } else {
+            throw new \Exception(__METHOD__.":only array or object can be made as compact syntax", 1);
+        }
+        return $out;
     }
 }
