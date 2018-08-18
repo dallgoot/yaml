@@ -54,7 +54,7 @@ class Dumper //extends AnotherClass
         // foreach (self::$result as $value) {
         //     $out .= $value."\n";
         // }
-        $out = implode("\n", iterator_to_array(self::$result));//TODO: replace by iterator_to_array and implode ???
+        $out = implode("\n", iterator_to_array(self::$result)); //TODO: replace by iterator_to_array and implode ???
         self::$result = null;
         return $out;
     }

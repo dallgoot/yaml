@@ -28,16 +28,17 @@ class Regex
     {
         $d         = "\\d{4}([-\\/])\\d{2}\\1\\d{2}";
         $h         = "\\d{2}(:)\\d{2}\\2\\d{2}";
-        $date      =  "/^$d$/";// 2002-12-14, 2002/12/14
-        $canonical =  "/^$d(?:t| )$h\\.\\dz?$/im";// 2001-12-15T02:59:43.1Z
-        $spaced    =  "/^$d(?:t| )$h\\.\\d{2} [-+]\\d$/im";// 2001-12-14 21:59:43.10 -5
-        $iso8601   =  "/^$d(?:t| )$h\\.\\d{2}[-+]\\d{2}\\2\\d{2}/im";// 2001-12-14t21:59:43.10-05:00
+        $date      = "/^$d$/"; // 2002-12-14, 2002/12/14
+        $canonical = "/^$d(?:t| )$h\\.\\dz?$/im"; // 2001-12-15T02:59:43.1Z
+        $spaced    = "/^$d(?:t| )$h\\.\\d{2} [-+]\\d$/im"; // 2001-12-14 21:59:43.10 -5
+        $iso8601   = "/^$d(?:t| )$h\\.\\d{2}[-+]\\d{2}\\2\\d{2}/im"; // 2001-12-14t21:59:43.10-05:00
         $matchDate      = preg_match($date, $v);
         $matchCanonical = preg_match($canonical, $v);
         $matchSpaced    = preg_match($spaced, $v);
         $matchIso       = preg_match($iso8601, $v);
-        if (is_bool($matchDate) || is_bool($matchCanonical) || is_bool($matchSpaced) || is_bool($matchIso))
-          throw new \Exception("Regex date error");
+        if (is_bool($matchDate) || is_bool($matchCanonical) || is_bool($matchSpaced) || is_bool($matchIso)) {
+                  throw new \Exception("Regex date error");
+        }
 
         return $matchDate || $matchCanonical || $matchSpaced || $matchIso;
     }

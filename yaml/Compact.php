@@ -42,7 +42,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
             foreach ($arrayOrObject as $key => $value) {
                 $out[$key] = $value;
             }
-        } elseif (is_object($arrayOrObject)){
+        } elseif (is_object($arrayOrObject)) {
             $propList = get_object_vars($arrayOrObject);
             foreach ($propList as $prop => $value) {
                 $arrayOrObject->{$prop} = $value;

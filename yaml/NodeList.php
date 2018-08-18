@@ -13,7 +13,7 @@ use Dallgoot\Yaml as Y;
 class NodeList extends \SplDoublyLinkedList
 {
     /* @var null|int */
-    public $type = null;//Y::LITT_FOLDED;
+    public $type = null; //Y::LITT_FOLDED;
 
     /**
      * NodeList constructor

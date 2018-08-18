@@ -94,8 +94,8 @@ final class Node
             //modify type according to child
             switch ($child->type) {
                 case Y::COMMENT: //fall through
-                case Y::KEY:     $this->value->type = Y::MAPPING;break;
-                case Y::ITEM:    $this->value->type = Y::SEQUENCE;break;
+                case Y::KEY:     $this->value->type = Y::MAPPING; break;
+                case Y::ITEM:    $this->value->type = Y::SEQUENCE; break;
             }
             $this->type & Y::LITTERALS && $this->value->type = $this->type;
         }
@@ -119,7 +119,7 @@ final class Node
      */
     public function parse(string $nodeString):Node
     {
-        $nodeValue = preg_replace("/^\t+/m", " ", $nodeString);//permissive to tabs but replacement
+        $nodeValue = preg_replace("/^\t+/m", " ", $nodeString); //permissive to tabs but replacement
         $this->indent = strspn($nodeValue, ' ');
         $nodeValue = ltrim($nodeValue);
         if ($nodeValue === '') {
@@ -156,7 +156,7 @@ final class Node
             case '#': return [Y::COMMENT, ltrim($v)];
             case "-": return $this->onHyphen($nodeValue);
             case '%': return [Y::DIRECTIVE, ltrim($v)];
-            case '?': return [Y::SET_KEY,   empty($v) ? null : new Node(ltrim($v), $this->line)];
+            case '?': return [Y::SET_KEY, empty($v) ? null : new Node(ltrim($v), $this->line)];
             case ':': return [Y::SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)];
             case '>': return [Y::LITT_FOLDED, null];
             case '|': return [Y::LITT, null];
@@ -181,8 +181,8 @@ final class Node
             if (!is_bool($hasComment)) {
                 $tmpNode = new Node(trim(substr($value, 0, $hasComment)), $this->line);
                 if ($tmpNode->type !== Y::PARTIAL) {
-                    $comment = new Node(trim(substr($value, $hasComment+1)), $this->line);
-                    $comment->identifier = true;//to specify it is NOT a fullline comment
+                    $comment = new Node(trim(substr($value, $hasComment + 1)), $this->line);
+                    $comment->identifier = true; //to specify it is NOT a fullline comment
                     $this->add($comment);
                     $n = $tmpNode;
                 }
@@ -250,7 +250,7 @@ final class Node
         $type = ['!' => Y::TAG, '&' => Y::REF_DEF, '*' => Y::REF_CALL][$nodeValue[0]];
         $pos = strpos($v, ' ');
         $this->identifier = is_bool($pos) ? $v : strstr($v, ' ', true);
-        $n = is_bool($pos) ? null : (new Node(trim(substr($nodeValue, $pos+1)), $this->line))->setParent($this);
+        $n = is_bool($pos) ? null : (new Node(trim(substr($nodeValue, $pos + 1)), $this->line))->setParent($this);
         return [$type, $n];
     }
 
@@ -285,13 +285,13 @@ final class Node
     private static function getScalar(string $v)
     {
         $types = ['yes'   => true,
-                  'no'    => false,
-                  'true'  => true,
-                  'false' => false,
-                  'null'  => null,
-                  '.inf'  => INF,
-                  '-.inf' => -INF,
-                  '.nan'  => NAN
+                    'no'    => false,
+                    'true'  => true,
+                    'false' => false,
+                    'null'  => null,
+                    '.inf'  => INF,
+                    '-.inf' => -INF,
+                    '.nan'  => NAN
         ];
         if (isset($types[strtolower($v)])) return $types[strtolower($v)];
         if (R::isDate($v))   return date_create($v);
