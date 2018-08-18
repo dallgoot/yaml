@@ -1,0 +1,10 @@
+content: |
+    # comment 1
+    header
+
+        # comment 2
+        <body>
+            <h1>title</h1>
+        </body>
+
+    footer # comment3

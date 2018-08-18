@@ -51,10 +51,10 @@ class Dumper //extends AnotherClass
         } else {
             self::dump($dataType, 0);
         }
-        $out = '';
-        foreach (self::$result as $value) {
-            $out .= $value."\n";
-        }
+        // foreach (self::$result as $value) {
+        //     $out .= $value."\n";
+        // }
+        $out = implode("\n", iterator_to_array(self::$result));//TODO: replace by iterator_to_array and implode ???
         self::$result = null;
         return $out;
     }

@@ -1,0 +1,2 @@
+parent: { child: first, child: duplicate }
+parent: { child: duplicate, child: duplicate }

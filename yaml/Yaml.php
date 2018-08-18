@@ -1,44 +1,6 @@
 <?php
+
 namespace Dallgoot\Yaml;
-
-use Dallgoot\Yaml as Y;
-
-// declaring constants for Dallgoot\Yaml
-$TYPES = ['DIRECTIVE',
-            'DOC_START',
-            'DOC_END',
-            'COMMENT',
-            'BLANK',
-            'ROOT',
-            'KEY',
-            'ITEM',
-            'MAPPING',
-            'SEQUENCE',
-            'COMPACT_MAPPING',
-            'COMPACT_SEQUENCE',
-            'PARTIAL',
-            'LITT', //litteral
-            'LITT_FOLDED', //litteral
-            'SCALAR',
-            'TAG',
-            'JSON',
-            'QUOTED',
-            'RAW',
-            'REF_DEF', //reference
-            'REF_CALL', //reference
-            'SET',
-            'SET_KEY',
-            'SET_VALUE'];
-
-
-foreach ($TYPES as $power => $name) {
-    define(__NAMESPACE__."\\$name", 2**$power);
-}
-
-const LITTERALS = Y\LITT|Y\LITT_FOLDED;
-// print_r(get_defined_constants(true)['user']);
-
-namespace Dallgoot;
 
 /**
  * TODO
@@ -49,6 +11,34 @@ namespace Dallgoot;
  */
 final class Yaml
 {
+    const BLANK            = 1;
+    const COMMENT          = 2;
+    const COMPACT_MAPPING  = 4;
+    const COMPACT_SEQUENCE = 8;
+    const DIRECTIVE        = 16;
+    const DOC_END          = 32;
+    const DOC_START        = 64;
+    const ITEM             = 128;
+    const JSON             = 256;
+    const KEY              = 512;
+    const LITT             = 1024;//litteral
+    const LITT_FOLDED      = 2048;//litteral
+    const MAPPING          = 4096;
+    const PARTIAL          = 8192;
+    const QUOTED           = 16384;
+    const RAW              = 32768;
+    const REF_CALL         = 65536;//reference
+    const REF_DEF          = 131072;//reference
+    const ROOT             = 262144;
+    const SCALAR           = 524288;
+    const SEQUENCE         = 1048576;
+    const SET              = 2097152;
+    const SET_KEY          = 4194304;
+    const SET_VALUE        = 8388608;
+    const TAG              = 16777216;
+
+    const LITTERALS = self::LITT|self::LITT_FOLDED;
+
     /* @var null|array */
     public static $TYPE_NAMES = null;
 
@@ -58,11 +48,13 @@ final class Yaml
      *
      * @return     string    The name.
      */
-    public static function getName($typeInteger)
+    public static function getName(int $typeInteger):string
     {
         if (is_null(self::$TYPE_NAMES)) {
-            $f = function ($v) { return str_replace('Dallgoot\Yaml\\', '', $v);};
-            self::$TYPE_NAMES = array_map($f, array_flip(get_defined_constants(true)['user']));
+            $oClass = new \ReflectionClass(__CLASS__);
+            self::$TYPE_NAMES = array_flip($oClass->getConstants());
+            // $f = function ($v) { return str_replace('Dallgoot\Yaml\\', '', $v);};
+            // self::$TYPE_NAMES = array_map($f, array_flip(get_defined_constants(true)['user']));
         }
         return self::$TYPE_NAMES[$typeInteger];
     }
@@ -77,7 +69,7 @@ final class Yaml
      */
     public static function parse(string $someYaml, $options = null, $debug = null)
     {
-        return (new Yaml\Loader(null, $options, $debug))->parse($someYaml);
+        return (new Loader(null, $options, $debug))->parse($someYaml);
     }
 
     /**
@@ -90,7 +82,7 @@ final class Yaml
      */
     public static function parseFile(string $fileName, $options = null, $debug = null)
     {
-        return (new Yaml\Loader($fileName, $options, $debug))->parse();
+        return (new Loader($fileName, $options, $debug))->parse();
     }
 
     /**
@@ -105,7 +97,7 @@ final class Yaml
      */
     public static function dump($somePhpVar, $options = null):string
     {
-        return Yaml\Dumper::toString($somePhpVar, $options);
+        return Dumper::toString($somePhpVar, $options);
     }
 
     /**
@@ -121,6 +113,6 @@ final class Yaml
      */
     public static function dumpFile(string $fileName, $somePhpVar, $options = null):bool
     {
-        return Yaml\Dumper::toFile($fileName, $somePhpVar, $options);
+        return Dumper::toFile($fileName, $somePhpVar, $options);
     }
 }

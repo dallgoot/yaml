@@ -1,0 +1,13 @@
+keysWithTabs: |
+  {foo: bar, baz: bar, bor: baz, boz: biz}
+endOfDocumentMapping: |
+  {foo: bar}
+endOfDocumentSequence: |
+  [1,2,3]
+#TODO : another end of documents ?
+blockChomping: |
+  {foo: one\ntwo, bar: one\ntwo}
+blockChompingWithInsideBlank: |
+  {bar: one\n\ntwo}
+blockChompingWithKeep: |
+  {foo: one\ntwo\n, bar: one\ntwo\n}

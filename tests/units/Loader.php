@@ -2,16 +2,11 @@
 
 namespace Dallgoot\Yaml\tests\units;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
-
 use atoum;
 
-/**
- * @engine concurrent
- */
 class Loader extends atoum
 {
-    private const EXAMPLES_FOLDER = __DIR__."/../../references/";
+    private const EXAMPLES_FOLDER = __DIR__."/../cases/examples/";
 
     public function test__constructWithNothing()
     {
@@ -24,7 +19,7 @@ class Loader extends atoum
         $options->setAccessible(true);
         $defaultOptions = $this->testedInstance::EXCLUDE_DIRECTIVES &
                           $this->testedInstance::IGNORE_COMMENTS &
-                          $this->testedInstance::EXCEPTIONS_PARSING &
+                          $this->testedInstance::NO_PARSING_EXCEPTIONS &
                           $this->testedInstance::NO_OBJECT_FOR_DATE;
         $this
             ->given($loaderMock)

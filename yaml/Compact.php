@@ -37,7 +37,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
 
     public static function wrap($arrayOrObject)
     {
-        //
+        //TODO : implement adaptation to new Compact
         return self;
     }
 }

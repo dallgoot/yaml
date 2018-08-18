@@ -2,7 +2,7 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml as Y;
+use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * Constructs the result (YamlObject or array) according to every Node and respecting value
@@ -29,15 +29,15 @@ final class Builder
     private static function buildNodeList(NodeList $node, &$parent)
     {
         $type = &$node->type;
-        if ($type & (Y\RAW | Y\LITTERALS)) {
+        if ($type & (Y::RAW | Y::LITTERALS)) {
             return self::litteral($node, $type);
         }
         $p = $parent;
         switch ($type) {
-            case Y\MAPPING: //fall through
-            case Y\SET:      $p = new \StdClass; break;
-            case Y\SEQUENCE: $p = []; break;
-            // case Y\KEY: $p = $parent;break;
+            case Y::MAPPING: //fall through
+            case Y::SET:      $p = new \StdClass; break;
+            case Y::SEQUENCE: $p = []; break;
+            // case Y::KEY: $p = $parent;break;
         }
         $out = null;
         foreach ($node as $child) {
@@ -56,50 +56,44 @@ final class Builder
     private static function buildNode(Node $node, &$parent)
     {
         extract((array) $node, EXTR_REFS);
+        if ($type & (Y::REF_DEF | Y::REF_CALL)) {
+            if (is_object($value)) {
+                $tmp = self::build($value, $parent) ?? $parent;
+            } else {
+                $tmp = $node->getPhpValue();
+            }
+            if ($type === Y::REF_DEF) self::$_root->addReference($identifier, $tmp);
+            return self::$_root->getReference($identifier);
+        }
         switch ($type) {
-            case Y\COMMENT: self::$_root->addComment($line, $value); return;
-            case Y\DIRECTIVE: return; //TODO
-            case Y\ITEM: self::buildItem($value, $parent); return;
-            case Y\KEY:  self::buildKey($node, $parent); return;
-            case Y\REF_DEF: //fall through
-            case Y\REF_CALL://TODO: self::build returns what ?
-                if (is_object($value)) {
-                    $result = self::build($value, $parent);
-                    if (is_null($result)) {
-                        $tmp = $parent;
-                    } else {
-                        $tmp = $result;
-                    }
-                } else {
-                    $tmp = $node->getPhpValue();
-                }
-                // $tmp = is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
-                if ($type === Y\REF_DEF) self::$_root->addReference($identifier, $tmp);
-                return self::$_root->getReference($identifier);
-            case Y\SET_KEY:
+            case Y::COMMENT: self::$_root->addComment($line, $value); return;
+            case Y::DIRECTIVE: return; //TODO
+            case Y::ITEM: self::buildItem($value, $parent); return;
+            case Y::KEY:  self::buildKey($node, $parent); return;
+            case Y::SET_KEY:
                 $key = json_encode(self::build($value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
                 if (empty($key))
                     throw new \Exception("Cant serialize complex key: ".var_export($value, true), 1);
                 $parent->{$key} = null;
                 return;
-            case Y\SET_VALUE:
+            case Y::SET_VALUE:
                 $prop = array_keys(get_object_vars($parent));
                 $key = end($prop);
-                if (property_exists($value, "type") && ($value->type & (Y\ITEM|Y\MAPPING))) {
-                    $p = $value->type === Y\ITEM ? [] : new \StdClass;
+                if (property_exists($value, "type") && ($value->type & (Y::ITEM|Y::MAPPING))) {
+                    $p = $value->type === Y::ITEM ? [] : new \StdClass;
                     self::build($value, $p);
                 } else {
                     $p = self::build($value, $parent->{$key});
                 }
                 $parent->{$key} = $p;
                 return;
-            case Y\TAG:
+            case Y::TAG:
                 if ($parent === self::$_root) {
                     $parent->addTag($identifier); return;
                 } else {//TODO: have somewhere a list of common tags and their treatment
                     if (in_array($identifier, ['!binary', '!str'])) {
-                        if ($value->value instanceof NodeList) $value->value->type = Y\RAW;
-                        else $value->type = Y\RAW;
+                        if ($value->value instanceof NodeList) $value->value->type = Y::RAW;
+                        else $value->type = Y::RAW;
                     }
                     $val = is_null($value) ? null : self::build(/** @scrutinizer ignore-type */ $value, $node);
                     return new Tag($identifier, $val);
@@ -124,8 +118,8 @@ final class Builder
         if (is_null($identifier)) {
             throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $line));
         } else {
-            if ($value instanceof Node && ($value->type & (Y\KEY|Y\ITEM))) {
-                $parent->{$identifier} = $value->type & Y\KEY ? new \StdClass : [];
+            if ($value instanceof Node && ($value->type & (Y::KEY|Y::ITEM))) {
+                $parent->{$identifier} = $value->type & Y::KEY ? new \StdClass : [];
                 self::build($value, $parent->{$identifier});
             } elseif (is_object($value)) {
                 $parent->{$identifier} = self::build($value, $parent->{$identifier});
@@ -140,7 +134,7 @@ final class Builder
         if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
             throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
         }
-        if ($value instanceof Node && $value->type === Y\KEY) {
+        if ($value instanceof Node && $value->type === Y::KEY) {
             $parent[$value->identifier] = self::build($value->value, $parent[$value->identifier]);
         } else {
             $index = count($parent);
@@ -168,7 +162,7 @@ final class Builder
         }
         $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
         foreach ($_root->value as $child) {
-            if ($child->type & Y\DOC_START) $totalDocStart++;
+            if ($child->type & Y::DOC_START) $totalDocStart++;
             //if 0 or 1 DOC_START = we are still in first document
             $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0;
             if (!isset($documents[$currentDoc])) $documents[$currentDoc] = new NodeList();
@@ -182,16 +176,16 @@ final class Builder
     {
         self::$_root = new YamlObject();
         $childTypes = $list->getTypes();
-        $isMapping  = (Y\KEY | Y\MAPPING) & $childTypes;
-        $isSequence = Y\ITEM & $childTypes;
-        $isSet      = Y\SET_VALUE & $childTypes;
+        $isMapping  = (bool) (Y::KEY | Y::MAPPING) & $childTypes;
+        $isSequence = (bool) Y::ITEM & $childTypes;
+        $isSet      = (bool) Y::SET_VALUE & $childTypes;
         if ($isMapping && $isSequence) {
             throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $key));
         } else {
             switch (true) {
-                case $isSequence: $list->type = Y\SEQUENCE;break;
-                case $isSet:      $list->type = Y\SET;break;
-                default:          $list->type = Y\MAPPING;
+                case $isSequence: $list->type = Y::SEQUENCE;break;
+                case $isSet:      $list->type = Y::SET;break;
+                default:          $list->type = Y::MAPPING;
             }
         }
         $string = '';
@@ -211,12 +205,13 @@ final class Builder
     {
         $children->rewind();
         $refIndent = $children->current()->indent;
-        $separator = $type === Y\RAW ? '' : "\n";
-        $action = function ($c) { return $c->value; };
-        if ($type & Y\LITT_FOLDED) {
+        $separator = $type === Y::RAW ? '' : "\n";
+        $action = function ($c) { return (string) $c->value; };
+        //TODO: use iterator_to_array for LITT & RAW
+        if ($type & Y::LITT_FOLDED) {
             $separator = ' ';
             $action = function ($c) use ($refIndent) {
-                return $c->indent > $refIndent || ($c->type & Y\BLANK) ? "\n".$c->value : $c->value;
+                return $c->indent > $refIndent || ($c->type & Y::BLANK) ? "\n".$c->value : $c->value;
             };
         }
         $tmp = [];

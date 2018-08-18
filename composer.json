@@ -21,6 +21,8 @@
         "lib-pcre" : "*"
     },
     "require-dev": {
-        "atoum/atoum": "^3.3"
+        "atoum/atoum": "^3.3",
+        "phpunit/phpunit": "^7.3",
+        "phuml/phuml": "^1.7"
     }
 }

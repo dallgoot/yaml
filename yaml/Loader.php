@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml as Y;
+use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * TODO
@@ -15,7 +15,9 @@ use Dallgoot\Yaml as Y;
 final class Loader
 {
     //public
-    public $errors = [];
+
+    /* @var null|string */
+    public $error;
 
     public const EXCLUDE_DIRECTIVES = 1;//DONT include_directive
     public const IGNORE_COMMENTS    = 2;//DONT include_comments
@@ -83,49 +85,39 @@ final class Loader
      */
     public function parse($strContent = null)
     {
-        $source = $this->content;
-        if (is_null($source)) $source = preg_split("/([^\n\r]+)/um", $strContent, 0, PREG_SPLIT_DELIM_CAPTURE);
+        $source = $this->content ?? preg_split("/([^\n\r]+)/um", $strContent, 0, PREG_SPLIT_DELIM_CAPTURE);
         //TODO : be more permissive on $strContent values
-        if (!is_array($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
+        if (!is_array($source) || !count($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
         $previous = $root = new Node();
         $emptyLines = [];
-        $specialTypes = Y\LITTERALS|Y\BLANK;
         try {
-            $source = array_combine(range(1, count($source)), array_values($source));
-            foreach ($source as $lineNb => $lineString) {
-                $n = new Node($lineString, $lineNb);
-                $deepest = $previous->getDeepestNode();
-                if ($deepest->type & Y\PARTIAL) {
-                    //TODO:verify this edge case
-                    // if ($n->type === Y\KEY && $n->indent === $previous->indent) {
-                    //     throw new \ParseError(sprintf(self::INVALID_VALUE, $lineNb), 1);
-                    // }
-                    $deepest->parse($deepest->value.' '.ltrim($lineString));
-                } else {
-                    if (($n->type & $specialTypes) && $this->onSpecialType($n, $previous, $emptyLines)) {
-                        continue;
-                    }
-                    if ($n->type & Y\SCALAR) {
-                        foreach ($emptyLines as $blankNode) {
-                            $blankNode->getParent()->add($blankNode);
-                        }
-                    }
-                    $emptyLines = [];
-                    switch ($n->indent <=> $previous->indent) {
-                        case -1: $previous->getParent($n->indent)->add($n);break;
-                        case 0:  $previous->getParent()->add($n);break;
-                        default:
-                            if ($this->onDeepestType($n, $previous, $lineString)) continue 2;
-                            $previous->add($n);
-                    }
-                    $previous = $n;
+            $gen = function() use($source) {
+                foreach ($source as $key => $value) {
+                    yield ++$key => $value;
                 }
+            };
+            foreach ($gen() as $lineNb => $lineString) {
+                $n = new Node($lineString, $lineNb);
+                if ($n->type & (Y::LITTERALS|Y::BLANK)) {
+                    if ($this->onSpecialType($n, $previous, $emptyLines)) continue;
+                } else {
+                    foreach ($emptyLines as $blankNode) {
+                        $blankNode->getParent()->add($blankNode);
+                    }
+                }
+                $emptyLines = [];
+                switch ($n->indent <=> $previous->indent) {
+                    case -1: $target = $previous->getParent($n->indent);
+                        break;
+                    case 0:  $target = $previous->getParent();
+                        break;
+                    default: $target = $previous;
+                }
+                if ($this->onContextType($n, $target, $lineString)) continue;
+                $target->add($n);
+                $previous = $n;
             }
-            if ($this->debug === 2) {
-                Y::getName(1);
-                var_dump("\033[33mParsed Structure\033[0m\n", Y::$TYPE_NAMES, $root);
-                die("Debug of root structure requested (remove debug level to suppress this)");
-            }
+            if ($this->debug === 2) echo "\033[33mParsed Structure\033[0m\n",var_export($root, true);
             $out = Builder::buildContent($root, $this->debug);
             return $out;
         } catch (\Error|\Exception|\ParseError $e) {
@@ -133,7 +125,7 @@ final class Loader
             $message = basename($e->getFile())."@".$e->getLine().":".$e->getMessage()." in '$file' @".($lineNb)."\n";
             if ($e instanceof \ParseError && ($this->options & self::NO_PARSING_EXCEPTIONS)) {
                 trigger_error($message, E_USER_WARNING);
-                $this->errors[] = $message;
+                $this->error = $message;
                 return null;
             }
             var_dump($root);
@@ -144,31 +136,31 @@ final class Loader
     private function onSpecialType(&$n, &$previous, &$emptyLines):bool
     {
         $deepest = $previous->getDeepestNode();
-        // if ($n->type & Y\KEY && $previous->type & Y\ITEM) {
-
-        // }
-        if ($n->type & Y\LITTERALS) {
-            if ($deepest->type & Y\KEY && is_null($deepest->value)) {
-                $deepest->add($n);
-                $previous = $n;
-                return true;
-            }
-        }
-        if ($n->type & Y\BLANK) {
-            if ($previous->type & Y\SCALAR) $emptyLines[] = $n->setParent($previous->getParent());
-            if ($deepest->type & Y\LITTERALS) $emptyLines[] = $n->setParent($deepest);
+        if ($n->type & Y::BLANK) {
+            if ($previous->type & Y::SCALAR) $emptyLines[] = $n->setParent($previous->getParent());
+            if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
             return true;
         }
         return false;
     }
 
-    private function onDeepestType(&$n, &$previous, $lineString):bool
+    private function onContextType(&$n, &$previous, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
-        if (($deepest->type & (Y\LITTERALS|Y\REF_DEF|Y\SET_VALUE)) && is_null($deepest->value)) {
-            $previous = $deepest;
+        if ($deepest->type & Y::PARTIAL) {
+            //TODO:verify this edge case
+            // if ($n->type === Y::KEY && $n->indent === $previous->indent) {
+            //     throw new \ParseError(sprintf(self::INVALID_VALUE, $lineNb), 1);
+            // }
+            $deepest->parse($deepest->value.' '.ltrim($lineString));
+            return true;
         }
-        if (($deepest->type & Y\TAG) && is_null($deepest->value)) {
+        if(($previous->type & Y::LITTERALS) || (($deepest->type & Y::LITTERALS) && is_null($deepest->value))) {
+            $n->type = Y::SCALAR;
+            $n->identifier = null;
+            $n->value = trim($lineString);
+        }
+        if (($deepest->type & (Y::LITTERALS|Y::REF_DEF|Y::SET_VALUE|Y::TAG)) && is_null($deepest->value)) {
             $previous = $deepest;
         }
         return false;

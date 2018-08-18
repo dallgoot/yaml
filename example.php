@@ -10,8 +10,8 @@ use \Dallgoot\Yaml as Y;
 /* USE CASE 1
 * load and parse if file exists
 */
-// $yaml = Y::loadFile('./dummy.yml');//->parse();
-$yaml = Y::parseFile('./references/Example 2.27.yml', null, 1);
+$yaml = Y::parseFile('./tests/cases/examples/Example_2_18.yml', null, 2);//->parse();
+// $yaml = Y::parseFile('./references/Example 2.27.yml', null, 1);
 var_dump($yaml);
 exit(0);
 // USE CASE 2
