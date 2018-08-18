@@ -16,7 +16,7 @@ class Tag
         if (is_null($tagName)) {
             throw new \Exception(self::class.": a tag MUST have a name", 1);
         }
-        $this->tagName  = $tagName;
+        $this->tagName = $tagName;
         $this->value = $value;
     }
 

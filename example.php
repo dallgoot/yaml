@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__.'/vendor/autoload.php';
 
 use \Dallgoot\Yaml as Y;
 
@@ -10,7 +10,7 @@ use \Dallgoot\Yaml as Y;
 /* USE CASE 1
 * load and parse if file exists
 */
-$yaml = Y::parseFile('./tests/cases/examples/Example_2_18.yml', null, 2);//->parse();
+$yaml = Y::parseFile('./tests/cases/examples/Example_2_18.yml', null, 2); //->parse();
 // $yaml = Y::parseFile('./references/Example 2.27.yml', null, 1);
 var_dump($yaml);
 exit(0);
