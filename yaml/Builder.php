@@ -28,12 +28,11 @@ final class Builder
 
     private static function buildNodeList(NodeList $node, &$parent)
     {
-        $type = &$node->type;
-        if ($type & (Y::RAW | Y::LITTERALS)) {
-            return self::litteral($node, $type);
+        if ($node->type & (Y::RAW | Y::LITTERALS)) {
+            return self::buildLitteral($node, $node->type);
         }
         $p = $parent;
-        switch ($type) {
+        switch ($node->type) {
             case Y::MAPPING: //fall through
             case Y::SET:      $p = new \StdClass; break;
             case Y::SEQUENCE: $p = []; break;
@@ -65,42 +64,18 @@ final class Builder
             if ($type === Y::REF_DEF) self::$_root->addReference($identifier, $tmp);
             return self::$_root->getReference($identifier);
         }
-        switch ($type) {
-            case Y::COMMENT: self::$_root->addComment($line, $value); return;
-            case Y::DIRECTIVE: return; //TODO
-            case Y::ITEM: self::buildItem($value, $parent); return;
-            case Y::KEY:  self::buildKey($node, $parent); return;
-            case Y::SET_KEY:
-                $key = json_encode(self::build($value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-                if (empty($key))
-                    throw new \Exception("Cant serialize complex key: ".var_export($value, true), 1);
-                $parent->{$key} = null;
-                return;
-            case Y::SET_VALUE:
-                $prop = array_keys(get_object_vars($parent));
-                $key = end($prop);
-                if (property_exists($value, "type") && ($value->type & (Y::ITEM|Y::MAPPING))) {
-                    $p = $value->type === Y::ITEM ? [] : new \StdClass;
-                    self::build($value, $p);
-                } else {
-                    $p = self::build($value, $parent->{$key});
-                }
-                $parent->{$key} = $p;
-                return;
-            case Y::TAG:
-                if ($parent === self::$_root) {
-                    $parent->addTag($identifier); return;
-                } else {//TODO: have somewhere a list of common tags and their treatment
-                    if (in_array($identifier, ['!binary', '!str'])) {
-                        if ($value->value instanceof NodeList) $value->value->type = Y::RAW;
-                        else $value->type = Y::RAW;
-                    }
-                    $val = is_null($value) ? null : self::build(/** @scrutinizer ignore-type */ $value, $node);
-                    return new Tag($identifier, $val);
-                }
-            default:
-                return is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
+        $typesActions = [Y::COMMENT   => 'buildComment',
+                         Y::DIRECTIVE => 'buildDirective',
+                         Y::ITEM      => 'buildItem',
+                         Y::KEY       => 'buildKey',
+                         Y::SET_KEY   => 'buildSetKey',
+                         Y::SET_VALUE => 'buildSetValue',
+                         Y::TAG       => 'buildTag',
+        ];
+        if (isset($typesActions[$type])) {
+            return self::{$typesActions[$type]}($node, $parent);
         }
+        return is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
     }
 
     /**
@@ -112,7 +87,7 @@ final class Builder
      * @throws \ParseError if Key has no name(identifier)
      * @return null
      */
-    private static function buildKey($node, &$parent):void
+    private static function buildKey(Node $node, &$parent):void
     {
         extract((array) $node, EXTR_REFS);
         if (is_null($identifier)) {
@@ -129,16 +104,16 @@ final class Builder
         }
     }
 
-    private static function buildItem($value, &$parent):void
+    private static function buildItem(Node $node, &$parent):void
     {
         if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
             throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
         }
         if ($value instanceof Node && $value->type === Y::KEY) {
-            $parent[$value->identifier] = self::build($value->value, $parent[$value->identifier]);
+            $parent[$node->value->identifier] = self::build($node->value->value, $parent[$node->value->identifier]);
         } else {
             $index = count($parent);
-            $parent[$index] = self::build($value, $parent[$index]);
+            $parent[$index] = self::build($node->value, $parent[$index]);
         }
     }
 
@@ -176,16 +151,16 @@ final class Builder
     {
         self::$_root = new YamlObject();
         $childTypes = $list->getTypes();
-        $isMapping  = (bool) (Y::KEY | Y::MAPPING) & $childTypes;
-        $isSequence = (bool) Y::ITEM & $childTypes;
-        $isSet      = (bool) Y::SET_VALUE & $childTypes;
-        if ($isMapping && $isSequence) {
+        $isaMapping  = (bool) (Y::KEY | Y::MAPPING) & $childTypes;
+        $isaSequence = (bool) Y::ITEM & $childTypes;
+        $isaSet      = (bool) Y::SET_VALUE & $childTypes;
+        if ($isaMapping && $isaSequence) {
             throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $key));
         } else {
             switch (true) {
-                case $isSequence: $list->type = Y::SEQUENCE;break;
-                case $isSet:      $list->type = Y::SET;break;
-                default:          $list->type = Y::MAPPING;
+                case $isaSequence: $list->type = Y::SEQUENCE;break;
+                case $isaSet:      $list->type = Y::SET;break;
+                default:           $list->type = Y::MAPPING;
             }
         }
         $string = '';
@@ -201,24 +176,70 @@ final class Builder
         return self::$_root;
     }
 
-    private static function litteral(NodeList $children, $type):string
+    private static function buildLitteral(NodeList $children, int $type):string
     {
+        $lines = [];
         $children->rewind();
         $refIndent = $children->current()->indent;
-        $separator = $type === Y::RAW ? '' : "\n";
-        $action = function ($c) { return (string) $c->value; };
-        //TODO: use iterator_to_array for LITT & RAW
-        if ($type & Y::LITT_FOLDED) {
-            $separator = ' ';
-            $action = function ($c) use ($refIndent) {
-                return $c->indent > $refIndent || ($c->type & Y::BLANK) ? "\n".$c->value : $c->value;
-            };
-        }
-        $tmp = [];
-        $children->rewind();
         foreach ($children as $child) {
-            $tmp[] = $child->value instanceof NodeList ? self::litteral($child->value, $type) : $action($child);
+            if ($child->value instanceof NodeList) {
+                $lines[] = self::buildLitteral($child->value, $type);
+            } else {
+                $prefix = '';
+                if ($type & Y::LITT_FOLDED && ($child->indent > $refIndent || ($child->type & Y::BLANK))) {
+                    $prefix = "\n";
+                }
+                $lines[] = $prefix.$child->value;
+            }
         }
-        return implode($separator, $tmp);
+        if ($type & Y::RAW)         return implode('',   $lines);
+        if ($type & Y::LITT)        return implode("\n", $lines);
+        if ($type & Y::LITT_FOLDED) return implode(' ',  $lines);
+    }
+
+    private function buildSetKey(Node $node, $parent):void
+    {
+        $key = json_encode(self::build($node->value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
+        if (empty($key))
+        throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
+        $parent->{$key} = null;
+    }
+
+    private function buildSetValue(Node $node, $parent):void
+    {
+        $prop = array_keys(get_object_vars($parent));
+        $key = end($prop);
+        if ($node->value->type & (Y::ITEM|Y::MAPPING)) {
+            $p = $node->value->type === Y::ITEM ? [] : new \StdClass;
+            self::build($node->value, $p);
+        } else {
+            $p = self::build($node->value, $parent->{$key});
+        }
+        $parent->{$key} = $p;
+    }
+
+    private function buildTag(Node $node, $parent)
+    {
+        if ($parent === self::$_root) {
+            $parent->addTag($node->identifier);
+            return;
+        }
+        //TODO: have somewhere a list of common tags and their treatment
+        if (in_array($node->identifier, ['!binary', '!str'])) {
+            if ($node->value->value instanceof NodeList) $node->value->value->type = Y::RAW;
+            else $node->value->type = Y::RAW;
+        }
+        $val = is_null($node->value) ? null : self::build(/** @scrutinizer ignore-type */ $node->value, $node);
+        return new Tag($node->identifier, $val);
+    }
+
+    private function buildComment(Node $node, $parent):void
+    {
+        self::$_root->addComment($node->line, $node->value);
+    }
+
+    private function buildDirective($node, $parent)
+    {
+        # TODO : implement
     }
 }

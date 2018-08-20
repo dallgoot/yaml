@@ -81,23 +81,16 @@ final class Node
         $current = $this->value;
         if (is_null($current)) {
             $this->value = $child;
-            return;
         } else {
-            if (is_scalar($current)) {
-                $current = new Node($current, $this->line);
-            }
             if ($current instanceof Node) {
                 $this->value = new NodeList();
                 $this->value->push($current);
             }
             $this->value->push($child);
             //modify type according to child
-            switch ($child->type) {
-                case Y::COMMENT: //fall through
-                case Y::KEY:     $this->value->type = Y::MAPPING; break;
-                case Y::ITEM:    $this->value->type = Y::SEQUENCE; break;
-            }
-            $this->type & Y::LITTERALS && $this->value->type = $this->type;
+            if ($child->type & (Y::COMMENT | Y::KEY)) $this->value->type = Y::MAPPING;
+            if ($child->type & Y::ITEM)               $this->value->type = Y::SEQUENCE;
+            if ($this->type & Y::LITTERALS)  $this->value->type = $this->type;
         }
     }
 
@@ -152,17 +145,19 @@ final class Node
         }
         if (in_array($first, ['{', '[']))      return $this->onObject($nodeValue);
         if (in_array($first, ['!', '&', '*'])) return $this->onNodeAction($nodeValue);
-        switch ($first) {
-            case '#': return [Y::COMMENT, ltrim($v)];
-            case "-": return $this->onHyphen($nodeValue);
-            case '%': return [Y::DIRECTIVE, ltrim($v)];
-            case '?': return [Y::SET_KEY, empty($v) ? null : new Node(ltrim($v), $this->line)];
-            case ':': return [Y::SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)];
-            case '>': return [Y::LITT_FOLDED, null];
-            case '|': return [Y::LITT, null];
-            default:
-                return [Y::SCALAR, $nodeValue];
+        // Note : php don't like '?' as an array key -_-
+        if($first === '?') return [Y::SET_KEY, empty($v) ? null : new Node(ltrim($v), $this->line)];
+        $characters = [ '#' =>  [Y::COMMENT, ltrim($v)],
+                        "-" =>  $this->onHyphen($nodeValue),
+                        '%' =>  [Y::DIRECTIVE, ltrim($v)],
+                        ':' =>  [Y::SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)],
+                        '>' =>  [Y::LITT_FOLDED, null],
+                        '|' =>  [Y::LITT, null]
+        ];
+        if (array_key_exists($first, $characters)) {
+            return $characters[$first];
         }
+        return [Y::SCALAR, $nodeValue];
     }
 
     /**
@@ -265,14 +260,14 @@ final class Node
         if (is_null($v)) return null;
         if ($this->type & (Y::REF_CALL | Y::SCALAR)) return self::getScalar($v);
         if ($this->type & (Y::COMPACT_MAPPING | Y::COMPACT_SEQUENCE)) return self::getCompact(substr($v, 1, -1), $this->type);
-        switch ($this->type) {
-            case Y::JSON:   return json_decode($v, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR);
-            case Y::QUOTED: return substr($v, 1, -1);
-            case Y::RAW:    return strval($v);
-            default:
-                trigger_error("Error can not get PHP type for ".Y::getName($this->type), E_USER_WARNING);
-                return null;
+        $expected = [Y::JSON   => json_decode($v, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR),
+                     Y::QUOTED => substr($v, 1, -1),
+                     Y::RAW    => strval($v)];
+        if (isset($expected[$this->type])) {
+            return $expected[$this->type];
         }
+        trigger_error("Error can not get PHP type for ".Y::getName($this->type), E_USER_WARNING);
+        return null;
     }
 
     /**
@@ -310,10 +305,7 @@ final class Node
     {
         if (preg_match("/^(0o\d+)$/i", $v))      return intval(base_convert($v, 8, 10));
         if (preg_match("/^(0x[\da-f]+)$/i", $v)) return intval(base_convert($v, 16, 10));
-        // TODO: remove these if not needed
-        // if preg_match("/^([\d.]+e[-+]\d{1,2})$/", $v)://fall through
-        // if preg_match("/^([-+]?(?:\d+|\d*.\d+))$/", $v):
-            return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
+        return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
     }
 
     private static function getCompact(string $mappingOrSeqString, int $type):object

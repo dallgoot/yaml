@@ -111,7 +111,7 @@ final class Loader
                         break;
                     case 0:  $target = $previous->getParent();
                         break;
-                    default: $target = $previous;
+                    default: $target = $previous->type & Y::SCALAR ? $previous->getParent() : $previous;
                 }
                 if ($this->onContextType($n, $target, $lineString)) continue;
                 $target->add($n);

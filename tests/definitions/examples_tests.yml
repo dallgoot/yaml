@@ -27,7 +27,7 @@ Example_2_13: |
 Example_2_14: |
      "Mark McGwire's year was crippled by a knee injury."
 Example_2_15: |
-     "Sammy Sosa completed another fine season with great stats. \n63 Home Runs \n0.288 Batting Average \n \n What a year!"
+     "Sammy Sosa completed another fine season with great stats. \n \n63 Home Runs \n0.288 Batting Average \n What a year!"
 Example_2_16: |
      {"name":"Mark McGwire","accomplishment":"Mark set a major league home run record in 1998.","stats":"65 Home Runs\n0.278 Batting Average"}
 Example_2_17: |
