@@ -6,6 +6,7 @@ use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * Constructs the result (YamlObject or array) according to every Node and respecting value
+ *
  * @author stephane.rebai@gmail.com
  * @license Apache 2.0
  * @link TODO : url to specific online doc
@@ -18,13 +19,28 @@ final class Builder
     const ERROR_NO_KEYNAME = self::class.": key has NO IDENTIFIER on line %d";
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
 
-
+    /**
+     * generic function to distinguish between Node and NodeList
+     *
+     * @param      Node|NodeList  $node    The node
+     * @param      mixed  $parent  The parent
+     *
+     * @return     mixed  ( description_of_the_return_value )
+     */
     private static function build(object $node, &$parent = null)
     {
         if ($node instanceof NodeList) return self::buildNodeList($node, $parent);
         return self::buildNode($node, $parent);
     }
 
+    /**
+     * Builds a node list.
+     *
+     * @param      NodeList  $node    The node
+     * @param      mixed    $parent  The parent
+     *
+     * @return     mixed    The parent (object|array) or a string representing the NodeList.
+     */
     private static function buildNodeList(NodeList $node, &$parent)
     {
         if ($node->type & (Y::RAW | Y::LITTERALS)) {
@@ -34,7 +50,7 @@ final class Builder
         switch ($node->type) {
             case Y::MAPPING: //fall through
             case Y::SET:      $p = new \StdClass; break;
-            case Y::SEQUENCE: $p = []; break;
+            case Y::SEQUENCE: $p = [];break;
             // case Y::KEY: $p = $parent;break;
         }
         $out = null;
@@ -51,6 +67,14 @@ final class Builder
         return is_null($out) ? $p : rtrim($out);
     }
 
+    /**
+     * Builds a node.
+     *
+     * @param      Node    $node    The node of any Node->type
+     * @param      mixed  $parent  The parent
+     *
+     * @return     mixed  The node value as scalar, array or object or null to otherwise.
+     */
     private static function buildNode(Node $node, &$parent)
     {
         extract((array) $node, EXTR_REFS);
@@ -80,7 +104,7 @@ final class Builder
     /**
      * Builds a key and set the property + value to the given parent
      *
-     * @param Node $node       The node
+     * @param Node $node       The node with type YAML::KEY
      * @param object|array $parent       The parent
      *
      * @throws \ParseError if Key has no name(identifier)
@@ -103,6 +127,14 @@ final class Builder
         }
     }
 
+    /**
+     * Builds an item. Adds the item value to the parent array|Iterator
+     *
+     * @param      Node        $node    The node with type YAML::ITEM
+     * @param      array|Iterator      $parent  The parent
+     *
+     * @throws     \Exception  if parent is another type than array or object Iterator
+     */
     private static function buildItem(Node $node, &$parent):void
     {
         if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
@@ -118,8 +150,9 @@ final class Builder
 
     /**
      * Builds a file.  check multiple documents & split if more than one documents
+     * TODO: implement splitting on YAML::DOC_END also
      *
-     * @param   Node   $_root      The root node
+     * @param   Node   $_root      The root node : Node with Node->type === YAML::ROOT
      * @param   int   $_debug      the level of debugging requested
      *
      * @return array|YamlObject      list of documents or juste one.
@@ -146,6 +179,16 @@ final class Builder
         return count($content) === 1 ? $content[0] : $content;
     }
 
+    /**
+     * Builds a document. Basically a NodeList of children
+     *
+     * @param      NodeList     $list   The list
+     * @param      integer      $key    The key
+     *
+     * @throws     \ParseError  (description)
+     *
+     * @return     YamlObject   The document as the separated part (by YAML::DOC_START) inside a whole YAML content
+     */
     private static function buildDocument(NodeList $list, int $key):YamlObject
     {
         self::$_root = new YamlObject();
@@ -175,6 +218,14 @@ final class Builder
         return self::$_root;
     }
 
+    /**
+     * Builds a litteral (folded or not) or any NodeList that has YAML::RAW type (like a multiline value)
+     *
+     * @param      NodeList  $children  The children
+     * @param      integer   $type      The type
+     *
+     * @return     string    The litteral.
+     */
     private static function buildLitteral(NodeList $children, int $type):string
     {
         $lines = [];
@@ -197,6 +248,14 @@ final class Builder
         return '';
     }
 
+    /**
+     * Builds a set key.
+     *
+     * @param      Node        $node    The node of type YAML::SET_KEY.
+     * @param      object      $parent  The parent
+     *
+     * @throws     \Exception  if a problem occurs during serialisation (json format) of the key
+     */
     private function buildSetKey(Node $node, $parent):void
     {
         $key = json_encode(self::build($node->value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
@@ -205,6 +264,12 @@ final class Builder
         $parent->{$key} = null;
     }
 
+    /**
+     * Builds a set value. Node of type YAML::SET_VALUE.
+     *
+     * @param      Node    $node    The node
+     * @param      object  $parent  The parent (the document object or any previous object created through a mapping key)
+     */
     private function buildSetValue(Node $node, $parent):void
     {
         $prop = array_keys(get_object_vars($parent));
@@ -218,6 +283,14 @@ final class Builder
         $parent->{$key} = $p;
     }
 
+    /**
+     * Builds a tag and its value (also built) and encapsulates them in a Tag object.
+     *
+     * @param      Node    $node    The node
+     * @param      mixed  $parent  The parent
+     *
+     * @return     Tag     The tag object of class Dallgoot\Yaml\Tag.
+     */
     private function buildTag(Node $node, $parent)
     {
         if ($parent === self::$_root) {
@@ -233,12 +306,24 @@ final class Builder
         return new Tag($node->identifier, $val);
     }
 
+    /**
+     * Builds a comment : adding it to the current document object (represented by self::root)
+     *
+     * @param      Node    $node    The node
+     * @param      mixed  $parent  The parent (currently ignored only present to allow one coherent method signature in Node::builNode)
+     */
     private function buildComment(Node $node, $parent):void
     {
         self::$_root->addComment($node->line, $node->value);
     }
 
-    private function buildDirective($node, $parent)
+    /**
+     * Builds a directive. NOT IMPLEMENTED YET
+     *
+     * @param      Node  $node    The node
+     * @param      mixed  $parent  The parent
+     */
+    private function buildDirective(Node $node, $parent)
     {
         // TODO : implement
     }
