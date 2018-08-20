@@ -20,12 +20,12 @@ final class Builder
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
 
     /**
-     * generic function to distinguish between Node and NodeList
+     * Generic function to distinguish between Node and NodeList
      *
-     * @param      Node|NodeList  $node    The node
-     * @param      mixed  $parent  The parent
+     * @param Node|NodeList  $node    The node
+     * @param mixed  $parent  The parent
      *
-     * @return     mixed  ( description_of_the_return_value )
+     * @return mixed  ( description_of_the_return_value )
      */
     private static function build(object $node, &$parent = null)
     {
@@ -36,10 +36,10 @@ final class Builder
     /**
      * Builds a node list.
      *
-     * @param      NodeList  $node    The node
-     * @param      mixed    $parent  The parent
+     * @param NodeList  $node    The node
+     * @param mixed    $parent  The parent
      *
-     * @return     mixed    The parent (object|array) or a string representing the NodeList.
+     * @return mixed    The parent (object|array) or a string representing the NodeList.
      */
     private static function buildNodeList(NodeList $node, &$parent)
     {
@@ -70,10 +70,10 @@ final class Builder
     /**
      * Builds a node.
      *
-     * @param      Node    $node    The node of any Node->type
-     * @param      mixed  $parent  The parent
+     * @param Node    $node    The node of any Node->type
+     * @param mixed  $parent  The parent
      *
-     * @return     mixed  The node value as scalar, array or object or null to otherwise.
+     * @return mixed  The node value as scalar, array or object or null to otherwise.
      */
     private static function buildNode(Node $node, &$parent)
     {
@@ -131,9 +131,10 @@ final class Builder
      * Builds an item. Adds the item value to the parent array|Iterator
      *
      * @param      Node        $node    The node with type YAML::ITEM
-     * @param      array|Iterator      $parent  The parent
+     * @param      array|\Iterator      $parent  The parent
      *
      * @throws     \Exception  if parent is another type than array or object Iterator
+     * @return null
      */
     private static function buildItem(Node $node, &$parent):void
     {
@@ -265,9 +266,9 @@ final class Builder
     }
 
     /**
-     * Builds a set value. Node of type YAML::SET_VALUE.
+     * Builds a set value.
      *
-     * @param      Node    $node    The node
+     * @param      Node    $node    The node of type YAML::SET_VALUE
      * @param      object  $parent  The parent (the document object or any previous object created through a mapping key)
      */
     private function buildSetValue(Node $node, $parent):void
@@ -286,7 +287,7 @@ final class Builder
     /**
      * Builds a tag and its value (also built) and encapsulates them in a Tag object.
      *
-     * @param      Node    $node    The node
+     * @param      Node    $node    The node of type YAML::TAG
      * @param      mixed  $parent  The parent
      *
      * @return     Tag     The tag object of class Dallgoot\Yaml\Tag.
@@ -309,7 +310,7 @@ final class Builder
     /**
      * Builds a comment : adding it to the current document object (represented by self::root)
      *
-     * @param      Node    $node    The node
+     * @param      Node    $node    The node of type YAML::COMMENT
      * @param      mixed  $parent  The parent (currently ignored only present to allow one coherent method signature in Node::builNode)
      */
     private function buildComment(Node $node, $parent):void
