@@ -1,0 +1,4 @@
+!foo
+foo: !quz [bar]
+quz: !foo
+   quz: bar

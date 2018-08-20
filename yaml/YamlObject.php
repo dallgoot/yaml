@@ -3,10 +3,9 @@ namespace Dallgoot\Yaml;
 
 /**
  *  The returned object representing a YAML file content
- * @category tag in class comment
- * @package tag in class comment
- * @author tag in class comment
- * @license tag in class comment
+ * @author stephane.rebai@gmail.com
+ * @license Apache 2.0
+ * @link TODO : url to specific online doc
  *
  * @method void addReference(string $name, $value)
  * @method mixed getReference(string $name)

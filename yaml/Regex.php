@@ -4,6 +4,9 @@ namespace Dallgoot\Yaml;
 
 /**
  * Define Regex patterns as constants
+ * @author stephane.rebai@gmail.com
+ * @license Apache 2.0
+ * @link TODO : url to specific online doc
  */
 class Regex
 {

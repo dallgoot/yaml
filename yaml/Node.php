@@ -7,10 +7,10 @@ use Dallgoot\Yaml\Regex as R;
 
 /**
  * TODO
- * @category tag in class comment
- * @package tag in class comment
- * @author tag in class comment
- * @license tag in class comment
+ *
+ * @author stephane.rebai@gmail.com
+ * @license Apache 2.0
+ * @link TODO : url to specific online doc
  */
 final class Node
 {
@@ -28,9 +28,15 @@ final class Node
     /** @var null|Node */
     private $parent;
 
-    public function __construct($nodeString = null, $line = null)
+    /**
+     * create the Node object and parses $nodeString IF not null (else assume a root type Node)
+     *
+     * @param string|null  $nodeString  The node string
+     * @param int|null  $line        The line
+     */
+    public function __construct($nodeString = null, $line = 0)
     {
-        $this->line = $line;
+        $this->line = (int) $line;
         if (is_null($nodeString)) {
             $this->type = Y::ROOT;
         } else {
@@ -40,9 +46,9 @@ final class Node
 
     /**
      * Sets the parent of the current Node
-     * @param      Node       $node   The node
+     * @param Node       $node   The node
      *
-     * @return     Node|self  The currentNode
+     * @return Node|self  The currentNode
      */
     public function setParent(Node $node):Node
     {
@@ -53,9 +59,9 @@ final class Node
     /**
      * Gets the ancestor with specified $indent or the direct $parent OR the current Node itself
      *
-     * @param int|null    $indent        The indent
+     * @param int|null $indent   The indent
      *
-     * @return Node|self        The parent.
+     * @return Node|self   The parent.
      */
     public function getParent(int $indent = null):Node
     {
@@ -73,7 +79,7 @@ final class Node
      * - if value is Node, then value is a NodeList with (previous value AND $child)
      * - if value is a NodeList, simply push $child into
      *
-     * @param      Node  $child  The child
+     * @param Node $child   The child
      */
     public function add(Node $child):void
     {
@@ -94,6 +100,11 @@ final class Node
         }
     }
 
+    /**
+     * Gets the deepest node.
+     *
+     * @return Node|self  The deepest node.
+     */
     public function getDeepestNode():Node
     {
         $cursor = $this;
@@ -106,9 +117,9 @@ final class Node
     /**
      * Parses the string (assumed to be a line from a valid YAML)
      *
-     * @param      string     $nodeString  The node string
+     * @param string     $nodeString  The node string
      *
-     * @return     Node|self  ( description_of_the_return_value )
+     * @return Node|self
      */
     public function parse(string $nodeString):Node
     {
@@ -132,8 +143,9 @@ final class Node
     /**
      *  Set the type and value according to first character
      *
-     * @param      string  $nodeValue  The node value
-     * @return     array   contains [node->type, node->value]
+     * @param string   $nodeValue  The node value
+     *
+     * @return array   contains [node->type, node->value]
      */
     private function define($nodeValue):array
     {
@@ -163,7 +175,8 @@ final class Node
     /**
      * Process when a "key: value" syntax is found in the parsed string
      * Note : key is match 1, value is match 2 as per regex from R::KEY
-     * @param      array  $matches  The matches provided by 'preg_match' function
+     *
+     * @param array  $matches  The matches provided by 'preg_match' function
      */
     private function onKey(array $matches):void
     {
@@ -173,7 +186,7 @@ final class Node
         if (!empty($value)) {
             $n = new Node($value, $this->line);
             $hasComment = strpos($value, ' #');
-            if (!is_bool($hasComment)) {
+            if (is_int($hasComment)) {
                 $tmpNode = new Node(trim(substr($value, 0, $hasComment)), $this->line);
                 if ($tmpNode->type !== Y::PARTIAL) {
                     $comment = new Node(trim(substr($value, $hasComment + 1)), $this->line);
@@ -190,10 +203,10 @@ final class Node
     /**
      * Determines the correct type and value when a short object/array syntax is found
      *
-     * @param      string  $value  The value assumed to start with { or ( or characters
+     * @param string  $value  The value assumed to start with { or ( or characters
      *
-     * @return     array   array with the type and $value (unchanged for now)
-     * @see self:define
+     * @return array   array with the type and $value (unchanged for now)
+     * @see Node::define
      */
     private function onObject($value):array
     {
@@ -207,9 +220,10 @@ final class Node
     /**
      * Determines type and value when an hyphen "-" is found
      *
-     * @param      string $nodeValue  The node value
+     * @param string $nodeValue  The node value
      *
-     * @return     array   array with the type and $value
+     * @return array   array with the type and $value
+     * @see Node::define
      */
     private function onHyphen($nodeValue):array
     {
@@ -233,10 +247,10 @@ final class Node
     /**
      * Determines the type and value according to $nodeValue when one of these characters is found : !,&,*
      *
-     * @param      string  $nodeValue  The node value
+     * @param string  $nodeValue  The node value
      *
-     * @return     array   array with the type and $value
-     * @see self::define
+     * @return array   array with the type and $value
+     * @see Node::define
      */
     private function onNodeAction($nodeValue):array
     {
@@ -244,8 +258,13 @@ final class Node
         $v = substr($nodeValue, 1);
         $type = ['!' => Y::TAG, '&' => Y::REF_DEF, '*' => Y::REF_CALL][$nodeValue[0]];
         $pos = strpos($v, ' ');
-        $this->identifier = is_bool($pos) ? $v : strstr($v, ' ', true);
-        $n = is_bool($pos) ? null : (new Node(trim(substr($nodeValue, $pos + 1)), $this->line))->setParent($this);
+        if (is_int($pos)) {
+            $this->identifier = strstr($v, ' ', true);
+            $n = (new Node(trim(substr($nodeValue, $pos + 1)), $this->line))->setParent($this);
+        } else {
+            $this->identifier = $v;
+            $n = null;
+        }
         return [$type, $n];
     }
 
@@ -273,9 +292,9 @@ final class Node
     /**
      * Returns the correct PHP type according to the string value
      *
-     * @param      string  $v      a string value
+     * @param string  $v      a string value
      *
-     * @return     mixed   The value with appropriate PHP type
+     * @return mixed   The value with appropriate PHP type
      */
     private static function getScalar(string $v)
     {
@@ -297,9 +316,9 @@ final class Node
     /**
      * Returns the correct PHP type according to the string value
      *
-     * @param      string  $v      a string value
+     * @param string  $v      a string value
      *
-     * @return     int|float   The scalar value with appropriate PHP type
+     * @return int|float   The scalar value with appropriate PHP type
      */
     private static function getNumber(string $v)
     {
@@ -308,8 +327,17 @@ final class Node
         return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
     }
 
+    /**
+     * returns a Compact object representing the inline object/array provided as string
+     *
+     * @param      string          $mappingOrSeqString  The mapping or sequence string
+     * @param      integer         $type                The type
+     *
+     * @return     Compact  The compact object equivalent to $mappingOrString
+     */
     private static function getCompact(string $mappingOrSeqString, int $type):object
     {
+        //TODO : this should handle references present inside the string
         $out = new Compact();
         if ($type === Y::COMPACT_SEQUENCE) {
             $f = function ($e) { return self::getScalar(trim($e));};

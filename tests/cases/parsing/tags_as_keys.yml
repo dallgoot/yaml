@@ -1,0 +1,5 @@
+transitions:
+    !php/const 'Symfony\Component\Yaml\Tests\B::FOO':
+        from:
+            - !php/const 'Symfony\Component\Yaml\Tests\B::BAR'
+        to: !php/const 'Symfony\Component\Yaml\Tests\B::BAZ'

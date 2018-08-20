@@ -2,7 +2,10 @@
 namespace Dallgoot\Yaml;
 
 /**
- *
+ * TODO
+ * @author stephane.rebai@gmail.com
+ * @license Apache 2.0
+ * @link TODO : url to specific online doc
  */
 class Tag
 {

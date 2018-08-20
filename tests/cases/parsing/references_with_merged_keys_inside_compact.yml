@@ -1,0 +1,12 @@
+foo: &FOO
+    bar: 1
+bar: &BAR
+    baz: 2
+    <<: *FOO
+baz:
+    baz_foo: 3
+    <<:
+        baz_bar: 4
+foobar:
+    bar: ~
+    <<: [*FOO, *BAR]

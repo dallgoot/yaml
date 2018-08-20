@@ -1,0 +1,4 @@
+foo:
+    - bar:
+        # comment
+        baz: [1, 2, 3]

@@ -6,10 +6,9 @@ use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * Constructs the result (YamlObject or array) according to every Node and respecting value
- * @category tag in class comment
- * @package tag in class comment
- * @author tag in class comment
- * @license tag in class comment
+ * @author stephane.rebai@gmail.com
+ * @license Apache 2.0
+ * @link TODO : url to specific online doc
  */
 final class Builder
 {
@@ -109,7 +108,7 @@ final class Builder
         if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
             throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
         }
-        if ($value instanceof Node && $value->type === Y::KEY) {
+        if ($node->value instanceof Node && $node->value->type === Y::KEY) {
             $parent[$node->value->identifier] = self::build($node->value->value, $parent[$node->value->identifier]);
         } else {
             $index = count($parent);
@@ -195,6 +194,7 @@ final class Builder
         if ($type & Y::RAW)         return implode('',   $lines);
         if ($type & Y::LITT)        return implode("\n", $lines);
         if ($type & Y::LITT_FOLDED) return implode(' ',  $lines);
+        return '';
     }
 
     private function buildSetKey(Node $node, $parent):void
@@ -240,6 +240,6 @@ final class Builder
 
     private function buildDirective($node, $parent)
     {
-        # TODO : implement
+        // TODO : implement
     }
 }

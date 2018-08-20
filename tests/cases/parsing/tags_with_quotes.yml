@@ -1,0 +1,3 @@
+data: !!binary "SGVsbG8gd29ybGQ="
+'enclosed with single quotes' : !!binary 'SGVsbG8gd29ybGQ='
+'containing spaces' : !!binary  "SGVs bG8gd 29ybGQ="
