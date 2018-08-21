@@ -1,0 +1,20 @@
+<?php
+
+$yaml = new YamlObject;
+
+$yaml->positiveFloat = 0.5353;
+$yaml->negativeFloat = -2.65;
+
+$yaml->castedPositiveFloat = (float) 2;
+$yaml->castedNegativeFloat = (float) -2;
+
+$yaml->positiveExponentFloat =  2.3e4;
+$yaml->negativeExponentFloat =  2.3e-4;
+
+$yaml->positiveInfinity = INF;
+$yaml->negativeInfinity = -INF;
+
+$yaml->notANumber = NAN;//this has the PHP type 'double'
+
+
+return $yaml;

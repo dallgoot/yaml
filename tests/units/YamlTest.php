@@ -1,19 +1,10 @@
 <?php
 declare(strict_types=1);
 
-// namespace Dallgoot\tests\units;
 use PHPUnit\Framework\TestCase;
-// require_once __DIR__ . '/../../vendor/autoload.php';
-// include __DIR__ .'/../tests_ref.php';
-// include __DIR__ .''
 
-// use atoum;
 use Dallgoot\Yaml\Yaml as Y;
 
-/**
- * @engine concurrent
- *
- */
 final class Yaml extends TestCase
 {
     private $folder = __DIR__."/../cases/";
@@ -55,5 +46,29 @@ final class Yaml extends TestCase
     //          ->string(json_encode($result, self::JSONOPTIONS));
     // }
 
+    public function testGetName($value='')
+    {
+    // code...
+    }
+
+    public function testParse($value='')
+    {
+    // code...
+    }
+
+    public function testParseFile($value='')
+    {
+    // code...
+    }
+
+    public function testDump($value='')
+    {
+    // code...
+    }
+
+    public function testDumpFile($value='')
+    {
+    // code...
+    }
 
 }

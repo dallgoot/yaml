@@ -29,26 +29,28 @@ class Loader extends atoum
         ;
     }
 
+    public function test__construct($value='')
+    {
+    // code...
+    }
 
-    // public function loadDataProvider()
-    // {
-    //  return new RecursiveDirectoryIterator(EXAMPLES_FOLDER, FilesystemIterator::SKIP_DOTS);
-    // }
+    public function testLoad($value='')
+    {
+    // code...
+    }
 
-    // public function testLoad(string $fileName)
-    // {
-    //  $this->
-    // }
+    public function testParse($value='')
+    {
+    // code...
+    }
 
+    public function testOnSpecialType($value='')
+    {
+    // code...
+    }
 
-
-    // public function onSpecialType($value='')
-    // {
-    //  # code...
-    // }
-
-    // public function onDeepestType($value='')
-    // {
-    //  # code...
-    // }
+    public function testOnContextType($value='')
+    {
+    // code...
+    }
 }
