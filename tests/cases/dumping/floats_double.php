@@ -1,11 +1,13 @@
 <?php
 
+namespace Dallgoot\Yaml;
+
 $yaml = new YamlObject;
 
 $yaml->positiveFloat = 0.5353;
 $yaml->negativeFloat = -2.65;
 
-$yaml->castedPositiveFloat = (float) 2;
+$yaml->castedPositiveFloat = (float) 2.0;
 $yaml->castedNegativeFloat = (float) -2;
 
 $yaml->positiveExponentFloat =  2.3e4;

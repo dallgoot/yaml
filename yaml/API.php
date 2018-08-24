@@ -31,7 +31,7 @@ class API
      *
      * @throws \UnexpectedValueException  (description)
      */
-    public function addReference(string $name, $value):void
+    public function addReference(string $name, $value)
     {
         if (empty($name)) {
             throw new \UnexpectedValueException(self::UNAMED_REFERENCE, 1);
@@ -65,7 +65,7 @@ class API
      * @param int $lineNumber      The line number at which thecomment should appear
      * @param string $value      The comment
      */
-    public function addComment(int $lineNumber, $value):void
+    public function addComment(int $lineNumber, $value)
     {
         $this->_comments[$lineNumber] = $value;
     }
@@ -90,7 +90,7 @@ class API
      *
      * @param string  $value  The value
      */
-    public function setText(string $value):void
+    public function setText(string $value)
     {
         $this->value .= $value;
     }
@@ -101,7 +101,7 @@ class API
      *
      * @param      string  $value  The value
      */
-    public function addTag(string $value):void
+    public function addTag(string $value)
     {
         $this->_tags[] = $value;
     }

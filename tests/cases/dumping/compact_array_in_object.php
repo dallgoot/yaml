@@ -1,8 +1,11 @@
 <?php
 
+namespace Dallgoot\Yaml;
+
+
 $yaml = new YamlObject;
 
-$o = new StdClass;
+$o = new \StdClass;
 
 $o->array = [1,2,3];
 

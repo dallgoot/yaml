@@ -24,7 +24,7 @@ final class Yaml extends TestCase
         // echo "\n".(is_array($output) ? $output[0]->getComment(1) : $output->getComment(1));
         $result = json_encode($output, self::JSONOPTIONS);
         $this->assertContains(json_last_error(), [JSON_ERROR_NONE, JSON_ERROR_INF_OR_NAN], json_last_error_msg());
-        $this->assertEquals($result, $expected, is_array($output) ? $output[0]->getComment(1) : $output->getComment(1));
+        $this->assertEquals($expected, $result, is_array($output) ? $output[0]->getComment(1) : $output->getComment(1));
     }
 
     public function test_examplesProvider()
@@ -39,36 +39,31 @@ final class Yaml extends TestCase
         return $generator();
     }
 
-    // private function stringResultTest($yaml, $expected)
-    // {
-    //     $this->given($result = $this->newTestedInstance::parse($yaml))
-    //          ->isIdenticalTo($expected)
-    //          ->string(json_encode($result, self::JSONOPTIONS));
-    // }
+
 
     public function testGetName($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testParse($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testParseFile($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testDump($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testDumpFile($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
 }

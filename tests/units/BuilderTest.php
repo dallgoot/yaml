@@ -9,67 +9,67 @@ final class BuilderTest extends TestCase
 {
     public function testBuild($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildNodeList($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildNode($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildKey($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildItem($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildContent($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildDocument($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildLitteral($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildSetKey($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildSetValue($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildTag($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildComment($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testBuildDirective($value='')
     {
-    # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
 

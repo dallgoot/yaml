@@ -2,59 +2,79 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-
 use Dallgoot\Yaml\Yaml as Y;
 
 final class DumperTest extends TestCase
 {
     public function test__construct($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testToString($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testToFile($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testDump($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testDumpYamlObject($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testAdd($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testDumpSequence($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testInsertComments($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testDumpObject($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
     public function testDumpCompact($value='')
      {
-         # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
      }
 
+
+    public function test_DumpingCasesProvider()
+    {
+        $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/dumping_tests.yml'));
+        $generator = function() use($nameResultPair) {
+            foreach ($nameResultPair as $testName => $testResult) {
+                yield [$testName, $testResult];
+            }
+        };
+        return $generator();
+    }
+
+    /**
+     * @dataProvider test_DumpingCasesProvider
+     */
+    public function test_DumpingCases($fileName, $expected)
+    {
+        $php = (include __DIR__."/../cases/dumping/$fileName.php");
+        $output = Y::dump($php);
+        $this->assertEquals($expected, $output, "cases/dumping/$fileName.php");
+    }
 }

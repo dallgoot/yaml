@@ -1,11 +1,52 @@
-test1:
-  yaml:
-  result:
-
-test2:
-  yaml:
-  result:
-
-test3:
-  yaml:
-  result:
+array: |
+  - a
+  - b
+  - c
+array_with_alphakey: |
+  - alphakey: alphakey_value
+  - 0: a
+  - 1: b
+  - 2: c
+compact_array_in_object: |
+  ---
+  key1: {array: [1, 2, 3]}
+compact_array: |
+  ---
+  key1: [1, 2, 3]
+compact_object_in_array: |
+  ---
+  key1: [1, 2, {key: a}]
+compact_object: |
+  ---
+  key1: {key1: a, key2: b}
+dateTime: |
+  ---
+  key: 2000-01-01
+floats_double: |
+  ---
+  positiveFloat: 0.5353
+  negativeFloat: -2.65
+  castedPositiveFloat: 2.0
+  castedNegativeFloat: -2.0
+  positiveExponentFloat: 2.3e4
+  negativeExponentFloat: 2.3e-4
+  positiveInfinity: .inf
+  negativeInfinity: -inf
+  notANumber: .nan
+stdObject: |
+  prop: my property
+yamlObject_indices: |
+  ---
+  -
+    - 1
+    - 2
+    - 3
+  - memberOfO: some really really really really really really really really really very long text as a simple string
+yamlObject_properties: |
+  ---
+  propA:
+    - 1
+    - 2
+    - 3
+  propB:
+    memberOfO: some really really really really really really really really really very long text as a simple string

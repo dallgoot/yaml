@@ -9,6 +9,6 @@ final class TagTest extends TestCase
 {
     public function test__construct($value='')
     {
-        // code
+           $this->markTestIncomplete('This test has not been implemented yet.');
     }
 }

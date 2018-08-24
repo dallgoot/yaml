@@ -1,9 +1,10 @@
 <?php
 
+namespace Dallgoot\Yaml;
 
 $yaml = new YamlObject();
 
-$o = new StdClass;
+$o = new \StdClass;
 
 $o->memberOfO = 'some really really really really really really really really really very long text as a simple string';
 

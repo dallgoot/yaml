@@ -1,8 +1,10 @@
 <?php
 
+namespace Dallgoot\Yaml;
+
 $yaml = new YamlObject;
 
-$o = new Stdclass;
+$o = new \Stdclass;
 
 $o->key = 'a';
 

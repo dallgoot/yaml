@@ -1,13 +1,138 @@
-keysWithTabs: |
-  {foo: bar, baz: bar, bor: baz, boz: biz}
+blockChompingWithInsideBlank: |
+  {bar: one\ntwo}
+blockChompingWIthKeepAndTrailing: |
+  {foo: one\ntwo, bar: one\ntwo}
+blockChompingWithKeep: |
+  {foo: one\ntwo, bar: one\ntwo}
+blockCHompingWithStripAndTrailing: |
+  {foo: one\ntwo, bar: one\ntwo}
+blockChomping: |
+  {foo: one\ntwo, bar: one\ntwo}
+comment_at_first_and_inside_map: |
+  {services: {app.foo_service: {class: Foo}, app/bar_service: {class: Bar}}}
+comment_between_keys: |
+  {a: {b: hello, d: hello}}
+comment_inside_litteral_in_subkey: |
+  {test: foo\n# bar\baz, collection: [{one: foo\n# bar\baz}, {two foo\n# bar\baz}]}
+comments_inside_litteral: |
+  {pages: [{title: some title, content: # comment 1\nheader\n\n# comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter # comment3}]}
+comment_with_a_colon: |
+  {foo: {bar: foobar}}
+compact_array_inside_mapping: |
+  {foo: {fiz: [cat]}}
+compact_in_a_key_separated_by_comment: |
+  {foo: [{bar: {baz: [1, 2, 3]}}]}
+compact_with_emptystring_as_key: |
+  {key: {"": foo}}
+complex_mapping_in_item: |
+  [{"1": {name: végétalien}}]
+complex_mapping_in_key: |
+  {diet: {"1": {name: végétalien}}}
+complex_mapping: |
+  {"1": {name: végétalien}}
+directive_at_start: |
+  {foo: 1, bar: 2}
+encoding_non_utf8: |
+  {foo: äöüß, euro: €, cp1252: ©ÉÇáñ}
 endOfDocumentMapping: |
   {foo: bar}
 endOfDocumentSequence: |
-  [1,2,3]
-#TODO : another end of documents ?
-blockChomping: |
-  {foo: one\ntwo, bar: one\ntwo}
-blockChompingWithInsideBlank: |
-  {bar: one\n\ntwo}
-blockChompingWithKeep: |
-  {foo: one\ntwo\n, bar: one\ntwo\n}
+  [1, 2, 3]
+key_separated_by_blank_line: |
+  {foo: {bar: baz}}
+keysWithTabs: |
+  {foo: bar, baz: bar, bor: baz, boz: biz}
+literalfolded_keep_trailing: |
+  {foo: one two, bar: one two}
+literalFolded_strip_trailing: |
+  {foo: one two, bar: one two}
+literalFolded_strip: |
+  {foo: one two, bar: one two}
+literalfolded: |
+  {foo: one two, bar: one two}
+literal_keep_trailing_leading: |
+  {foo: bar}
+literal_with_comment_at_lastline: |
+  {content: # comment 1\nheader\n\n# comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter}
+map_in_an_empty_item: |
+  {foo: [{bar: foobar}]}
+map_with_boolean_keys: |
+  {true: foo, false: bar}
+map_with_comment_inside_item: |
+  {foo: [{bar: "foobar", baz: "foobaz"}]}
+map_with_duplicate_keys: |
+  {parent: {child: duplicate}}
+map_with_float_keys: |
+  {foo: {1.2: "bar", 1.3: "baz"}}
+map_with_number_keys: |
+  {map: {1: one, 2: two}}
+map_with_quoted_number_keys: |
+  {map: {0: one, 1: two}}
+map_with_seq_and_embed_comment: |
+  {a: {b: [c], d: e}}
+multidoc_sequence: |
+  [[Mark McGwire, Sammy Sosa, Ken Griffey], [Chicago Cubs, St Louis Cardinals]]
+multiline_indented.keyslookalike: |
+  {a: b\nc}
+multiline_quoted_in_subkey: |
+  {foo: {foobar: foo\n#bar, bar: baz}}
+multiline_quoted_with_blank: |
+  {foobar: foo\n\nbar}
+multiline_quoted_with_slash: |
+  {foobar: "foo\\nbar"}
+multiline_quoted: |
+  {foo: bar\nbaz\nfoobar\nfoo, bar: baz}
+multiline_unquoted_in_seqitem: |
+  {foo: [{bar: one\n\ntwo\nthree}]}
+multiline_unquoted: |
+  {foo: bar\nbaz\nfoobar\nfoo, bar: baz}
+multiline_with_boolean_strings: |
+  {test: You can have things that don't look like strings here\ntrue\nyes you can}
+references_inside_compact: |
+  {var: var-value, scalar: var-value, list: [ var-value ], list_in_list: [[ var-value ]], map_in_list: [ { key: var-value } ], embedded_mapping: [ key: var-value ], map: { key: var-value }, list_in_map: { key: [var-value] }, map_in_map: { foo: { bar: var-value } }}
+references_inside_merged_key: |
+  {mergekeyrefdef: { a: foo, b: bar, c: baz}, mergekeyderef: {d: quux, b: bar, c: baz}}
+# TODO: how is this supposed to work ?
+# references_with_merged_keys_inside_compact: |
+#   foo: &FOO
+#       bar: 1
+#   bar: &BAR
+#       baz: 2
+#       bar: 1
+#   baz:
+#       baz_foo: 3
+#       baz_bar: 4
+#   foobar:
+#       bar: ~
+#       <<: [*FOO, *BAR]
+references_with_merge: |
+  {foo: {baz: foobar}, bar: {baz: foobar}}
+# TODO: this should create an infinite loop ?
+# references_with_selfreference: |
+#   foo: { &foo { a: Steve, <<: *foo} }
+sequence_item_with_multiple_keys: |
+  {collection: [{key: foo, foo: bar}]}
+sequence_with_duplicate_keys: |
+  {array: [{key: two}]}
+sequence_with_linefeed_and_key: |
+  {a: [{b: [{bar: baz}]}, foo], d: e}
+tags_as_casting: |
+  {1.2: "bar", 1.3: "baz", true: foo, false: bar, null: null, ~: null}
+# TODO: this a Symfony specific behavior : is it useful and used ?
+# tags_as_keys: |
+#   {transitions: {FOO: }}
+tags_in_compact: |
+  [{tagname: foo, value: [foo, bar]}, {tagname: quz, value: {foo: bar, quz: {tagname: bar, value: {one: bar}}}}]
+tags_in_item_with_sequence: |
+  [{tagname: foo, value: [yaml]}, {tagname: quz, value: [bar]}]
+tags_inline_long: |
+  {foo: {tagname: inline, value: bar}, quz: {tagname: long, value: this is a long text}}
+tags_in_litteral: |
+  {data: {tagname: binary, value: SGVsbG8gd29ybGQ=}}
+tags_in_mapping: |
+  {foo: {tagname: quz, value: [bar]}, quz: {tagname: foo, value: {quz: bar}}}
+tags_with_quotes: |
+  {data: {tagname: binary, value: "SGVsbG8gd29ybGQ="}, enclosed with single quotes: {tagname: binary, value: "SGVsbG8gd29ybGQ="}, containing spaces: {tagname: binary, value: "SGVs bG8gd 29ybGQ="}}
+# TODO: this a Symfony specific behavior : is it useful and used ?
+tag_symfony_phpobject: |
+  {foo: {tagname: php/object, value: O:30:"Symfony\Component\Yaml\Tests\B":1:{s:1:"b";s:3:"foo";}}, bar: 1}

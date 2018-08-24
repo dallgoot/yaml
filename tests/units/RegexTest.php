@@ -9,17 +9,17 @@ final class RegexTest extends TestCase
 {
     public function testIsDate($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testIsNumber($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testIsProperlyQuoted($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
 }

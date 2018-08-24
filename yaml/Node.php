@@ -81,7 +81,7 @@ final class Node
      *
      * @param Node $child   The child
      */
-    public function add(Node $child):void
+    public function add(Node $child)
     {
         $child->setParent($this);
         $current = $this->value;
@@ -178,7 +178,7 @@ final class Node
      *
      * @param array  $matches  The matches provided by 'preg_match' function
      */
-    private function onKey(array $matches):void
+    private function onKey(array $matches)
     {
         $this->type = Y::KEY;
         $this->identifier = trim($matches[1]);

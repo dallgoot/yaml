@@ -9,11 +9,11 @@ final class NodeListTest extends TestCase
 {
     public function test__construct($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testGetTypes($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 }

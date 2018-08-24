@@ -9,7 +9,8 @@ final class APITest extends TestCase
 {
     public function testaddReference($value='')
     {
-     // code...
+             $this->markTestIncomplete('This test has not been implemented yet.');
+
     }
 
     /**
@@ -17,7 +18,8 @@ final class APITest extends TestCase
      */
     public function testGetReference($value='')
     {
-     // code...
+             $this->markTestIncomplete('This test has not been implemented yet.');
+
     }
 
     /**
@@ -25,12 +27,14 @@ final class APITest extends TestCase
      */
     public function testGetAllReferences($value='')
     {
-     // code...
+             $this->markTestIncomplete('This test has not been implemented yet.');
+
     }
 
     public function testAddComment($value='')
     {
-     // code...
+             $this->markTestIncomplete('This test has not been implemented yet.');
+
     }
 
     /**
@@ -38,16 +42,19 @@ final class APITest extends TestCase
      */
     public function testGetComment($value='')
     {
-     // code...
+             $this->markTestIncomplete('This test has not been implemented yet.');
+
     }
 
     public function testSetText($value='')
     {
-     // code...
+             $this->markTestIncomplete('This test has not been implemented yet.');
+
     }
 
     public function testAddTag($value='')
     {
-     // code...
+             $this->markTestIncomplete('This test has not been implemented yet.');
+
     }
 }

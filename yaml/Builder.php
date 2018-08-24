@@ -110,7 +110,7 @@ final class Builder
      * @throws \ParseError if Key has no name(identifier)
      * @return null
      */
-    private static function buildKey(Node $node, &$parent):void
+    private static function buildKey(Node $node, &$parent)
     {
         extract((array) $node, EXTR_REFS);
         if (is_null($identifier)) {
@@ -136,7 +136,7 @@ final class Builder
      * @throws     \Exception  if parent is another type than array or object Iterator
      * @return null
      */
-    private static function buildItem(Node $node, &$parent):void
+    private static function buildItem(Node $node, &$parent)
     {
         if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
             throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
@@ -257,7 +257,7 @@ final class Builder
      *
      * @throws     \Exception  if a problem occurs during serialisation (json format) of the key
      */
-    private function buildSetKey(Node $node, $parent):void
+    private function buildSetKey(Node $node, $parent)
     {
         $key = json_encode(self::build($node->value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
         if (empty($key))
@@ -271,7 +271,7 @@ final class Builder
      * @param      Node    $node    The node of type YAML::SET_VALUE
      * @param      object  $parent  The parent (the document object or any previous object created through a mapping key)
      */
-    private function buildSetValue(Node $node, $parent):void
+    private function buildSetValue(Node $node, $parent)
     {
         $prop = array_keys(get_object_vars($parent));
         $key = end($prop);
@@ -313,7 +313,7 @@ final class Builder
      * @param      Node    $node    The node of type YAML::COMMENT
      * @param      mixed  $parent  The parent (currently ignored only present to allow one coherent method signature in Node::builNode)
      */
-    private function buildComment(Node $node, $parent):void
+    private function buildComment(Node $node, $parent)
     {
         self::$_root->addComment($node->line, $node->value);
     }

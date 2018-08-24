@@ -1,7 +1,9 @@
 <?php
 
-$php = new YamlObject;
+namespace Dallgoot\Yaml;
 
-$php->key = new DateTime('now');
+$yaml = new YamlObject;
 
-return $php;
+$yaml->key = new \DateTime('2000-01-01');
+
+return $yaml;

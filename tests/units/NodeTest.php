@@ -9,82 +9,82 @@ final class NodeTest extends TestCase
 {
     public function test__construct($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testSetParent($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testGetParent($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testAdd($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testGetDeepestNode($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testParse($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testDefine($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testOnKey($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testOnObject($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testOnHyphen($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testOnNodeAction($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testGetPhpValue($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testGetScalar($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testGetNumber($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testGetCompact($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function test__debugInfo($value='')
     {
-    // code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
 }

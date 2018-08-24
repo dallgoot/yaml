@@ -9,16 +9,16 @@ final class CompactTest extends TestCase
 {
     public function test__construct($value='')
     {
-     # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testJsonSerialize($value='')
     {
-     # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 
     public function testWrap($value='')
     {
-     # code...
+        $this->markTestIncomplete('This test has not been implemented yet.');
     }
 }
