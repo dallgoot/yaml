@@ -35,4 +35,9 @@ class NodeList extends \SplDoublyLinkedList
         }
         return $types;
     }
+
+    public function __debugInfo()
+    {
+        return ['type'=> Y::getName($this->type), 'dllist'=> $this->dllist];
+    }
 }

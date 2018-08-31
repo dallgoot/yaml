@@ -48,8 +48,9 @@ final class Builder
         }
         $p = $parent;
         switch ($node->type) {
-            case Y::MAPPING: //fall through
-            case Y::SET:      $p = new \StdClass; break;
+            case Y::MAPPING: // fall through
+            // case Y::SET_KEY: // fall through
+            case Y::SET:      $p = new \StdClass; var_dump('in set'); break;
             case Y::SEQUENCE: $p = [];break;
             // case Y::KEY: $p = $parent;break;
         }
@@ -107,7 +108,7 @@ final class Builder
      * @param Node $node       The node with type YAML::KEY
      * @param object|array $parent       The parent
      *
-     * @throws \ParseError if Key has no name(identifier)
+     * @throws \ParseError if Key has no name(identifier) Note: empty string is allowed
      * @return null
      */
     private static function buildKey(Node $node, &$parent)
@@ -116,13 +117,18 @@ final class Builder
         if (is_null($identifier)) {
             throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $line));
         } else {
-            if ($value instanceof Node && ($value->type & (Y::KEY|Y::ITEM))) {
-                $parent->{$identifier} = $value->type & Y::KEY ? new \StdClass : [];
-                self::build($value, $parent->{$identifier});
-            } elseif (is_object($value)) {
-                $parent->{$identifier} = self::build($value, $parent->{$identifier});
+            if (is_array($parent)) {
+                $target = &$parent[$identifier];
             } else {
-                $parent->{$identifier} = $node->getPhpValue();
+                $target = &$parent->{$identifier};
+            }
+            if ($value instanceof Node && ($value->type & (Y::KEY|Y::ITEM))) {
+                $target = $value->type & Y::KEY ? new \StdClass : [];
+                self::build($value, $target);
+            } elseif (is_object($value)) {
+                $target = self::build($value, $target);
+            } else {
+                $target = $node->getPhpValue();
             }
         }
     }
@@ -142,7 +148,7 @@ final class Builder
             throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
         }
         if ($node->value instanceof Node && $node->value->type === Y::KEY) {
-            $parent[$node->value->identifier] = self::build($node->value->value, $parent[$node->value->identifier]);
+            self::build($node->value, $parent);
         } else {
             $index = count($parent);
             $parent[$index] = self::build($node->value, $parent[$index]);
@@ -240,6 +246,13 @@ final class Builder
                 if ($type & Y::LITT_FOLDED && ($child->indent > $refIndent || ($child->type & Y::BLANK))) {
                     $prefix = "\n";
                 }
+                if (!($child->type & (Y::SCALAR|Y::BLANK))) {
+                    switch ($child->type) {
+                        case Y::ITEM:    $child->value = '- '.$child->value;break;
+                        case Y::COMMENT: $child->value = '# '.$child->value;break;
+                        default: die(Y::getName($child->type));
+                    }
+                }
                 $lines[] = $prefix.$child->value;
             }
         }
@@ -257,12 +270,13 @@ final class Builder
      *
      * @throws     \Exception  if a problem occurs during serialisation (json format) of the key
      */
-    private function buildSetKey(Node $node, $parent)
+    private function buildSetKey(Node $node, &$parent)
     {
-        $key = json_encode(self::build($node->value, $parent), JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        if (empty($key))
-        throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
-        $parent->{$key} = null;
+        $built = self::build($node->value, $parent);
+        $stringKey = is_string($built) && Regex::isProperlyQuoted($built) ? trim($built, '\'" '): $built;
+        $key = json_encode($stringKey, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
+        if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
+        $parent->{trim($key, '\'" ')} = null;
     }
 
     /**
@@ -271,7 +285,7 @@ final class Builder
      * @param      Node    $node    The node of type YAML::SET_VALUE
      * @param      object  $parent  The parent (the document object or any previous object created through a mapping key)
      */
-    private function buildSetValue(Node $node, $parent)
+    private function buildSetValue(Node $node, &$parent)
     {
         $prop = array_keys(get_object_vars($parent));
         $key = end($prop);

@@ -65,6 +65,9 @@ final class Node
      */
     public function getParent(int $indent = null):Node
     {
+        if ($this->type === Y::ROOT) {
+            return $this;
+        }
         if (!is_int($indent)) return $this->parent ?? $this;
         $cursor = $this;
         while ($cursor instanceof Node && $cursor->indent >= $indent) {
@@ -83,6 +86,10 @@ final class Node
      */
     public function add(Node $child)
     {
+        if($this->type & (Y::SCALAR|Y::QUOTED)) {
+            $this->getParent()->add($child);
+            return;
+        }
         $child->setParent($this);
         $current = $this->value;
         if (is_null($current)) {
@@ -90,12 +97,18 @@ final class Node
         } else {
             if ($current instanceof Node) {
                 $this->value = new NodeList();
-                $this->value->push($current);
+                if ($current->type & Y::LITTERALS) {
+                    $this->value->type = $current->type;
+                } else {
+                    $this->value->push($current);
+                }
+                //modify type according to child
+                if ($current->type & Y::SET_KEY)   $this->value->type = Y::SET;
+                if ($current->type & Y::KEY)       $this->value->type = Y::MAPPING;
+                if ($current->type & Y::ITEM)      $this->value->type = Y::SEQUENCE;
             }
             $this->value->push($child);
-            //modify type according to child
-            if ($child->type & (Y::COMMENT | Y::KEY)) $this->value->type = Y::MAPPING;
-            if ($child->type & Y::ITEM)               $this->value->type = Y::SEQUENCE;
+
             if ($this->type & Y::LITTERALS)  $this->value->type = $this->type;
         }
     }
@@ -158,11 +171,11 @@ final class Node
         if (in_array($first, ['{', '[']))      return $this->onObject($nodeValue);
         if (in_array($first, ['!', '&', '*'])) return $this->onNodeAction($nodeValue);
         // Note : php don't like '?' as an array key -_-
-        if($first === '?') return [Y::SET_KEY, empty($v) ? null : new Node(ltrim($v), $this->line)];
+        if($first === '?') return [Y::SET_KEY, empty(trim($v)) ? null : new Node(ltrim($v), $this->line)];
         $characters = [ '#' =>  [Y::COMMENT, ltrim($v)],
                         "-" =>  $this->onHyphen($nodeValue),
                         '%' =>  [Y::DIRECTIVE, ltrim($v)],
-                        ':' =>  [Y::SET_VALUE, empty($v) ? null : new Node(ltrim($v), $this->line)],
+                        ':' =>  [Y::SET_VALUE, empty(trim($v)) ? null : new Node(ltrim($v), $this->line)],
                         '>' =>  [Y::LITT_FOLDED, null],
                         '|' =>  [Y::LITT, null]
         ];
@@ -237,6 +250,7 @@ final class Node
         if (preg_match(R::ITEM, $nodeValue, $matches)) {
             if (isset($matches[1]) && !empty(trim($matches[1]))) {
                 $n = new Node(trim($matches[1]), $this->line);
+                $n->indent = $this->indent + 2;
                 return [Y::ITEM, $n->setParent($this)];
             }
             return [Y::ITEM, null];
@@ -350,7 +364,7 @@ final class Node
             //TODO : that's not robust enough, improve it
             foreach (explode(',', $mappingOrSeqString) as $value) {
                 list($keyName, $keyValue) = explode(':', $value);
-                $out->{trim($keyName)} = self::getScalar(trim($keyValue));
+                $out->{trim($keyName, '\'" ')} = self::getScalar(trim($keyValue));
             }
         }
         return $out;

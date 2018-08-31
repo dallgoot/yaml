@@ -17,6 +17,8 @@ try {
         $name = $fileInfo->getFilename();
         $testName = str_replace('.yml','',$name);
         $result = Y::parseFile($fileInfo->getPathname());
+        // $content = file_get_contents($fileInfo->getPathname());
+        // $result = Y::parse($content);
         $s = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR);
         if (!in_array(json_last_error(), [JSON_ERROR_INF_OR_NAN, JSON_ERROR_NONE ])) {
             throw new Exception(json_last_error_msg()." on $name", 1);

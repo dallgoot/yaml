@@ -52,26 +52,4 @@ class Compact extends \ArrayIterator implements \JsonSerializable
         return $out;
     }
 
-    // public function __toString()
-    // {
-    //     $max = count($this);
-    //     $pairs = [];
-    //     if ($max > 0) {
-    //         $objectAsArray = $this->getArrayCopy();
-    //         if(array_keys($objectAsArray) !== range(0, $max)) {
-    //             $pairs = $objectAsArray;
-    //         } else {
-    //             $valuesList = array_map([self, 'dump'], $objectAsArray, array_fill( 0 , $max , $indent ));
-    //             return '['.implode(', ', $valuesList).']';
-    //         }
-    //     } else {
-    //         $pairs = get_object_vars($this);
-    //     }
-    //     $content = [];
-    //     foreach ($pairs as $key => $value) {
-    //         $content[] = "$key: ".Dumper::dump($value, $indent);
-    //     }
-    //     // var_dump('ccc', $pairs);
-    //     return '{'.implode(', ', $content).'}';
-    // }
 }

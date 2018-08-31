@@ -47,7 +47,7 @@ Example_2_23: |
 Example_2_24: |
      [{"tagName":"circle","value":{"center":{"x":73,"y":129},"radius":7}},{"tagName":"line","value":{"start":{"x":73,"y":129},"finish":{"x":89,"y":102}}},{"tagName":"label","value":{"start":{"x":73,"y":129},"color":16772795,"text":"Pretty vector drawing."}}]
 Example_2_25: |
-     {"\"Mark McGwire\"":null,"\"Sammy Sosa\"":null,"\"Ken Griffey\"":null}
+     {"Mark McGwire":null,"Sammy Sosa":null,"Ken Griffey":null}
 Example_2_26: |
      {"Mark McGwire":65,"Sammy Sosa":63,"Ken Griffy":58}
 Example_2_27: |
