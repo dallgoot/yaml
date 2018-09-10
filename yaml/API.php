@@ -6,9 +6,10 @@ use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * TODO
- * @author stephane.rebai@gmail.com
+ * 
+ * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link TODO : url to specific online doc
+ * @link    TODO : url to specific online doc
  */
 class API
 {
@@ -26,8 +27,9 @@ class API
 
     /**
      * Adds a reference.
-     * @param string  $name   The reference name
-     * @param mixed    $value  The reference value
+     * 
+     * @param string $name  The reference name
+     * @param mixed  $value The reference value
      *
      * @throws \UnexpectedValueException  (description)
      */
@@ -40,8 +42,9 @@ class API
     }
 
     /**
-     *  return the reference saved by $name
-     * @param  string  $name Name of the reference
+     * Return the reference saved by $name
+     * 
+     * @param string $name Name of the reference
      *
      * @return mixed Value of the reference
      * @throws UnexpectedValueException    if there's no reference by that $name
@@ -62,7 +65,7 @@ class API
     /**
      * Adds a comment.
      *
-     * @param int $lineNumber      The line number at which thecomment should appear
+     * @param int    $lineNumber The line number at which thecomment should appear
      * @param string $value      The comment
      */
     public function addComment(int $lineNumber, $value)
@@ -73,7 +76,7 @@ class API
     /**
      * Gets the comment at $lineNumber
      *
-     * @param int|null  $lineNumber  The line number
+     * @param int|null $lineNumber The line number
      *
      * @return string|array The comment à $lineNumber OR ALL comments.
      */
@@ -88,7 +91,7 @@ class API
     /**
      * Sets the text when the content is *only* a litteral
      *
-     * @param string  $value  The value
+     * @param string $value The value
      */
     public function setText(string $value)
     {
@@ -99,7 +102,7 @@ class API
      * TODO:  what to do with these tags ???
      * Adds a tag.
      *
-     * @param      string  $value  The value
+     * @param string $value The value
      */
     public function addTag(string $value)
     {

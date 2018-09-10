@@ -7,16 +7,17 @@ use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * TODO
- * @author stephane.rebai@gmail.com
+ * 
+ * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link TODO : url to specific online doc
+ * @link    TODO : url to specific online doc
  */
 final class Loader
 {
     //public
 
     /* @var null|string */
-    public $error;
+    public static $error;
 
     public const EXCLUDE_DIRECTIVES = 1;//DONT include_directive
     public const IGNORE_COMMENTS    = 2;//DONT include_comments
@@ -47,13 +48,13 @@ final class Loader
     }
 
     /**
-     * load a file and save its content as $content
+     * Load a file and save its content as $content
      *
-     * @param      string       $absolutePath  The absolute path of a file
+     * @param string $absolutePath The absolute path of a file
      *
-     * @throws     \Exception   if file don't exist OR reading failed
+     * @throws \Exception if file don't exist OR reading failed
      *
-     * @return     self  ( returns the same Loader  )
+     * @return self  ( returns the same Loader  )
      */
     public function load(string $absolutePath):Loader
     {
@@ -76,11 +77,12 @@ final class Loader
     /**
      * Parse Yaml lines into a hierarchy of Node
      *
-     * @param      string       $strContent  The Yaml string or null to parse loaded content
-     * @throws     \Exception    if content is not available as $strContent or as $this->content (from file)
-     * @throws     \ParseError  if any error during parsing or building
+     * @param string $strContent The Yaml string or null to parse loaded content
+     * 
+     * @throws \Exception    if content is not available as $strContent or as $this->content (from file)
+     * @throws \ParseError  if any error during parsing or building
      *
-     * @return     array|YamlObject|null      null on errors if NO_PARSING_EXCEPTIONS is set, otherwise an array of YamlObject or just YamlObject
+     * @return array|YamlObject|null      null on errors if NO_PARSING_EXCEPTIONS is set, otherwise an array of YamlObject or just YamlObject
      */
     public function parse($strContent = null)
     {
@@ -89,7 +91,7 @@ final class Loader
         if (!is_array($source) || !count($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
         $previous = $root = new Node();
         $emptyLines = [];
-        try {
+        try { //var_dump($source);
             $gen = function () use($source) {
                 foreach ($source as $key => $value) {
                     yield ++$key => $value;
@@ -97,19 +99,41 @@ final class Loader
             };
             foreach ($gen() as $lineNb => $lineString) {
                 $n = new Node($lineString, $lineNb);
-                if ($n->type & (Y::LITTERALS|Y::BLANK|Y::COMMENT)) {
-                    if ($this->onSpecialType($n, $previous, $emptyLines)) continue;
+                $deepest = $previous->getDeepestNode();
+                if ($n->type & (Y::LITTERALS|Y::BLANK|Y::COMMENT) || $deepest->type & Y::PARTIAL) {
+                    if ($this->onSpecialType($n, $previous, $emptyLines, $lineString)) continue;
                 }
-                foreach ($emptyLines as $blankNode) {
-                    $blankNode->getParent()->add($blankNode);
-                }
+                //Note: 6.6 comments: Note that outside scalar content, a line containing only white space characters is taken to be a comment line.
+                    foreach ($emptyLines as $blankNode) {
+                        if ($blankNode !== $previous) {
+                            $blankNode->getParent()->add($blankNode);
+                        }
+                    }
                 $emptyLines = [];
                 switch ($n->indent <=> $previous->indent) {
                     case -1: $target = $previous->getParent($n->indent);
+                        if ($n->type & Y::ITEM) {
+                            $target = $previous->getParent($n->indent, Y::KEY);
+                        }
                         break;
-                    case 0:  $target = $previous->getParent();
+                    case 0:
+                        if ($n->type & Y::KEY && $n->indent === 0) {
+                            $target = $root;
+                        } elseif($n->type & Y::ITEM && $deepest->type & Y::KEY && is_null($deepest->value)) {
+                            $target = $deepest;
+                        } else {
+                            $target = $previous->getParent();
+                        }
                         break;
-                    default: $target = $previous->type & Y::ITEM && $n->type != Y::SET_VALUE? $previous->getDeepestNode()->getParent($n->indent) : $previous;
+                    default:
+                        $target = $previous;
+                        if ($previous->type & Y::ITEM) {
+                            if (($deepest->type & Y::KEY && is_null($deepest->value)) ||
+                                ($deepest->type & Y::TAG && $deepest->value->count() === 0)
+                            ) {
+                                $target = $deepest;
+                            }
+                        }
                 }
                 if ($this->onContextType($n, $target, $lineString)) continue;
                 $target->add($n);
@@ -126,9 +150,9 @@ final class Loader
         } catch (\Error|\Exception|\ParseError $e) {
             $file = $this->filePath ? basename($this->filePath) : 'YAML STRING';
             $message = basename($e->getFile())."@".$e->getLine().": ".$e->getMessage()." for '$file' @".($lineNb)."\n";
-            if ($e instanceof \ParseError && ($this->options & self::NO_PARSING_EXCEPTIONS)) {
-                trigger_error($message, E_USER_WARNING);
-                $this->error = $message;
+            if ($this->options & self::NO_PARSING_EXCEPTIONS) {
+                // trigger_error($message, E_USER_WARNING);
+                self::$error = $message;
                 return null;
             }
             $this->debug && print_r($root);
@@ -136,20 +160,28 @@ final class Loader
         }
     }
 
-    private function onSpecialType(&$n, &$previous, &$emptyLines):bool
+    private function onSpecialType(&$n, &$previous, &$emptyLines, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
+        if ($deepest->type & Y::PARTIAL) {
+            $add = trim($lineString) === '' ? "\n" : trim($lineString);
+            if ($add !== "\n" && $deepest->value[-1] !== "\n") {
+                $add = ' '.$add;
+            }
+            $deepest->parse($deepest->value.$add);
+            return true;
+        }
         if ($n->type & Y::BLANK) {
             if ($previous->type & Y::SCALAR) $emptyLines[] = $n->setParent($previous->getParent());
             if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
             return true;
         }
-        //comment is fullline : forces 'root' as parent if not inside a LITTERAL
+        //comment is fullline : forces 'root' as parent IF NOT inside a LITTERAL
         if ($n->type & Y::COMMENT &&
             !($previous->getParent()->value->type & Y::LITTERALS) &&
             !($deepest->type & Y::LITTERALS)) {
-            $previous->getParent(0)->add($n);
-            return true;
+                $previous->getParent(0)->add($n);
+                return true;
         }
         return false;
     }
@@ -157,14 +189,6 @@ final class Loader
     private function onContextType(&$n, &$previous, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
-        if ($deepest->type & Y::PARTIAL) {
-            //TODO:verify this edge case
-            // if ($n->type === Y::KEY && $n->indent === $previous->indent) {
-            //     throw new \ParseError(sprintf(self::INVALID_VALUE, $lineNb), 1);
-            // }
-            $deepest->parse($deepest->value.' '.ltrim($lineString));
-            return true;
-        }
         if (($previous->type & Y::LITTERALS && $n->indent >= $previous->indent) || (($deepest->type & Y::LITTERALS) && is_null($deepest->value))) {
             $n->type = Y::SCALAR;
             $n->identifier = null;
@@ -173,7 +197,11 @@ final class Loader
             return false;
         }
         // var_dump(Y::getName($n->type).Y::getName($deepest->type).Y::getName($previous->type));
-        if (($deepest->type & (Y::LITTERALS|Y::REF_DEF|Y::SET_VALUE|Y::TAG)) && is_null($deepest->value)) {
+        if ((($deepest->type & (Y::LITTERALS|Y::REF_DEF|Y::SET_VALUE)) &&
+            is_null($deepest->value)) //&&
+            /*!($previous->type & Y::ROOT)*/ ||
+            ($deepest->type & Y::TAG && $deepest->value->count() === 0)) {
+            // var_dump(Y::getName($previous->type));
             $previous = $deepest;
         }
         if ($n->type & Y::SCALAR && $previous->type & Y::SCALAR) {

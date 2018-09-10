@@ -4,5 +4,5 @@
 'true': foo
 !!str false: bar
 
-!!str null: 'null'
+!!str null: null
 '~': 'null'

@@ -4,9 +4,10 @@ namespace Dallgoot\Yaml;
 
 /**
  * TODO
- * @author stephane.rebai@gmail.com
+ * 
+ * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link TODO : url to specific online doc
+ * @link    TODO : url to specific online doc
  */
 final class Yaml
 {
@@ -42,29 +43,27 @@ final class Yaml
     public static $TYPE_NAMES = null;
 
     /**
-     * Gets the name for a given constant declared in the Dallgoot\Yaml namespace
-     * @param      integer  $typeInteger       The constant value
+     * Gets the name for a given constant declared in the Dallgoot\Yaml class
+     * 
+     * @param integer $typeInteger The constant value
      *
-     * @return     string    The name.
+     * @return string The name.
      */
     public static function getName(int $typeInteger):string
     {
         if (is_null(self::$TYPE_NAMES)) {
             $oClass = new \ReflectionClass(__CLASS__);
             self::$TYPE_NAMES = array_flip($oClass->getConstants());
-            // $f = function ($v) { return str_replace('Dallgoot\Yaml\\', '', $v);};
-            // self::$TYPE_NAMES = array_map($f, array_flip(get_defined_constants(true)['user']));
         }
-        return self::$TYPE_NAMES[$typeInteger];
+        return self::$TYPE_NAMES[$typeInteger] ?? 0;
     }
 
     /**
      * Parse the given Yaml string to a PHP type
      *
-     * @param      string  $someYaml        Some yaml
+     * @param string $someYaml Some yaml
      *
-     * @return     YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
-     * documents as an array of YamlObject )
+     * @return YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple documents as an array of YamlObject )
      */
     public static function parse(string $someYaml, $options = null, $debug = null)
     {
@@ -74,10 +73,11 @@ final class Yaml
     /**
      * Load the given file and parse its content (assumed YAML) to a PHP type
      *
-     * @param string  $someYaml      Some yaml
+     * @param string   $fileName Some file path name
+     * @param int|null $options  enalbed/disable some options see YAML::LOADER
+     * @param int|null $debug    define the level of debugging (true = default)
      *
-     * @return YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple
-     * documents as an array of YamlObject )
+     * @return YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple documents as an array of YamlObject )
      */
     public static function parseFile(string $fileName, $options = null, $debug = null)
     {
@@ -87,11 +87,11 @@ final class Yaml
     /**
      * Returns the YAML representation corresponding to given PHP variable
      *
-     * @param mixed  $somePhpVar       Some php variable
-     * @param int|null $options       Dumper::constants as options
+     * @param mixed    $somePhpVar Some php variable
+     * @param int|null $options    enalbed/disable some options see YAML::Dumper
      *
-     * @return     string  ( the representation of $somePhpVar as a YAML content (single or multiple document according to argument) )
-     * @throws   Exception on errors during building YAML string
+     * @return string  ( the representation of $somePhpVar as a YAML content (single or multiple document accordingly) )
+     * @throws Exception on errors during building YAML string
      * @see Dumper::toString
      */
     public static function dump($somePhpVar, $options = null):string
@@ -103,12 +103,13 @@ final class Yaml
      * Builds the YAML representation corresponding to given PHP variable ($somePhpVar)
      * AND save it as file with the $fileName provided.
      *
-     * @param string   $fileName       The file name
-     * @param mixed   $somePhpVar     Some php variable
-     * @param int|null $options       Dumper::constants as options
+     * @param string   $fileName   The file name
+     * @param mixed    $somePhpVar Some php variable
+     * @param int|null $options    Dumper::constants as options
      *
-     * @return     boolean  true if YAML built and saved , false otherwise
-     * @throws   Exception on errors during building YAML string
+     * @return boolean  true if YAML built and saved , false if error during writing file
+     * @throws Exception on errors (from Dumper::toString) during building YAML string
+     * @see    Dumper::toString
      */
     public static function dumpFile(string $fileName, $somePhpVar, $options = null):bool
     {

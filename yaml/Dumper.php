@@ -6,9 +6,9 @@ use \SplDoublyLinkedList as DLL;
 
 /**
  *
- * @author stephane.rebai@gmail.com
+ * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link TODO : url to specific online doc
+ * @link    TODO : url to specific online doc
  */
 class Dumper //extends AnotherClass
 {
@@ -22,20 +22,20 @@ class Dumper //extends AnotherClass
     public const EXPAND_SHORT = 00001;
     public const SERIALIZE_CUSTOM_OBJECTS = 00010;
 
-    public function __construct(int $options = null)
-    {
-        if (is_int($options)) self::$options = $options;
-    }
+    // public function __construct(int $options = null)
+    // {
+    //     if (is_int($options)) self::$options = $options;
+    // }
 
     /**
      * Returns the YAML representation as a string of the $dataType provided
      *
-     * @param mixed      $dataType     The data type
-     * @param int|null     $options      The options
+     * @param mixed    $dataType The data type
+     * @param int|null $options  The options
      *
-     * @throws     \Exception  datatype cannot be null
+     * @throws \Exception datatype cannot be null
      *
-     * @return     string      The Yaml string content
+     * @return string The Yaml string content
      */
     public static function toString($dataType, int $options = null):string
     {
@@ -57,11 +57,11 @@ class Dumper //extends AnotherClass
     /**
      * Calls and saves the result of Dumper::toString to the file $filePath provided
      *
-     * @param string   $filePath      The file path
-     * @param mixed   $dataType      The data type
-     * @param int|null  $options      The options
+     * @param string   $filePath The file path
+     * @param mixed    $dataType The data type
+     * @param int|null $options  The options
      *
-     * @return     boolean  true = if the file has been correctly saved  (according to return from 'file_put_contents')
+     * @return boolean  true = if the file has been correctly saved  (according to return from 'file_put_contents')
      */
     public static function toFile(string $filePath, $dataType, int $options = null):bool
     {

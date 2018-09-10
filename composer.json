@@ -21,8 +21,9 @@
         "lib-pcre" : "*"
     },
     "require-dev": {
-        "atoum/atoum": "^3.3",
         "phpunit/phpunit": "^7.3",
-        "phuml/phuml": "^1.7"
+        "apigen/apigen": "dev-master",
+        "roave/better-reflection": "dev-master#c87d856",
+        "jetbrains/phpstorm-stubs": "^2018.1"
     }
 }

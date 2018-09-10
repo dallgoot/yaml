@@ -2,14 +2,14 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Yaml as Y;
+use Dallgoot\Yaml\{Yaml as Y, Regex as R};
 
 /**
  * Constructs the result (YamlObject or array) according to every Node and respecting value
  *
- * @author stephane.rebai@gmail.com
+ * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link TODO : url to specific online doc
+ * @link    TODO : url to specific online doc
  */
 final class Builder
 {
@@ -22,8 +22,8 @@ final class Builder
     /**
      * Generic function to distinguish between Node and NodeList
      *
-     * @param Node|NodeList  $node    The node
-     * @param mixed  $parent  The parent
+     * @param Node|NodeList $node   The node.
+     * @param mixed         $parent The parent
      *
      * @return mixed  ( description_of_the_return_value )
      */
@@ -36,8 +36,8 @@ final class Builder
     /**
      * Builds a node list.
      *
-     * @param NodeList  $node    The node
-     * @param mixed    $parent  The parent
+     * @param NodeList $node   The node
+     * @param mixed    $parent The parent
      *
      * @return mixed    The parent (object|array) or a string representing the NodeList.
      */
@@ -49,10 +49,8 @@ final class Builder
         $p = $parent;
         switch ($node->type) {
             case Y::MAPPING: // fall through
-            // case Y::SET_KEY: // fall through
-            case Y::SET:      $p = new \StdClass; var_dump('in set'); break;
+            case Y::SET:      $p = new \StdClass; break;
             case Y::SEQUENCE: $p = [];break;
-            // case Y::KEY: $p = $parent;break;
         }
         $out = null;
         foreach ($node as $child) {
@@ -83,13 +81,14 @@ final class Builder
             if (is_object($value)) {
                 $tmp = self::build($value, $parent) ?? $parent;
             } else {
-                $tmp = $node->getPhpValue();
+                $tmp = Node2PHP::get($node);
             }
             if ($type === Y::REF_DEF) self::$_root->addReference($identifier, $tmp);
             return self::$_root->getReference($identifier);
         }
-        $typesActions = [Y::COMMENT   => 'buildComment',
-                         Y::DIRECTIVE => 'buildDirective',
+
+        if ($type & Y::COMMENT) self::$_root->addComment($node->line, $node->value);
+        $typesActions = [Y::DIRECTIVE => 'buildDirective',
                          Y::ITEM      => 'buildItem',
                          Y::KEY       => 'buildKey',
                          Y::SET_KEY   => 'buildSetKey',
@@ -99,7 +98,7 @@ final class Builder
         if (isset($typesActions[$type])) {
             return self::{$typesActions[$type]}($node, $parent);
         }
-        return is_object($value) ? self::build($value, $parent) : $node->getPhpValue();
+        return is_object($value) ? self::build($value, $parent) : Node2PHP::get($node);
     }
 
     /**
@@ -122,13 +121,17 @@ final class Builder
             } else {
                 $target = &$parent->{$identifier};
             }
-            if ($value instanceof Node && ($value->type & (Y::KEY|Y::ITEM))) {
-                $target = $value->type & Y::KEY ? new \StdClass : [];
+            if ($value instanceof Node && ($value->type & (Y::KEY|Y::SET_KEY|Y::SET_KEY|Y::ITEM))) {
+                $target = $value->type & Y::ITEM ? [] : new \StdClass;
                 self::build($value, $target);
             } elseif (is_object($value)) {
-                $target = self::build($value, $target);
+                if (is_null($value->type) && $value->getTypes() & Y::SCALAR && !($value->getTypes() & Y::COMMENT)) {
+                    $target = self::buildLitteral($value, Y::LITT_FOLDED);
+                } else {
+                    $target = self::build($value, $target);
+                }
             } else {
-                $target = $node->getPhpValue();
+                $target = Node2PHP::get($node);
             }
         }
     }
@@ -147,11 +150,11 @@ final class Builder
         if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
             throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
         }
-        if ($node->value instanceof Node && $node->value->type === Y::KEY) {
+        if ($node->value instanceof Node && $node->value->type & Y::KEY) {
             self::build($node->value, $parent);
         } else {
             $index = count($parent);
-            $parent[$index] = self::build($node->value, $parent[$index]);
+            $parent[$index] = is_null($node->value) ? null : self::build($node->value, $parent[$index]);
         }
     }
 
@@ -238,6 +241,22 @@ final class Builder
         $lines = [];
         $children->rewind();
         $refIndent = $children->current()->indent;
+        // $lastChild = $children->pop();
+        // $hasComment = strpos($lastChild->value, ' #');
+        // if (is_int($hasComment)) {
+        //     $children->push(new Node(trim(substr($lastChild->value, 0, $hasComment)), $lastChild->line));
+        //     self::$_root->addComment($lastChild->line, trim(substr($lastChild->value, $hasComment)));//keep the '#' to note that it is NOT a fulline comment;
+        // } else {
+        //     $children->push($lastChild);
+        // }
+        //remove trailing blank nodes
+        $max = $children->count() - 1;
+        while ($children->offsetGet($max)->type & Y::BLANK) {
+            $children->offsetUnset($max);
+            $max = $children->count() - 1;
+        }
+        $children->rewind();
+        // TODO : Example 6.1. Indentation Spaces  spaces must be considered as content
         foreach ($children as $child) {
             if ($child->value instanceof NodeList) {
                 $lines[] = self::buildLitteral($child->value, $type);
@@ -250,15 +269,20 @@ final class Builder
                     switch ($child->type) {
                         case Y::ITEM:    $child->value = '- '.$child->value;break;
                         case Y::COMMENT: $child->value = '# '.$child->value;break;
-                        default: die(Y::getName($child->type));
+                        default: //die(__METHOD__.Y::getName($child->type));
                     }
+                }
+                if (is_object($child->value)) {
+                    // var_dump($child->$value);
+                    throw new \ParseError(__METHOD__.':'.get_class($child->value), 1);
+                    // die(__METHOD__);
                 }
                 $lines[] = $prefix.$child->value;
             }
         }
         if ($type & Y::RAW)         return implode('',   $lines);
         if ($type & Y::LITT)        return implode("\n", $lines);
-        if ($type & Y::LITT_FOLDED) return implode(' ',  $lines);
+        if ($type & Y::LITT_FOLDED) return preg_replace(['/ +(\n)/','/(\n+) +/'], "$1", implode(' ',  $lines));
         return '';
     }
 
@@ -275,7 +299,7 @@ final class Builder
         $built = self::build($node->value, $parent);
         $stringKey = is_string($built) && Regex::isProperlyQuoted($built) ? trim($built, '\'" '): $built;
         $key = json_encode($stringKey, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
+        // if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
         $parent->{trim($key, '\'" ')} = null;
     }
 
@@ -289,7 +313,7 @@ final class Builder
     {
         $prop = array_keys(get_object_vars($parent));
         $key = end($prop);
-        if ($node->value->type & (Y::ITEM|Y::MAPPING)) {
+        if ($node->value->type & (Y::ITEM|Y::KEY|Y::SEQUENCE|Y::MAPPING)) {
             $p = $node->value->type === Y::ITEM ? [] : new \StdClass;
             self::build($node->value, $p);
         } else {
@@ -306,30 +330,24 @@ final class Builder
      *
      * @return     Tag     The tag object of class Dallgoot\Yaml\Tag.
      */
-    private function buildTag(Node $node, $parent)
+    private function buildTag(Node $node, &$parent)
     {
+        $list = $node->value;
+        $current = $list->current();
+        if ((is_object($parent) || is_array($parent)) && $current->type & Y::KEY) {
+            self::buildKey($list, $parent);
+            return;
+        }
         if ($parent === self::$_root) {
             $parent->addTag($node->identifier);
             return;
         }
         //TODO: have somewhere a list of common tags and their treatment
         if (in_array($node->identifier, ['!binary', '!str'])) {
-            if ($node->value->value instanceof NodeList) $node->value->value->type = Y::RAW;
-            else $node->value->type = Y::RAW;
+            // if ($list->value instanceof NodeList) $node->value->value->type = Y::RAW;
+            // else $node->value->type = Y::RAW;
         }
-        $val = is_null($node->value) ? null : self::build(/** @scrutinizer ignore-type */ $node->value, $node);
-        return new Tag($node->identifier, $val);
-    }
-
-    /**
-     * Builds a comment : adding it to the current document object (represented by self::root)
-     *
-     * @param      Node    $node    The node of type YAML::COMMENT
-     * @param      mixed  $parent  The parent (currently ignored only present to allow one coherent method signature in Node::builNode)
-     */
-    private function buildComment(Node $node, $parent)
-    {
-        self::$_root->addComment($node->line, $node->value);
+        return new Tag($node->identifier, $list->count === 0 ? null : self::buildNodeList($list, $node));
     }
 
     /**

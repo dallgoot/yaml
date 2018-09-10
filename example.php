@@ -13,7 +13,7 @@ const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | 
 */
 ini_set("auto_detect_line_endings", 1);
 // $yaml = Y::parseFile('./tests/cases/parsing/blockChompingWithInsideBlank.yml', null, 0); //->parse();
-$content = file_get_contents('./tests/cases/parsing/complex_mapping_in_item.yml');//var_dump($content);
+$content = file_get_contents('./tests/cases/parsing/tags_as_casting.yml');//var_dump($content);
 $yaml = Y::parse($content, null, 2); //->parse();
 // $yaml = Y::parseFile('./references/Example 2.27.yml', null, 1);
 var_dump($yaml);

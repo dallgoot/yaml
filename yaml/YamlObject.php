@@ -3,9 +3,10 @@ namespace Dallgoot\Yaml;
 
 /**
  *  The returned object representing a YAML file content
- * @author stephane.rebai@gmail.com
+ * 
+ * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link TODO : url to specific online doc
+ * @link    TODO : url to specific online doc
  *
  * @method void addReference(string $name, $value)
  * @method mixed getReference(string $name)
@@ -19,7 +20,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
 {
     private $__yaml__object__api;
 
-    private const UNDEFINED_METHOD = self::class.": undefined method '%s' ! valid methods are %s";
+    private const UNDEFINED_METHOD = self::class.": undefined method '%s', valid methods are %s";
 
     public function __construct()
     {
@@ -27,7 +28,9 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         $this->__yaml__object__api = new API();
     }
 
-    //TODO: determine accessible methods : private OR public
+    /**
+     * @todo determine accessible methods : private OR public
+     */
     public function __call($funcName, $arguments)
     {
         $reflectAPI = new \ReflectionClass(get_class($this->__yaml__object__api));

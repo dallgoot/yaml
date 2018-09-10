@@ -1,0 +1,37 @@
+compact_keyvalue_with_no_space: |
+
+compact_with_invalid_reference_and_comment: |
+
+compact_with_invalid_reference: |
+
+compact_with_no_closing_brace: |
+
+compact_with_no_keyvalue_pair: |
+
+invalid_quoting_in_compact: |
+
+key_in_key: |
+
+litteral_folded_with_immediate_value: |
+
+litteral_with_immediate_value: |
+
+map_key_with_scalar_and_sequence: |
+
+map_with_compact_with_duplicates: |
+
+map_with_embed_compact_and_comment: |
+
+seq_items_with_multiline_scalar_and_key: |
+
+seq_items_with_scalar_and_key: |
+
+sequence_items_with_no_space: |
+
+special_chars_with_no_sense: |
+
+string_alone_with_indented_key: |
+
+unescaped_double_quotes: |
+
+unescaped_simple_quotes: |

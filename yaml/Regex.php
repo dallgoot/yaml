@@ -4,9 +4,10 @@ namespace Dallgoot\Yaml;
 
 /**
  * Define Regex patterns as constants
- * @author stephane.rebai@gmail.com
+ * 
+ * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link TODO : url to specific online doc
+ * @link    TODO : url to specific online doc
  */
 class Regex
 {
@@ -23,7 +24,7 @@ class Regex
     const MAPPING  = "/(?P<map>{\s*(?:(['\"])".self::AN."\\2\s*:\s*(?:".self::SIMPLE."|".self::seqForMap."|(?P>map)),?\s*)+})/i";
     const SEQUENCE = "/(?P<seq>\[(?:(?:".self::SIMPLE."|".self::mapForSeq."|(?P>seq)),?\s*)+\])/i";
 
-    const KEY  = '/^([[:alnum:]_][[:alnum:]_ -.\/]*[ \t]*)(?::[ \t](.*)|:)$/';
+    const KEY  = '/^([[:alnum:]_\'"~][[:alnum:]_ -.\/~]*[ \t]*)(?::[ \t]([^\n]+)|:)$/';
     const ITEM = '/^-([ \t]+(.*))?$/';
 
 
@@ -40,9 +41,8 @@ class Regex
         $matchSpaced    = preg_match($spaced, $v);
         $matchIso       = preg_match($iso8601, $v);
         if (is_bool($matchDate) || is_bool($matchCanonical) || is_bool($matchSpaced) || is_bool($matchIso)) {
-                  throw new \Exception("Regex date error");
+            throw new \Exception(self::class." regex error for dates");
         }
-
         return $matchDate || $matchCanonical || $matchSpaced || $matchIso;
     }
 
@@ -54,6 +54,6 @@ class Regex
 
     public static function isProperlyQuoted(String $var):bool
     {
-        return (bool) preg_match("/(['".'"]).*?(?<![\\\\])\1$/ms', $var);
+        return (bool) preg_match("/^(['".'"]).*?(?<![\\\\])\1$/ms', $var);
     }
 }

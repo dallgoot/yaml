@@ -1,11 +1,11 @@
 blockChompingWithInsideBlank: |
   {"bar":"one\n\ntwo"}
 blockChompingWithKeepAndTrailing: |
-  {"foo":"one\ntwo\n","bar":"one\ntwo"}
+  {"foo":"one\ntwo","bar":"one\ntwo"}
 blockChompingWithKeep: |
   {"foo":"one\ntwo","bar":"one\ntwo"}
 blockChompingWithStripAndTrailing: |
-  {"foo":"one\ntwo\n","bar":"one\ntwo"}
+  {"foo":"one\ntwo","bar":"one\ntwo"}
 blockChomping: |
   {"foo":"one\ntwo","bar":"one\ntwo"}
 comment_at_first_and_inside_map: |
@@ -53,7 +53,7 @@ literalfolded: |
 literal_keep_trailing_leading: |
   {"foo":"bar"}
 literal_with_comment_at_lastline: |
-  {"content":"# comment 1\nheader\n\n# comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter"}
+  {"content":"# comment 1\nheader\n\n# comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter # comment3"}
 map_in_an_empty_item: |
   {"foo":{"bar":"foobar"}}
 map_with_boolean_keys: |
@@ -73,25 +73,26 @@ map_with_seq_and_embed_comment: |
 multidoc_sequence: |
   [["Mark McGwire","Sammy Sosa","Ken Griffey"],["Chicago Cubs","St Louis Cardinals"]]
 multiline_indented.keyslookalike: |
-  {"a":"b c"}
+  {"a":"b\nc"}
 multiline_quoted_in_subkey: |
-  {"foo":{"foobar":"foo\n#bar","bar":"baz"}}
+  {"foo":{"foobar":"foo #bar","bar":"baz"}}
 multiline_quoted_with_blank: |
-  {"foobar":"foo\n\nbar"}
+  {"foobar":"foo\nbar"}
 multiline_quoted_with_slash: |
-  {"foobar":"foo\\nbar"}
+  {"foobar":"foo\\ bar"}
 multiline_quoted: |
-  {"foo":"bar\nbaz\nfoobar\nfoo","bar":"baz"}
+  {"foo":"bar baz foobar foo","bar":"baz"}
 multiline_unquoted_in_seqitem: |
-  {"foo":[{"bar":"one\n\ntwo\nthree"}]}
+  {"foo":{"bar":"one\ntwo three"}}
 multiline_unquoted: |
-  {"foo":"bar\nbaz\nfoobar\nfoo","bar":"baz"}
+  {"foo":"bar baz foobar foo","bar":"baz"}
 multiline_with_boolean_strings: |
-  {"test":"You can have things that don't look like strings here\ntrue\nyes you can"}
+  {"test":"You can have things that don't look like strings here true yes you can"}
 references_inside_compact: |
   {"var":"var-value","scalar":"var-value","list":["var-value"],"list_in_list":[["var-value"]],"map_in_list":[{"key":"var-value"}],"embedded_mapping":["key":"var-value"],"map":{"key":"var-value"},"list_in_map":{"key":["var-value"]},"map_in_map":{"foo":{"bar":"var-value"}}}
-references_inside_merged_key: |
-  {"mergekeyrefdef":{"a":"foo","b":"bar","c":"baz"},"mergekeyderef":{"d":"quux","b":"bar","c":"baz"}}
+# TODO: if support for merged keys is dropped : delete this
+# references_inside_merged_key: |
+#   {"mergekeyrefdef":{"a":"foo","b":"bar","c":"baz"},"mergekeyderef":{"d":"quux","b":"bar","c":"baz"}}
 # TODO:how is this supposed to work ?
 # references_with_merged_keys_inside_compact: |
 #   foo:&FOO
@@ -105,19 +106,19 @@ references_inside_merged_key: |
 #   foobar:
 #       bar:~
 #       <<:[*FOO,*BAR]
-references_with_merge: |
-  {"foo":{"baz":"foobar"},"bar":{"baz":"foobar"}}
+# references_with_merge: |
+#   {"foo":{"baz":"foobar"},"bar":{"baz":"foobar"}}
 # TODO:this should create an infinite loop ?
 # references_with_selfreference: |
 #   foo:{ &foo { a:Steve,<<:*foo} }
 sequence_item_with_multiple_keys: |
-  {"collection":{"key":"foo","foo":"bar"}}
+  {"collection":[{"key":"foo","foo":"bar"}]}
 sequence_with_duplicate_keys: |
   {"array":{"key":"two"}}
 sequence_with_linefeed_and_key: |
-  {"a":[{"b":{"bar":"baz"}]},"foo"],"d":"e"}
+  {"a":{"b":{"bar":"baz"},"0":"foo"},"d":"e"}
 tags_as_casting: |
-  {"1.2":"bar","1.3":"baz","true":"foo","false":"bar","null":null,"~":null}
+  {"1.2":"bar","1.3":"baz","true":"foo","false":"bar","null":null,"~":"null"}
 # TODO:this a Symfony specific behavior :is it useful and used ?
 # tags_as_keys: |
 #   {transitions:{FOO:}}
@@ -132,7 +133,7 @@ tags_in_litteral: |
 tags_in_mapping: |
   {"foo":{"tagName":"quz","value":["bar"]},"quz":{"tagName":"foo","value":{"quz":"bar"}}}
 tags_with_quotes: |
-  {"data":{"tagName":"!binary","value":"SGVsbG8gd29ybGQ="},"enclosed with single quotes":{"tagName":"!binary","value":"SGVsbG8gd29ybGQ="},"containing spaces":{"tagName":"binary","value":"SGVs bG8gd 29ybGQ="}}
+  {"data":{"tagName":"!binary","value":"SGVsbG8gd29ybGQ="},"enclosed with single quotes":{"tagName":"!binary","value":"SGVsbG8gd29ybGQ="},"containing spaces":{"tagName":"!binary","value":"SGVs bG8gd 29ybGQ="}}
 # TODO:this a Symfony specific behavior :is it useful and used ?
 tag_symfony_phpobject: |
   {"foo":{"tagName":"php/object","value":"O:30:\"Symfony\\Component\\Yaml\\Tests\\B\":1:{s:1:\"b\";s:3:\"foo\";}"},"bar":1}
