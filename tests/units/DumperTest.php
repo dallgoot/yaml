@@ -70,8 +70,11 @@ final class DumperTest extends TestCase
 
     /**
      * @dataProvider test_DumpingCasesProvider
+     * @param string $fileName
+     * @param string $expected
+     * @throws Exception
      */
-    public function test_DumpingCases($fileName, $expected)
+    public function test_DumpingCases(string $fileName, string $expected)
     {
         $php = (include __DIR__."/../cases/dumping/$fileName.php");
         $output = Y::dump($php);

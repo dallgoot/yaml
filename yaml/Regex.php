@@ -4,7 +4,7 @@ namespace Dallgoot\Yaml;
 
 /**
  * Define Regex patterns as constants
- * 
+ *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
@@ -21,14 +21,19 @@ class Regex
     private const seqForMap = "(?P<seq>\[(?:(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+\])";
     private const mapForSeq = "(?P<map>{\s*(?:".self::AN."\s*:\s*(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+})";
 
-    const MAPPING  = "/(?P<map>{\s*(?:(['\"])".self::AN."\\2\s*:\s*(?:".self::SIMPLE."|".self::seqForMap."|(?P>map)),?\s*)+})/i";
+    // const MAPPING  = "/(?P<map>{\s*(?:(['\"])".self::AN."\\2\s*:\s*(?:".self::SIMPLE."|".self::seqForMap."|(?P>map)),?\s*)+})/i";
+    const MAPPING  = "/(?P<map>{(?:\s*((['\"]?)[\w -\/]*\2?)\s*:\s*(!!?\w+)? *(?:(?P<sv>[\w '\"]+|-?[\d.e]+)|(?P<seq>\[(?:(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+\])|(?P>map)),?\s*)+})/i";
     const SEQUENCE = "/(?P<seq>\[(?:(?:".self::SIMPLE."|".self::mapForSeq."|(?P>seq)),?\s*)+\])/i";
 
     const KEY  = '/^([[:alnum:]_\'"~][[:alnum:]_ -.\/~]*[ \t]*)(?::[ \t]([^\n]+)|:)$/';
     const ITEM = '/^-([ \t]+(.*))?$/';
 
-
-    public static function isDate($v):bool
+    /**
+     * @param string $v a string value
+     * @return bool
+     * @throws \Exception if any preg_match has invalid regex
+     */
+    public static function isDate(string $v):bool
     {
         $d         = "\\d{4}([-\\/])\\d{2}\\1\\d{2}";
         $h         = "\\d{2}(:)\\d{2}\\2\\d{2}";

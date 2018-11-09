@@ -47,7 +47,7 @@ class API
      * @param string $name Name of the reference
      *
      * @return mixed Value of the reference
-     * @throws UnexpectedValueException    if there's no reference by that $name
+     * @throws \UnexpectedValueException    if there's no reference by that $name
      */
     public function &getReference($name)
     {

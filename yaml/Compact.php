@@ -5,7 +5,7 @@ namespace Dallgoot\Yaml;
 
 /**
  *
- * @author  DStéphane Rebai <stephane.rebai@gmail.com>
+ * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
@@ -33,6 +33,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
      * Transforms an object/array into a new Compact object
      * 
      * @return Compact
+     * @throws \Exception if type can not be made "compact"
      */
     public static function wrap($arrayOrObject)
     {

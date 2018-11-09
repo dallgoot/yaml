@@ -160,7 +160,7 @@ final class Loader
         }
     }
 
-    private function onSpecialType(&$n, &$previous, &$emptyLines, $lineString):bool
+    private function onSpecialType(Node &$n, Node &$previous, &$emptyLines, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
         if ($deepest->type & Y::PARTIAL) {
@@ -186,7 +186,7 @@ final class Loader
         return false;
     }
 
-    private function onContextType(&$n, &$previous, $lineString):bool
+    private function onContextType(Node &$n, Node &$previous, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
         if (($previous->type & Y::LITTERALS && $n->indent >= $previous->indent) || (($deepest->type & Y::LITTERALS) && is_null($deepest->value))) {

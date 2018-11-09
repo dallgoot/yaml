@@ -21,8 +21,8 @@ final class Yaml
     const ITEM             = 128;
     const JSON             = 256;
     const KEY              = 512;
-    const LITT             = 1024; //litteral
-    const LITT_FOLDED      = 2048; //litteral
+    const LITT             = 1024; //literal
+    const LITT_FOLDED      = 2048; //literal
     const MAPPING          = 4096;
     const PARTIAL          = 8192;
     const QUOTED           = 16384;
@@ -48,6 +48,7 @@ final class Yaml
      * @param integer $typeInteger The constant value
      *
      * @return string The name.
+     * @throws
      */
     public static function getName(int $typeInteger):string
     {
@@ -64,6 +65,7 @@ final class Yaml
      * @param string $someYaml Some yaml
      *
      * @return YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple documents as an array of YamlObject )
+     * @throws
      */
     public static function parse(string $someYaml, $options = null, $debug = null)
     {
@@ -78,6 +80,7 @@ final class Yaml
      * @param int|null $debug    define the level of debugging (true = default)
      *
      * @return YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple documents as an array of YamlObject )
+     * @throws
      */
     public static function parseFile(string $fileName, $options = null, $debug = null)
     {
@@ -91,7 +94,7 @@ final class Yaml
      * @param int|null $options    enalbed/disable some options see YAML::Dumper
      *
      * @return string  ( the representation of $somePhpVar as a YAML content (single or multiple document accordingly) )
-     * @throws Exception on errors during building YAML string
+     * @throws \Exception on errors during building YAML string
      * @see Dumper::toString
      */
     public static function dump($somePhpVar, $options = null):string
@@ -108,7 +111,7 @@ final class Yaml
      * @param int|null $options    Dumper::constants as options
      *
      * @return boolean  true if YAML built and saved , false if error during writing file
-     * @throws Exception on errors (from Dumper::toString) during building YAML string
+     * @throws \Exception on errors (from Dumper::toString) during building YAML string
      * @see    Dumper::toString
      */
     public static function dumpFile(string $fileName, $somePhpVar, $options = null):bool

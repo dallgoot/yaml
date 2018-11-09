@@ -17,7 +17,9 @@ final class Node2PHP
     /**
      * Returns the correct PHP datatype for the value of the current Node
      *
+     * @param Node $n a Node object to be evaluated as PHP type.
      * @return mixed  The value as PHP type : scalar, array or Compact, DateTime
+     * @throws \Exception if occurs in self::getScalar or self::getCompact
      */
     public static function get(Node $n)
     {
@@ -37,6 +39,7 @@ final class Node2PHP
      * @param string $v a string value
      *
      * @return mixed The value with appropriate PHP type
+     * @throws \Exception if happens in R::isDate or R::isNumber
      */
     private static function getScalar(string $v)
     {
@@ -75,6 +78,7 @@ final class Node2PHP
      * @param integer $type               The type
      *
      * @return Compact The compact object equivalent to $mappingOrString
+     * @throws \Exception if raised by self::getScalar
      */
     private static function getCompact(string $mappingOrSeqString, int $type):object
     {

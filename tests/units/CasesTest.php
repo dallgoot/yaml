@@ -28,6 +28,7 @@ final class Cases extends TestCase
         $this->assertArrayHasKey('Example_2_01', $nameResultPair, 'ERROR during Yaml::parseFile for ../definitions/examples_tests.yml');
         return $this->getGenerator($nameResultPair);
     }
+
     public function parsingProvider()
     {
         $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/parsing_tests.yml'));

@@ -153,8 +153,7 @@ final class Builder
         if ($node->value instanceof Node && $node->value->type & Y::KEY) {
             self::build($node->value, $parent);
         } else {
-            $index = count($parent);
-            $parent[$index] = is_null($node->value) ? null : self::build($node->value, $parent[$index]);
+            $parent[] = is_null($node->value) ? null : self::build($node->value, $parent);
         }
     }
 
@@ -328,7 +327,7 @@ final class Builder
      * @param      Node    $node    The node of type YAML::TAG
      * @param      mixed  $parent  The parent
      *
-     * @return     Tag     The tag object of class Dallgoot\Yaml\Tag.
+     * @return     Tag|null     The tag object of class Dallgoot\Yaml\Tag.
      */
     private function buildTag(Node $node, &$parent)
     {
@@ -340,14 +339,13 @@ final class Builder
         }
         if ($parent === self::$_root) {
             $parent->addTag($node->identifier);
-            return;
+            return self::buildNodeList($list, $parent);
         }
         //TODO: have somewhere a list of common tags and their treatment
         if (in_array($node->identifier, ['!binary', '!str'])) {
-            // if ($list->value instanceof NodeList) $node->value->value->type = Y::RAW;
-            // else $node->value->type = Y::RAW;
+            $list->type = Y::RAW;
         }
-        return new Tag($node->identifier, $list->count === 0 ? null : self::buildNodeList($list, $node));
+        return new Tag($node->identifier, $list->count === 0 ? null : self::buildNodeList($list, $parent));
     }
 
     /**

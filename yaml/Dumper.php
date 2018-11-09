@@ -16,6 +16,7 @@ class Dumper //extends AnotherClass
     private const WIDTH = 120;
     private const OPTIONS = 00000;
 
+    /** @var null|NodeList */
     private static $result;
     private static $options;
     //options
@@ -133,9 +134,9 @@ class Dumper //extends AnotherClass
     {
         if ($obj instanceof Tag) {
             if (is_scalar($obj->value)) {
-                self::add("!".$obj->tagName.' '.$obj->value);
+                self::add("!".$obj->tagName.' '.$obj->value, $indent);
             } else {
-                self::add("!".$obj->tagName);
+                self::add("!".$obj->tagName, $indent);
                 self::add(self::dump($obj->value, $indent + self::INDENT), $indent + self::INDENT);
             }
         }

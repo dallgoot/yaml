@@ -229,7 +229,7 @@ final class Node
                 $n = new Node($value, $this->line);
             } else {
                 $n = new Node(trim(substr($value, 0, $hasComment)), $this->line);
-                if ($tmpNode->type !== Y::PARTIAL) {
+                if ($n->type !== Y::PARTIAL) {
                     $comment = new Node(trim(substr($value, $hasComment + 1)), $this->line);
                     $comment->identifier = true; //to specify it is NOT a fullline comment
                     $this->add($comment->setParent($this));
