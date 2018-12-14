@@ -3,7 +3,7 @@ namespace Dallgoot\Yaml;
 
 /**
  *  The returned object representing a YAML file content
- * 
+ *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
@@ -54,6 +54,6 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         unset($prop["__yaml__object__api"]);
         if (count($prop) > 0) return $prop;
         if (count($this) > 0) return iterator_to_array($this);
-        return $this->__yaml__object__api->value;
+        return $this->__yaml__object__api->value ?? "Empty YamlObject";
     }
 }

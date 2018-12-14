@@ -4,7 +4,7 @@ namespace Dallgoot\Yaml;
 
 /**
  * TODO
- * 
+ *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
@@ -44,7 +44,7 @@ final class Yaml
 
     /**
      * Gets the name for a given constant declared in the Dallgoot\Yaml class
-     * 
+     *
      * @param integer $typeInteger The constant value
      *
      * @return string The name.
@@ -56,7 +56,7 @@ final class Yaml
             $oClass = new \ReflectionClass(__CLASS__);
             self::$TYPE_NAMES = array_flip($oClass->getConstants());
         }
-        return self::$TYPE_NAMES[$typeInteger] ?? 0;
+        return self::$TYPE_NAMES[$typeInteger] ?? 'UNKNOWN';
     }
 
     /**
@@ -76,7 +76,7 @@ final class Yaml
      * Load the given file and parse its content (assumed YAML) to a PHP type
      *
      * @param string   $fileName Some file path name
-     * @param int|null $options  enalbed/disable some options see YAML::LOADER
+     * @param int|null $options  enable/disable some options see YAML::LOADER
      * @param int|null $debug    define the level of debugging (true = default)
      *
      * @return YamlObject|array    ( return a PHP type representation with Yaml document as YamlObject and multiple documents as an array of YamlObject )
@@ -91,7 +91,7 @@ final class Yaml
      * Returns the YAML representation corresponding to given PHP variable
      *
      * @param mixed    $somePhpVar Some php variable
-     * @param int|null $options    enalbed/disable some options see YAML::Dumper
+     * @param int|null $options    enable/disable some options see YAML::Dumper
      *
      * @return string  ( the representation of $somePhpVar as a YAML content (single or multiple document accordingly) )
      * @throws \Exception on errors during building YAML string

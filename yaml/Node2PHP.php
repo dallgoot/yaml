@@ -25,9 +25,12 @@ final class Node2PHP
     {
         if (is_null($n->value)) return null;
         if ($n->type & (Y::REF_CALL | Y::SCALAR)) return self::getScalar($n->value);
-        if ($n->type & (Y::COMPACT_MAPPING | Y::COMPACT_SEQUENCE))
-            return self::getCompact(substr($n->value, 1, -1), $n->type);
-        $expected = [Y::JSON   => json_decode($n->value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR),
+        // if ($n->type & (Y::COMPACT_MAPPING | Y::COMPACT_SEQUENCE))
+        //     return self::getCompact(substr($n->value, 1, -1), $n->type);
+        if ($n->type & (Y::COMPACT_MAPPING | Y::COMPACT_SEQUENCE| Y::JSON)) {
+            return $n->value;
+        }
+        $expected = [//Y::JSON   => $n->value, //json_decode($n->value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR),
                      Y::QUOTED => trim($n->value, "\"'"),
                      Y::RAW    => strval($n->value)];
         return $expected[$n->type] ?? null;
@@ -80,23 +83,41 @@ final class Node2PHP
      * @return Compact The compact object equivalent to $mappingOrString
      * @throws \Exception if raised by self::getScalar
      */
-    private static function getCompact(string $mappingOrSeqString, int $type):object
+    private static function getCompact(string $objOr, int $type):object
     {
-        //TODO : this should handle references present inside the string
-        $out = new Compact();
         if ($type === Y::COMPACT_SEQUENCE) {
-            $f = function ($e) { return self::getScalar(trim($e));};
-            //TODO : that's not robust enough, improve it
-            foreach (array_map($f, explode(",", $mappingOrSeqString)) as $key => $value) {
-                $out[$key] = $value;
-            }
+            return new Compact(self::getArray($objOrSeqString));
         }
         if ($type === Y::COMPACT_MAPPING) {
-            //TODO : that's not robust enough, improve it
-            foreach (explode(',', $mappingOrSeqString) as $value) {
-                list($keyName, $keyValue) = explode(':', $value);
-                $out->{trim($keyName, '\'" ')} = self::getScalar(trim($keyValue));
-            }
+            return new Compact(self::getObject($objOrSeqString));
+        }
+        throw new TypeError(__METHOD__.": paramater 'type' can only be YAML::COMPACT_SEQUENCE or YAML::COMPACT_MAPPING");
+    }
+
+    /**
+     * @todo : that's not robust enough, improve it.this should handle references present inside the string
+     */
+    private function getArray($sequenceString)
+    {
+        $out = [];
+        $f = function ($e) { return self::getScalar(trim($e));};
+        foreach (array_map($f, explode(",", $sequenceString)) as $key => $value) {
+            $out[$key] = $value;
+        }
+        return $out;
+    }
+
+    /**
+     * Gets the compact object.
+     *
+     * @todo : that's not robust enough, improve it.this should handle references present inside the string
+     */
+    private static function getObject($objectString)
+    {
+        $out = new \StdClass;
+        foreach (explode(',', $objectString) as $value) {
+            list($keyName, $keyValue) = explode(':', $value);
+            $out->{trim($keyName, '\'" ')} = self::getScalar(trim($keyValue));
         }
         return $out;
     }

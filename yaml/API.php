@@ -6,13 +6,15 @@ use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * TODO
- * 
+ *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
 class API
 {
+    /** @var null|bool */
+    private $hasDocStart; // null = no docstart, true = docstart before document comments, false = docstart after document comments
     private $_references = [];
     private $_comments   = [];
     // private $_documents  = [];
@@ -27,7 +29,7 @@ class API
 
     /**
      * Adds a reference.
-     * 
+     *
      * @param string $name  The reference name
      * @param mixed  $value The reference value
      *
@@ -43,7 +45,7 @@ class API
 
     /**
      * Return the reference saved by $name
-     * 
+     *
      * @param string $name Name of the reference
      *
      * @return mixed Value of the reference
@@ -78,7 +80,7 @@ class API
      *
      * @param int|null $lineNumber The line number
      *
-     * @return string|array The comment à $lineNumber OR ALL comments.
+     * @return string|array The comment at $lineNumber OR ALL comments.
      */
     public function getComment(int $lineNumber = null)
     {
@@ -107,5 +109,25 @@ class API
     public function addTag(string $value)
     {
         $this->_tags[] = $value;
+    }
+
+    /**
+     * Determines if it has YAML document start string => '---'.
+     *
+     * @return     boolean  True if has document start, False otherwise.
+     */
+    public function hasDocStart()
+    {
+        return is_bool($this->hasDocStart);
+    }
+
+    /**
+     * Sets the document start.
+     *
+     * @param      null|bool  $value  The value : null = no docstart, true = docstart before document comments, false = docstart after document comments
+     */
+    public function setDocStart($value)
+    {
+        $this->hasDocStart = $value;
     }
 }

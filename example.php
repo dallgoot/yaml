@@ -12,9 +12,9 @@ const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | 
 * load and parse if file exists
 */
 ini_set("auto_detect_line_endings", 1);
-// $yaml = Y::parseFile('./tests/cases/parsing/blockChompingWithInsideBlank.yml', null, 0); //->parse();
-$content = file_get_contents('./tests/cases/parsing/tags_in_compact.yml');//var_dump($content);
-$yaml = Y::parse($content, null, 2); //->parse();
+$content = file_get_contents('./tests/cases/parsing/multiline_quoted_with_blank.yml');//var_dump($content);
+// $content = file_get_contents('./tests/cases/examples/Example_2_17.yml');//var_dump($content);
+$yaml = Y::parse($content, null, 2);
 // $yaml = Y::parseFile('./references/Example 2.27.yml', null, 1);
 var_dump($yaml);
 var_dump(json_encode($yaml, JSON_OPTIONS));

@@ -22,7 +22,7 @@ PHP library to load and parse YAML file to PHP datatypes equivalent
 ## What's different from other PHP Yaml libraries
 - support multiple documents in one YAML content (string or file)
 - complex mapping
-- coherent types support, other libraries don't provide types distinction between:
+<!-- - coherent types support, other libraries don't provide types distinction between:
 ```yaml
 ---
 sequence:
@@ -55,7 +55,7 @@ In Dallgot\Yaml you get the following types:
     }
 }
 ```
-That is an issue when parsing YAML but also when dumping YAML content.
+That is an issue when parsing YAML but also when dumping YAML content. -->
 Take this example from Symfony/Yaml:
 ```php
 $object = new \stdClass();
@@ -74,15 +74,17 @@ Note the "-" hyphen which makes possible to distinguish between a mapping key VS
 This distinction is crucial to allow respecting original YAML structure when content is loaded and dumped.
 
 ## API
-- Dallgoot\Yaml\Loader : Return an array of *YamlObject* for multiple document, or *YamlObject* for one document
+  TBD
+<!-- - Dallgoot\Yaml\Loader : Return an array of *YamlObject* for multiple document, or *YamlObject* for one document
 - Dallgoot\Yaml\Dumper : create YAML structure according to data types provided :
     - a YamlObject is a document (with Comments, References, Directives)
     - an array of YamlObject is a multi-documents YAML file.
     - any other datatypes is a one YAML Document
-- Dallgoot\Yaml\Tag : an object with properties _tagname_, _value_
+- Dallgoot\Yaml\Tag : an object with properties _tagname_, _value_ -->
 
 ## TODO:
-- DUMPER: implementation
+  TBD
+<!-- - DUMPER: implementation
 - CHECK childs validity in Node::add
 - DEFINE debug levels
 - tags: default handling for common tags, and user-customized process for custom ones
@@ -90,7 +92,7 @@ This distinction is crucial to allow respecting original YAML structure when con
 - IMPROVE : rename key names that are not valid PHP property name (to be implemented)
 - IMPROVE : identifying errors in YAML content
 - UNICODE checking
-
+ -->
 ## Performances
     TBD
 

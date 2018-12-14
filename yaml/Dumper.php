@@ -29,7 +29,7 @@ class Dumper //extends AnotherClass
     // }
 
     /**
-     * Returns the YAML representation as a string of the $dataType provided
+     * Returns (as a string) the YAML representation of the $dataType provided
      *
      * @param mixed    $dataType The data type
      * @param int|null $options  The options
@@ -62,6 +62,8 @@ class Dumper //extends AnotherClass
      * @param mixed    $dataType The data type
      * @param int|null $options  The options
      *
+     * @throws \Exception datatype cannot be null
+     *
      * @return boolean  true = if the file has been correctly saved  (according to return from 'file_put_contents')
      */
     public static function toFile(string $filePath, $dataType, int $options = null):bool
@@ -89,7 +91,7 @@ class Dumper //extends AnotherClass
 
     private static function dumpYamlObject(YamlObject $dataType)
     {
-        self::$result->push("---");
+        if ($dataType->hasDocStart()) self::$result->push("---");
         // self::dump($dataType, 0);
         if (count($dataType) > 0) {
             self::dumpSequence($dataType->getArrayCopy(), 0);
@@ -114,7 +116,7 @@ class Dumper //extends AnotherClass
         foreach ($array as $key => $item) {
             $lineStart = current($refKeys) === $key ? "- " : "- $key: ";
             if (is_scalar($item)) {
-                self::add($lineStart.$item, $indent);
+                self::add($lineStart.self::dump($item,0), $indent);
             } else {
                 self::add($lineStart, $indent);
                 self::dump($item, $indent + self::INDENT);
@@ -143,6 +145,7 @@ class Dumper //extends AnotherClass
         if ($obj instanceof Compact) return self::dumpCompact($obj, $indent);
         //TODO:  consider dumping datetime as date strings according to a format provided by user or default
         if ($obj instanceof \DateTime) return $obj->format('Y-m-d');
+        // if ($obj instanceof \SplString) {var_dump('splstrin',$obj);return '"'.$obj.'"';}
         $propList = get_object_vars($obj);
         foreach ($propList as $property => $value) {
             if (is_scalar($value)) {

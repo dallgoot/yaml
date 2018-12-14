@@ -15,18 +15,33 @@ class Regex
     // const NULL  = "null";
     // const FALSE = "false";
     // const TRUE  = "true";
-    const AN = "[\w ]*";
+    // const AN = "[\w ]*";
     // const NUM = "-?[\d.e]+";
-    const SIMPLE = "(?P<sv>null|false|true|[\w ]+|-?[\d.e]+)";
-    private const seqForMap = "(?P<seq>\[(?:(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+\])";
-    private const mapForSeq = "(?P<map>{\s*(?:".self::AN."\s*:\s*(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+})";
+    // const SIMPLE = "(?P<sv>null|false|true|[\w ]+|-?[\d.e]+)";
+    // private const seqForMap = "(?P<seq>\[(?:(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+\])";
+    // private const mapForSeq = "(?P<map>{\s*(?:".self::AN."\s*:\s*(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+})";
+    const quoted = "(?'quot'(?'q'['\"]).*?(?<![\\\\])(?&q))";
+    const num    = "(?'num'[-+]?(?:\\d+\\.?(?:\\d*(e[+-]?\\d+)?)|(\\.(inf|nan))))";
+    const word   = "(?'word'[\\w ]+)";
+    const rc     = "(?'rc'\\*\\w+)";
+    const rd     = "(?'rd'&\\w+)";
+    const tag    = "(?'tag'!+\\w+)";
+    const all    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&num)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
+    const map    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|\\w+) *?: *(?&all)) *,? *)* *?\\})";
+    const seq    = "(?'seq'\\[ *(?:(?'i'(?&all)) *,? *)* *\\])";
+    const allDef = "(?(DEFINE)".self::quoted.self::num.self::rc.self::word.self::tag.self::rd.self::all.self::map.self::seq.")";
 
-    // const MAPPING  = "/(?P<map>{\s*(?:(['\"])".self::AN."\\2\s*:\s*(?:".self::SIMPLE."|".self::seqForMap."|(?P>map)),?\s*)+})/i";
-    const MAPPING  = "/(?P<map>{(?:\s*((['\"]?)[\w -\/]*\2?)\s*:\s*(!!?\w+)? *(?:(?P<sv>[\w '\"]+|-?[\d.e]+)|(?P<seq>\[(?:(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+\])|(?P>map)),?\s*)+})/i";
-    const SEQUENCE = "/(?P<seq>\[(?:(?:".self::SIMPLE."|".self::mapForSeq."|(?P>seq)),?\s*)+\])/i";
+    const MAPPING  = "/".self::allDef."(?&map)$/";
+    const MAPPING_VALUES = "/".self::allDef."(?'k'(?&quot)|\\w+) *: *(?'v'(?&all))?/i";
 
-    const KEY  = '/^([[:alnum:]_\'"~][[:alnum:]_ -.\/~]*[ \t]*)(?::[ \t]([^\n]+)|:)$/';
+    const SEQUENCE = "/".self::allDef."(?&seq)/";
+    const SEQUENCE_VALUES = "/".self::allDef."(?'item'(?&all)) *,? */i";
+
+
+    const KEY  = '/^([[:alnum:]_\'"~][[:alnum:]_ -.\/~]*[ \t]*)(?::[ \t]([^\n]+)|:)$/i';
     const ITEM = '/^-([ \t]+(.*))?$/';
+
+
 
     /**
      * @param string $v a string value
@@ -59,6 +74,6 @@ class Regex
 
     public static function isProperlyQuoted(String $var):bool
     {
-        return (bool) preg_match("/^(['".'"]).*?(?<![\\\\])\1$/ms', $var);
+        return (bool) preg_match("/^(['\"]).*?(?<![\\\\])\\1$/s", $var);
     }
 }

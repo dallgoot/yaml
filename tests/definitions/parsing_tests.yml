@@ -89,7 +89,7 @@ multiline_unquoted: |
 multiline_with_boolean_strings: |
   {"test":"You can have things that don't look like strings here true yes you can"}
 references_inside_compact: |
-  {"var":"var-value","scalar":"var-value","list":["var-value"],"list_in_list":[["var-value"]],"map_in_list":[{"key":"var-value"}],"embedded_mapping":["key":"var-value"],"map":{"key":"var-value"},"list_in_map":{"key":["var-value"]},"map_in_map":{"foo":{"bar":"var-value"}}}
+  {"var":"var-value","scalar":"var-value","list":["var-value"],"list_in_list":[["var-value"]],"map_in_list":[{"key":"var-value"}],"embedded_mapping":{"key":"var-value"},"map":{"key":"var-value"},"list_in_map":{"key":["var-value"]},"map_in_map":{"foo":{"bar":"var-value"}}}
 # TODO: if support for merged keys is dropped : delete this
 # references_inside_merged_key: |
 #   {"mergekeyrefdef":{"a":"foo","b":"bar","c":"baz"},"mergekeyderef":{"d":"quux","b":"bar","c":"baz"}}

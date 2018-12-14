@@ -3,12 +3,12 @@ namespace Dallgoot\Yaml;
 
 /**
  * TODO
- * 
+ *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
-class Tag
+class Tag implements \JsonSerializable
 {
     /** @var string */
     public $tagName;
@@ -35,5 +35,10 @@ class Tag
         /* TODO  implement and throw Exception if invalid (setName method ???)
          *The suffix must not contain any “!” character. This would cause the tag shorthand to be interpreted as having a named tag handle. In addition, the suffix must not contain the “[”, “]”, “{”, “}” and “,” characters. These characters would cause ambiguity with flow collection structures. If the suffix needs to specify any of the above restricted characters, they must be escaped using the “%” character. This behavior is consistent with the URI character escaping rules (specifically, section 2.3 of RFC2396).
         */
+    }
+
+    public function jsonSerialize()
+    {
+        return ["tagName" => $this->tagName, "value" => $this->value];
     }
 }

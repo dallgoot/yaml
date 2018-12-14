@@ -7,7 +7,7 @@ use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * TODO
- * 
+ *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
@@ -58,10 +58,10 @@ final class Loader
      */
     public function load(string $absolutePath):Loader
     {
-        $this->filePath = $absolutePath;
         if (!file_exists($absolutePath)) {
             throw new \Exception(sprintf(self::EXCEPTION_NO_FILE, $absolutePath));
         }
+        $this->filePath = $absolutePath;
         $adle = "auto_detect_line_endings";
         $prevADLE = ini_get($adle);
         !$prevADLE && ini_set($adle, "true");
@@ -78,7 +78,7 @@ final class Loader
      * Parse Yaml lines into a hierarchy of Node
      *
      * @param string $strContent The Yaml string or null to parse loaded content
-     * 
+     *
      * @throws \Exception    if content is not available as $strContent or as $this->content (from file)
      * @throws \ParseError  if any error during parsing or building
      *
@@ -100,7 +100,7 @@ final class Loader
             foreach ($gen() as $lineNb => $lineString) {
                 $n = new Node($lineString, $lineNb);
                 $deepest = $previous->getDeepestNode();
-                if ($n->type & (Y::LITTERALS|Y::BLANK|Y::COMMENT) || $deepest->type & Y::PARTIAL) {
+                if ($n->type & (Y::LITTERALS|Y::BLANK|Y::COMMENT|Y::TAG) || $deepest->type & Y::PARTIAL) {
                     if ($this->onSpecialType($n, $previous, $emptyLines, $lineString)) continue;
                 }
                 //Note: 6.6 comments: Note that outside scalar content, a line containing only white space characters is taken to be a comment line.
@@ -129,7 +129,7 @@ final class Loader
                         $target = $previous;
                         if ($previous->type & Y::ITEM) {
                             if (($deepest->type & Y::KEY && is_null($deepest->value)) ||
-                                ($deepest->type & Y::TAG && $deepest->value->count() === 0)
+                                ($deepest->type & Y::TAG && is_null($deepest->value))
                             ) {
                                 $target = $deepest;
                             }
@@ -183,6 +183,9 @@ final class Loader
                 $previous->getParent(0)->add($n);
                 return true;
         }
+        if($n->type & Y::TAG && is_null($n->value) && $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
+            $n->value = '';
+        }
         return false;
     }
 
@@ -200,7 +203,7 @@ final class Loader
         if ((($deepest->type & (Y::LITTERALS|Y::REF_DEF|Y::SET_VALUE)) &&
             is_null($deepest->value)) //&&
             /*!($previous->type & Y::ROOT)*/ ||
-            ($deepest->type & Y::TAG && $deepest->value->count() === 0)) {
+            ($deepest->type & Y::TAG && is_null($deepest->value)) ) {
             // var_dump(Y::getName($previous->type));
             $previous = $deepest;
         }
