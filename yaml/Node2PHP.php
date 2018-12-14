@@ -28,8 +28,8 @@ final class Node2PHP
         if ($n->type & Y::JSON) {
             return $n->value;
         }
-        $expected = [Y::QUOTED => trim($n->value, "\"'"),
-                     Y::RAW    => strval($n->value)];
+        $expected = [Y::QUOTED => trim((string) $n->value, "\"'"),
+                     Y::RAW    => strval((string) $n->value)];
         return $expected[$n->type] ?? null;
     }
 

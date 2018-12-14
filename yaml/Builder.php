@@ -366,8 +366,9 @@ final class Builder
      */
     private static function buildTag(Node $node, &$parent)
     {
+        $name = (string) $node->identifier;
         if ($parent === self::$_root && empty($node->value)) {
-            $parent->addTag((string) $node->identifier);
+            $parent->addTag($name);
             return;
         }
         $target = $node->value;
@@ -386,8 +387,7 @@ final class Builder
         // if (in_array($node->identifier, ['!binary', '!str'])) {
         //     $target->type = Y::RAW;
         // }
-
-        return new Tag($node->identifier, is_object($target) ? self::build($target) : null);
+        return new Tag($name, is_object($target) ? self::build($target) : null);
     }
 
     /**

@@ -12,7 +12,7 @@ namespace Dallgoot\Yaml;
 class Compact extends \ArrayIterator implements \JsonSerializable
 {
     /**
-     *  construct Compact according to argument if present
+     *  Construct Compact according to argument if present
      *
      * @param array|object  $candidate  The candidate to be made into Compact
      */
@@ -40,7 +40,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
     /**
      * Transforms an object/array into a new Compact object
      *
-     * @param array|object $arrayOrObject
+     * @param array|object $arrayOrObject the variable to mutate as Compact
      *
      * @return Compact
      * @throws \Exception if type can not be made "compact"

@@ -125,6 +125,7 @@ class API
      * Sets the document start.
      *
      * @param      null|bool  $value  The value : null = no docstart, true = docstart before document comments, false = docstart after document comments
+     *
      * @return null
      */
     public function setDocStart($value)
