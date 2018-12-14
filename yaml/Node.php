@@ -96,8 +96,8 @@ final class Node
         }
         $child->setParent($this);
         $current = $this->value;
-        if (is_null($current))
-{            $this->value = $child;
+        if (is_null($current)) {
+            $this->value = $child;
             return;
         }
         if ($current instanceof Node) {
@@ -262,7 +262,7 @@ final class Node
         if (preg_match(R::MAPPING, $value)){
             $this->type = Y::COMPACT_MAPPING;
             $this->value->type = Y::COMPACT_MAPPING;
-            $count = preg_match_all(R::MAPPING_VALUES, trim(substr($value, 1,-1)), $matches);
+            preg_match_all(R::MAPPING_VALUES, trim(substr($value, 1,-1)), $matches);
             foreach ($matches['k'] as $index => $property) {
                 $n = new Node('', $this->line);
                 $n->type = Y::KEY;

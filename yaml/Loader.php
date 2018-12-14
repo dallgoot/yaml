@@ -128,9 +128,7 @@ final class Loader
                     default:
                         $target = $previous;
                         if ($previous->type & Y::ITEM) {
-                            if (($deepest->type & Y::KEY && is_null($deepest->value)) ||
-                                ($deepest->type & Y::TAG && is_null($deepest->value))
-                            ) {
+                            if ($deepest->type & (Y::KEY|Y::TAG) && is_null($deepest->value)) {
                                 $target = $deepest;
                             }
                         }
@@ -183,7 +181,7 @@ final class Loader
                 $previous->getParent(0)->add($n);
                 return true;
         }
-        if($n->type & Y::TAG && is_null($n->value) && $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
+        if ($n->type & Y::TAG && is_null($n->value) && $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
             $n->value = '';
         }
         return false;
@@ -199,12 +197,7 @@ final class Loader
             $previous = $deepest->getParent();
             return false;
         }
-        // var_dump(Y::getName($n->type).Y::getName($deepest->type).Y::getName($previous->type));
-        if ((($deepest->type & (Y::LITTERALS|Y::REF_DEF|Y::SET_VALUE)) &&
-            is_null($deepest->value)) //&&
-            /*!($previous->type & Y::ROOT)*/ ||
-            ($deepest->type & Y::TAG && is_null($deepest->value)) ) {
-            // var_dump(Y::getName($previous->type));
+        if (is_null($deepest->value) && $deepest->type & (Y::LITTERALS|Y::REF_DEF|Y::SET_VALUE|Y::TAG)) {
             $previous = $deepest;
         }
         if ($n->type & Y::SCALAR && $previous->type & Y::SCALAR) {

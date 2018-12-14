@@ -57,54 +57,12 @@ final class Builder
                 self::$_root = new YamlObject;
                 // $tmp = var_dump('insideforeach'.$tmp);
                 $content[] = self::buildNodeList($list, self::$_root);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $num));
             }
         }
         // $content = array_map([self::class, 'buildNodeList'], $documents, array_keys($documents));
         return count($content) === 1 ? $content[0] : $content;
-    }
-
-    /**
-     * Builds a document. Basically a NodeList of children
-     *
-     * @param      NodeList     $list   The list
-     * @param      integer      $key    The key
-     *
-     * @throws     \ParseError  (description)
-     *
-     * @return     YamlObject   The document as the separated part (by YAML::DOC_START) inside a whole YAML content
-     */
-    private static function buildDocument(NodeList $list, int $key):YamlObject
-    {
-        // $childTypes  = $list->getTypes();
-        // $isaMapping  = (bool) (Y::KEY|Y::MAPPING) & $childTypes;
-        // $isaSequence = (bool) Y::ITEM & $childTypes;
-        // $isaSet      = (bool) Y::SET_VALUE & $childTypes;
-        // if ($isaMapping && $isaSequence) {
-        //     throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $key));
-        // } else {
-        //     switch (true) {
-        //         case $isaSequence: $list->type = Y::SEQUENCE;break;
-        //         case $isaSet:      $list->type = Y::SET;break;
-        //         default:           $list->type = Y::MAPPING;
-        //     }
-        // }
-        // self::$_root = new YamlObject();
-        // $string = '';
-        // foreach ($list as $child) {
-        //     $result = self::build($child, self::$_root);
-        //     if (is_string($result)) {
-        //         $string .= $result.' ';
-        //     }
-        // }
-        // if (!empty($string)) {
-        //     self::$_root->setText(rtrim($string));
-        // }
-        // if () {
-        //     # code...
-        // }
-        // return self::$_root;
     }
 
     /**
@@ -143,8 +101,7 @@ final class Builder
             } else {
                 if ($childTypes & Y::ITEM) {
                     $node->type = Y::SEQUENCE;
-                } elseif (!($childTypes & Y::COMMENT))
-                {
+                } elseif (!($childTypes & Y::COMMENT)) {
                     $node->type = Y::LITT_FOLDED;
                 }
             }
@@ -162,6 +119,9 @@ final class Builder
                     self::build($child, $out);
                 }
             }
+            if ($node->type & Y::COMPACT_MAPPING) {
+                $out = new Compact($out);
+            }
         } elseif ($node->type & (Y::COMPACT_SEQUENCE|Y::SEQUENCE)) {
             $out = $parent ?? [];//var_dump("HERE");
             foreach ($node as $key => $child) {
@@ -170,6 +130,9 @@ final class Builder
                 } else {
                     self::build($child);
                 }
+            }
+            if ($node->type & Y::COMPACT_SEQUENCE) {
+                $out = new Compact($out);
             }
         } else {
             $tmpString = null;//var_dump("PAS ICI");
@@ -293,7 +256,7 @@ final class Builder
             if($value->type & Y::KEY) {
                 self::buildKey($node->value, $parent);
                 return;
-            } else if ($value->type & Y::ITEM) {
+            } elseif ($value->type & Y::ITEM) {
                 $list = new NodeList();
                 $list->push($value);
                 $list->type = Y::SEQUENCE;
@@ -367,7 +330,7 @@ final class Builder
      */
     private function buildSetKey(Node $node, &$parent)
     {
-        $built = self::build($node->value);
+        $built = is_object($node->value) ? self::build($node->value) : null;
         $stringKey = is_string($built) && Regex::isProperlyQuoted($built) ? trim($built, '\'" '): $built;
         $key = json_encode($stringKey, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
         // if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
@@ -401,10 +364,10 @@ final class Builder
      *
      * @return     Tag|null     The tag object of class Dallgoot\Yaml\Tag.
      */
-    private function buildTag(Node $node, &$parent)
+    private static function buildTag(Node $node, &$parent)
     {
         if ($parent === self::$_root && empty($node->value)) {
-            $parent->addTag($node->identifier);
+            $parent->addTag((string) $node->identifier);
             return;
         }
         $target = $node->value;
@@ -424,7 +387,7 @@ final class Builder
         //     $target->type = Y::RAW;
         // }
 
-        return new Tag($node->identifier, empty($target) ? null : self::build($target));
+        return new Tag($node->identifier, is_object($target) ? self::build($target) : null);
     }
 
     /**

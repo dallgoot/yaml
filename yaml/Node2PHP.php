@@ -25,13 +25,10 @@ final class Node2PHP
     {
         if (is_null($n->value)) return null;
         if ($n->type & (Y::REF_CALL | Y::SCALAR)) return self::getScalar($n->value);
-        // if ($n->type & (Y::COMPACT_MAPPING | Y::COMPACT_SEQUENCE))
-        //     return self::getCompact(substr($n->value, 1, -1), $n->type);
-        if ($n->type & (Y::COMPACT_MAPPING | Y::COMPACT_SEQUENCE| Y::JSON)) {
+        if ($n->type & Y::JSON) {
             return $n->value;
         }
-        $expected = [//Y::JSON   => $n->value, //json_decode($n->value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR),
-                     Y::QUOTED => trim($n->value, "\"'"),
+        $expected = [Y::QUOTED => trim($n->value, "\"'"),
                      Y::RAW    => strval($n->value)];
         return $expected[$n->type] ?? null;
     }
@@ -72,53 +69,5 @@ final class Node2PHP
         if (preg_match("/^(0o\d+)$/i", $v))      return intval(base_convert($v, 8, 10));
         if (preg_match("/^(0x[\da-f]+)$/i", $v)) return intval(base_convert($v, 16, 10));
         return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
-    }
-
-    /**
-     * Returns a Compact object representing the inline object/array provided as string
-     *
-     * @param string  $mappingOrSeqString The mapping or sequence string
-     * @param integer $type               The type
-     *
-     * @return Compact The compact object equivalent to $mappingOrString
-     * @throws \Exception if raised by self::getScalar
-     */
-    private static function getCompact(string $objOr, int $type):object
-    {
-        if ($type === Y::COMPACT_SEQUENCE) {
-            return new Compact(self::getArray($objOrSeqString));
-        }
-        if ($type === Y::COMPACT_MAPPING) {
-            return new Compact(self::getObject($objOrSeqString));
-        }
-        throw new TypeError(__METHOD__.": paramater 'type' can only be YAML::COMPACT_SEQUENCE or YAML::COMPACT_MAPPING");
-    }
-
-    /**
-     * @todo : that's not robust enough, improve it.this should handle references present inside the string
-     */
-    private function getArray($sequenceString)
-    {
-        $out = [];
-        $f = function ($e) { return self::getScalar(trim($e));};
-        foreach (array_map($f, explode(",", $sequenceString)) as $key => $value) {
-            $out[$key] = $value;
-        }
-        return $out;
-    }
-
-    /**
-     * Gets the compact object.
-     *
-     * @todo : that's not robust enough, improve it.this should handle references present inside the string
-     */
-    private static function getObject($objectString)
-    {
-        $out = new \StdClass;
-        foreach (explode(',', $objectString) as $value) {
-            list($keyName, $keyValue) = explode(':', $value);
-            $out->{trim($keyName, '\'" ')} = self::getScalar(trim($keyValue));
-        }
-        return $out;
     }
 }

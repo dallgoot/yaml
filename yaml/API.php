@@ -14,7 +14,7 @@ use Dallgoot\Yaml\Yaml as Y;
 class API
 {
     /** @var null|bool */
-    private $hasDocStart; // null = no docstart, true = docstart before document comments, false = docstart after document comments
+    private $_hasDocStart; // null = no docstart, true = docstart before document comments, false = docstart after document comments
     private $_references = [];
     private $_comments   = [];
     // private $_documents  = [];
@@ -118,16 +118,17 @@ class API
      */
     public function hasDocStart()
     {
-        return is_bool($this->hasDocStart);
+        return is_bool($this->_hasDocStart);
     }
 
     /**
      * Sets the document start.
      *
      * @param      null|bool  $value  The value : null = no docstart, true = docstart before document comments, false = docstart after document comments
+     * @return null
      */
     public function setDocStart($value)
     {
-        $this->hasDocStart = $value;
+        $this->_hasDocStart = $value;
     }
 }

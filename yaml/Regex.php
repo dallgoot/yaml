@@ -11,31 +11,22 @@ namespace Dallgoot\Yaml;
  */
 class Regex
 {
+    const QUOTED = "(?'quot'(?'q'['\"]).*?(?<![\\\\])(?&q))";
+    const NUM    = "(?'num'[-+]?(?:\\d+\\.?(?:\\d*(e[+-]?\\d+)?)|(\\.(inf|nan))))";
+    const WORD   = "(?'word'[\\w ]+)";
+    const RC     = "(?'rc'\\*\\w+)";
+    const RD     = "(?'rd'&\\w+)";
+    const TAG    = "(?'tag'!+\\w+)";
+    const ALL    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&num)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
+    const MAP    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|\\w+) *?: *(?&all)) *,? *)* *?\\})";
+    const SEQ    = "(?'seq'\\[ *(?:(?'i'(?&all)) *,? *)* *\\])";
+    const ALLDEF = "(?(DEFINE)".self::QUOTED.self::NUM.self::RC.self::WORD.self::TAG.self::RD.self::ALL.self::MAP.self::SEQ.")";
 
-    // const NULL  = "null";
-    // const FALSE = "false";
-    // const TRUE  = "true";
-    // const AN = "[\w ]*";
-    // const NUM = "-?[\d.e]+";
-    // const SIMPLE = "(?P<sv>null|false|true|[\w ]+|-?[\d.e]+)";
-    // private const seqForMap = "(?P<seq>\[(?:(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+\])";
-    // private const mapForSeq = "(?P<map>{\s*(?:".self::AN."\s*:\s*(?:(?P>sv)|(?P>seq)|(?P>map)),?\s*)+})";
-    const quoted = "(?'quot'(?'q'['\"]).*?(?<![\\\\])(?&q))";
-    const num    = "(?'num'[-+]?(?:\\d+\\.?(?:\\d*(e[+-]?\\d+)?)|(\\.(inf|nan))))";
-    const word   = "(?'word'[\\w ]+)";
-    const rc     = "(?'rc'\\*\\w+)";
-    const rd     = "(?'rd'&\\w+)";
-    const tag    = "(?'tag'!+\\w+)";
-    const all    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&num)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
-    const map    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|\\w+) *?: *(?&all)) *,? *)* *?\\})";
-    const seq    = "(?'seq'\\[ *(?:(?'i'(?&all)) *,? *)* *\\])";
-    const allDef = "(?(DEFINE)".self::quoted.self::num.self::rc.self::word.self::tag.self::rd.self::all.self::map.self::seq.")";
+    const MAPPING  = "/".self::ALLDEF."(?&map)$/";
+    const MAPPING_VALUES = "/".self::ALLDEF."(?'k'(?&quot)|\\w+) *: *(?'v'(?&all))?/i";
 
-    const MAPPING  = "/".self::allDef."(?&map)$/";
-    const MAPPING_VALUES = "/".self::allDef."(?'k'(?&quot)|\\w+) *: *(?'v'(?&all))?/i";
-
-    const SEQUENCE = "/".self::allDef."(?&seq)/";
-    const SEQUENCE_VALUES = "/".self::allDef."(?'item'(?&all)) *,? */i";
+    const SEQUENCE = "/".self::ALLDEF."(?&seq)/";
+    const SEQUENCE_VALUES = "/".self::ALLDEF."(?'item'(?&all)) *,? */i";
 
 
     const KEY  = '/^([[:alnum:]_\'"~][[:alnum:]_ -.\/~]*[ \t]*)(?::[ \t]([^\n]+)|:)$/i';

@@ -11,12 +11,16 @@ namespace Dallgoot\Yaml;
  */
 class Compact extends \ArrayIterator implements \JsonSerializable
 {
-
+    /**
+     *  construct Compact according to argument if present
+     *
+     * @param array|object  $candidate  The candidate to be made into Compact
+     */
     public function __construct($candidate)
     {
-        if ($candidate){
+        if ($candidate) {
             parent::__construct($candidate, 1); //1 = Array indices can be accessed as properties in read/write.
-        }else{
+        } else {
             parent::__construct([], 1); //1 = Array indices can be accessed as properties in read/write.
         }
     }
@@ -36,29 +40,16 @@ class Compact extends \ArrayIterator implements \JsonSerializable
     /**
      * Transforms an object/array into a new Compact object
      *
-     * @param array|object
+     * @param array|object $arrayOrObject
      *
      * @return Compact
      * @throws \Exception if type can not be made "compact"
      */
     public static function wrap($arrayOrObject)
     {
-        // $out = new Compact;
-        // if (is_array($arrayOrObject) || is_subclass_of($arrayOrObject, 'Iterator')) {
-        //     foreach ($arrayOrObject as $key => $value) {
-        //         $out[$key] = $value;
-        //     }
-        // } elseif (is_object($arrayOrObject)) {
-        //     $propList = get_object_vars($arrayOrObject);
-        //     foreach ($propList as $prop => $value) {
-        //         $out->{$prop} = $value;
-        //     }
-        // } else {
-        //     throw new \Exception(__METHOD__.":only array or object can be made as compact syntax", 1);
-        // }
         try {
             $out = new Compact($arrayOrObject);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new \Exception(__METHOD__.":only array or object can be made as compact syntax", 1);
         }
         return $out;

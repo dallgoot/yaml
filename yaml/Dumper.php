@@ -16,7 +16,7 @@ class Dumper //extends AnotherClass
     private const WIDTH = 120;
     private const OPTIONS = 00000;
 
-    /** @var null|NodeList */
+    /** @var null|SplDoublyLinkedList */
     private static $result;
     private static $options;
     //options
