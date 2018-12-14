@@ -24,7 +24,7 @@ final class Node2PHP
     public static function get(Node $n)
     {
         if (is_null($n->value)) return null;
-        if ($n->type & (Y::REF_CALL | Y::SCALAR)) return self::getScalar($n->value);
+        if ($n->type & (Y::REF_CALL|Y::SCALAR)) return self::getScalar((string) $n->value);
         if ($n->type & Y::JSON) {
             return $n->value;
         }

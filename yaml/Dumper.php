@@ -91,7 +91,7 @@ class Dumper //extends AnotherClass
 
     private static function dumpYamlObject(YamlObject $dataType)
     {
-        if ($dataType->hasDocStart()) self::$result->push("---");
+        if ($dataType->hasDocStart() && self::$result instanceof DLL) self::$result->push("---");
         // self::dump($dataType, 0);
         if (count($dataType) > 0) {
             self::dumpSequence($dataType->getArrayCopy(), 0);
@@ -160,13 +160,13 @@ class Dumper //extends AnotherClass
     public static function dumpCompact($subject, int $indent)
     {
         $pairs = [];
-        if (is_array($subject) || $subject instanceof \Countable) {
+        if (is_array($subject) || $subject instanceof \ArrayIterator) {
             $max = count($subject);
             $objectAsArray = is_array($subject) ? $subject : $subject->getArrayCopy();
             if(array_keys($objectAsArray) !== range(0, $max)) {
                 $pairs = $objectAsArray;
             } else {
-                $valuesList = array_map([self, 'dump'], $objectAsArray, array_fill( 0 , $max , $indent ));
+                $valuesList = array_map(self::dump, $objectAsArray, array_fill( 0 , $max , $indent ));
                 return '['.implode(', ', $valuesList).']';
             }
         } else {

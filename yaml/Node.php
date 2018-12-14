@@ -72,7 +72,7 @@ final class Node
         $cursor = $this;
         while ($cursor instanceof Node && $cursor->indent >= $indent) {
             if ($cursor->indent === $indent && $cursor->type !== $type) {
-                $cursor = $cursor->parent;
+                $cursor = $cursor->parent ?? $cursor;
                 break;
             }
             $cursor = $cursor->parent;
@@ -99,8 +99,7 @@ final class Node
         if (is_null($current)) {
             $this->value = $child;
             return;
-        }
-        if ($current instanceof Node) {
+        }elseif ($current instanceof Node) {
             $this->value = new NodeList();
             if ($current->type & Y::LITTERALS) {
                 $this->value->type = $current->type;

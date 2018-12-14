@@ -8,7 +8,7 @@ namespace Dallgoot\Yaml;
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
-class Tag implements \JsonSerializable
+class Tag
 {
     /** @var string */
     public $tagName;

@@ -4,5 +4,5 @@ php:
   - nightly
 before_script:
   # - phpenv config-rm xdebug.ini
-  - composer require atoum/atoum
-script: vendor/bin/atoum -d ./tests
+  - composer require phpunit/phpunit
+script: vendor/bin/phpunit

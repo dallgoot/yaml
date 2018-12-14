@@ -24,7 +24,7 @@ final class Loader
     public const NO_PARSING_EXCEPTIONS = 4;//THROW Exception on parsing Errors
     public const NO_OBJECT_FOR_DATE = 8;//DONT import date strings as dateTime Object
     //privates
-    /* @var null|string */
+    /* @var null|false|array| */
     private $content;
     /* @var null|string */
     private $filePath;
@@ -111,10 +111,7 @@ final class Loader
                     }
                 $emptyLines = [];
                 switch ($n->indent <=> $previous->indent) {
-                    case -1: $target = $previous->getParent($n->indent);
-                        if ($n->type & Y::ITEM) {
-                            $target = $previous->getParent($n->indent, Y::KEY);
-                        }
+                    case -1: $target = $previous->getParent($n->indent, $n->type & Y::ITEM ? Y::KEY : null);
                         break;
                     case 0:
                         if ($n->type & Y::KEY && $n->indent === 0) {
@@ -146,7 +143,7 @@ final class Loader
             $out = Builder::buildContent($root, $this->debug);
             return $out;
         } catch (\Error|\Exception|\ParseError $e) {
-            $file = $this->filePath ? basename($this->filePath) : 'YAML STRING';
+            $file = $this->filePath ? basename($this->filePath) : '#YAML STRING#';
             $message = basename($e->getFile())."@".$e->getLine().": ".$e->getMessage()." for '$file' @".($lineNb)."\n";
             if ($this->options & self::NO_PARSING_EXCEPTIONS) {
                 // trigger_error($message, E_USER_WARNING);
@@ -170,18 +167,15 @@ final class Loader
             return true;
         }
         if ($n->type & Y::BLANK) {
-            if ($previous->type & Y::SCALAR) $emptyLines[] = $n->setParent($previous->getParent());
+            if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
             if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
             return true;
-        }
-        //comment is fullline : forces 'root' as parent IF NOT inside a LITTERAL
-        if ($n->type & Y::COMMENT &&
-            !($previous->getParent()->value->type & Y::LITTERALS) &&
-            !($deepest->type & Y::LITTERALS)) {
-                $previous->getParent(0)->add($n);
-                return true;
-        }
-        if ($n->type & Y::TAG && is_null($n->value) && $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
+        } elseif ($n->type & Y::COMMENT
+                  && !($previous->getParent()->value->type & Y::LITTERALS)
+                  && !($deepest->type & Y::LITTERALS)) {
+            $previous->getParent(0)->add($n);
+            return true;
+        } elseif ($n->type & Y::TAG && is_null($n->value) && $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
             $n->value = '';
         }
         return false;
@@ -200,9 +194,9 @@ final class Loader
         if (is_null($deepest->value) && $deepest->type & (Y::LITTERALS|Y::REF_DEF|Y::SET_VALUE|Y::TAG)) {
             $previous = $deepest;
         }
-        if ($n->type & Y::SCALAR && $previous->type & Y::SCALAR) {
-            $previous = $previous->getParent();
-        }
+        // if ($n->type & Y::SCALAR && $previous->type & Y::SCALAR) {
+        //     $previous = $previous->getParent();
+        // }
         return false;
     }
 }

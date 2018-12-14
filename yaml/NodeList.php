@@ -5,7 +5,7 @@ use Dallgoot\Yaml\Yaml as Y;
 
 /**
  * TODO
- * 
+ *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
@@ -39,9 +39,10 @@ class NodeList extends \SplDoublyLinkedList
 
     /**
      * Provides a slimmer output when using var_dump Note: currently PHP ignores it on SPL types
+     * @todo activate when PHP allows it
      */
-    public function __debugInfo()
-    {
-        return ['type'=> Y::getName($this->type), 'dllist'=> $this->dllist];
-    }
+    // public function __debugInfo()
+    // {
+    //     return ['type'=> Y::getName($this->type), 'dllist'=> $this->dllist];
+    // }
 }

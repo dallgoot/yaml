@@ -42,7 +42,7 @@ final class Builder
             // var_dump('alone', $tmp);
             return $tmp;
         }
-        $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
+        $_root->value instanceof NodeList && $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
         foreach ($_root->value as $child) {
             if ($child->type & Y::DOC_START) $totalDocStart++;
             //if 0 or 1 DOC_START = we are still in first document
@@ -106,50 +106,35 @@ final class Builder
                 }
             }
         }
-        // var_dump('nodetype:'.Y::getName($node->type) );
         if ($node->type & (Y::RAW | Y::LITTERALS)) {
-            return self::buildLitteral($node, $node->type);
+            return self::buildLitteral($node, (int) $node->type);
         }
+        $action = function ($child, &$parent, &$out) {
+            self::build($child, $out);
+        };
         if ($node->type & (Y::COMPACT_MAPPING|Y::MAPPING|Y::SET)) {
-            $out = $parent ?? new \StdClass;//var_dump("PAS LA");
-            foreach ($node as $key => $child) {
-                if ($child->type & (Y::KEY)) {
-                    self::buildKey($child, $out);
-                } else {
-                    self::build($child, $out);
-                }
-            }
-            if ($node->type & Y::COMPACT_MAPPING) {
-                $out = new Compact($out);
-            }
+            $out = $parent ?? new \StdClass;
         } elseif ($node->type & (Y::COMPACT_SEQUENCE|Y::SEQUENCE)) {
-            $out = $parent ?? [];//var_dump("HERE");
-            foreach ($node as $key => $child) {
-                if ($child->type & Y::ITEM) {
-                    self::buildItem($child, $out);
-                } else {
-                    self::build($child);
-                }
-            }
-            if ($node->type & Y::COMPACT_SEQUENCE) {
-                $out = new Compact($out);
-            }
+            $out = $parent ?? [];
         } else {
-            $tmpString = null;//var_dump("PAS ICI");
-            foreach ($node as $key => $child) {
-                 if ($child->type & (Y::SCALAR|Y::QUOTED)) {
+            $out = '';
+            $action = function ($child, &$out) {
+                if ($child->type & (Y::SCALAR|Y::QUOTED)) {
                     if ($parent) {
-                        $parent->setText(self::build($child, $parent));
+                        $parent->setText(self::build($child));
                     } else {
-                        $tmpString .= self::build($child, $parent);
+                        $out .= self::build($child);
                     }
-                } else {
-                    self::build($child, $parent);
                 }
-            }
-            $out = is_null($tmpString) ? $parent : $tmpString;
+            };
         }
-        return $out;
+        foreach ($node as $child) {
+            $action($child, $parent, $out);
+        }
+        if ($node->type & (Y::COMPACT_SEQUENCE|Y::COMPACT_MAPPING)) {
+            $out = new Compact($out);
+        }
+        return is_null($out) ? $parent : $out;
     }
 
     /**
@@ -311,12 +296,13 @@ final class Builder
                 while (is_object($val)) {
                     $val = $val->value;
                 }
-                $lines[] = $prefix.$val;
+                $lines[] = $prefix.trim($val);
             }
         }
         if ($type & Y::RAW)         return implode('',   $lines);
         if ($type & Y::LITT)        return implode("\n", $lines);
         if ($type & Y::LITT_FOLDED) return preg_replace(['/ +(\n)/','/(\n+) +/'], "$1", implode(' ',  $lines));
+        // TODO : rewrite without 'preg_replace' if ($type & Y::LITT_FOLDED) return implode(' ',  $lines);
         return '';
     }
 
