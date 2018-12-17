@@ -36,10 +36,8 @@ final class Builder
         if ($_root->value instanceof Node) {
             $q = new NodeList;
             $q->push($_root->value);
-            // return self::buildNodeList($q, new YamlObject);
             self::$_root = new YamlObject;
             $tmp =  self::buildNodeList($q, self::$_root);
-            // var_dump('alone', $tmp);
             return $tmp;
         }
         $_root->value instanceof NodeList && $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
@@ -50,18 +48,15 @@ final class Builder
             if (!isset($documents[$currentDoc])) $documents[$currentDoc] = new NodeList();
             $documents[$currentDoc]->push($child);
         }
-        // $content = array_map([self::class, 'buildDocument'], $documents, array_keys($documents));
         $content = [];
         foreach ($documents as $num => $list) {
             try {
                 self::$_root = new YamlObject;
-                // $tmp = var_dump('insideforeach'.$tmp);
                 $content[] = self::buildNodeList($list, self::$_root);
             } catch (\Exception $e) {
                 throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $num));
             }
         }
-        // $content = array_map([self::class, 'buildNodeList'], $documents, array_keys($documents));
         return count($content) === 1 ? $content[0] : $content;
     }
 
@@ -89,23 +84,7 @@ final class Builder
      */
     private static function buildNodeList(NodeList $node, &$parent=null)
     {
-        if (is_null($node->type)) {
-            $childTypes  = $node->getTypes();
-            if ($childTypes & (Y::KEY|Y::SET_KEY)) {
-                if ($childTypes & Y::ITEM) {
-                    // TODO: replace the document index in HERE ----------v
-                    throw new \ParseError(sprintf(self::INVALID_DOCUMENT, 0));
-                } else {
-                    $node->type = Y::MAPPING;
-                }
-            } else {
-                if ($childTypes & Y::ITEM) {
-                    $node->type = Y::SEQUENCE;
-                } elseif (!($childTypes & Y::COMMENT)) {
-                    $node->type = Y::LITT_FOLDED;
-                }
-            }
-        }
+        $node->forceType();
         if ($node->type & (Y::RAW | Y::LITTERALS)) {
             return self::buildLitteral($node, (int) $node->type);
         }
@@ -118,7 +97,7 @@ final class Builder
             $out = $parent ?? [];
         } else {
             $out = '';
-            $action = function ($child, &$out) {
+            $action = function ($child, &$parent, &$out) {
                 if ($child->type & (Y::SCALAR|Y::QUOTED)) {
                     if ($parent) {
                         $parent->setText(self::build($child));
@@ -263,47 +242,36 @@ final class Builder
      * @param      integer   $type      The type
      *
      * @return     string    The litteral.
+     * @todo : Example 6.1. Indentation Spaces  spaces must be considered as content
      */
-    private static function buildLitteral(NodeList $children, int $type):string
+    private static function buildLitteral(NodeList $list, int $type):string
     {
-        $lines = [];
-        $children->rewind();
-        $refIndent = $children->current()->indent;
-        //remove trailing blank nodes
-        $max = $children->count() - 1;
-        while ($children->offsetGet($max)->type & Y::BLANK) {
-            $children->offsetUnset($max);
-            $max = $children->count() - 1;
+        $list->rewind();
+        $refIndent = $list->current()->indent;
+        //remove trailing blank
+        while ($list->top()->type & Y::BLANK) {
+            $list->pop();
         }
-        $children->rewind();
-        // TODO : Example 6.1. Indentation Spaces  spaces must be considered as content
-        foreach ($children as $child) {
+        $result = '';
+        $separator = '';
+        if ($type & Y::LITT)         $separator = "\n";
+        if ($type & Y::LITT_FOLDED)  $separator = ' ';
+        foreach ($list as $child) {
             if ($child->value instanceof NodeList) {
-                $lines[] = self::buildLitteral($child->value, $type);
+                $result .= self::buildLitteral($child->value, $type).$separator;
             } else {
-                $prefix = '';
+                $val = $child->type & (Y::SCALAR|Y::BLANK) ? $child->value : substr($child->raw, $refIndent);
                 if ($type & Y::LITT_FOLDED && ($child->indent > $refIndent || ($child->type & Y::BLANK))) {
-                    $prefix = "\n";
+                    if ($result[-1] === $separator)
+                        $result[-1] = "\n";
+                    if ($result[-1] === "\n")
+                        $result .= $val;
+                    continue;
                 }
-                if (!($child->type & (Y::SCALAR|Y::BLANK))) {
-                    switch ($child->type) {
-                        case Y::ITEM:    $child->value = '- '.$child->value;break;
-                        case Y::COMMENT: $child->value = '# '.$child->value;break;
-                        default: //die(__METHOD__.Y::getName($child->type));
-                    }
-                }
-                $val = $child->value;
-                while (is_object($val)) {
-                    $val = $val->value;
-                }
-                $lines[] = $prefix.trim($val);
+                $result .= $val.$separator;
             }
         }
-        if ($type & Y::RAW)         return implode('',   $lines);
-        if ($type & Y::LITT)        return implode("\n", $lines);
-        if ($type & Y::LITT_FOLDED) return preg_replace(['/ +(\n)/','/(\n+) +/'], "$1", implode(' ',  $lines));
-        // TODO : rewrite without 'preg_replace' if ($type & Y::LITT_FOLDED) return implode(' ',  $lines);
-        return '';
+        return rtrim($result);
     }
 
     /**
@@ -381,6 +349,7 @@ final class Builder
      *
      * @param      Node  $node    The node
      * @param      mixed  $parent  The parent
+     * @todo implement if requested
      */
     private function buildDirective(Node $node, $parent)
     {

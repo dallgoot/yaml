@@ -15,7 +15,7 @@ comment_between_keys: |
 comment_inside_litteral_in_subkey: |
   {"test":"foo\n# bar\nbaz","collection":{"one":"foo\n# bar\nbaz","two":"foo\n# bar\nbaz"}}
 comments_inside_litteral: |
-  {"pages":[{"title":"some title","content":"# comment 1\nheader\n\n# comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter # comment3"}]}
+  {"pages":[{"title":"some title","content":"# comment 1\nheader\n\n    # comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter # comment3"}]}
 comment_with_a_colon: |
   {"foo":{"bar":"foobar"}}
 compact_array_inside_mapping: |
@@ -53,7 +53,7 @@ literalfolded: |
 literal_keep_trailing_leading: |
   {"foo":"bar"}
 literal_with_comment_at_lastline: |
-  {"content":"# comment 1\nheader\n\n# comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter # comment3"}
+  {"content":"# comment 1\nheader\n\n    # comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter # comment3"}
 map_in_an_empty_item: |
   {"foo":{"bar":"foobar"}}
 map_with_boolean_keys: |

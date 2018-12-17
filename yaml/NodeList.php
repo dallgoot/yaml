@@ -37,6 +37,27 @@ class NodeList extends \SplDoublyLinkedList
         return $types;
     }
 
+    public function forceType()
+    {
+        if (is_null($this->type)) {
+            $childTypes  = $this->getTypes();
+            if ($childTypes & (Y::KEY|Y::SET_KEY)) {
+                if ($childTypes & Y::ITEM) {
+                    // TODO: replace the document index in HERE ----------v
+                    throw new \ParseError(self::class.": Error conflicting types found");
+                } else {
+                    $this->type = Y::MAPPING;
+                }
+            } else {
+                if ($childTypes & Y::ITEM) {
+                    $this->type = Y::SEQUENCE;
+                } elseif (!($childTypes & Y::COMMENT)) {
+                    $this->type = Y::LITT_FOLDED;
+                }
+            }
+        }
+    }
+
     /**
      * Provides a slimmer output when using var_dump Note: currently PHP ignores it on SPL types
      * @todo activate when PHP allows it

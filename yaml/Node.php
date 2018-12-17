@@ -22,6 +22,8 @@ final class Node
     public $identifier;
     /** @var Node|NodeList|null|string */
     public $value = null;
+    /** @var null|string */
+    public $raw;
 
     /** @var null|Node */
     private $parent;
@@ -38,6 +40,7 @@ final class Node
         if (is_null($nodeString)) {
             $this->type = Y::ROOT;
         } else {
+            $this->raw = $nodeString;
             $this->parse($nodeString);
         }
     }
@@ -192,7 +195,7 @@ final class Node
             $this->type = $first === '?' ? Y::SET_KEY : Y::SET_VALUE;
             if (!empty(trim($v))) {
                 $this->value = new NodeList;
-                $this->add((new Node(ltrim($v), $this->line))->setParent($this));
+                $this->add(new Node(ltrim($v), $this->line));
             }
             return;
         }
