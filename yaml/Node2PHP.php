@@ -13,7 +13,7 @@ use Dallgoot\Yaml\{Yaml as Y, Regex as R};
  */
 final class Node2PHP
 {
-
+    public static $dateAsString = false;
     /**
      * Returns the correct PHP datatype for the value of the current Node
      *
@@ -25,9 +25,7 @@ final class Node2PHP
     {
         if (is_null($n->value)) return null;
         if ($n->type & (Y::REF_CALL|Y::SCALAR)) return self::getScalar((string) $n->value);
-        if ($n->type & Y::JSON) {
-            return $n->value;
-        }
+        if ($n->type & Y::JSON) return $n->value;
         $expected = [Y::QUOTED => trim((string) $n->value, "\"'"),
                      Y::RAW    => strval((string) $n->value)];
         return $expected[$n->type] ?? null;
@@ -43,7 +41,7 @@ final class Node2PHP
      */
     private static function getScalar(string $v)
     {
-        if (R::isDate($v))   return date_create($v);
+        if (R::isDate($v))   return self::$dateAsString ? $v : date_create($v);
         if (R::isNumber($v)) return self::getNumber($v);
         $types = ['yes'   => true,
                     'no'    => false,
@@ -66,8 +64,8 @@ final class Node2PHP
      */
     private static function getNumber(string $v)
     {
-        if (preg_match("/^(0o\d+)$/i", $v))      return intval(base_convert($v, 8, 10));
-        if (preg_match("/^(0x[\da-f]+)$/i", $v)) return intval(base_convert($v, 16, 10));
+        if (preg_match(R::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
+        if (preg_match(R::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
         return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
     }
 }

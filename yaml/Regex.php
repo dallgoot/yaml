@@ -11,11 +11,14 @@ namespace Dallgoot\Yaml;
  */
 class Regex
 {
+    const OCTAL_NUM = "/^(0o\d+)$/i";
+    const HEX_NUM   = "/^(0x[\da-f]+)$/i";
+
     const QUOTED = "(?'quot'(?'q'['\"]).*?(?<![\\\\])(?&q))";
     const NUM    = "(?'num'[-+]?(?:\\d+\\.?(?:\\d*(e[+-]?\\d+)?)|(\\.(inf|nan))))";
     const WORD   = "(?'word'[\\w ]+)";
-    const RC     = "(?'rc'\\*\\w+)";
-    const RD     = "(?'rd'&\\w+)";
+    const RC     = "(?'rc'\\*\\w+)"; //reference call
+    const RD     = "(?'rd'&\\w+)"; //reference definition
     const TAG    = "(?'tag'!+\\w+)";
     const ALL    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&num)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
     const MAP    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|\\w+) *?: *(?&all)) *,? *)* *?\\})";
@@ -28,13 +31,13 @@ class Regex
     const SEQUENCE = "/".self::ALLDEF."(?&seq)/";
     const SEQUENCE_VALUES = "/".self::ALLDEF."(?'item'(?&all)) *,? */i";
 
-
     const KEY  = '/^([[:alnum:]_\'"~][[:alnum:]_ -.\/~]*[ \t]*)(?::[ \t]([^\n]+)|:)$/i';
     const ITEM = '/^-([ \t]+(.*))?$/';
 
 
 
     /**
+     * Determines if a valid Date format
      * @param string $v a string value
      * @return bool
      * @throws \Exception if any preg_match has invalid regex
@@ -52,18 +55,33 @@ class Regex
         $matchSpaced    = preg_match($spaced, $v);
         $matchIso       = preg_match($iso8601, $v);
         if (is_bool($matchDate) || is_bool($matchCanonical) || is_bool($matchSpaced) || is_bool($matchIso)) {
-            throw new \Exception(self::class." regex error for dates");
+            throw new \Exception(self::class." regex ERROR for dates");
         }
         return $matchDate || $matchCanonical || $matchSpaced || $matchIso;
     }
 
+    /**
+     * Determines if number.
+     *
+     * @param      string   $var    The variable
+     *
+     * @return     boolean  True if number, False otherwise.
+     * @todo replace regex expression with class constants
+     */
     public static function isNumber(string $var):bool
     {
         //TODO: https://secure.php.net/manual/en/function.is-numeric.php
         return (bool) preg_match("/^((0o\d+)|(0x[\da-f]+)|([\d.]+e[-+]\d{1,2})|([-+]?(\d*\.?\d+)))$/i", $var);
     }
 
-    public static function isProperlyQuoted(String $var):bool
+    /**
+     * Determines if properly quoted.
+     *
+     * @param      string   $var    The variable
+     *
+     * @return     boolean  True if properly quoted, False otherwise.
+     */
+    public static function isProperlyQuoted(string $var):bool
     {
         return (bool) preg_match("/^(['\"]).*?(?<![\\\\])\\1$/s", $var);
     }

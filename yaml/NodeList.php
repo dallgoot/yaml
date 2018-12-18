@@ -26,7 +26,7 @@ class NodeList extends \SplDoublyLinkedList
     /**
      * Gets the types of the elements in this NodeList
      *
-     * @return integer The &-sum of all the types.
+     * @return integer The "|-sum" of all the types.
      */
     public function getTypes():int
     {
@@ -37,17 +37,20 @@ class NodeList extends \SplDoublyLinkedList
         return $types;
     }
 
+    /**
+     * If no type is set for this NodeList, forces a type according to its children types
+     *
+     * @throws     \ParseError  (description)
+     */
     public function forceType()
     {
         if (is_null($this->type)) {
             $childTypes  = $this->getTypes();
             if ($childTypes & (Y::KEY|Y::SET_KEY)) {
                 if ($childTypes & Y::ITEM) {
-                    // TODO: replace the document index in HERE ----------v
                     throw new \ParseError(self::class.": Error conflicting types found");
-                } else {
-                    $this->type = Y::MAPPING;
                 }
+                $this->type = Y::MAPPING;
             } else {
                 if ($childTypes & Y::ITEM) {
                     $this->type = Y::SEQUENCE;
@@ -60,7 +63,7 @@ class NodeList extends \SplDoublyLinkedList
 
     /**
      * Provides a slimmer output when using var_dump Note: currently PHP ignores it on SPL types
-     * @todo activate when PHP allows it
+     * @todo activate when PHP supports it
      */
     // public function __debugInfo()
     // {

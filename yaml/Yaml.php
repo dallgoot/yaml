@@ -44,6 +44,7 @@ final class Yaml
 
     /**
      * Gets the name for a given constant declared in the Dallgoot\Yaml class
+     * (memoize the value => name associations on first call)
      *
      * @param integer $typeInteger The constant value
      *
@@ -56,7 +57,7 @@ final class Yaml
             $oClass = new \ReflectionClass(__CLASS__);
             self::$TYPE_NAMES = array_flip($oClass->getConstants());
         }
-        return self::$TYPE_NAMES[$typeInteger] ?? 'UNKNOWN';
+        return self::$TYPE_NAMES[$typeInteger] ?? 'UNKNOWN!!!';
     }
 
     /**
@@ -112,7 +113,7 @@ final class Yaml
      *
      * @return boolean  true if YAML built and saved , false if error during writing file
      * @throws \Exception on errors (from Dumper::toString) during building YAML string
-     * @see    Dumper::toString
+     * @see    Dumper::toFile
      */
     public static function dumpFile(string $fileName, $somePhpVar, $options = null):bool
     {

@@ -36,9 +36,7 @@ final class Builder
         if ($_root->value instanceof Node) {
             $q = new NodeList;
             $q->push($_root->value);
-            self::$_root = new YamlObject;
-            $tmp =  self::buildNodeList($q, self::$_root);
-            return $tmp;
+            $_root->value = $q;
         }
         $_root->value instanceof NodeList && $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
         foreach ($_root->value as $child) {
@@ -50,8 +48,8 @@ final class Builder
         }
         $content = [];
         foreach ($documents as $num => $list) {
+            self::$_root = new YamlObject;
             try {
-                self::$_root = new YamlObject;
                 $content[] = self::buildNodeList($list, self::$_root);
             } catch (\Exception $e) {
                 throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $num));
@@ -209,7 +207,7 @@ final class Builder
      */
     private static function buildItem(Node $node, &$parent)
     {
-        extract((array) $node, EXTR_REFS);//var_dump(__METHOD__);
+        extract((array) $node, EXTR_REFS);
         if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
             throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
         }
@@ -221,10 +219,8 @@ final class Builder
                 self::buildKey($node->value, $parent);
                 return;
             } elseif ($value->type & Y::ITEM) {
-                $list = new NodeList();
-                $list->push($value);
-                $list->type = Y::SEQUENCE;
-                $result = self::buildNodeList($list);
+                $a = [];
+                $result = self::buildItem($value, $a);
             } else {
                 $result = self::build($value);
             }
@@ -287,7 +283,7 @@ final class Builder
         $built = is_object($node->value) ? self::build($node->value) : null;
         $stringKey = is_string($built) && Regex::isProperlyQuoted($built) ? trim($built, '\'" '): $built;
         $key = json_encode($stringKey, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        // if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
+        if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
         $parent->{trim($key, '\'" ')} = null;
     }
 
@@ -301,13 +297,12 @@ final class Builder
     {
         $prop = array_keys(get_object_vars($parent));
         $key = end($prop);
-        if ($node->value->type & (Y::ITEM|Y::KEY|Y::SEQUENCE|Y::MAPPING)) {
-            $p = $node->value->type === Y::ITEM ? [] : new \StdClass;
-            self::build($node->value, $p);
-        } else {
-            $p = self::build($node->value, $parent->{$key});
+        if ($node->value->type & (Y::ITEM|Y::KEY )) {
+            $nl = new NodeList;
+            $nl->push($node->value);
+            $node->value = $nl;
         }
-        $parent->{$key} = $p;
+        $parent->{$key} = self::build($node->value);
     }
 
     /**
@@ -323,25 +318,26 @@ final class Builder
         $name = (string) $node->identifier;
         if ($parent === self::$_root && empty($node->value)) {
             $parent->addTag($name);
-            return;
-        }
-        $target = $node->value;
-        if ($node->value instanceof Node) {
-            if ($node->value->type & (Y::KEY|Y::ITEM)) {
-                if (is_null($parent)) {
-                    $target = new NodeList;
-                    $target->push($node->value);
-                    $target->type = $node->value->type & Y::KEY ? Y::MAPPING : Y::SEQUENCE;
-                } else {
-                    $node->value->type & Y::KEY ? self::buildKey($node->value, $parent) : self::buildItem($node->value, $parent);
+        } else {
+            $target = $node->value;
+            if ($node->value instanceof Node) {
+                if ($node->value->type & (Y::KEY|Y::ITEM)) {
+                    if (is_null($parent)) {
+                        $target = new NodeList;
+                        $target->push($node->value);
+                        // $target->type = $node->value->type & Y::KEY ? Y::MAPPING : Y::SEQUENCE;
+                    } else {
+                        self::build($node->value, $parent);
+                        // $node->value->type & Y::KEY ? self::buildKey($node->value, $parent) : self::buildItem($node->value, $parent);
+                    }
                 }
             }
+            //TODO: have somewhere a list of common tags and their treatment
+            // if (in_array($node->identifier, ['!binary', '!str'])) {
+            //     $target->type = Y::RAW;
+            // }
+            return new Tag($name, is_object($target) ? self::build($target) : null);
         }
-        //TODO: have somewhere a list of common tags and their treatment
-        // if (in_array($node->identifier, ['!binary', '!str'])) {
-        //     $target->type = Y::RAW;
-        // }
-        return new Tag($name, is_object($target) ? self::build($target) : null);
     }
 
     /**

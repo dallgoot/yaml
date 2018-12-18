@@ -16,13 +16,10 @@ class Compact extends \ArrayIterator implements \JsonSerializable
      *
      * @param array|object  $candidate  The candidate to be made into Compact
      */
-    public function __construct($candidate)
+    public function __construct($candidate = null)
     {
-        if ($candidate) {
-            parent::__construct($candidate, 1); //1 = Array indices can be accessed as properties in read/write.
-        } else {
-            parent::__construct([], 1); //1 = Array indices can be accessed as properties in read/write.
-        }
+        $candidate = $candidate ?? [];
+        parent::__construct($candidate, 1); //1 = Array indices can be accessed as properties in read/write.
     }
 
     /**
@@ -35,7 +32,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
         $prop = get_object_vars($this);
         if (count($prop) > 0) return $prop;
         if (count($this) > 0) return iterator_to_array($this);
-        return new \Stdclass;
+        return $this;//new \Stdclass;
     }
 
     /**

@@ -17,13 +17,13 @@ class Tag
 
     /**
      * Tag constructor.
-     * @param $tagName
-     * @param $value
+     * @param string $tagName the name of the tag like '!str' (WITHOUT the first "!")
+     * @param mixed $value  any PHP variable type
      * @throws \Exception if $tagName is an invalid string or absent
      */
     public function __construct(string $tagName, $value)
     {
-        if (is_null($tagName)) {
+        if (empty($tagName)) {
             throw new \Exception(self::class.": a tag MUST have a name", 1);
         }
         $this->tagName = $tagName;
@@ -34,7 +34,7 @@ class Tag
      * Should verify if the tag is correct
      *
      * @param      string  $providedName  The provided name
-     * @todo is this useful ???
+     * @todo is this required ???
      */
     private function checkNameValidity(string $providedName)
     {

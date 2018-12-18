@@ -62,7 +62,7 @@ final class Node
      * Gets the ancestor with specified $indent or the direct $parent OR the current Node itself
      *
      * @param int|null $indent The indent
-     * @param int $type  first ancestor of this type is returned
+     * @param int $type  first ancestor of this YAML::type is returned
      *
      * @return Node|self   The parent.
      */
@@ -90,6 +90,7 @@ final class Node
      * - if value is a NodeList, push $child into and set NodeList type accordingly
      *
      * @param Node $child The child
+     * @todo  refine the conditions when Y::LITTERALS
      */
     public function add(Node $child)
     {
@@ -117,8 +118,6 @@ final class Node
             if ($child->type & Y::ITEM)      $this->value->type = Y::SEQUENCE;
         }
         $this->value->push($child);
-
-        if ($this->type & Y::LITTERALS)  $this->value->type = $this->type;
     }
 
     /**
@@ -175,36 +174,31 @@ final class Node
      */
     private function identify($nodeValue)
     {
-        $v = substr($nodeValue, 1);
+        $v = ltrim(substr($nodeValue, 1));
         $first = $nodeValue[0];
         if (in_array($first, ['"', "'"])) {
             $this->type = R::isProperlyQuoted($nodeValue) ? Y::QUOTED : Y::PARTIAL;
             $this->value = $nodeValue;
             return;
-        }
-        if (in_array($first, ['{', '['])) {
+        } elseif (in_array($first, ['{', '['])) {
              $this->onCompact(trim($nodeValue));
              return;
-         }
-        if (in_array($first, ['!', '&', '*'])) {
+         } elseif (in_array($first, ['!', '&', '*'])) {
             $this->onNodeAction($nodeValue);
             return;
-        }
-        // Note : php don't like '?' as an array key -_-'
-        if(in_array($first, ['?', ':'])) {
+        } elseif(in_array($first, ['?', ':'])) {// Note : php don't like '?' as an array key -_-'
             $this->type = $first === '?' ? Y::SET_KEY : Y::SET_VALUE;
             if (!empty(trim($v))) {
                 $this->value = new NodeList;
-                $this->add(new Node(ltrim($v), $this->line));
+                $this->add(new Node($v, $this->line));
             }
             return;
-        }
-        if ($first === "-") {
+        } elseif ($first === "-") {
             $this->onHyphen($nodeValue);
             return;
         }
-        $characters = [ '#' =>  [Y::COMMENT, ltrim($v)],
-                        '%' =>  [Y::DIRECTIVE, ltrim($v)],
+        $characters = [ '#' =>  [Y::COMMENT, $v],
+                        '%' =>  [Y::DIRECTIVE, $v],
                         '>' =>  [Y::LITT_FOLDED, null],
                         '|' =>  [Y::LITT, null]
                         ];
@@ -238,7 +232,6 @@ final class Node
                     $comment = new Node(trim(substr($value, $hasComment + 1)), $this->line);
                     $comment->identifier = true; //to specify it is NOT a fullline comment
                     $this->add($comment);
-                    // var_dump($n, $comment);
                 }
             }
             $n->indent = $this->indent + strlen($this->identifier);
@@ -302,24 +295,22 @@ final class Node
         if (substr($nodeValue, 0, 3) === '---') {
             $this->type = Y::DOC_START;
             $rest = trim(substr($nodeValue, 3));
-            if (empty($rest)) {
-                return;
+            if (!empty($rest)) {
+                $n = new Node($rest, $this->line);
+                $n->indent = $this->indent + 4;
+                $this->value = $n->setParent($this);
             }
-            $n = new Node($rest, $this->line);
-            $n->indent = $this->indent + 4;
-            $this->value = $n->setParent($this);
-            return;
-        }
-        if (preg_match(R::ITEM, $nodeValue, $matches)) {
+        } elseif (preg_match(R::ITEM, $nodeValue, $matches)) {
             $this->type = Y::ITEM;
             if (isset($matches[1]) && !empty(trim($matches[1]))) {
                 $n = new Node(trim($matches[1]), $this->line);
                 $n->indent = $this->indent + 2;
                 $this->value = $n->setParent($this);
             }
-            return;
+        } else {
+            $this->type  = Y::SCALAR;
+            $this->value = $nodeValue;
         }
-        list($this->type, $this->value) = [Y::SCALAR, $nodeValue];
     }
 
     /**
@@ -336,7 +327,6 @@ final class Node
         $this->type = ['!' => Y::TAG, '&' => Y::REF_DEF, '*' => Y::REF_CALL][$nodeValue[0]];
         $this->identifier = $v;
         $pos = strpos($v, ' ');
-        // $this->value = new NodeList;
         if ($this->type & (Y::TAG|Y::REF_DEF) && is_int($pos)) {
             $this->identifier = strstr($v, ' ', true);
             $value = trim(substr($nodeValue, $pos + 1));

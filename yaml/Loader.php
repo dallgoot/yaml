@@ -15,16 +15,15 @@ use Dallgoot\Yaml\Yaml as Y;
 final class Loader
 {
     //public
-
     /* @var null|string */
     public static $error;
-
-    public const EXCLUDE_DIRECTIVES = 1;//DONT include_directive
+    public const IGNORE_DIRECTIVES = 1;//DONT include_directive
     public const IGNORE_COMMENTS    = 2;//DONT include_comments
-    public const NO_PARSING_EXCEPTIONS = 4;//THROW Exception on parsing Errors
+    public const NO_PARSING_EXCEPTIONS = 4;//DONT throw Exception on parsing errors
     public const NO_OBJECT_FOR_DATE = 8;//DONT import date strings as dateTime Object
+
     //privates
-    /* @var null|false|array| */
+    /* @var null|false|array */
     private $content;
     /* @var null|string */
     private $filePath;
@@ -74,6 +73,18 @@ final class Loader
         return $this;
     }
 
+    private function getSourceIterator($strContent = null)
+    {
+        $source = $this->content ?? preg_split("/\n/m", preg_replace('/(\r\n|\r)/', "\n", $strContent), 0, PREG_SPLIT_DELIM_CAPTURE);
+        //TODO : be more permissive on $strContent values
+        if (!is_array($source) || !count($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
+        return function () use($source) {
+            foreach ($source as $key => $value) {
+                yield ++$key => $value;
+            }
+        };
+    }
+
     /**
      * Parse Yaml lines into a hierarchy of Node
      *
@@ -86,29 +97,22 @@ final class Loader
      */
     public function parse($strContent = null)
     {
-        $source = $this->content ?? preg_split("/\n/m", preg_replace('/(\r\n|\r)/', "\n", $strContent), 0, PREG_SPLIT_DELIM_CAPTURE);
-        //TODO : be more permissive on $strContent values
-        if (!is_array($source) || !count($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
+        $sourceIterator = $this->getSourceIterator($strContent);
         $previous = $root = new Node();
         $emptyLines = [];
-        try { //var_dump($source);
-            $gen = function () use($source) {
-                foreach ($source as $key => $value) {
-                    yield ++$key => $value;
-                }
-            };
-            foreach ($gen() as $lineNb => $lineString) {
+        try {
+            foreach ($sourceIterator() as $lineNb => $lineString) {
                 $n = new Node($lineString, $lineNb);
                 $deepest = $previous->getDeepestNode();
                 if ($n->type & (Y::LITTERALS|Y::BLANK|Y::COMMENT|Y::TAG) || $deepest->type & Y::PARTIAL) {
                     if ($this->onSpecialType($n, $previous, $emptyLines, $lineString)) continue;
                 }
                 //Note: 6.6 comments: Note that outside scalar content, a line containing only white space characters is taken to be a comment line.
-                    foreach ($emptyLines as $blankNode) {
-                        if ($blankNode !== $previous) {
-                            $blankNode->getParent()->add($blankNode);
-                        }
+                foreach ($emptyLines as $blankNode) {
+                    if ($blankNode !== $previous) {
+                        $blankNode->getParent()->add($blankNode);
                     }
+                }
                 $emptyLines = [];
                 switch ($n->indent <=> $previous->indent) {
                     case -1: $target = $previous->getParent($n->indent, $n->type & Y::ITEM ? Y::KEY : null);
