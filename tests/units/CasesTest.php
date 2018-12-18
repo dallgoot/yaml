@@ -71,7 +71,7 @@ final class Cases extends TestCase
      */
     public function testBatchParsing($fileName, $expected)
     {
-        $yaml = file_get_contents($this->testFolder."/parsing/$fileName.yml");
+        $yaml = file_get_contents($this->testFolder."parsing/$fileName.yml");
         $output = Y::parse($yaml, Loader::NO_PARSING_EXCEPTIONS);
         $result = json_encode($output, self::JSON_OPTIONS);
         $this->assertContains(json_last_error(), [JSON_ERROR_NONE, JSON_ERROR_INF_OR_NAN], json_last_error_msg());

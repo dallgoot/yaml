@@ -226,7 +226,7 @@ final class Node
     {
         $this->type = Y::KEY;
         $this->identifier = trim($matches[1], '"\' ');
-        $value = $matches[2] ? trim($matches[2]) : null;
+        $value = isset($matches[2]) ? trim($matches[2]) : null;
         if (!empty($value)) {
             $hasComment = strpos($value, ' #');
             if (is_bool($hasComment)) {
