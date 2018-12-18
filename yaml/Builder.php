@@ -33,11 +33,6 @@ final class Builder
         self::$_debug = $_debug;
         $totalDocStart = 0;
         $documents = [];
-        if ($_root->value instanceof Node) {
-            $q = new NodeList;
-            $q->push($_root->value);
-            $_root->value = $q;
-        }
         $_root->value instanceof NodeList && $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
         foreach ($_root->value as $child) {
             if ($child->type & Y::DOC_START) $totalDocStart++;
@@ -47,12 +42,12 @@ final class Builder
             $documents[$currentDoc]->push($child);
         }
         $content = [];
-        foreach ($documents as $num => $list) {
+        foreach ($documents as $docNum => $list) {
             self::$_root = new YamlObject;
             try {
                 $content[] = self::buildNodeList($list, self::$_root);
             } catch (\Exception $e) {
-                throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $num));
+                throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum));
             }
         }
         return count($content) === 1 ? $content[0] : $content;
@@ -168,21 +163,13 @@ final class Builder
         } else {
             if ($value instanceof Node) {
                 if ($value->type & (Y::ITEM|Y::KEY)) {
-                    $list = new NodeList();
-                    $list->push($value);
-                    $list->type = $value->type & Y::ITEM ? Y::SEQUENCE : Y::MAPPING;
-                    $value = $list;
+                    $value = new NodeList($value);
                 } else {
                     $result = self::build($value);
                 }
             }
             if ($value instanceof NodeList) {
-                $childTypes = $value->getTypes();
-                if (is_null($value->type) && $childTypes & Y::SCALAR && !($childTypes & Y::COMMENT)) {
-                    $result = self::buildLitteral($value, Y::LITT_FOLDED);
-                } else {
-                    $result = self::buildNodeList($value);
-                }
+                $result = self::buildNodeList($value);
             }
             if (is_null($parent)) {
                 return $result;
@@ -221,12 +208,9 @@ final class Builder
             } elseif ($value->type & Y::ITEM) {
                 $a = [];
                 $result = self::buildItem($value, $a);
-            } else {
-                $result = self::build($value);
             }
-        } elseif ($value instanceof NodeList) {
-            $result = self::buildNodeList($value);
         }
+        $result = self::build($value);
         $parent[$key] = $result;
     }
 
@@ -245,13 +229,9 @@ final class Builder
         $list->rewind();
         $refIndent = $list->current()->indent;
         //remove trailing blank
-        while ($list->top()->type & Y::BLANK) {
-            $list->pop();
-        }
+        while ($list->top()->type & Y::BLANK) $list->pop();
         $result = '';
-        $separator = '';
-        if ($type & Y::LITT)         $separator = "\n";
-        if ($type & Y::LITT_FOLDED)  $separator = ' ';
+        $separator = [ 0 => '', Y::LITT => "\n", Y::LITT_FOLDED => ' '][(int) $type];
         foreach ($list as $child) {
             if ($child->value instanceof NodeList) {
                 $result .= self::buildLitteral($child->value, $type).$separator;
@@ -298,9 +278,7 @@ final class Builder
         $prop = array_keys(get_object_vars($parent));
         $key = end($prop);
         if ($node->value->type & (Y::ITEM|Y::KEY )) {
-            $nl = new NodeList;
-            $nl->push($node->value);
-            $node->value = $nl;
+            $node->value = new NodeList($node->value);
         }
         $parent->{$key} = self::build($node->value);
     }
@@ -323,12 +301,9 @@ final class Builder
             if ($node->value instanceof Node) {
                 if ($node->value->type & (Y::KEY|Y::ITEM)) {
                     if (is_null($parent)) {
-                        $target = new NodeList;
-                        $target->push($node->value);
-                        // $target->type = $node->value->type & Y::KEY ? Y::MAPPING : Y::SEQUENCE;
+                        $target = new NodeList($node->value);
                     } else {
                         self::build($node->value, $parent);
-                        // $node->value->type & Y::KEY ? self::buildKey($node->value, $parent) : self::buildItem($node->value, $parent);
                     }
                 }
             }

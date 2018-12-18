@@ -65,7 +65,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     /**
      * Filters unwanted property for JSON serialization
      *
-     * @return     <mixed>  array of properties or keys, OR string if LITTERAL only
+     * @return     <mixed>  array (of object properties or keys) OR string if LITTERAL only
      */
     public function jsonSerialize()
     {

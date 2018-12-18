@@ -98,7 +98,9 @@ final class Loader
     public function parse($strContent = null)
     {
         $sourceIterator = $this->getSourceIterator($strContent);
-        $previous = $root = new Node();
+        $root = new Node();
+        $root->value = new NodeList;
+        $previous = $root;
         $emptyLines = [];
         try {
             foreach ($sourceIterator() as $lineNb => $lineString) {

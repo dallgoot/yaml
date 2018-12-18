@@ -18,9 +18,12 @@ class NodeList extends \SplDoublyLinkedList
     /**
      * NodeList constructor
      */
-    public function __construct()
+    public function __construct(Node $node = null)
     {
         $this->setIteratorMode(NodeList::IT_MODE_KEEP);
+        if (!is_null($node)) {
+            $this->push($node);
+        }
     }
 
     /**
@@ -59,6 +62,7 @@ class NodeList extends \SplDoublyLinkedList
                 }
             }
         }
+        return $this;
     }
 
     /**

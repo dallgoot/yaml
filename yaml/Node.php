@@ -68,9 +68,7 @@ final class Node
      */
     public function getParent(int $indent = null, $type = 0):Node
     {
-        if ($this->type === Y::ROOT) {
-            return $this;
-        }
+        if ($this->type === Y::ROOT) return $this;
         if (!is_int($indent)) return $this->parent ?? $this;
         $cursor = $this;
         while ($cursor instanceof Node && $cursor->indent >= $indent) {
@@ -111,14 +109,19 @@ final class Node
                 $this->value->push($current);
             }
         }
-        //modify type according to child
-        if (is_null($this->value->type)) {
-            if ($child->type & Y::SET_KEY)   $this->value->type = Y::SET;
-            if ($child->type & Y::KEY)       $this->value->type = Y::MAPPING;
-            if ($child->type & Y::ITEM)      $this->value->type = Y::SEQUENCE;
-        }
+        // if (is_null($this->value->type)) {
+        //     $this->adjustValueType($child);
+        // }
         $this->value->push($child);
     }
+
+    //modify value type according to child
+    // private function adjustValueType(Node $child)
+    // {
+    //     if ($child->type & Y::SET_KEY)   $this->value->type = Y::SET;
+    //     if ($child->type & Y::KEY)       $this->value->type = Y::MAPPING;
+    //     if ($child->type & Y::ITEM)      $this->value->type = Y::SEQUENCE;
+    // }
 
     /**
      * Gets the deepest node.
@@ -176,38 +179,40 @@ final class Node
     {
         $v = ltrim(substr($nodeValue, 1));
         $first = $nodeValue[0];
-        if (in_array($first, ['"', "'"])) {
-            $this->type = R::isProperlyQuoted($nodeValue) ? Y::QUOTED : Y::PARTIAL;
-            $this->value = $nodeValue;
-            return;
-        } elseif (in_array($first, ['{', '['])) {
-             $this->onCompact(trim($nodeValue));
-             return;
-         } elseif (in_array($first, ['!', '&', '*'])) {
-            $this->onNodeAction($nodeValue);
-            return;
-        } elseif(in_array($first, ['?', ':'])) {// Note : php don't like '?' as an array key -_-'
-            $this->type = $first === '?' ? Y::SET_KEY : Y::SET_VALUE;
-            if (!empty(trim($v))) {
-                $this->value = new NodeList;
-                $this->add(new Node($v, $this->line));
+        if ($first === "-")                        $this->onHyphen($nodeValue);
+        elseif (in_array($first, ['"', "'"]))      $this->onQuoted($nodeValue);
+        elseif (in_array($first, ['{', '[']))      $this->onCompact($nodeValue);
+        elseif (in_array($first, ['?', ':']))      $this->onSetElement($nodeValue);
+        elseif (in_array($first, ['!', '&', '*'])) $this->onNodeAction($nodeValue);
+        else {
+            $characters = [ '#' =>  [Y::COMMENT, $v],
+                            '%' =>  [Y::DIRECTIVE, $v],
+                            '>' =>  [Y::LITT_FOLDED, null],
+                            '|' =>  [Y::LITT, null]
+                            ];
+            if (isset($characters[$first])) {
+                $this->type  = $characters[$first][0];
+                $this->value = $characters[$first][1];
+            } else {
+                $this->type  = Y::SCALAR;
+                $this->value = $nodeValue;
             }
-            return;
-        } elseif ($first === "-") {
-            $this->onHyphen($nodeValue);
-            return;
         }
-        $characters = [ '#' =>  [Y::COMMENT, $v],
-                        '%' =>  [Y::DIRECTIVE, $v],
-                        '>' =>  [Y::LITT_FOLDED, null],
-                        '|' =>  [Y::LITT, null]
-                        ];
-        if (isset($characters[$first])) {
-            $this->type  = $characters[$first][0];
-            $this->value = $characters[$first][1];
-        } else {
-            $this->type  = Y::SCALAR;
-            $this->value = $nodeValue;
+    }
+
+    private function onQuoted($nodeValue)
+    {
+        $this->type = R::isProperlyQuoted($nodeValue) ? Y::QUOTED : Y::PARTIAL;
+        $this->value = $nodeValue;
+    }
+
+    private function onSetElement($nodeValue)
+    {
+        $this->type = $nodeValue[0] === '?' ? Y::SET_KEY : Y::SET_VALUE;
+        $v = trim(substr($nodeValue, 1));
+        if (!empty($v)) {
+            $this->value = new NodeList;
+            $this->add(new Node($v, $this->line));
         }
     }
 
