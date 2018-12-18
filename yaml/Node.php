@@ -64,7 +64,7 @@ final class Node
      * @param int|null $indent The indent
      * @param int $type  first ancestor of this YAML::type is returned
      *
-     * @return Node|self   The parent.
+     * @return Node|null   The parent.
      */
     public function getParent(int $indent = null, $type = 0):Node
     {
@@ -102,16 +102,13 @@ final class Node
             $this->value = $child;
             return;
         }elseif ($current instanceof Node) {
-            $this->value = new NodeList();
             if ($current->type & Y::LITTERALS) {
+                $this->value = new NodeList();
                 $this->value->type = $current->type;
             } else {
-                $this->value->push($current);
+                $this->value = new NodeList($current);
             }
         }
-        // if (is_null($this->value->type)) {
-        //     $this->adjustValueType($child);
-        // }
         $this->value->push($child);
     }
 
@@ -275,7 +272,7 @@ final class Node
         if (preg_match(R::SEQUENCE, $value)){
             $this->type = Y::COMPACT_SEQUENCE;
             $this->value->type = Y::COMPACT_SEQUENCE;
-            $count = preg_match_all(R::SEQUENCE_VALUES, trim(substr($value, 1,-1)), $matches);
+            preg_match_all(R::SEQUENCE_VALUES, trim(substr($value, 1,-1)), $matches);
             foreach ($matches['item'] as $key => $item) {
                 $i = new Node('', $this->line);
                 $i->type = Y::ITEM;
