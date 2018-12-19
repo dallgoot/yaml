@@ -105,36 +105,17 @@ final class Loader
         try {
             foreach ($sourceIterator() as $lineNb => $lineString) {
                 $n = new Node($lineString, $lineNb);
-                $deepest = $previous->getDeepestNode();
-                if ($n->type & (Y::LITTERALS|Y::BLANK|Y::COMMENT|Y::TAG) || $deepest->type & Y::PARTIAL) {
-                    if ($this->onSpecialType($n, $previous, $emptyLines, $lineString)) continue;
-                }
-                //Note: 6.6 comments: Note that outside scalar content, a line containing only white space characters is taken to be a comment line.
-                foreach ($emptyLines as $blankNode) {
-                    if ($blankNode !== $previous) {
-                        $blankNode->getParent()->add($blankNode);
-                    }
-                }
+                if ($this->onSpecialType($n, $previous, $emptyLines, $lineString)) continue;
+                $this->attachBlankLines($emptyLines, $previous);
                 $emptyLines = [];
+                $target = $previous;
                 switch ($n->indent <=> $previous->indent) {
-                    case -1: $target = $previous->getParent($n->indent, $n->type & Y::ITEM ? Y::KEY : null);
-                        break;
+                    case -1:
+                        $target = $previous->getParent($n->indent);break;//, $n->type & Y::ITEM ? Y::KEY : null);
                     case 0:
-                        if ($n->type & Y::KEY && $n->indent === 0) {
-                            $target = $root;
-                        } elseif($n->type & Y::ITEM && $deepest->type & Y::KEY && is_null($deepest->value)) {
-                            $target = $deepest;
-                        } else {
-                            $target = $previous->getParent();
-                        }
-                        break;
+                        $this->onEqualIndent($n, $previous, $target);break;
                     default:
-                        $target = $previous;
-                        if ($previous->type & Y::ITEM) {
-                            if ($deepest->type & (Y::KEY|Y::TAG) && is_null($deepest->value)) {
-                                $target = $deepest;
-                            }
-                        }
+                        $this->onMoreIndent($previous, $target);
                 }
                 if ($this->onContextType($n, $target, $lineString)) continue;
                 $target->add($n);
@@ -161,6 +142,38 @@ final class Loader
         }
     }
 
+    public function onMoreIndent(Node &$previous, Node &$target)
+    {
+        $deepest = $previous->getDeepestNode();
+        if ($previous->type & Y::ITEM) {
+            if ($deepest->type & (Y::KEY|Y::TAG) && is_null($deepest->value)) {
+                $target = $deepest;
+            }
+        }
+    }
+
+
+    private function onEqualIndent(Node &$n, Node &$previous, Node &$target)
+    {
+        $deepest = $previous->getDeepestNode();
+        if ($n->type & Y::KEY && $n->indent === 0) {
+            $target = $previous->getParent(-1);//get root
+        } elseif ($n->type & Y::ITEM && $deepest->type & Y::KEY && is_null($deepest->value)) {
+            $target = $deepest;
+        } else {
+            $target = $previous->getParent();
+        }
+    }
+
+    public function attachBlankLines(array &$emptyLines, Node &$previous)
+    {
+        foreach ($emptyLines as $blankNode) {
+            if ($blankNode !== $previous) {
+                $blankNode->getParent()->add($blankNode);
+            }
+        }
+    }
+
     private function onSpecialType(Node &$n, Node &$previous, &$emptyLines, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
@@ -181,7 +194,7 @@ final class Loader
                   && !($deepest->type & Y::LITTERALS)) {
             $previous->getParent(0)->add($n);
             return true;
-        } elseif ($n->type & Y::TAG && is_null($n->value) && $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
+        } elseif ($n->type & Y::TAG && is_null($n->value) ){//&& $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
             $n->value = '';
         }
         return false;
