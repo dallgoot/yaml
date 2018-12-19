@@ -33,12 +33,12 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     /**
      * Transfer method calls to Yaml::API object
      *
-     * @param  <string>                 $funcName   The function name
-     * @param  <mixed>                  $arguments  The arguments
+     * @param  string                   $funcName   The function name
+     * @param  mixed                    $arguments  The arguments
      *
      * @throws \BadMethodCallException  if method isn't part of the public API
      *
-     * @return <mixed>                  the return value of the API::method called
+     * @return mixed                    the return value of the API::method called
      */
     public function __call($funcName, $arguments)
     {
@@ -65,7 +65,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     /**
      * Filters unwanted property for JSON serialization
      *
-     * @return     <mixed>  array (of object properties or keys) OR string if LITTERAL only
+     * @return   mixed  Array (of object properties or keys) OR string if LITTERAL only
      */
     public function jsonSerialize()
     {

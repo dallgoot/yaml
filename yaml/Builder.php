@@ -16,7 +16,6 @@ final class Builder
     public static $_root;
     private static $_debug;
 
-    const ERROR_NO_KEYNAME = self::class.": key has NO IDENTIFIER on line %d";
     const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
 
     /**
@@ -34,7 +33,7 @@ final class Builder
         $totalDocStart = 0;
         $documents = [];
         $buffer = new NodeList();
-        $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
+        if ($_root->value instanceof NddeList) $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
         foreach ($_root->value as $child) {
             if ($child->type & Y::DOC_START) {
                 if(++$totalDocStart > 1){
@@ -110,7 +109,7 @@ final class Builder
         foreach ($node as $child) {
             $action($child, $parent, $out);
         }
-        if ($node->type & (Y::COMPACT_SEQUENCE|Y::COMPACT_MAPPING)) {
+        if ($node->type & (Y::COMPACT_SEQUENCE|Y::COMPACT_MAPPING) && !empty($out)) {
             $out = new Compact($out);
         }
         return is_null($out) ? $parent : $out;

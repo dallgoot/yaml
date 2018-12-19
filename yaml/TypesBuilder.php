@@ -13,6 +13,7 @@ use Dallgoot\Yaml\{Yaml as Y, Regex as R};
  */
 final class TypesBuilder
 {
+    const ERROR_NO_KEYNAME = self::class.": key has NO IDENTIFIER on line %d";
 
     public static function buildReference($node, $parent)
     {
@@ -77,14 +78,9 @@ final class TypesBuilder
         $ref = $parent instanceof \ArrayIterator ? $parent->getArrayCopy() : $parent;
         $numKeys = array_filter(array_keys($ref), 'is_int');
         $key = count($numKeys) > 0 ? max($numKeys) + 1 : 0;
-        if ($value instanceof Node) {
-            if($value->type & Y::KEY) {
-                self::buildKey($node->value, $parent);
-                return;
-            } elseif ($value->type & Y::ITEM) {
-                $a = [];
-                $result = self::buildItem($value, $a);
-            }
+        if ($value instanceof Node && $value->type & Y::KEY) {
+            self::buildKey($node->value, $parent);
+            return;
         }
         $result = Builder::build($value);
         $parent[$key] = $result;
@@ -121,7 +117,7 @@ final class TypesBuilder
         if ($node->value->type & (Y::ITEM|Y::KEY )) {
             $node->value = new NodeList($node->value);
         }
-        $parent->{$key} = Builder::build($node->value);
+        $parent->{$key} = Builder::build(/** @scrutinizer ignore-type */ $node->value);
     }
 
     /**
@@ -158,10 +154,10 @@ final class TypesBuilder
      *
      * @param      Node  $node    The node
      * @param      mixed  $parent  The parent
-     * @todo implement if requested
+     * @todo implement if required
      */
-    public function buildDirective(Node $node, $parent)
+    public function buildDirective()//Node $node, $parent)
     {
-        // TODO : implement
+    //     // TODO : implement
     }
 }

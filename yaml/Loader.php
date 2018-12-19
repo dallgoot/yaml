@@ -123,12 +123,11 @@ final class Loader
             }
             if ($this->debug === 2) {
                 print_r((new \ReflectionClass(Y::class))->getConstants());
-                echo "\033[33mParsed Structure\033[0m\n";
                 print_r($root);
-                exit();
+            } else {
+                $out = Builder::buildContent($root, $this->debug);
+                return $out;
             }
-            $out = Builder::buildContent($root, $this->debug);
-            return $out;
         } catch (\Error|\Exception|\ParseError $e) {
             $file = $this->filePath ? basename($this->filePath) : '#YAML STRING#';
             $message = basename($e->getFile())."@".$e->getLine().": ".$e->getMessage()." for '$file' @".($lineNb)."\n";

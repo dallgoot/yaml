@@ -78,7 +78,7 @@ final class Node
             }
             $cursor = $cursor->parent;
         }
-        return $cursor;
+        return $cursor ?? $this;
     }
 
     /**
@@ -111,14 +111,6 @@ final class Node
         }
         $this->value->push($child);
     }
-
-    //modify value type according to child
-    // private function adjustValueType(Node $child)
-    // {
-    //     if ($child->type & Y::SET_KEY)   $this->value->type = Y::SET;
-    //     if ($child->type & Y::KEY)       $this->value->type = Y::MAPPING;
-    //     if ($child->type & Y::ITEM)      $this->value->type = Y::SEQUENCE;
-    // }
 
     /**
      * Gets the deepest node.
@@ -160,7 +152,7 @@ final class Node
         } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something on same line ?
             $this->type = Y::DOC_END;
         } elseif (preg_match(R::KEY, $nodeValue, $matches)) {
-            $this->onKey($matches);
+            NodeHandlers::onKey($matches, $this);
         } else {
             $this->identify($nodeValue);
         }
@@ -176,11 +168,11 @@ final class Node
     {
         $v = ltrim(substr($nodeValue, 1));
         $first = $nodeValue[0];
-        if ($first === "-")                        $this->onHyphen($nodeValue);
-        elseif (in_array($first, ['"', "'"]))      $this->onQuoted($nodeValue);
-        elseif (in_array($first, ['{', '[']))      $this->onCompact($nodeValue);
-        elseif (in_array($first, ['?', ':']))      $this->onSetElement($nodeValue);
-        elseif (in_array($first, ['!', '&', '*'])) $this->onNodeAction($nodeValue);
+        if ($first === "-")                        NodeHandlers::onHyphen($nodeValue, $this);
+        elseif (in_array($first, ['"', "'"]))      NodeHandlers::onQuoted($nodeValue, $this);
+        elseif (in_array($first, ['{', '[']))      NodeHandlers::onCompact($nodeValue, $this);
+        elseif (in_array($first, ['?', ':']))      NodeHandlers::onSetElement($nodeValue, $this);
+        elseif (in_array($first, ['!', '&', '*'])) NodeHandlers::onNodeAction($nodeValue, $this);
         else {
             $characters = [ '#' =>  [Y::COMMENT, $v],
                             '%' =>  [Y::DIRECTIVE, $v],
@@ -194,146 +186,6 @@ final class Node
                 $this->type  = Y::SCALAR;
                 $this->value = $nodeValue;
             }
-        }
-    }
-
-    private function onQuoted($nodeValue)
-    {
-        $this->type = R::isProperlyQuoted($nodeValue) ? Y::QUOTED : Y::PARTIAL;
-        $this->value = $nodeValue;
-    }
-
-    private function onSetElement($nodeValue)
-    {
-        $this->type = $nodeValue[0] === '?' ? Y::SET_KEY : Y::SET_VALUE;
-        $v = trim(substr($nodeValue, 1));
-        if (!empty($v)) {
-            $this->value = new NodeList;
-            $this->add(new Node($v, $this->line));
-        }
-    }
-
-    /**
-     * Process when a "key: value" syntax is found in the parsed string
-     * Note : key is match 1, value is match 2 as per regex from R::KEY
-     *
-     * @param array $matches The matches provided by 'preg_match' function in Node::parse
-     */
-    private function onKey(array $matches)
-    {
-        $this->type = Y::KEY;
-        $this->identifier = trim($matches[1], '"\' ');
-        $value = isset($matches[2]) ? trim($matches[2]) : null;
-        if (!empty($value)) {
-            $hasComment = strpos($value, ' #');
-            if (is_bool($hasComment)) {
-                $n = new Node($value, $this->line);
-            } else {
-                $n = new Node(trim(substr($value, 0, $hasComment)), $this->line);
-                if ($n->type !== Y::PARTIAL) {
-                    $comment = new Node(trim(substr($value, $hasComment + 1)), $this->line);
-                    $comment->identifier = true; //to specify it is NOT a fullline comment
-                    $this->add($comment);
-                }
-            }
-            $n->indent = $this->indent + strlen($this->identifier);
-            $this->add($n);
-        }
-    }
-
-    /**
-     * Determines the correct type and value when a compact object/array syntax is found
-     *
-     * @param string $value The value assumed to start with { or [ or characters
-     *
-     * @see Node::identify
-     */
-    private function onCompact($value)
-    {
-        $this->value = json_decode($value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        if (json_last_error() === JSON_ERROR_NONE){
-            $this->type = Y::JSON;
-            return;
-        }
-        $this->value = new NodeList();
-        if (preg_match(R::MAPPING, $value)){
-            $this->type = Y::COMPACT_MAPPING;
-            $this->value->type = Y::COMPACT_MAPPING;
-            preg_match_all(R::MAPPING_VALUES, trim(substr($value, 1,-1)), $matches);
-            foreach ($matches['k'] as $index => $property) {
-                $n = new Node('', $this->line);
-                $n->type = Y::KEY;
-                $n->identifier = trim($property, '"\' ');//TODO : maybe check for proper quoting first ?
-                $n->value = new Node($matches['v'][$index], $this->line);
-                $this->value->push($n);
-            }
-            return;
-        }
-        if (preg_match(R::SEQUENCE, $value)){
-            $this->type = Y::COMPACT_SEQUENCE;
-            $this->value->type = Y::COMPACT_SEQUENCE;
-            preg_match_all(R::SEQUENCE_VALUES, trim(substr($value, 1,-1)), $matches);
-            foreach ($matches['item'] as $key => $item) {
-                $i = new Node('', $this->line);
-                $i->type = Y::ITEM;
-                $i->add(new Node($item, $this->line));
-                $this->value->push($i);
-            }
-            return;
-        }
-        $this->value = $value;
-        $this->type  = Y::PARTIAL;
-    }
-
-    /**
-     * Determines type and value when an hyphen "-" is found
-     *
-     * @param string $nodeValue The node value
-     *
-     * @see Node::identify
-     */
-    private function onHyphen($nodeValue)
-    {
-        if (substr($nodeValue, 0, 3) === '---') {
-            $this->type = Y::DOC_START;
-            $rest = trim(substr($nodeValue, 3));
-            if (!empty($rest)) {
-                $n = new Node($rest, $this->line);
-                $n->indent = $this->indent + 4;
-                $this->value = $n->setParent($this);
-            }
-        } elseif (preg_match(R::ITEM, $nodeValue, $matches)) {
-            $this->type = Y::ITEM;
-            if (isset($matches[1]) && !empty(trim($matches[1]))) {
-                $n = new Node(trim($matches[1]), $this->line);
-                $n->indent = $this->indent + 2;
-                $this->value = $n->setParent($this);
-            }
-        } else {
-            $this->type  = Y::SCALAR;
-            $this->value = $nodeValue;
-        }
-    }
-
-    /**
-     * Determines the type and value according to $nodeValue when one of these characters is found : !,&,*
-     *
-     * @param string $nodeValue The node value
-     *
-     * @see  Node::identify
-     * @todo handle tags like  <tag:clarkevans.com,2002:invoice>
-     */
-    private function onNodeAction($nodeValue)
-    {
-        $v = substr($nodeValue, 1);
-        $this->type = ['!' => Y::TAG, '&' => Y::REF_DEF, '*' => Y::REF_CALL][$nodeValue[0]];
-        $this->identifier = $v;
-        $pos = strpos($v, ' ');
-        if ($this->type & (Y::TAG|Y::REF_DEF) && is_int($pos)) {
-            $this->identifier = strstr($v, ' ', true);
-            $value = trim(substr($nodeValue, $pos + 1));
-            $value = R::isProperlyQuoted($value) ? trim($value, "\"'") : $value;
-            $this->add((new Node($value, $this->line))->setParent($this));
         }
     }
 

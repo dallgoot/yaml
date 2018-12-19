@@ -32,7 +32,6 @@ class Compact extends \ArrayIterator implements \JsonSerializable
         $prop = get_object_vars($this);
         if (count($prop) > 0) return $prop;
         if (count($this) > 0) return iterator_to_array($this);
-        return $this;//new \Stdclass;
     }
 
     /**
