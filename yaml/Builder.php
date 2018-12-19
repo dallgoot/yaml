@@ -115,36 +115,40 @@ final class Builder
      * @param Node    $node    The node of any Node->type
      * @param mixed  $parent  The parent
      *
-     * @return mixed  The node value as scalar, array or object or null to otherwise.
+     * @return mixed  The node value as Scalar, Array, Object or Null otherwise.
      */
     private static function buildNode(Node $node, &$parent)
     {
         extract((array) $node, EXTR_REFS);
-        if ($type & (Y::REF_DEF | Y::REF_CALL)) {
-            if (is_object($value)) {
-                $tmp = self::build($value, $parent) ?? $parent;
-            } else {
-                $tmp = Node2PHP::get($node);
-            }
-            if ($type === Y::REF_DEF) self::$_root->addReference($identifier, $tmp);
-            return self::$_root->getReference($identifier);
-        }
-        if ($type & (Y::COMPACT_MAPPING|Y::COMPACT_SEQUENCE)) {
-            return self::buildNodeList($node->value, $parent);
-        }
-        if ($type & Y::COMMENT) self::$_root->addComment($node->line, $node->value);
-        $typesActions = [Y::DIRECTIVE => 'buildDirective',
-                         Y::ITEM      => 'buildItem',
-                         Y::KEY       => 'buildKey',
-                         Y::SET_KEY   => 'buildSetKey',
-                         Y::SET_VALUE => 'buildSetValue',
-                         Y::TAG       => 'buildTag',
+        $actions = [Y::DIRECTIVE => 'buildDirective',
+                    Y::ITEM      => 'buildItem',
+                    Y::KEY       => 'buildKey',
+                    Y::SET_KEY   => 'buildSetKey',
+                    Y::SET_VALUE => 'buildSetValue',
+                    Y::TAG       => 'buildTag',
         ];
-        if (isset($typesActions[$type])) {
-            return self::{$typesActions[$type]}($node, $parent);
+        if (isset($actions[$type])) {
+            return self::{$actions[$type]}($node, $parent);
+        } elseif ($type & Y::COMMENT) {
+            self::$_root->addComment($line, $value);
+        } elseif ($type & (Y::COMPACT_MAPPING|Y::COMPACT_SEQUENCE)) {
+            return self::buildNodeList($value, $parent);
+        } elseif ($type & (Y::REF_DEF | Y::REF_CALL)) {
+            return self::handleReference($node, $parent);
+        } elseif ($value instanceof Node) {
+            return self::buildNode($value, $parent);
+        } else {
+            return Node2PHP::get($node);
         }
-        return is_object($value) ? self::build($value, $parent) : Node2PHP::get($node);
     }
+
+    private static function handleReference($node, $parent)
+    {
+        $tmp = is_null($node->value) ? null : self::build($node->value, $parent);
+        if ($node->type === Y::REF_DEF) self::$_root->addReference($node->identifier, $tmp);
+        return self::$_root->getReference($node->identifier);
+    }
+
 
     /**
      * Builds a key and set the property + value to the given parent
@@ -231,7 +235,7 @@ final class Builder
         //remove trailing blank
         while ($list->top()->type & Y::BLANK) $list->pop();
         $result = '';
-        $separator = [ 0 => '', Y::LITT => "\n", Y::LITT_FOLDED => ' '][(int) $type];
+        $separator = [ Y::RAW => '', Y::LITT => "\n", Y::LITT_FOLDED => ' '][$type];
         foreach ($list as $child) {
             if ($child->value instanceof NodeList) {
                 $result .= self::buildLitteral($child->value, $type).$separator;

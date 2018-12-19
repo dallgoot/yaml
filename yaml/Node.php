@@ -97,16 +97,16 @@ final class Node
             return;
         }
         $child->setParent($this);
-        $current = $this->value;
-        if (is_null($current)) {
+        if (is_null($this->value)) {
             $this->value = $child;
             return;
-        }elseif ($current instanceof Node) {
-            if ($current->type & Y::LITTERALS) {
+        }elseif ($this->value instanceof Node) {
+            if ($this->value->type & Y::LITTERALS) {
+                $type = $this->value->type;
                 $this->value = new NodeList();
-                $this->value->type = $current->type;
+                $this->value->type = $type;
             } else {
-                $this->value = new NodeList($current);
+                $this->value = new NodeList($this->value);
             }
         }
         $this->value->push($child);
