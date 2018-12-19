@@ -2,7 +2,7 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Yaml as Y, Regex as R};
+use Dallgoot\Yaml\{Yaml as Y, Regex as R, TypesBuilder as TB};
 
 /**
  * Constructs the result (YamlObject or array) according to every Node and respecting value
@@ -13,7 +13,7 @@ use Dallgoot\Yaml\{Yaml as Y, Regex as R};
  */
 final class Builder
 {
-    private static $_root;
+    public static $_root;
     private static $_debug;
 
     const ERROR_NO_KEYNAME = self::class.": key has NO IDENTIFIER on line %d";
@@ -49,7 +49,7 @@ final class Builder
         return count($documents) === 1 ? $documents[0] : $documents;
     }
 
-    private function buildDocument(NodeList $list, int $docNum):YamlObject
+    private static function buildDocument(NodeList $list, int $docNum):YamlObject
     {
         self::$_root = new YamlObject;
         try {
@@ -68,7 +68,7 @@ final class Builder
      *
      * @return mixed  ( description_of_the_return_value )
      */
-    private static function build(object $node, &$parent = null)
+    public static function build(object $node, &$parent = null)
     {
         if ($node instanceof NodeList) return self::buildNodeList($node, $parent);
         return self::buildNode($node, $parent);
@@ -82,7 +82,7 @@ final class Builder
      *
      * @return mixed    The parent (object|array) or a string representing the NodeList.
      */
-    private static function buildNodeList(NodeList $node, &$parent=null)
+    public static function buildNodeList(NodeList $node, &$parent=null)
     {
         $node->forceType();
         if ($node->type & (Y::RAW | Y::LITTERALS)) {
@@ -135,94 +135,18 @@ final class Builder
                     Y::TAG       => 'buildTag',
         ];
         if (isset($actions[$type])) {
-            return self::{$actions[$type]}($node, $parent);
+            return TB::{$actions[$type]}($node, $parent);
         } elseif ($type & Y::COMMENT) {
             self::$_root->addComment($line, $value);
         } elseif ($type & (Y::COMPACT_MAPPING|Y::COMPACT_SEQUENCE)) {
             return self::buildNodeList($value, $parent);
         } elseif ($type & (Y::REF_DEF | Y::REF_CALL)) {
-            return self::handleReference($node, $parent);
+            return TB::buildReference($node, $parent);
         } elseif ($value instanceof Node) {
             return self::buildNode($value, $parent);
         } else {
             return Node2PHP::get($node);
         }
-    }
-
-    private static function handleReference($node, $parent)
-    {
-        $tmp = is_null($node->value) ? null : self::build($node->value, $parent);
-        if ($node->type === Y::REF_DEF) self::$_root->addReference($node->identifier, $tmp);
-        return self::$_root->getReference($node->identifier);
-    }
-
-
-    /**
-     * Builds a key and set the property + value to the given parent
-     *
-     * @param Node $node       The node with type YAML::KEY
-     * @param object|array $parent       The parent
-     *
-     * @throws \ParseError if Key has no name(identifier) Note: empty string is allowed
-     * @return null
-     */
-    private static function buildKey(Node $node, &$parent=null)
-    {
-        extract((array) $node, EXTR_REFS);
-        if (is_null($identifier)) {
-            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $line));
-        } else {
-            if ($value instanceof Node) {
-                if ($value->type & (Y::ITEM|Y::KEY)) {
-                    $value = new NodeList($value);
-                } else {
-                    $result = self::build($value);
-                }
-            }
-            if ($value instanceof NodeList) {
-                $result = self::buildNodeList($value);
-            }
-            if (is_null($parent)) {
-                return $result;
-            } else {
-                if (is_array($parent)) {
-                    $parent[$identifier] = $result;
-                } else {
-                    $parent->{$identifier} = $result;
-                }
-            }
-        }
-    }
-
-    /**
-     * Builds an item. Adds the item value to the parent array|Iterator
-     *
-     * @param      Node        $node    The node with type YAML::ITEM
-     * @param      array|\Iterator      $parent  The parent
-     *
-     * @throws     \Exception  if parent is another type than array or object Iterator
-     * @return null
-     */
-    private static function buildItem(Node $node, &$parent)
-    {
-        extract((array) $node, EXTR_REFS);
-        if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
-            throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
-        }
-        $ref = $parent instanceof \ArrayIterator ? $parent->getArrayCopy() : $parent;
-        $numKeys = array_filter(array_keys($ref), 'is_int');
-        $key = count($numKeys) > 0 ? max($numKeys) + 1 : 0;
-        if ($value instanceof Node) {
-            if($value->type & Y::KEY) {
-                self::buildKey($node->value, $parent);
-                return;
-            } elseif ($value->type & Y::ITEM) {
-                $a = [];
-                $result = self::buildItem($value, $a);
-            }
-        }
-        $result = self::build($value);
-        $parent[$key] = $result;
     }
 
 
@@ -253,7 +177,7 @@ final class Builder
         return rtrim($result);
     }
 
-    private function setLiteralValue(Node $child, string &$result, int $refIndent, string $separator, int $type)
+    private static function setLiteralValue(Node $child, string &$result, int $refIndent, string $separator, int $type)
     {
         $val = $child->type & (Y::SCALAR) ? $child->value : substr($child->raw, $refIndent);
         if ($type & Y::LITT_FOLDED && ($child->indent > $refIndent || ($child->type & Y::BLANK))) {
@@ -266,80 +190,4 @@ final class Builder
         $result .= $val.$separator;
     }
 
-    /**
-     * Builds a set key.
-     *
-     * @param      Node        $node    The node of type YAML::SET_KEY.
-     * @param      object      $parent  The parent
-     *
-     * @throws     \Exception  if a problem occurs during serialisation (json format) of the key
-     */
-    private function buildSetKey(Node $node, &$parent)
-    {
-        $built = is_object($node->value) ? self::build($node->value) : null;
-        $stringKey = is_string($built) && Regex::isProperlyQuoted($built) ? trim($built, '\'" '): $built;
-        $key = json_encode($stringKey, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
-        $parent->{trim($key, '\'" ')} = null;
-    }
-
-    /**
-     * Builds a set value.
-     *
-     * @param      Node    $node    The node of type YAML::SET_VALUE
-     * @param      object  $parent  The parent (the document object or any previous object created through a mapping key)
-     */
-    private function buildSetValue(Node $node, &$parent)
-    {
-        $prop = array_keys(get_object_vars($parent));
-        $key = end($prop);
-        if ($node->value->type & (Y::ITEM|Y::KEY )) {
-            $node->value = new NodeList($node->value);
-        }
-        $parent->{$key} = self::build($node->value);
-    }
-
-    /**
-     * Builds a tag and its value (also built) and encapsulates them in a Tag object.
-     *
-     * @param      Node    $node    The node of type YAML::TAG
-     * @param      mixed  $parent  The parent
-     *
-     * @return     Tag|null     The tag object of class Dallgoot\Yaml\Tag.
-     */
-    private static function buildTag(Node $node, &$parent)
-    {
-        $name = (string) $node->identifier;
-        if ($parent === self::$_root && empty($node->value)) {
-            $parent->addTag($name);
-        } else {
-            $target = $node->value;
-            if ($node->value instanceof Node) {
-                if ($node->value->type & (Y::KEY|Y::ITEM)) {
-                    if (is_null($parent)) {
-                        $target = new NodeList($node->value);
-                    } else {
-                        self::build($node->value, $parent);
-                    }
-                }
-            }
-            //TODO: have somewhere a list of common tags and their treatment
-            // if (in_array($node->identifier, ['!binary', '!str'])) {
-            //     $target->type = Y::RAW;
-            // }
-            return new Tag($name, is_object($target) ? self::build($target) : null);
-        }
-    }
-
-    /**
-     * Builds a directive. NOT IMPLEMENTED YET
-     *
-     * @param      Node  $node    The node
-     * @param      mixed  $parent  The parent
-     * @todo implement if requested
-     */
-    private function buildDirective(Node $node, $parent)
-    {
-        // TODO : implement
-    }
 }
