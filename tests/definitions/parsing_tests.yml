@@ -70,6 +70,8 @@ map_with_quoted_number_keys: |
   {"map":{"0":"one","1":"two"}}
 map_with_seq_and_embed_comment: |
   {"a":{"b":["c"],"d":"e"}}
+multidoc_mapping: |
+  [{"a":"Mark McGwire","b":"Sammy Sosa","c":"Ken Griffey"},{"a":"Chicago Cubs","b":"St Louis Cardinals"}]
 multidoc_sequence: |
   [["Mark McGwire","Sammy Sosa","Ken Griffey"],["Chicago Cubs","St Louis Cardinals"]]
 multiline_indented.keyslookalike: |

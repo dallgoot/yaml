@@ -33,24 +33,31 @@ final class Builder
         self::$_debug = $_debug;
         $totalDocStart = 0;
         $documents = [];
-        $_root->value instanceof NodeList && $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
+        $buffer = new NodeList();
+        $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
         foreach ($_root->value as $child) {
-            if ($child->type & Y::DOC_START) $totalDocStart++;
-            //if 0 or 1 DOC_START = we are still in first document
-            $currentDoc = $totalDocStart > 1 ? $totalDocStart - 1 : 0;
-            if (!isset($documents[$currentDoc])) $documents[$currentDoc] = new NodeList();
-            $documents[$currentDoc]->push($child);
-        }
-        $content = [];
-        foreach ($documents as $docNum => $list) {
-            self::$_root = new YamlObject;
-            try {
-                $content[] = self::buildNodeList($list, self::$_root);
-            } catch (\Exception $e) {
-                throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum));
+            if ($child->type & Y::DOC_START) {
+                if(++$totalDocStart > 1){
+                    $documents[] = self::buildDocument($buffer, count($documents));
+                    $buffer = new NodeList($child);
+                }
+            } else {
+                $buffer->push($child);
             }
         }
-        return count($content) === 1 ? $content[0] : $content;
+        $documents[] = self::buildDocument($buffer, count($documents));
+        return count($documents) === 1 ? $documents[0] : $documents;
+    }
+
+    private function buildDocument(NodeList $list, int $docNum):YamlObject
+    {
+        self::$_root = new YamlObject;
+        try {
+            $out = self::buildNodeList($list, self::$_root);
+        } catch (\Exception $e) {
+            throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum));
+        }
+        return $out;
     }
 
     /**
@@ -228,7 +235,7 @@ final class Builder
      * @return     string    The litteral.
      * @todo : Example 6.1. Indentation Spaces  spaces must be considered as content
      */
-    private static function buildLitteral(NodeList $list, int $type):string
+    private static function buildLitteral(NodeList $list, int $type = Y::RAW):string
     {
         $list->rewind();
         $refIndent = $list->current()->indent;
@@ -240,18 +247,23 @@ final class Builder
             if ($child->value instanceof NodeList) {
                 $result .= self::buildLitteral($child->value, $type).$separator;
             } else {
-                $val = $child->type & (Y::SCALAR|Y::BLANK) ? $child->value : substr($child->raw, $refIndent);
-                if ($type & Y::LITT_FOLDED && ($child->indent > $refIndent || ($child->type & Y::BLANK))) {
-                    if ($result[-1] === $separator)
-                        $result[-1] = "\n";
-                    if ($result[-1] === "\n")
-                        $result .= $val;
-                    continue;
-                }
-                $result .= $val.$separator;
+                self::setLiteralValue($child, $result, $refIndent, $separator, $type);
             }
         }
         return rtrim($result);
+    }
+
+    private function setLiteralValue(Node $child, string &$result, int $refIndent, string $separator, int $type)
+    {
+        $val = $child->type & (Y::SCALAR) ? $child->value : substr($child->raw, $refIndent);
+        if ($type & Y::LITT_FOLDED && ($child->indent > $refIndent || ($child->type & Y::BLANK))) {
+            if ($result[-1] === $separator)
+                $result[-1] = "\n";
+            if ($result[-1] === "\n")
+                $result .= $val;
+            return;
+        }
+        $result .= $val.$separator;
     }
 
     /**
