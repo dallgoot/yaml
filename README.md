@@ -12,12 +12,12 @@ PHP library to load and parse YAML file to PHP datatypes equivalent
 - YAML specifications version 1.2 http://yaml.org/spec/1.2/spec.html
 - comments (option : enabled by default)
 - complex mapping (Note: keys are JSON encoded strings)
-- JSON values
-- multi-line values (simple/doubled quoted or not, mapping, sequence or JSON)
-- multiple document in a file
+- JSON values (valid as per PHP json_encode)
+- compact syntax for mapping and sequences
+- multi-line values (simple|double quoted or not, compact mapping|sequence or JSON)
+- multiple document in a file (Note: only on document start ATM)
 - references (option : enabled by default)
-- short syntax for mapping and sequences
-- tags (partial implementation)
+- tags (Note: partial implementation as Dallgoot\Yaml\Tag object)
 
 ## What's different from other PHP Yaml libraries
 - support multiple documents in one YAML content (string or file)
@@ -85,13 +85,12 @@ This distinction is crucial to allow respecting original YAML structure when con
 ## TODO:
   TBD
 <!-- - DUMPER: implementation
-- CHECK childs validity in Node::add
 - DEFINE debug levels
 - tags: default handling for common tags, and user-customized process for custom ones
 - directives (to be implemented) : currently ignored
 - IMPROVE : rename key names that are not valid PHP property name (to be implemented)
 - IMPROVE : identifying errors in YAML content
-- UNICODE checking
+- UNICODE checking (?)
  -->
 ## Performances
     TBD
