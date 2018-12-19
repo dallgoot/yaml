@@ -183,9 +183,10 @@ final class Loader
             }
             $deepest->parse($deepest->value.$add);
             return true;
-        }
-        if ($n->type & Y::BLANK) {
-            $this->onSpecialBlank($emptyLines, $n, $previous, $deepest);
+        } elseif ($n->type & Y::BLANK) {
+            // $this->onSpecialBlank($emptyLines, $n, $previous, $deepest);
+            if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
+        if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
             return true;
         } elseif ($n->type & Y::COMMENT
                   && !($previous->getParent()->value->type & Y::LITTERALS)
@@ -198,11 +199,11 @@ final class Loader
         return false;
     }
 
-    private function onSpecialBlank(array &$emptyLines, Node $n, Node $previous, Node $deepest)
-    {
-        if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
-        if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
-    }
+    // private function onSpecialBlank(array &$emptyLines, Node $n, Node $previous, Node $deepest)
+    // {
+    //     if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
+    //     if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
+    // }
 
     private function onContextType(Node &$n, Node &$previous, $lineString):bool
     {
