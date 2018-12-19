@@ -4,5 +4,5 @@ php:
   - nightly
 before_script:
   # - phpenv config-rm xdebug.ini
-  - composer require phpunit/phpunit
+  - composer require phpunit/phpunit ^7.3
 script: vendor/bin/phpunit
