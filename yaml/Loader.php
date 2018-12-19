@@ -177,7 +177,7 @@ final class Loader
     {
         $deepest = $previous->getDeepestNode();
         if ($deepest->type & Y::PARTIAL) {
-            $add = trim($lineString) === '' ? "\n" : trim($lineString);
+            $add = empty($lineString) ? "\n" : ltrim($lineString);
             if ($add !== "\n" && $deepest->value[-1] !== "\n") {
                 $add = ' '.$add;
             }
@@ -185,18 +185,23 @@ final class Loader
             return true;
         }
         if ($n->type & Y::BLANK) {
-            if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
-            if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
+            $this->onSpecialBlank($emptyLines, $n, $previous, $deepest);
             return true;
         } elseif ($n->type & Y::COMMENT
                   && !($previous->getParent()->value->type & Y::LITTERALS)
                   && !($deepest->type & Y::LITTERALS)) {
-            $previous->getParent(0)->add($n);
+            // $previous->getParent(0)->add($n);
             return true;
         } elseif ($n->type & Y::TAG && is_null($n->value) ){//&& $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
             $n->value = '';
         }
         return false;
+    }
+
+    private function onSpecialBlank(array &$emptyLines, Node $n, Node $previous, Node $deepest)
+    {
+        if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
+        if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
     }
 
     private function onContextType(Node &$n, Node &$previous, $lineString):bool
