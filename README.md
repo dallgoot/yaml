@@ -4,12 +4,12 @@
 PHP library to load and parse YAML file to PHP coherent datatypes equivalent
 
 ## Features:
-- define *apropriate* PHP datatypes for values ie. object for mappings, array for sequences, JSON, DateTime, integers, floats, etc.
+- define *appropriate* PHP datatypes for values ie. object for mappings, array for sequences, JSON, DateTime, integers, floats, etc.
 - recover from some parsing errors
 - tolerance to tabulations
 
 ## Support:
-- YAML specifications version 1.2 http://yaml.org/spec/1.2/spec.html
+- YAML specifications [version 1.2](http://yaml.org/spec/1.2/spec.html)
 - comments (option : enabled by default)
 - complex mapping (Note: keys are JSON encoded strings)
 - JSON values (valid as per PHP function _json_encode_)
