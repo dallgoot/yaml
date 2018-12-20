@@ -186,7 +186,7 @@ final class Loader
         } elseif ($n->type & Y::BLANK) {
             // $this->onSpecialBlank($emptyLines, $n, $previous, $deepest);
             if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
-        if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
+            if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
             return true;
         } elseif ($n->type & Y::COMMENT
                   && !($previous->getParent()->value->type & Y::LITTERALS)

@@ -21,6 +21,7 @@
         "lib-pcre" : "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^7.3"
+        "phpunit/phpunit": "^7.3",
+        "symfony/yaml": "^4.2"
     }
 }
