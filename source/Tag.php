@@ -1,6 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
 
+use Dallgoot\Yaml\{Yaml as Y};
 /**
  * TODO
  *
@@ -14,20 +15,57 @@ class Tag
     public $tagName;
     /** @var Node|null|string */
     public $value;
+    /** @var null|Node|NodeList */
+    private $raw;
+
+    const LEGACY_TAGS = ['!str', '!binary', '!set', '!omap', 'php/object', '!inline', '!long'];
 
     /**
      * Tag constructor.
-     * @param string $tagName the name of the tag like '!str' (WITHOUT the first "!")
+     * @param string $tagName the name of the tag like '!!str' (WITHOUT the first "!")
      * @param mixed $value  any PHP variable type
      * @throws \Exception if $tagName is an invalid string or absent
      */
-    public function __construct(string $tagName, $value)
+    public function __construct(string $tagName, $raw)
     {
         if (empty($tagName)) {
             throw new \Exception(self::class.": a tag MUST have a name", 1);
         }
         $this->tagName = $tagName;
-        $this->value = $value;
+        $this->raw = $raw;
+    }
+
+    /**
+     * Return the tagged value according to Tag type
+     *
+     * @param      scalar|Node|NodeList  $value  The value
+     *
+     * @return     mixed
+     *
+     * @todo implement others legacy types if needed  + Symfony type 'php/object' (unserialize ???)
+     */
+    public function buildValue(object &$parent = null)
+    {
+        $value = $this->raw;
+        if ($value instanceof Node) {
+            $value = new NodeList($this->raw);
+        }
+        $value->forceType();
+        // $parent = Builder::$_root;
+        switch ($this->tagName) {
+            case '!set': $value->type = Y::SET;break;
+            case '!omap': $value->type = Y::SEQUENCE;break;
+            // assumed to be !str,!binary
+            default: $parent = null;
+                     $value->type = Y::RAW;
+        }
+        $this->value = Builder::buildNodeList($value, $parent);
+        return $this->value;
+    }
+
+    public function isKnown():bool
+    {
+        return in_array($this->tagName, self::LEGACY_TAGS);
     }
 
     /**

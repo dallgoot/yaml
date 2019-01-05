@@ -57,7 +57,7 @@ final class DumperTest extends TestCase
      }
 
 
-    public function test_DumpingCasesProvider()
+    public function dumpingCasesProvider()
     {
         $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/dumping_tests.yml'));
         $generator = function() use($nameResultPair) {
@@ -69,7 +69,7 @@ final class DumperTest extends TestCase
     }
 
     /**
-     * @dataProvider test_DumpingCasesProvider
+     * @dataProvider dumpingCasesProvider
      * @param string $fileName
      * @param string $expected
      * @throws Exception
@@ -78,6 +78,6 @@ final class DumperTest extends TestCase
     {
         $php = (include __DIR__."/../cases/dumping/$fileName.php");
         $output = Y::dump($php);
-        $this->assertEquals($expected, $output, "cases/dumping/$fileName.php");
+        $this->assertEquals($expected, $output, "$fileName.php");
     }
 }

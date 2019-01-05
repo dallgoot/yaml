@@ -3,6 +3,9 @@
     "description": "Provides loader, dumper and an API for YAML files. Loader builds to equivalent data types in PHP7",
     "type": "library",
     "license": "Apache-2.0",
+    "config": {
+        "vendor-dir":"dependencies"
+    },
     "authors": [
         {
             "name": "dallgoot",
@@ -11,14 +14,18 @@
     ],
       "autoload": {
         "classmap": [
-          "yaml",
+          "source",
           "tests",
-          "vendor"
+          "dependencies"
         ]
     },
     "require": {
-        "php" : ">=7.2",
-        "lib-pcre" : "*"
+        "php": ">=7.2",
+        "ext-json": "*",
+        "ext-pcre": "*",
+        "ext-Reflection": "*",
+        "ext-SPL": "*",
+        "lib-pcre": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.3",

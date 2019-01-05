@@ -1,0 +1,2 @@
+#!/bin/bash
+./dependencies/bin/phpunit --configuration ./configuration/phpunit.xml --testsuite $1

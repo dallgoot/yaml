@@ -38,6 +38,8 @@ endOfDocumentMapping: |
   {"foo":"bar"}
 endOfDocumentSequence: |
   [1,2,3]
+folded_with_alpha_keys: |
+  {"folded_with_alpha_keys":"- alphakey: alphakey_value\n- 0: a\n- 1: b\n- 2: c"}
 key_separated_by_blank_line: |
   {"foo":{"bar":"baz"}}
 keysWithTabs: |
@@ -131,11 +133,13 @@ tags_in_item_with_sequence: |
 tags_inline_long: |
   {"foo":{"tagName":"inline","value":"bar"},"quz":{"tagName":"long","value":"this is a long text"}}
 tags_in_litteral: |
-  {"data":{"tagName":"!binary","value":"SGVsbG8gd29ybGQ="}}
+  {"data":"SGVsbG8gd29ybGQ="}
 tags_in_mapping: |
   {"foo":{"tagName":"quz","value":["bar"]},"quz":{"tagName":"foo","value":{"quz":"bar"}}}
 tags_with_quotes: |
-  {"data":{"tagName":"!binary","value":"SGVsbG8gd29ybGQ="},"enclosed with single quotes":{"tagName":"!binary","value":"SGVsbG8gd29ybGQ="},"containing spaces":{"tagName":"!binary","value":"SGVs bG8gd 29ybGQ="}}
+  {"data":"SGVsbG8gd29ybGQ=","enclosed with single quotes":"SGVsbG8gd29ybGQ=","containing spaces":"SGVs bG8gd 29ybGQ="}
 # TODO:this a Symfony specific behavior :is it useful and used ?
 tag_symfony_phpobject: |
-  {"foo":{"tagName":"php/object","value":"O:30:\"Symfony\\Component\\Yaml\\Tests\\B\":1:{s:1:\"b\";s:3:\"foo\";}"},"bar":1}
+  {"foo":"O:30:\"Symfony\\Component\\Yaml\\Tests\\B\":1:{s:1:\"b\";s:3:\"foo\";}","bar":1}
+yaml_in_literal_folded: |
+  {"yamlObject_indices":"-\n  - 1\n  - 2\n  - 3\n-\n  memberOfO: some really really really really really really really really really very long text as a simple string"}

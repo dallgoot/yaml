@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'/dependencies/autoload.php';
 
 use \Dallgoot\Yaml\Yaml as Y;
 
@@ -12,9 +12,9 @@ const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | 
 * load and parse if file exists
 */
 ini_set("auto_detect_line_endings", 1);
-$content = file_get_contents('./tests/cases/parsing/multidoc_sequence.yml');//var_dump($content);
-// $content = file_get_contents('./tests/cases/examples/Example_2_17.yml');//var_dump($content);
-$yaml = Y::parse($content, null, 3);
+// $content = file_get_contents('./tests/cases/parsing/yaml_in_literal_folded.yml');//var_dump($content);
+$content = file_get_contents('./tests/cases/parsing/tags_in_mapping.yml');//var_dump($content);
+$yaml = Y::parse($content, null, (int) $argv[1]);
 // $yaml = Y::parseFile('./references/Example 2.27.yml', null, 1);
 var_dump($yaml);
 var_dump(json_encode($yaml, JSON_OPTIONS));

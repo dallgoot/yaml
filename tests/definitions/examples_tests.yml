@@ -43,7 +43,7 @@ Example_2_21: |
 Example_2_22: |
      {"canonical":{"date":"2001-12-15 02:59:43.100000","timezone_type":2,"timezone":"Z"},"iso8601":{"date":"2001-12-14 21:59:43.100000","timezone_type":1,"timezone":"-05:00"},"spaced":{"date":"2001-12-14 21:59:43.100000","timezone_type":1,"timezone":"-05:00"},"date":{"date":"2002-12-14 00:00:00.000000","timezone_type":3,"timezone":"UTC"}}
 Example_2_23: |
-     {"not-date":{"tagName":"!str","value":"2002-04-28"},"picture":{"tagName":"!binary","value":"R0lGODlhDAAMAIQAAP//9/X17unp5WZmZgAAAOfn515eXvPz7Y6OjuDg4J+fn5OTk6enp56enmleECcgggoBADs="},"application specific tag":{"tagName":"something","value":"The semantics of the tag\nabove may be different for\ndifferent documents."}}
+     {"not-date":"2002-04-28","picture":"R0lGODlhDAAMAIQAAP//9/X17unp5WZmZgAAAOfn515eXvPz7Y6OjuDg4J+fn5OTk6enp56enmleECcgggoBADs=","application specific tag":{"tagName":"something","value":"The semantics of the tag\nabove may be different for\ndifferent documents."}}
 Example_2_24: |
      [{"tagName":"circle","value":{"center":{"x":73,"y":129},"radius":7}},{"tagName":"line","value":{"start":{"x":73,"y":129},"finish":{"x":89,"y":102}}},{"tagName":"label","value":{"start":{"x":73,"y":129},"color":16772795,"text":"Pretty vector drawing."}}]
 Example_2_25: |

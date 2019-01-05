@@ -1,0 +1,5 @@
+folded_with_alpha_keys: |
+  - alphakey: alphakey_value
+  - 0: a
+  - 1: b
+  - 2: c

@@ -129,15 +129,15 @@ final class Loader
                 return $out;
             }
         } catch (\Error|\Exception|\ParseError $e) {
-            $file = $this->filePath ? basename($this->filePath) : '#YAML STRING#';
-            $message = basename($e->getFile())."@".$e->getLine().": ".$e->getMessage()." for '$file' @".($lineNb)."\n";
+            $file = $this->filePath ? realpath($this->filePath) : '#YAML STRING#';
+            $message = $e->getMessage()."\n ".$e->getFile().":".$e->getLine();
             if ($this->options & self::NO_PARSING_EXCEPTIONS) {
                 // trigger_error($message, E_USER_WARNING);
                 self::$error = $message;
                 return null;
             }
-            $this->debug && print_r($root);
-            throw new \Exception($message, 3);
+            !is_null($this->debug) && print_r($root);
+            throw new \Exception($message." for $file:$lineNb", 3);
         }
     }
 

@@ -3,7 +3,7 @@
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/|version|/phpunit.xsd"
          backupGlobals="true"
          backupStaticAttributes="false"
-         bootstrap="vendor/autoload.php"
+         bootstrap="../dependencies/autoload.php"
          cacheTokens="false"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
@@ -23,12 +23,23 @@
          colors="true"
          verbose="false">
    <testsuites>
-      <testsuite name="Units">
-         <directory>./tests/units/*Test.php files</directory>
-         <exclude>./tests/units/CasesTest.php</exclude>
+      <testsuite name="all">
+         <directory>../tests/units/*Test.php</directory>
       </testsuite>
-      <testsuite name="Cases">
-         <file>./tests/units/CasesTest.php</file>
+      <testsuite name="units">
+         <directory>../tests/units/*Test.php</directory>
+         <exclude>../tests/units/DumperTest.php</exclude>
+         <exclude>../tests/units/CasesTest.php</exclude>
+         <exclude>../tests/units/SymfonyYamlTest.php</exclude>
+      </testsuite>
+      <testsuite name="cases">
+         <file>../tests/units/CasesTest.php</file>
+      </testsuite>
+      <testsuite name="dumper">
+         <file>../tests/units/DumperTest.php</file>
+      </testsuite>
+      <testsuite name="symfony">
+         <file>../tests/units/SymfonyYamlTest.php</file>
       </testsuite>
    </testsuites>
 </phpunit>

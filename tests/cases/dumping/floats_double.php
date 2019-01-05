@@ -11,7 +11,7 @@ $yaml->castedPositiveFloat = (float) 2.0;
 $yaml->castedNegativeFloat = (float) -2;
 
 $yaml->positiveExponentFloat =  2.3e4;
-$yaml->negativeExponentFloat =  2.3e-4;
+$yaml->negativeExponentFloat =  2.3e-3;
 
 $yaml->positiveInfinity = INF;
 $yaml->negativeInfinity = -INF;

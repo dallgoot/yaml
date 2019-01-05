@@ -2,7 +2,7 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Yaml as Y, Regex as R, TypesBuilder as TB};
+use Dallgoot\Yaml\{NodeList, Yaml as Y, Regex as R, TypesBuilder as TB};
 
 /**
  * Constructs the result (YamlObject or array) according to every Node and respecting value
@@ -16,7 +16,7 @@ final class Builder
     public static $_root;
     private static $_debug;
 
-    const INVALID_DOCUMENT = self::class.": DOCUMENT %d can NOT be a mapping AND a sequence";
+    const INVALID_DOCUMENT = "DOCUMENT %d is invalid,";
 
     /**
      * Builds a file.  check multiple documents & split if more than one documents
@@ -30,15 +30,29 @@ final class Builder
     public static function buildContent(Node $_root, int $_debug)
     {
         self::$_debug = $_debug;
-        $totalDocStart = 0;
+        $docStarted = 0;
         $documents = [];
         $buffer = new NodeList();
-        if ($_root->value instanceof NddeList) $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
+        if ($_root->value instanceof NodeList) {
+            $_root->value->setIteratorMode(NodeList::IT_MODE_DELETE);
+        } else {
+            die("NOT A LIST");
+        }
         foreach ($_root->value as $child) {
-            if ($child->type & Y::DOC_START) {
-                if(++$totalDocStart > 1){
-                    $documents[] = self::buildDocument($buffer, count($documents));
-                    $buffer = new NodeList($child);
+            if ($child->type & Y::DOC_END && $child !== $_root->value->top()) {
+                $buffer->push($child);
+                $documents[] = self::buildDocument($buffer, count($documents));
+                $buffer = new NodeList();
+            } elseif ($child->type & Y::DOC_START) {
+                if ($buffer->count() === 0) {
+                    $buffer->push($child);
+                } else {
+                    if (in_array($buffer->getTypes(), [Y::COMMENT, Y::DIRECTIVE])) {
+                        $buffer->push($child);
+                    } else {
+                        $documents[] = self::buildDocument($buffer, count($documents));
+                        $buffer = new NodeList($child);
+                    }
                 }
             } else {
                 $buffer->push($child);
@@ -49,12 +63,15 @@ final class Builder
     }
 
     private static function buildDocument(NodeList $list, int $docNum):YamlObject
-    {
+    {var_dump(__METHOD__);
         self::$_root = new YamlObject;
         try {
             $out = self::buildNodeList($list, self::$_root);
+            if (is_string($out)) {
+                $out = self::$_root->setText($out);
+            }
         } catch (\Exception $e) {
-            throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum));
+            throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum)." ".$e->getMessage()."\n ".$e->getFile().':'.$e->getLine());
         }
         return $out;
     }
@@ -81,35 +98,35 @@ final class Builder
      *
      * @return mixed    The parent (object|array) or a string representing the NodeList.
      */
-    public static function buildNodeList(NodeList $node, &$parent=null)
+    public static function buildNodeList(NodeList $list, &$parent=null)
     {
-        $node->forceType();
-        if ($node->type & (Y::RAW | Y::LITTERALS)) {
-            return self::buildLitteral($node, (int) $node->type);
-        }
+        $list->forceType();
         $action = function ($child, &$parent, &$out) {
             self::build($child, $out);
         };
-        if ($node->type & (Y::COMPACT_MAPPING|Y::MAPPING|Y::SET)) {
+        $list->type = $list->type ?? Y::RAW;
+        if ($list->type & (Y::RAW|Y::LITTERALS)) {
+            $tmp = self::buildLitteral($list, $list->type);//var_dump("ICI1",$list, $tmp);
+            return $tmp;
+        } elseif ($list->type & (Y::COMPACT_MAPPING|Y::MAPPING|Y::SET)) {//var_dump("ICI2");
             $out = $parent ?? new \StdClass;
-        } elseif ($node->type & (Y::COMPACT_SEQUENCE|Y::SEQUENCE)) {
+        } elseif ($list->type & (Y::COMPACT_SEQUENCE|Y::SEQUENCE)) {//var_dump("ICI3");
             $out = $parent ?? [];
         } else {
-            $out = '';
+            $out = null;//var_dump("ICI");
             $action = function ($child, &$parent, &$out) {
-                if ($child->type & (Y::SCALAR|Y::QUOTED)) {
-                    if ($parent) {
-                        $parent->setText(self::build($child));
-                    } else {
-                        $out .= self::build($child);
-                    }
+                if ($child->type & (Y::SCALAR|Y::QUOTED|Y::DOC_START)) {
+                    $out .= Node2PHP::get($child);
+                } else {
+                    self::build($child);//var_dump("HERE");
                 }
+                // var_dump("out:".$out);
             };
         }
-        foreach ($node as $child) {
+        foreach ($list as $child) {
             $action($child, $parent, $out);
         }
-        if ($node->type & (Y::COMPACT_SEQUENCE|Y::COMPACT_MAPPING) && !empty($out)) {
+        if ($list->type & (Y::COMPACT_SEQUENCE|Y::COMPACT_MAPPING) && !empty($out)) {
             $out = new Compact($out);
         }
         return is_null($out) ? $parent : $out;
@@ -137,6 +154,10 @@ final class Builder
             return TB::{$actions[$type]}($node, $parent);
         } elseif ($type & Y::COMMENT) {
             self::$_root->addComment($line, $value);
+        // } elseif ($type & Y::DOC_START) {
+        //     if (!is_null($value)) {
+        //         return self::build($value->value, $self::$_root);
+        //     }
         } elseif ($type & (Y::COMPACT_MAPPING|Y::COMPACT_SEQUENCE)) {
             return self::buildNodeList($value, $parent);
         } elseif ($type & (Y::REF_DEF | Y::REF_CALL)) {
@@ -158,28 +179,42 @@ final class Builder
      * @return     string    The litteral.
      * @todo : Example 6.1. Indentation Spaces  spaces must be considered as content
      */
-    private static function buildLitteral(NodeList $list, int $type = Y::RAW):string
-    {
-        $list->rewind();
-        $refIndent = $list->current()->indent;
-        //remove trailing blank
-        while ($list->top()->type & Y::BLANK) $list->pop();
+    private static function buildLitteral(NodeList &$list, int $type = Y::RAW):string
+    {//var_dump(__METHOD__,$list);
         $result = '';
-        $separator = [ Y::RAW => '', Y::LITT => "\n", Y::LITT_FOLDED => ' '][$type];
-        foreach ($list as $child) {
-            if ($child->value instanceof NodeList) {
-                $result .= self::buildLitteral($child->value, $type).$separator;
-            } else {
-                self::setLiteralValue($child, $result, $refIndent, $separator, $type);
+        $list->rewind();
+        $refIndent = $list->count() > 0 ? $list->current()->indent : 0;
+        if($list->count()) {
+            //remove trailing blank
+            while ($list->top()->type & Y::BLANK) $list->pop();
+            $separator = [ Y::RAW => '', Y::LITT => "\n", Y::LITT_FOLDED => ' '][$type];
+            foreach ($list as $child) {
+                if ($child->value instanceof NodeList) {
+                    $result .= self::buildLitteral($child->value, $type).$separator;
+                } else {
+                    self::setLiteralValue($child, $result, $refIndent, $separator, $type);
+                }
             }
         }
         return rtrim($result);
     }
 
-    private static function setLiteralValue(Node $child, string &$result, int $refIndent, string $separator, int $type)
+    private static function setLiteralValue(Node $node, string &$result, int $refIndent, string $separator, int $type)
     {
-        $val = $child->type & (Y::SCALAR) ? $child->value : substr($child->raw, $refIndent);
-        if ($type & Y::LITT_FOLDED && ($child->indent > $refIndent || ($child->type & Y::BLANK))) {
+        if ($node->type & Y::SCALAR) {
+            $val = $node->value;
+        } else {
+            if ($node->value instanceof Node && !($node->value->type & Y::SCALAR) && preg_match('/(([^:]+:)|( *-)) *$/', $node->raw)) {
+                $childValue = '';
+                self::setLiteralValue($node->value, $childValue, $refIndent, $separator, $type);
+                // $val = substr($node->raw.$separator.$childValue, $refIndent);
+                // $val = substr($node->raw, $refIndent).$separator.self::buildLitteral(new NodeList($node->value), $type);
+                $val = substr($node->raw, $refIndent).$separator.$childValue;
+            } else {
+                $val = substr($node->raw, $refIndent);
+            }
+        }
+        if ($type & Y::LITT_FOLDED && ($node->indent > $refIndent || ($node->type & Y::BLANK))) {
             if ($result[-1] === $separator)
                 $result[-1] = "\n";
             if ($result[-1] === "\n")

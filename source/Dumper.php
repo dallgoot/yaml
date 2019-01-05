@@ -15,6 +15,7 @@ class Dumper //extends AnotherClass
     private const INDENT = 2;
     private const WIDTH = 120;
     private const OPTIONS = 00000;
+    private const DATE_FORMAT = 'Y-m-d';
 
     /** @var null|\SplDoublyLinkedList */
     private static $result;
@@ -22,6 +23,7 @@ class Dumper //extends AnotherClass
     //options
     public const EXPAND_SHORT = 00001;
     public const SERIALIZE_CUSTOM_OBJECTS = 00010;
+    public static $floatPrecision = 4;
 
     // public function __construct(int $options = null)
     // {
@@ -50,7 +52,7 @@ class Dumper //extends AnotherClass
         } else {
             self::dump($dataType, 0);
         }
-        $out = implode("\n", iterator_to_array(self::$result));
+        $out = implode("\n", iterator_to_array(self::$result));//var_dump(iterator_to_array(self::$result));
         self::$result = null;
         return $out;
     }
@@ -74,32 +76,33 @@ class Dumper //extends AnotherClass
     private static function dump($dataType, int $indent)
     {
         if (is_scalar($dataType)) {
+            if ($dataType === INF) return '.inf';
+            if ($dataType === -INF) return '-.inf';
             switch (gettype($dataType)) {
                 case 'boolean': return $dataType ? 'true' : 'false';
-                case 'float': if (is_infinite($dataType)) return $dataType > 0 ? '.inf' : '-.inf';
-                              return sprintf('%.2F', $dataType);
-                case 'double': if (is_nan((float) $dataType)) return '.nan';
+                case 'float': //fall through
+                case 'double': return is_nan($dataType) ? '.nan' : sprintf('%.'.self::$floatPrecision.'F', $dataType);
                 default:
                     return $dataType;
             }
         } elseif (is_object($dataType)) {
-            self::dumpObject($dataType, $indent);
+            return self::dumpObject($dataType, $indent);
         } elseif (is_array($dataType)) {
-            self::dumpSequence($dataType, $indent);
+            return self::dumpArray($dataType, $indent);
         }
     }
 
-    private static function dumpYamlObject(YamlObject $dataType)
+    private static function dumpYamlObject(YamlObject $obj)
     {
-        if ($dataType->hasDocStart() && self::$result instanceof DLL) self::$result->push("---");
-        // self::dump($dataType, 0);
-        if (count($dataType) > 0) {
-            self::dumpSequence($dataType->getArrayCopy(), 0);
+        if ($obj->hasDocStart() && self::$result instanceof DLL) self::$result->push("---");
+        // self::dump($obj, 0);
+        if (count($obj) > 0) {
+            self::dumpArray($obj->getArrayCopy(), 0);
         } else {
-            self::dumpObject($dataType, 0);
+            self::dumpObject($obj, 0);
         }
-        // self::insertComments($dataType->getComment());
-        //TODO: $references = $dataType->getAllReferences();
+        // self::insertComments($obj->getComment());
+        //TODO: $references = $obj->getAllReferences();
     }
 
     private static function add($value, $indent)
@@ -110,7 +113,7 @@ class Dumper //extends AnotherClass
         }
     }
 
-    private static function dumpSequence(array $array, int $indent)
+    private static function dumpArray(array $array, int $indent)
     {
         $refKeys = range(0, count($array));
         foreach ($array as $key => $item) {
@@ -118,7 +121,7 @@ class Dumper //extends AnotherClass
             if (is_scalar($item)) {
                 self::add($lineStart.self::dump($item,0), $indent);
             } else {
-                self::add($lineStart, $indent);
+                self::add(rtrim($lineStart), $indent);
                 self::dump($item, $indent + self::INDENT);
             }
             next($refKeys);
@@ -144,29 +147,33 @@ class Dumper //extends AnotherClass
         }
         if ($obj instanceof Compact) return self::dumpCompact($obj, $indent);
         //TODO:  consider dumping datetime as date strings according to a format provided by user or default
-        if ($obj instanceof \DateTime) return $obj->format('Y-m-d');
+        if ($obj instanceof \DateTime) return $obj->format(self::DATE_FORMAT);
         // if ($obj instanceof \SplString) {var_dump('splstrin',$obj);return '"'.$obj.'"';}
-        $propList = get_object_vars($obj);
+        $propList = get_object_vars($obj);//var_dump($propList);
         foreach ($propList as $property => $value) {
-            if (is_scalar($value)) {
-                self::add("$property: ".self::dump($value, $indent), $indent);
+            if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime) {
+                self::add("$property: ".self::dump($value, $indent), $indent);//var_dump('IS SCALAR', $value);
             } else {
-                self::add("$property: ", $indent);
-                self::add(self::dump($value, $indent + self::INDENT), $indent + self::INDENT);
+                self::add("$property:", $indent);
+                // self::add(self::dump($value, $indent + self::INDENT), $indent + self::INDENT);var_dump('NOT SCALAR');
+                self::dump($value, $indent + self::INDENT);//var_dump('NOT SCALAR');
             }
         }
     }
 
     public static function dumpCompact($subject, int $indent)
-    {
+    {//var_dump('ICI');
         $pairs = [];
         if (is_array($subject) || $subject instanceof \ArrayIterator) {
             $max = count($subject);
-            $objectAsArray = is_array($subject) ? $subject : $subject->getArrayCopy();
-            if(array_keys($objectAsArray) !== range(0, $max)) {
+            $objectAsArray = is_array($subject) ? $subject : $subject->getArrayCopy();//var_dump(array_keys($objectAsArray), range(0, $max));
+            if(array_keys($objectAsArray) !== range(0, $max-1)) {
                 $pairs = $objectAsArray;
             } else {
-                $valuesList = array_map(self::dump, $objectAsArray, array_fill( 0 , $max , $indent ));
+                $valuesList = [];
+                foreach ($objectAsArray as $value) {
+                    $valuesList[] = is_scalar($value) ? self::dump($value, $indent) : self::dumpCompact($value, $indent);
+                }
                 return '['.implode(', ', $valuesList).']';
             }
         } else {
@@ -174,11 +181,7 @@ class Dumper //extends AnotherClass
         }
         $content = [];
         foreach ($pairs as $key => $value) {
-            if (is_scalar($value)) {
-                $content[] = "$key: ".self::dump($value, $indent);
-            } else {
-                $content[] = "$key: ".self::dumpCompact($value, $indent);
-            }
+            $content[] = "$key: ".(is_scalar($value) ? self::dump($value, $indent) : self::dumpCompact($value, $indent));
         }
         return '{'.implode(', ', $content).'}';
     }

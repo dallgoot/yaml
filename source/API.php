@@ -15,17 +15,25 @@ class API
 {
     /** @var null|bool */
     private $_hasDocStart; // null = no docstart, true = docstart before document comments, false = docstart after document comments
+    /** @var null|YamlObject */
+    private $_obj;
     private $_references = [];
     private $_comments   = [];
     // private $_documents  = [];
     private $_tags = [];
-
+    /** @var null|int */
     public $type = Y::MAPPING;
-    public $value = null;
+    /** @var null|string */
+    public $value;
 
-    const UNKNOWN_REFERENCE = self::class.": no reference named '%s'";
-    const UNAMED_REFERENCE  = self::class.": reference MUST have a name";
+    const UNKNOWN_REFERENCE = "no reference named: '%s'";
+    const UNAMED_REFERENCE  = "reference MUST have a name";
 
+
+    public function __construct(YamlObject $obj)
+    {
+        $this->_obj = $obj;
+    }
 
     /**
      * Adds a reference.
@@ -40,7 +48,7 @@ class API
         if (empty($name)) {
             throw new \UnexpectedValueException(self::UNAMED_REFERENCE, 1);
         }
-        $this->_references[(string) $name] = $value;
+        $this->_references[$name] = $value;
     }
 
     /**
@@ -97,7 +105,8 @@ class API
      */
     public function setText(string $value)
     {
-        $this->value .= $value;
+        $this->value .= ltrim($value);
+        return $this->_obj;
     }
 
     /**
@@ -132,4 +141,10 @@ class API
     {
         $this->_hasDocStart = $value;
     }
+
+    public function isTagged()
+    {
+        return !empty($this->_tags);
+    }
+
 }

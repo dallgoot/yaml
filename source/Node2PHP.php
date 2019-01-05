@@ -39,7 +39,7 @@ final class Node2PHP
      * @return mixed The value with appropriate PHP type
      * @throws \Exception if happens in R::isDate or R::isNumber
      */
-    private static function getScalar(string $v)
+    public static function getScalar(string $v)
     {
         if (R::isDate($v))   return self::$dateAsString ? $v : date_create($v);
         if (R::isNumber($v)) return self::getNumber($v);

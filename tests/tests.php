@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
 include 'tests_ref.php';
 
 use Dallgoot\Yaml\Yaml as Y;

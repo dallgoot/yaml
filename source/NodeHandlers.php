@@ -42,17 +42,19 @@ final class NodeHandlers
         if (!empty($value)) {
             $hasComment = strpos($value, ' #');
             if (is_bool($hasComment)) {
-                $n = new Node($value, $node->line);
+                $n = new Node(trim($value), $node->line);
+                $n->indent = $node->indent + strlen($node->identifier);
+                $node->add($n);
             } else {
                 $n = new Node(trim(substr($value, 0, $hasComment)), $node->line);
+                $n->indent = $node->indent + strlen($node->identifier);
+                $node->add($n);
                 if ($n->type !== Y::PARTIAL) {
-                    $comment = new Node(trim(substr($value, $hasComment + 1)), $node->line);
+                    $comment = new Node(trim(substr($value, $hasComment)), $node->line);
                     $comment->identifier = true; //to specify it is NOT a fullline comment
                     $node->add($comment);
                 }
             }
-            $n->indent = $node->indent + strlen($node->identifier);
-            $node->add($n);
         }
     }
 
@@ -79,7 +81,7 @@ final class NodeHandlers
                 $n = new Node('', $node->line);
                 $n->type = Y::KEY;
                 $n->identifier = trim($property, '"\' ');//TODO : maybe check for proper quoting first ?
-                $n->value = new Node($matches['v'][$index], $node->line);
+                $n->value = new Node(trim($matches['v'][$index]), $node->line);
                 $node->value->push($n);
             }
             return;
@@ -91,7 +93,7 @@ final class NodeHandlers
             foreach ($matches['item'] as $key => $item) {
                 $i = new Node('', $node->line);
                 $i->type = Y::ITEM;
-                $i->add(new Node($item, $node->line));
+                $i->add(new Node(trim($item), $node->line));
                 $node->value->push($i);
             }
             return;
@@ -148,7 +150,7 @@ final class NodeHandlers
             $node->identifier = strstr($v, ' ', true);
             $value = trim(substr($nodeValue, $pos + 1));
             $value = R::isProperlyQuoted($value) ? trim($value, "\"'") : $value;
-            $node->add((new Node($value, $node->line))->setParent($node));
+            $node->add(new Node($value, $node->line));
         }
     }
 

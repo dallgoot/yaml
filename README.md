@@ -4,7 +4,7 @@
 PHP library to load and parse YAML file to PHP coherent datatypes equivalent
 
 ## Features:
-- define *appropriate* PHP datatypes for values ie. object for mappings, array for sequences, JSON, DateTime, integers, floats, etc.
+- define *appropriate* PHP datatypes for values ie. object for mappings, array for sequences, Compact syntax, JSON, DateTime, etc.
 - recover from some parsing errors
 - tolerance to tabulations
 
@@ -31,10 +31,11 @@ PHP library to load and parse YAML file to PHP coherent datatypes equivalent
     - any other datatypes is a one YAML Document
 - Dallgoot\Yaml\Tag : an object with properties _tagname_, _value_ -->
 
-## TODO:
+## Todo
 - implement/verify Loader::Options, Dumper::Options
 - DUMPER:
     - finish implementation
+    - quote strings that are not valid values in YAML syntax
     - set up tests
 - DEFINE debug levels :
     - print Loader Tree structure
@@ -45,7 +46,7 @@ PHP library to load and parse YAML file to PHP coherent datatypes equivalent
   - Examples of each function of the API
 - Benchmarks against other libs
 
-## IMPROVEMENT
+## Improvements
 - more precise errors identification in YAML content
 - Unicode checking (?)
 - tags: default handling for common tags, and user-customized process for custom ones

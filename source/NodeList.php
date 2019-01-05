@@ -35,8 +35,19 @@ class NodeList extends \SplDoublyLinkedList
     {
         $types = 0;
         foreach ($this as $child) {
-            $types |= $child->type;
+            if ($child->type & Y::DOC_START) {var_dump(__METHOD__.' theres a DOCSTART');
+                if ($child->value instanceof Node) {
+                    $types |= $child->value->type;
+                } elseif ($child->value instanceof NodeList) {
+                    $child->value->forceType();
+                    $types |= $child->value->type;
+                    // $types |= $child->value->getTypes();
+                }
+            } else {
+                $types |= $child->type;
+            }
         }
+        $this->rewind();
         return $types;
     }
 
@@ -48,7 +59,7 @@ class NodeList extends \SplDoublyLinkedList
     public function forceType()
     {
         if (is_null($this->type)) {
-            $childTypes  = $this->getTypes();
+            $childTypes = $this->getTypes();
             if ($childTypes & (Y::KEY|Y::SET_KEY)) {
                 if ($childTypes & Y::ITEM) {
                     throw new \ParseError(self::class.": Error conflicting types found");
@@ -57,8 +68,17 @@ class NodeList extends \SplDoublyLinkedList
             } else {
                 if ($childTypes & Y::ITEM) {
                     $this->type = Y::SEQUENCE;
+                } elseif ($childTypes & Y::DOC_START && $this->count() === 1) {var_dump(__METHOD__.' theres a DOCSTART');
+                    if ($child->value instanceof Node) {
+                        $this->type = $child->value->type;
+                    } elseif ($child->value instanceof NodeList) {
+                        $child->value->forceType();
+                        $this->type =  $child->value->type;
+                    }
                 } elseif (!($childTypes & Y::COMMENT)) {
                     $this->type = Y::LITT_FOLDED;
+                } else {
+                    $this->type = Y::SCALAR;
                 }
             }
         }

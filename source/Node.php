@@ -12,18 +12,18 @@ use Dallgoot\Yaml\{Yaml as Y, Regex as R};
  */
 final class Node
 {
+    /** @var null|string|boolean */
+    public $identifier;
     /** @var int */
     public $indent = -1;
     /** @var int */
     public $line;
-    /** @var int */
-    public $type;
-    /** @var null|string|boolean */
-    public $identifier;
-    /** @var Node|NodeList|null|string */
-    public $value = null;
     /** @var null|string */
     public $raw;
+    /** @var int */
+    public $type;
+    /** @var null|Node|NodeList|string */
+    public $value;
 
     /** @var null|Node */
     private $parent;
@@ -100,7 +100,10 @@ final class Node
         if (is_null($this->value)) {
             $this->value = $child;
             return;
-        }elseif ($this->value instanceof Node) {
+        } elseif (is_scalar($this->value)) {
+            $this->value = new Node($this->value, $this->line);
+        }
+        if ($this->value instanceof Node) {
             if ($this->value->type & Y::LITTERALS) {
                 $type = $this->value->type;
                 $this->value = new NodeList();
@@ -174,8 +177,8 @@ final class Node
         elseif (in_array($first, ['?', ':']))      NodeHandlers::onSetElement($nodeValue, $this);
         elseif (in_array($first, ['!', '&', '*'])) NodeHandlers::onNodeAction($nodeValue, $this);
         else {
-            $characters = [ '#' =>  [Y::COMMENT, $v],
-                            '%' =>  [Y::DIRECTIVE, $v],
+            $characters = [ '#' =>  [Y::COMMENT, $nodeValue],
+                            '%' =>  [Y::DIRECTIVE, $nodeValue],
                             '>' =>  [Y::LITT_FOLDED, null],
                             '|' =>  [Y::LITT, null]
                             ];
@@ -199,6 +202,8 @@ final class Node
         return ['line'  => $this->line,
                 'indent'=> $this->indent,
                 'type'  => Y::getName($this->type).($this->identifier ? "($this->identifier)" : ''),
-                'value' => $this->value];
+                'value' => $this->value,
+                'raw'   => $this->raw,
+            ];
     }
 }
