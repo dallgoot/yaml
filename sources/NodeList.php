@@ -17,6 +17,8 @@ class NodeList extends \SplDoublyLinkedList
 
     /**
      * NodeList constructor
+     * 
+     * @param Node $node (optional) a node that will be pushed as first element
      */
     public function __construct(Node $node = null)
     {
@@ -35,7 +37,7 @@ class NodeList extends \SplDoublyLinkedList
     {
         $types = 0;
         foreach ($this as $child) {
-            if ($child->type & Y::DOC_START) {var_dump(__METHOD__.' theres a DOCSTART');
+            if ($child->type & Y::DOC_START) {//var_dump(__METHOD__.' theres a DOCSTART');
                 if ($child->value instanceof Node) {
                     $types |= $child->value->type;
                 } elseif ($child->value instanceof NodeList) {
@@ -54,7 +56,8 @@ class NodeList extends \SplDoublyLinkedList
     /**
      * If no type is set for this NodeList, forces a type according to its children types
      *
-     * @throws     \ParseError  (description)
+     * @return self
+     * @throws \ParseError  (description)
      */
     public function forceType()
     {
@@ -68,7 +71,7 @@ class NodeList extends \SplDoublyLinkedList
             } else {
                 if ($childTypes & Y::ITEM) {
                     $this->type = Y::SEQUENCE;
-                } elseif ($childTypes & Y::DOC_START && $this->count() === 1) {var_dump(__METHOD__.' theres a DOCSTART');
+                } elseif ($childTypes & Y::DOC_START && $this->count() === 1) {//var_dump(__METHOD__.' theres a DOCSTART');
                     if ($child->value instanceof Node) {
                         $this->type = $child->value->type;
                     } elseif ($child->value instanceof NodeList) {

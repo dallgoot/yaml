@@ -140,6 +140,6 @@ tags_with_quotes: |
   {"data":"SGVsbG8gd29ybGQ=","enclosed with single quotes":"SGVsbG8gd29ybGQ=","containing spaces":"SGVs bG8gd 29ybGQ="}
 # TODO:this a Symfony specific behavior :is it useful and used ?
 tag_symfony_phpobject: |
-  {"foo":"O:30:\"Symfony\\Component\\Yaml\\Tests\\B\":1:{s:1:\"b\";s:3:\"foo\";}","bar":1}
+  {"foo":{"__PHP_Incomplete_Class_Name":"Symfony\\Component\\Yaml\\Tests\\B","b":"foo"},"bar":1}
 yaml_in_literal_folded: |
   {"yamlObject_indices":"-\n  - 1\n  - 2\n  - 3\n-\n  memberOfO: some really really really really really really really really really very long text as a simple string"}

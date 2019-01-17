@@ -23,10 +23,13 @@ final class Node2PHP
      */
     public static function get(Node $n)
     {
+        if (!($n instanceof Node)) {
+            throw new Exception("Error: only Dallgoot\\Yaml\\Node is valid argument", 1);
+        }
         if (is_null($n->value)) return null;
         if ($n->type & (Y::REF_CALL|Y::SCALAR)) return self::getScalar((string) $n->value);
         if ($n->type & Y::JSON) return $n->value;
-        $expected = [Y::QUOTED => trim((string) $n->value, "\"'"),
+        $expected = [Y::QUOTED => substr(trim((string) $n->value), 1, -1),
                      Y::RAW    => strval((string) $n->value)];
         return $expected[$n->type] ?? null;
     }
@@ -52,7 +55,7 @@ final class Node2PHP
                     '-.inf' => -INF,
                     '.nan'  => NAN
         ];
-        return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : strval($v);
+        return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $v;
     }
 
     /**

@@ -26,8 +26,8 @@ final class TypesBuilder
     /**
      * Builds a key and set the property + value to the given parent
      *
-     * @param Node $node       The node with type YAML::KEY
-     * @param object|array $parent       The parent
+     * @param Node         $node   The node with type YAML::KEY
+     * @param object|array $parent The parent
      *
      * @throws \ParseError if Key has no name(identifier) Note: empty string is allowed
      * @return null
@@ -64,17 +64,17 @@ final class TypesBuilder
     /**
      * Builds an item. Adds the item value to the parent array|Iterator
      *
-     * @param      Node        $node    The node with type YAML::ITEM
-     * @param      array|\Iterator      $parent  The parent
+     * @param Node            $node   The node with type YAML::ITEM
+     * @param array|\Iterator $parent The parent
      *
-     * @throws     \Exception  if parent is another type than array or object Iterator
+     * @throws \Exception  if parent is another type than array or object Iterator
      * @return null
      */
     public static function buildItem(Node $node, &$parent = null)
     {
         extract((array) $node, EXTR_REFS);
         if (!is_array($parent) && !($parent instanceof \ArrayIterator)) {
-            throw new \Exception("parent must be an Iterable not ".(is_object($parent) ? get_class($parent) : gettype($parent)), 1);
+            throw new \Exception("parent must be an ArrayIterator not ".(is_object($parent) ? get_class($parent) : gettype($parent)));
         }
         $ref = $parent instanceof \ArrayIterator ? $parent->getArrayCopy() : $parent;
         $numKeys = array_filter(array_keys($ref), 'is_int');
@@ -91,25 +91,25 @@ final class TypesBuilder
     /**
      * Builds a set key.
      *
-     * @param      Node        $node    The node of type YAML::SET_KEY.
-     * @param      object      $parent  The parent
+     * @param Node   $node   The node of type YAML::SET_KEY.
+     * @param object $parent The parent
      *
-     * @throws     \Exception  if a problem occurs during serialisation (json format) of the key
+     * @throws \Exception  if a problem occurs during serialisation (json format) of the key
      */
     public static function buildSetKey(Node $node, &$parent = null)
     {
         $built = is_object($node->value) ? Builder::build($node->value) : null;
         $stringKey = is_string($built) && Regex::isProperlyQuoted($built) ? trim($built, '\'" '): $built;
         $key = json_encode($stringKey, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true), 1);
+        if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($node->value, true));
         $parent->{trim($key, '\'" ')} = null;
     }
 
     /**
      * Builds a set value.
      *
-     * @param      Node    $node    The node of type YAML::SET_VALUE
-     * @param      object  $parent  The parent (the document object or any previous object created through a mapping key)
+     * @param Node   $node   The node of type YAML::SET_VALUE
+     * @param object $parent The parent (the document object or any previous object created through a mapping key)
      */
     public static function buildSetValue(Node $node, &$parent = null)
     {
@@ -124,48 +124,29 @@ final class TypesBuilder
     /**
      * Builds a tag and its value (also built) and encapsulates them in a Tag object.
      *
-     * @param      Node    $node    The node of type YAML::TAG
-     * @param      array|object|null  $parent  The parent
+     * @param Node              $node   The node of type YAML::TAG
+     * @param array|object|null $parent The parent
      *
-     * @return     Tag|mixed     The tag object of class Dallgoot\Yaml\Tag.
+     * @return Tag|mixed The tag object of class Dallgoot\Yaml\Tag.
      */
     public static function buildTag(Node $node, &$parent = null)
     {
+        if (is_null($parent) && $node->value & (Y::ITEM|Y::KEY)) {
+            $node->value = new NodeList($node->value);
+            $node->value->forceType();
+        }
         $tag = new Tag((string) $node->identifier, $node->value);
         //soit le tag est connu et on build sa valeur transformée
-        if ($tag->isKnown()) {
-            return $tag->buildValue($parent);
-        } else { // soit le tag est inconnu et on retourne un objet Tag avec sa valeur 'built'
-            return $tag;
-        }
-
-        // if ($parent === Builder::$_root) {
-        //     $parent->addTag($name);
-        //     if (!empty($node->value)) {
-        //         // $index = $parent->key();
-        //         // $parent->offsetSet($index, $node->value);
-        //         // $parent->prev();
-        //     }
-        //     return;
-        // } else {
-        //     // $target = $node->value;
-        //     // if ($node->value instanceof Node) {
-        //     //     if ($node->value->type & (Y::KEY|Y::ITEM)) {
-        //     //         if (is_null($parent)) {
-        //     //             $target = new NodeList($node->value);
-        //     //         } else {
-        //     //             Builder::build($node->value, $parent);
-        //     //         }
-        //     //     }
-        //     // }
-        // }
+        $tag->build($parent);
+        return $tag->isKnown() ? $tag->value : $tag;
     }
 
     /**
      * Builds a directive. ---NOT IMPLEMENTED YET---
      *
-     * @param      Node  $node    The node
-     * @param      mixed  $parent  The parent
+     * @param Node  $node   The node
+     * @param mixed $parent The parent
+     * 
      * @todo implement if required
      */
     public static function buildDirective()//Node $node, $parent = null)

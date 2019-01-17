@@ -29,7 +29,11 @@ class API
     const UNKNOWN_REFERENCE = "no reference named: '%s'";
     const UNAMED_REFERENCE  = "reference MUST have a name";
 
-
+    /**
+     * Creates API object to be used for the document provided as argument
+     * 
+     * @param YamlObject $obj the YamlObject as the target for all methods call that needs it
+     */
     public function __construct(YamlObject $obj)
     {
         $this->_obj = $obj;
@@ -42,11 +46,12 @@ class API
      * @param mixed  $value The reference value
      *
      * @throws \UnexpectedValueException  (description)
+     * @return null
      */
     public function addReference(string $name, $value)
     {
         if (empty($name)) {
-            throw new \UnexpectedValueException(self::UNAMED_REFERENCE, 1);
+            throw new \UnexpectedValueException(self::UNAMED_REFERENCE);
         }
         $this->_references[$name] = $value;
     }
@@ -64,9 +69,14 @@ class API
         if (array_key_exists($name, $this->_references)) {
             return $this->_references[$name];
         }
-        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name), 1);
+        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name));
     }
 
+    /**
+     * Return array with all references as Keys and their values, declared for this YamlObject
+     * 
+     * @return array
+     */
     public function getAllReferences():array
     {
         return $this->_references;
@@ -77,6 +87,8 @@ class API
      *
      * @param int    $lineNumber The line number at which thecomment should appear
      * @param string $value      The comment
+     * 
+     * @return null
      */
     public function addComment(int $lineNumber, $value)
     {
@@ -88,7 +100,7 @@ class API
      *
      * @param int|null $lineNumber The line number
      *
-     * @return string|array The comment at $lineNumber OR ALL comments.
+     * @return string|array The comment at $lineNumber OR all comments.
      */
     public function getComment(int $lineNumber = null)
     {
@@ -102,6 +114,8 @@ class API
      * Sets the text when the content is *only* a litteral
      *
      * @param string $value The value
+     * 
+     * @return YamlObject
      */
     public function setText(string $value)
     {
@@ -114,6 +128,8 @@ class API
      * Adds a tag.
      *
      * @param string $value The value
+     * 
+     * @return null
      */
     public function addTag(string $value)
     {
@@ -123,7 +139,7 @@ class API
     /**
      * Determines if it has YAML document start string => '---'.
      *
-     * @return     boolean  True if has document start, False otherwise.
+     * @return boolean  True if has document start, False otherwise.
      */
     public function hasDocStart()
     {
@@ -133,7 +149,7 @@ class API
     /**
      * Sets the document start.
      *
-     * @param null|bool  $value  The value : null = no docstart, true = docstart before document comments, false = docstart after document comments
+     * @param null|bool $value The value : null = no docstart, true = docstart before document comments, false = docstart after document comments
      *
      * @return null
      */
@@ -142,6 +158,11 @@ class API
         $this->_hasDocStart = $value;
     }
 
+    /**
+     * Is the whole YAML document (YamlObject) tagged ?
+     * 
+     * @return bool
+     */
     public function isTagged()
     {
         return !empty($this->_tags);

@@ -13,9 +13,8 @@ const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | 
 */
 ini_set("auto_detect_line_endings", 1);
 // $content = file_get_contents('./tests/cases/parsing/yaml_in_literal_folded.yml');//var_dump($content);
-$content = file_get_contents('./tests/cases/parsing/tags_in_mapping.yml');//var_dump($content);
-$yaml = Y::parse($content, null, (int) $argv[1]);
-// $yaml = Y::parseFile('./references/Example 2.27.yml', null, 1);
+$content = file_get_contents('./tests/cases/examples/Example_2_15.yml');//var_dump($content);
+$yaml = Y::parse($content, 0, (int) $argv[1]);
 var_dump($yaml);
 var_dump(json_encode($yaml, JSON_OPTIONS));
 exit(0);

@@ -24,6 +24,10 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
 
     private const UNDEFINED_METHOD = self::class.": undefined method '%s', valid methods are %s";
 
+    /**
+     * Construct the YamlObject making sure the indices can be accessed directly
+     * and creates the API object with a reference to this YamlObject.
+     */
     public function __construct()
     {
         parent::__construct([], 1); //1 = Array indices can be accessed as properties in read/write.
@@ -33,11 +37,10 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     /**
      * Transfer method calls to Yaml::API object
      *
-     * @param  string                   $funcName   The function name
-     * @param  mixed                    $arguments  The arguments
+     * @param string $funcName  The function name
+     * @param mixed  $arguments The arguments
      *
-     * @throws \BadMethodCallException  if method isn't part of the public API
-     *
+     * @throws \BadMethodCallException if method isn't part of the public API
      * @return mixed                    the return value of the API::method called
      */
     public function __call($funcName, $arguments)
@@ -46,7 +49,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         $getName = function ($o) { return $o->name; };
         $publicApi  = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PUBLIC));
         if (!in_array($funcName, $publicApi) ) {
-            throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName, implode(",", $publicApi)), 1);
+            throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName, implode(",", $publicApi)));
         }
         return call_user_func_array([$this->__yaml__object__api, $funcName], $arguments);
     }
@@ -55,7 +58,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      * Returns a string representation of the YamlObject when
      * it has NO property NOR keys ie. is only a LITTERAL
      *
-     * @return     string  String representation of the object.
+     * @return string String representation of the object.
      */
     public function __toString():string
     {
@@ -65,7 +68,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     /**
      * Filters unwanted property for JSON serialization
      *
-     * @return   mixed  Array (of object properties or keys) OR string if LITTERAL only
+     * @return mixed Array (of object properties or keys) OR string if YAML object only contains LITTERAL (in self::value)
      */
     public function jsonSerialize()
     {

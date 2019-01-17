@@ -14,7 +14,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
     /**
      *  Construct Compact according to argument if present
      *
-     * @param array|object  $candidate  The candidate to be made into Compact
+     * @param array|object $candidate The candidate to be made into Compact
      */
     public function __construct($candidate = null)
     {
@@ -47,7 +47,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
         try {
             $out = new Compact($arrayOrObject);
         } catch (\Exception $e) {
-            throw new \Exception(__METHOD__.":only array or object can be made as compact syntax", 1);
+            throw new \Exception(__METHOD__.":only array or object can be made as compact syntax", null, $e);
         }
         return $out;
     }

@@ -13,13 +13,29 @@ use Dallgoot\Yaml\{Yaml as Y, Regex as R};
 final class NodeHandlers
 {
 
-    public static function onQuoted($nodeValue, Node $node)
+    /**
+     * Set $node type and value when $nodevalue starts with a quote (simple or double)
+     *
+     * @param string $nodeValue The node value
+     * @param Node   $node      The node
+     *
+     * @see   Node::identify
+     */
+    public static function onQuoted(string $nodeValue, Node $node)
     {
-        $node->type = R::isProperlyQuoted($nodeValue) ? Y::QUOTED : Y::PARTIAL;
-        $node->value = $nodeValue;
+        $node->type = R::isProperlyQuoted(trim($nodeValue)) ? Y::QUOTED : Y::PARTIAL;
+        $node->value = trim($nodeValue);
     }
 
-    public static function onSetElement($nodeValue, Node $node)
+    /**
+     * Set $node type and value when NodeValue starts with a Set characters "?:"
+     *
+     * @param string $nodeValue The node value
+     * @param Node   $node      The node
+     *
+     * @see   Node::identify
+     */
+    public static function onSetElement(string $nodeValue, Node $node)
     {
         $node->type = $nodeValue[0] === '?' ? Y::SET_KEY : Y::SET_VALUE;
         $v = trim(substr($nodeValue, 1));
@@ -29,19 +45,24 @@ final class NodeHandlers
     }
 
     /**
-     * Process when a "key: value" syntax is found in the parsed string
+     * Process when a "key: value" syntax is found in the parsed string.
+     * Sets $node type and value, and add child if applicable.
      * Note : key is match 1, value is match 2 as per regex from R::KEY
      *
      * @param array $matches The matches provided by 'preg_match' function in Node::parse
+     * @param Node  $node    The current Node being created
+     *
+     * @return null
+     * @see    Node::identify
      */
     public static function onKey(array $matches, Node $node)
     {
         $node->type = Y::KEY;
         $node->identifier = trim($matches[1], '"\' ');
-        $value = isset($matches[2]) ? trim($matches[2]) : null;
+        $value = isset($matches[2]) ? trim($matches[2]) : null;//var_dump($value);
         if (!empty($value)) {
             $hasComment = strpos($value, ' #');
-            if (is_bool($hasComment)) {
+            if (is_bool($hasComment) || R::isProperlyQuoted($value)) {
                 $n = new Node(trim($value), $node->line);
                 $n->indent = $node->indent + strlen($node->identifier);
                 $node->add($n);
@@ -59,21 +80,23 @@ final class NodeHandlers
     }
 
     /**
-     * Determines the correct type and value when a compact object/array syntax is found
+     * Determines the Node type and value when a compact object/array syntax is found
      *
      * @param string $value The value assumed to start with { or [ or characters
+     * @param Node   $node  The current Node being created
      *
-     * @see Node::identify
+     * @return null
+     * @see    Node::identify
      */
-    public static function onCompact($value, Node $node)
+    public static function onCompact(string $value, Node $node)
     {
         $node->value = json_decode($value, false, 512, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        if (json_last_error() === JSON_ERROR_NONE){
+        if (json_last_error() === JSON_ERROR_NONE) {
             $node->type = Y::JSON;
             return;
         }
         $node->value = new NodeList();
-        if (preg_match(R::MAPPING, $value)){
+        if (preg_match(R::MAPPING, $value)) {
             $node->type = Y::COMPACT_MAPPING;
             $node->value->type = Y::COMPACT_MAPPING;
             preg_match_all(R::MAPPING_VALUES, trim(substr($value, 1,-1)), $matches);
@@ -86,7 +109,7 @@ final class NodeHandlers
             }
             return;
         }
-        if (preg_match(R::SEQUENCE, $value)){
+        if (preg_match(R::SEQUENCE, $value)) {
             $node->type = Y::COMPACT_SEQUENCE;
             $node->value->type = Y::COMPACT_SEQUENCE;
             preg_match_all(R::SEQUENCE_VALUES, trim(substr($value, 1,-1)), $matches);
@@ -103,13 +126,15 @@ final class NodeHandlers
     }
 
     /**
-     * Determines type and value when an hyphen "-" is found
+     * Determines Node type and value when an hyphen "-" is found
      *
-     * @param string $nodeValue The node value
+     * @param string $nodeValue The node string value
+     * @param Node   $node      The current Node being created
      *
-     * @see Node::identify
+     * @return null
+     * @see    Node::identify
      */
-    public static function onHyphen($nodeValue, Node $node)
+    public static function onHyphen(string $nodeValue, Node $node)
     {
         if (substr($nodeValue, 0, 3) === '---') {
             $node->type = Y::DOC_START;
@@ -117,14 +142,14 @@ final class NodeHandlers
             if (!empty($rest)) {
                 $n = new Node($rest, $node->line);
                 $n->indent = $node->indent + 4;
-                $node->value = $n->setParent($node);
+                $node->add($n);
             }
         } elseif (preg_match(R::ITEM, $nodeValue, $matches)) {
             $node->type = Y::ITEM;
             if (isset($matches[1]) && !empty(trim($matches[1]))) {
                 $n = new Node(trim($matches[1]), $node->line);
                 $n->indent = $node->indent + 2;
-                $node->value = $n->setParent($node);
+                $node->add($n);
             }
         } else {
             $node->type  = Y::SCALAR;
@@ -133,20 +158,22 @@ final class NodeHandlers
     }
 
     /**
-     * Determines the type and value according to $nodeValue when one of these characters is found : !,&,*
+     * Sets Node type and value according to $nodeValue when one of these characters is found : !,&,*
      *
      * @param string $nodeValue The node value
+     * @param Node   $node      The current Node being created
      *
-     * @see  Node::identify
-     * @todo handle tags like  <tag:clarkevans.com,2002:invoice>
+     * @return null
+     * @see    Node::identify
+     * @todo   handle tags like  <tag:clarkevans.com,2002:invoice>
      */
-    public static function onNodeAction($nodeValue, Node $node)
+    public static function onNodeAction(string $nodeValue, Node $node)
     {
         $v = substr($nodeValue, 1);
         $node->type = ['!' => Y::TAG, '&' => Y::REF_DEF, '*' => Y::REF_CALL][$nodeValue[0]];
         $node->identifier = $v;
         $pos = strpos($v, ' ');
-        if ($node->type & (Y::TAG|Y::REF_DEF) && is_int($pos)) {
+        if (is_int($pos)) {
             $node->identifier = strstr($v, ' ', true);
             $value = trim(substr($nodeValue, $pos + 1));
             $value = R::isProperlyQuoted($value) ? trim($value, "\"'") : $value;

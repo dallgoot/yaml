@@ -10,10 +10,10 @@ use \SplDoublyLinkedList as DLL;
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
-class Dumper //extends AnotherClass
+class Dumper
 {
     private const INDENT = 2;
-    private const WIDTH = 120;
+    private const WIDTH  = 120;
     private const OPTIONS = 00000;
     private const DATE_FORMAT = 'Y-m-d';
 
@@ -42,7 +42,7 @@ class Dumper //extends AnotherClass
      */
     public static function toString($dataType, int $options = null):string
     {
-        if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml", 1);
+        if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml");
         self::$options = is_int($options) ? $options : self::OPTIONS;
         self::$result = new DLL;
         if ($dataType instanceof YamlObject) {
@@ -66,13 +66,21 @@ class Dumper //extends AnotherClass
      *
      * @throws \Exception datatype cannot be null
      *
-     * @return boolean  true = if the file has been correctly saved  (according to return from 'file_put_contents')
+     * @return bool true = if the file has been correctly saved  ( return value from 'file_put_contents')
      */
     public static function toFile(string $filePath, $dataType, int $options = null):bool
     {
         return !is_bool(file_put_contents($filePath, self::toString($dataType, $options)));
     }
 
+    /**
+     * Dump (determine) the string value according to type
+     *
+     * @param string  $dataType The data type
+     * @param integer $indent   The indent
+     *
+     * @return string The YAML representation of $dataType
+     */
     private static function dump($dataType, int $indent)
     {
         if (is_scalar($dataType)) {
@@ -92,6 +100,11 @@ class Dumper //extends AnotherClass
         }
     }
 
+    /**
+     * Dumps an YamlObject (YAML document) as a YAML string
+     *
+     * @param YamlObject $obj The object
+     */
     private static function dumpYamlObject(YamlObject $obj)
     {
         if ($obj->hasDocStart() && self::$result instanceof DLL) self::$result->push("---");
@@ -105,7 +118,13 @@ class Dumper //extends AnotherClass
         //TODO: $references = $obj->getAllReferences();
     }
 
-    private static function add($value, $indent)
+    /**
+     * Add $value to the current YAML representation (self::$result) and cut lines to self::WIDTH if needed
+     *
+     * @param string $value  The value
+     * @param int    $indent The indent
+     */
+    private static function add(string $value, int $indent)
     {
         $newVal = str_repeat(" ", $indent).$value;
         foreach (str_split($newVal, self::WIDTH) as $chunks) {
@@ -113,6 +132,12 @@ class Dumper //extends AnotherClass
         }
     }
 
+    /**
+     * Dumps an array as a YAML sequence
+     *
+     * @param array   $array  The array
+     * @param integer $indent The indent
+     */
     private static function dumpArray(array $array, int $indent)
     {
         $refKeys = range(0, count($array));
@@ -128,6 +153,11 @@ class Dumper //extends AnotherClass
         }
     }
 
+    /**
+     * Insert comments from YamlObject at specific lines OR add to the value currently at the line
+     *
+     * @param array $commentsArray  The comments array
+     */
     private static function insertComments(array $commentsArray)
     {
         foreach ($commentsArray as $lineNb => $comment) {
@@ -135,6 +165,14 @@ class Dumper //extends AnotherClass
         }
     }
 
+    /**
+     * Dumps an object as a YAML mapping.
+     *
+     * @param      object   $obj     The object
+     * @param      integer  $indent  The indent
+     *
+     * @return     <type>   ( description_of_the_return_value )
+     */
     private static function dumpObject(object $obj, int $indent)
     {
         if ($obj instanceof Tag) {
@@ -161,6 +199,17 @@ class Dumper //extends AnotherClass
         }
     }
 
+    /**
+     * Dumps a Compact|mixed (representing an array or object) as the single-line format representation.
+     * All values inside are assumed single-line as well.
+     * Note: can NOT use JSON_encode because of possible reference calls or definitions as : '&abc 123', '*fre'
+     * which would be quoted by json_encode
+     *
+     * @param mixed   $subject The subject
+     * @param integer $indent  The indent
+     *
+     * @return string the string representation (JSON like) of the value
+     */
     public static function dumpCompact($subject, int $indent)
     {//var_dump('ICI');
         $pairs = [];

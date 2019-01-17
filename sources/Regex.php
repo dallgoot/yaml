@@ -63,10 +63,10 @@ class Regex
     /**
      * Determines if number.
      *
-     * @param      string   $var    The variable
+     * @param string $var A string value
      *
-     * @return     boolean  True if number, False otherwise.
-     * @todo replace regex expression with class constants
+     * @return boolean  True if number, False otherwise.
+     * @todo   replace regex expression with class constants
      */
     public static function isNumber(string $var):bool
     {
@@ -77,12 +77,12 @@ class Regex
     /**
      * Determines if properly quoted.
      *
-     * @param      string   $var    The variable
+     * @param string $var The variable
      *
-     * @return     boolean  True if properly quoted, False otherwise.
+     * @return boolean True if properly quoted, False otherwise.
      */
     public static function isProperlyQuoted(string $var):bool
     {
-        return (bool) preg_match("/^(['\"]).*?(?<![\\\\])\\1$/s", $var);
+        return (bool) preg_match("/^(['\"]).*?(?<![\\\\])\\1$/s", trim($var));
     }
 }

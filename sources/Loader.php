@@ -37,6 +37,13 @@ final class Loader
     private const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
     private const EXCEPTION_LINE_SPLIT = self::class.": content is not a string(maybe a file error?)";
 
+    /**
+     * Loader constructor
+     *
+     * @param string|null       $absolutePath The absolute file path
+     * @param int|null          $options      The options (bitmask as int value)
+     * @param integer|bool|null $debug        The debug level as either boolean (true=1) or any integer
+     */
     public function __construct($absolutePath = null, $options = null, $debug = 0)
     {
         $this->debug   = is_int($debug) ? min($debug, 3) : 1;
@@ -73,6 +80,14 @@ final class Loader
         return $this;
     }
 
+    /**
+     * Gets the source iterator.
+     *
+     * @param string|null $strContent  The string content
+     *
+     * @throws \Exception if self::content is empty or splitting on linefeed has failed
+     * @return Generator  The source iterator.
+     */
     private function getSourceIterator($strContent = null)
     {
         $source = $this->content ?? preg_split("/\n/m", preg_replace('/(\r\n|\r)/', "\n", $strContent), 0, PREG_SPLIT_DELIM_CAPTURE);
@@ -104,7 +119,7 @@ final class Loader
         $emptyLines = [];
         try {
             foreach ($sourceIterator() as $lineNb => $lineString) {
-                $n = new Node($lineString, $lineNb);
+                $n = new Node($lineString, $lineNb);//var_dump($n);
                 if ($this->onSpecialType($n, $previous, $emptyLines, $lineString)) continue;
                 $this->attachBlankLines($emptyLines, $previous);
                 $emptyLines = [];
@@ -137,21 +152,57 @@ final class Loader
                 return null;
             }
             !is_null($this->debug) && print_r($root);
-            throw new \Exception($message." for $file:$lineNb", 3);
+            throw new \Exception($message." for $file:$lineNb", 1, $e);
         }
     }
 
+    /**
+     * Modify parent target when current Node indentation is superior to previous node indentation
+     *
+     * @param Node $target   The target
+     * @param Node $previous The previous
+     *
+     * @return null
+     */
     public function onMoreIndent(Node &$previous, Node &$target)
     {
-        $deepest = $previous->getDeepestNode();
+        // switch ($previous->type) {
+        //     case 'value':
+        //         # code...
+        //         break;
+
+        //     default:
+        //         # code...
+        //         break;
+        // }
+        // var_dump(__METHOD__);
         if ($previous->type & Y::ITEM) {
+            $deepest = $previous->getDeepestNode();
             if ($deepest->type & (Y::KEY|Y::TAG) && is_null($deepest->value)) {
                 $target = $deepest;
             }
         }
+        // if ($previous->type & Y::LITTERALS) {
+        //     $n->type = Y::SCALAR;
+        //     $n->identifier = null;
+        //     // $n->value = ltrim($lineString);
+        //     // $previous = $previous;
+        //     var_dump('NEvEr HERE3');//die();
+        // }
+        // $target = $previous;
     }
 
+    //TODO: rearrange conditions call
 
+    /**
+     * Modify parent target when current Node indentation is equal to previous node indentation
+     *
+     * @param Node $n        The current Node
+     * @param Node $previous The previous
+     * @param Node $target   The target
+     *
+     * @return null
+     */
     private function onEqualIndent(Node &$n, Node &$previous, Node &$target)
     {
         $deepest = $previous->getDeepestNode();
@@ -164,6 +215,14 @@ final class Loader
         }
     }
 
+    /**
+     * Attach blank(empty) Nodes savec in $emptylines to their parent (it means they are needed)
+     *
+     * @param array $emptyLines The empty lines
+     * @param Node  $previous   The previous
+     *
+     * @return null
+     */
     public function attachBlankLines(array &$emptyLines, Node &$previous)
     {
         foreach ($emptyLines as $blankNode) {
@@ -173,7 +232,18 @@ final class Loader
         }
     }
 
-    private function onSpecialType(Node &$n, Node &$previous, &$emptyLines, $lineString):bool
+    /**
+     * For certain (special) Nodes types some actions are required BEFORE parent assignment
+     *
+     * @param Node   $n          The current Node being treated in self::parse
+     * @param Node   $previous   The previous Node
+     * @param array  $emptyLines The empty lines
+     * @param string $lineString The current line string (= raw value of the current Node)
+     *
+     * @return boolean  if True self::parse skips changing previous and adding to parent
+     * @see self::parse
+     */
+    private function onSpecialType(Node &$n, Node &$previous, array &$emptyLines, string $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
         if ($deepest->type & Y::PARTIAL) {
@@ -183,18 +253,25 @@ final class Loader
             }
             $deepest->parse($deepest->value.$add);
             return true;
-        } elseif ($n->type & Y::BLANK) {
-            // $this->onSpecialBlank($emptyLines, $n, $previous, $deepest);
-            if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
-            if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
-            return true;
-        } elseif ($n->type & Y::COMMENT
-                  && !($previous->getParent()->value->type & Y::LITTERALS)
-                  && !($deepest->type & Y::LITTERALS)) {
-            // $previous->getParent(0)->add($n);
-            return true;
-        } elseif ($n->type & Y::TAG && is_null($n->value) ){//&& $previous->type & (Y::ROOT|Y::DOC_START|Y::DOC_END)) {
-            $n->value = '';
+        } else {
+            switch ($n->type) {
+                // case Y::LITT_FOLDED: die('found LIterral alone!!');
+                case Y::BLANK:
+                    // $this->onSpecialBlank($emptyLines, $n, $previous, $deepest);
+                    if ($previous->type & Y::SCALAR)   $emptyLines[] = $n->setParent($previous->getParent());
+                    if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
+                    return true;
+                case Y::COMMENT:
+                    if (!($previous->getParent()->value->type & Y::LITTERALS) && !($deepest->type & Y::LITTERALS)) {
+                        $previous->getParent(0)->add($n);
+                        return true;
+                    };
+                    break;
+                case Y::TAG: if (is_null($n->value)) {
+                                $n->value = '';
+                             }
+                default: return false;
+            }
         }
         return false;
     }
@@ -205,18 +282,42 @@ final class Loader
     //     if ($deepest->type & Y::LITTERALS) $emptyLines[] = $n->setParent($deepest);
     // }
 
+    /**
+     * According to the current Node type and deepest value
+     * this indicates if self::parse skips (or not) the parent and previous assignment
+     *
+     * @param      Node     $n           The current Node
+     * @param      Node     $previous    The previous Node
+     * @param      <type>   $lineString  The current Node raw line string
+     *
+     * @return     boolean  True if context, False otherwiser
+     * @todo  is this really necessary according ot other checkings out there ?
+     */
     private function onContextType(Node &$n, Node &$previous, $lineString):bool
     {
         $deepest = $previous->getDeepestNode();
-        if (($previous->type & Y::LITTERALS && $n->indent >= $previous->indent) || (($deepest->type & Y::LITTERALS) && is_null($deepest->value))) {
+        if (($deepest->type & Y::LITTERALS) && is_null($deepest->value)) {
             $n->type = Y::SCALAR;
             $n->identifier = null;
-            $n->value = trim($lineString);
-            $previous = $deepest->getParent();
+            $n->value = ltrim($lineString);
+            $previous = $deepest;//->getParent();
+            // var_dump('NEvEr HERE2');//die();
             return false;
         }
+        /*var_dump('HERE',
+            $n->indent >= $previous->indent,
+            Y::LITT,
+            Y::LITT_FOLDED,
+            Y::LITT+Y::LITT_FOLDED,
+            $n,
+            // $deepest,
+            // decbin(Y::LITTERALS),
+            // decbin(Y::LITT+Y::LITT_FOLDED),
+            // decbin($previous->type),
+            // decbin($deepest->type),
+            is_null($deepest->value));*/
         if (is_null($deepest->value) && $deepest->type & (Y::LITTERALS|Y::REF_DEF|Y::SET_VALUE|Y::TAG)) {
-            $previous = $deepest;
+            $previous = $deepest;//var_dump($deepest);die();
         }
         // if ($n->type & Y::SCALAR && $previous->type & Y::SCALAR) {
         //     $previous = $previous->getParent();

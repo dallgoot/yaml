@@ -88,6 +88,7 @@ final class Node
      * - if value is a NodeList, push $child into and set NodeList type accordingly
      *
      * @param Node $child The child
+     * 
      * @todo  refine the conditions when Y::LITTERALS
      */
     public function add(Node $child)
