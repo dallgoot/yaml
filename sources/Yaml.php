@@ -11,54 +11,6 @@ namespace Dallgoot\Yaml;
  */
 final class Yaml
 {
-    const BLANK            = 1;
-    const COMMENT          = 2;
-    const COMPACT_MAPPING  = 4;
-    const COMPACT_SEQUENCE = 8;
-    const DIRECTIVE        = 16;
-    const DOC_END          = 32;
-    const DOC_START        = 64;
-    const ITEM             = 128;
-    const JSON             = 256;
-    const KEY              = 512;
-    const LITT             = 1024; //literal
-    const LITT_FOLDED      = 2048; //literal
-    const MAPPING          = 4096;
-    const PARTIAL          = 8192;
-    const QUOTED           = 16384;
-    const RAW              = 32768;
-    const REF_CALL         = 65536; //reference
-    const REF_DEF          = 131072; //reference
-    const ROOT             = 262144;
-    const SCALAR           = 524288;
-    const SEQUENCE         = 1048576;
-    const SET              = 2097152;
-    const SET_KEY          = 4194304;
-    const SET_VALUE        = 8388608;
-    const TAG              = 16777216;
-
-    const LITTERALS = self::LITT|self::LITT_FOLDED;
-
-    /* @var null|array */
-    public static $TYPE_NAMES = null;
-
-    /**
-     * Gets the name for a given constant declared in the Dallgoot\Yaml class
-     * (memoize the value=>name associations on first call)
-     *
-     * @param integer $typeInteger The constant value
-     *
-     * @return string The name.
-     */
-    public static function getName(int $typeInteger):string
-    {
-        if (is_null(self::$TYPE_NAMES)) {
-            $oClass = new \ReflectionClass(__CLASS__);
-            self::$TYPE_NAMES = array_flip($oClass->getConstants());
-        }
-        return self::$TYPE_NAMES[$typeInteger] ?? 'UNKNOWN TYPE!!!';
-    }
-
     /**
      * Parse the given Yaml string to a PHP type
      *
@@ -105,9 +57,9 @@ final class Yaml
         try {
             return (new Loader($fileName, $options, $debug))->parse();
         } catch (\Exception|\Error $e) {
-            throw new Exception(__CLASS__." Error during parsing '$fileName'", 1, $e);
+            throw new \Exception(__CLASS__." Error during parsing '$fileName'", 1, $e);
         }
-        
+
     }
 
     /**
@@ -125,10 +77,10 @@ final class Yaml
         try {
             return Dumper::toString($somePhpVar, $options);
         } catch (\Exception|\Error $e) {
-            throw new Exception(__CLASS__." Error dumping", 1, $e);
+            throw new \Exception(__CLASS__." Error dumping", 1, $e);
         }
     }
-    
+
 
     /**
      * Builds the YAML representation corresponding to given PHP variable ($somePhpVar)
@@ -147,7 +99,7 @@ final class Yaml
         try {
             return Dumper::toFile($fileName, $somePhpVar, $options);
         } catch (\Exception|\Error $e) {
-            throw new Exception(__CLASS__." Error during dumping '$fileName'", 1, $e);
+            throw new \Exception(__CLASS__." Error during dumping '$fileName'", 1, $e);
         }
     }
 }

@@ -2,8 +2,6 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Yaml as Y;
-
 /**
  * TODO
  *
@@ -22,7 +20,7 @@ class API
     // private $_documents  = [];
     private $_tags = [];
     /** @var null|int */
-    public $type = Y::MAPPING;
+    // public $type = Y::MAPPING;
     /** @var null|string */
     public $value;
 
@@ -31,7 +29,7 @@ class API
 
     /**
      * Creates API object to be used for the document provided as argument
-     * 
+     *
      * @param YamlObject $obj the YamlObject as the target for all methods call that needs it
      */
     public function __construct(YamlObject $obj)
@@ -74,7 +72,7 @@ class API
 
     /**
      * Return array with all references as Keys and their values, declared for this YamlObject
-     * 
+     *
      * @return array
      */
     public function getAllReferences():array
@@ -87,7 +85,7 @@ class API
      *
      * @param int    $lineNumber The line number at which thecomment should appear
      * @param string $value      The comment
-     * 
+     *
      * @return null
      */
     public function addComment(int $lineNumber, $value)
@@ -114,10 +112,10 @@ class API
      * Sets the text when the content is *only* a litteral
      *
      * @param string $value The value
-     * 
+     *
      * @return YamlObject
      */
-    public function setText(string $value)
+    public function setText(string $value):YamlObject
     {
         $this->value .= ltrim($value);
         return $this->_obj;
@@ -128,7 +126,7 @@ class API
      * Adds a tag.
      *
      * @param string $value The value
-     * 
+     *
      * @return null
      */
     public function addTag(string $value)
@@ -160,7 +158,7 @@ class API
 
     /**
      * Is the whole YAML document (YamlObject) tagged ?
-     * 
+     *
      * @return bool
      */
     public function isTagged()

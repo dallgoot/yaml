@@ -23,13 +23,13 @@ class Regex
     const ALL    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&num)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
     const MAP    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|\\w+) *?: *(?&all)) *,? *)* *?\\})";
     const SEQ    = "(?'seq'\\[ *(?:(?'i'(?&all)) *,? *)* *\\])";
-    const ALLDEF = "(?(DEFINE)".self::QUOTED.self::NUM.self::RC.self::WORD.self::TAG.self::RD.self::ALL.self::MAP.self::SEQ.")";
+    const ALLDEF = "(?(DEFINE)".Regex::QUOTED.Regex::NUM.Regex::RC.Regex::WORD.Regex::TAG.Regex::RD.Regex::ALL.Regex::MAP.Regex::SEQ.")";
 
-    const MAPPING  = "/".self::ALLDEF."(?&map)$/";
-    const MAPPING_VALUES = "/".self::ALLDEF."(?'k'(?&quot)|\\w+) *: *(?'v'(?&all))?/i";
+    const MAPPING  = "/".Regex::ALLDEF."(?&map)$/";
+    const MAPPING_VALUES = "/".Regex::ALLDEF."(?'k'(?&quot)|\\w+) *: *(?'v'(?&all))?/i";
 
-    const SEQUENCE = "/".self::ALLDEF."(?&seq)/";
-    const SEQUENCE_VALUES = "/".self::ALLDEF."(?'item'(?&all)) *,? */i";
+    const SEQUENCE = "/".(Regex::ALLDEF)."(?&seq)/";
+    const SEQUENCE_VALUES = "/".Regex::ALLDEF."(?'item'(?&all)) *,? */i";
 
     const KEY  = '/^([[:alnum:]_\'"~][[:alnum:]_ -.\/~]*[ \t]*)(?::[ \t]([^\n]+)|:)$/i';
     const ITEM = '/^-([ \t]+(.*))?$/';
@@ -55,7 +55,7 @@ class Regex
         $matchSpaced    = preg_match($spaced, $v);
         $matchIso       = preg_match($iso8601, $v);
         if (is_bool($matchDate) || is_bool($matchCanonical) || is_bool($matchSpaced) || is_bool($matchIso)) {
-            throw new \Exception(self::class." regex ERROR for dates");
+            throw new \Exception(__METHOD__." regex ERROR");
         }
         return $matchDate || $matchCanonical || $matchSpaced || $matchIso;
     }

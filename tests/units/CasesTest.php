@@ -31,7 +31,7 @@ final class Cases extends TestCase
 
     public function parsingProvider()
     {
-        $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/parsing_tests.yml'));
+        $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/parsing_tests.yml'));//var_dump($nameResultPair);die();
         return $this->getGenerator($nameResultPair);
     }
 

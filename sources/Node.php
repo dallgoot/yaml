@@ -2,16 +2,17 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Yaml as Y, Regex as R};
-
 /**
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
-final class Node
+class Node
 {
+    /** @var bool */
+    public static $dateAsString = false;
+
     /** @var null|string|boolean */
     public $identifier;
     /** @var int */
@@ -21,7 +22,7 @@ final class Node
     /** @var null|string */
     public $raw;
     /** @var int */
-    public $type;
+    // public $type;
     /** @var null|Node|NodeList|string */
     public $value;
 
@@ -34,15 +35,14 @@ final class Node
      * @param string|null $nodeString The node string
      * @param int|null    $line       The line
      */
-    public function __construct($nodeString = null, $line = 0)
+    public function __construct(string $nodeString = null, $line = 0)
     {
+        $this->raw = $nodeString;
         $this->line = (int) $line;
-        if (is_null($nodeString)) {
-            $this->type = Y::ROOT;
-        } else {
-            $this->raw = $nodeString;
-            $this->parse($nodeString);
-        }
+         //permissive to tabs but replacement
+        $nodeValue = preg_replace("/^\t+/m", " ", $nodeString);
+        $this->indent = strspn($nodeValue, ' ');
+        // $this->value = $nodeString;
     }
 
     /**
@@ -64,21 +64,18 @@ final class Node
      * @param int|null $indent The indent
      * @param int $type  first ancestor of this YAML::type is returned
      *
-     * @return Node|null   The parent.
+     * @return Node   The parent.
      */
     public function getParent(int $indent = null, $type = 0):Node
     {
-        if ($this->type === Y::ROOT) return $this;
         if (!is_int($indent)) return $this->parent ?? $this;
         $cursor = $this;
-        while ($cursor instanceof Node && $cursor->indent >= $indent) {
-            if ($cursor->indent === $indent && $cursor->type !== $type) {
-                $cursor = $cursor->parent ?? $cursor;
-                break;
-            }
+        while ($cursor instanceof Node
+               && $cursor->indent !== $indent
+               && !($cursor->parent instanceof NodeRoot)) {
             $cursor = $cursor->parent;
         }
-        return $cursor ?? $this;
+        return $cursor->parent ?? $this;
     }
 
     /**
@@ -88,32 +85,22 @@ final class Node
      * - if value is a NodeList, push $child into and set NodeList type accordingly
      *
      * @param Node $child The child
-     * 
+     *
      * @todo  refine the conditions when Y::LITTERALS
      */
     public function add(Node $child)
     {
-        if ($this->type & (Y::SCALAR|Y::QUOTED)) {
-            $this->getParent()->add($child);
-            return;
-        }
         $child->setParent($this);
         if (is_null($this->value)) {
             $this->value = $child;
-            return;
-        } elseif (is_scalar($this->value)) {
-            $this->value = new Node($this->value, $this->line);
+        } elseif ($this->value instanceof Node) {
+            $this->value = new NodeList($this->value);
+            $this->value->push($child);
+        } elseif ($this->value instanceof NodeList) {
+            $this->value->push($child);
+        // } else {
+        //     $this->value = new NodeScalar($this->raw, $this->line);
         }
-        if ($this->value instanceof Node) {
-            if ($this->value->type & Y::LITTERALS) {
-                $type = $this->value->type;
-                $this->value = new NodeList();
-                $this->value->type = $type;
-            } else {
-                $this->value = new NodeList($this->value);
-            }
-        }
-        $this->value->push($child);
     }
 
     /**
@@ -124,12 +111,12 @@ final class Node
     public function getDeepestNode():Node
     {
         $cursor = $this;
-        while ($cursor->value instanceof Node || $cursor->value instanceof NodeList) {
+        while ($cursor->value instanceof Node) {
             if ($cursor->value instanceof NodeList) {
-                if ($cursor->value->count() === 1) {
+                if ($cursor->value->count() > 0) {
                     $cursor = $cursor->value->OffsetGet(0);
                 } else {
-                    $cursor = $cursor;
+                    // $cursor = $cursor;
                     break;
                 }
             } else {
@@ -139,59 +126,155 @@ final class Node
         return $cursor;
     }
 
+
     /**
-     * Parses the string (assumed to be a line from a valid YAML)
+     * For certain (special) Nodes types some actions are required BEFORE parent assignment
      *
-     * @param string $nodeString The node string
+     * @param Node   $previous   The previous Node
+     * @param array  $emptyLines The empty lines
      *
-     * @return Node|self
+     * @return boolean  if True self::parse skips changing previous and adding to parent
+     * @see self::parse
      */
-    public function parse(string $nodeString):Node
+    public function needsSpecialProcess(Node &$previous, array &$emptyLines):bool
     {
-        $nodeValue = preg_replace("/^\t+/m", " ", $nodeString); //permissive to tabs but replacement
-        $this->indent = strspn($nodeValue, ' ');
-        $nodeValue = ltrim($nodeValue);
-        if ($nodeValue === '') {
-            $this->type = Y::BLANK;
-        } elseif (substr($nodeValue, 0, 3) === '...') {//TODO: can have something on same line ?
-            $this->type = Y::DOC_END;
-        } elseif (preg_match(R::KEY, $nodeValue, $matches)) {
-            NodeHandlers::onKey($matches, $this);
+        $deepest = $previous->getDeepestNode();
+        if ($deepest instanceof NodePartial) {
+            return $deepest->specialProcess($this, $emptyLines);
         } else {
-            $this->identify($nodeValue);
+            return $this->specialProcess($previous, $emptyLines);
         }
-        return $this;
+    }
+
+    public function specialProcess(Node &$previous, array &$emptyLines)
+    {
+        // $deepest = $previous->getDeepestNode();
+        // //what first character to determine if escaped sequence are allowed
+        // $val = ($deepest->value[-1] !== "\n" ? ' ' : '').substr($this->raw, $this->indent);
+        // $deepest->parse($deepest->value.$val);
+        return false;
+    }
+
+
+    public function getTargetOnLessIndent(Node $previous):Node
+    {
+        return $previous->getParent($this->indent);
     }
 
     /**
-     *  Set the type and value according to first character
+     * Modify parent target when current Node indentation is equal to previous node indentation
      *
-     * @param string $nodeValue The node value
+     * @param Node $previous The previous
+     *
+     * @return Node
      */
-    private function identify($nodeValue)
+    public function getTargetonEqualIndent(Node &$previous):Node
     {
-        $v = ltrim(substr($nodeValue, 1));
-        $first = $nodeValue[0];
-        if ($first === "-")                        NodeHandlers::onHyphen($nodeValue, $this);
-        elseif (in_array($first, ['"', "'"]))      NodeHandlers::onQuoted($nodeValue, $this);
-        elseif (in_array($first, ['{', '[']))      NodeHandlers::onCompact($nodeValue, $this);
-        elseif (in_array($first, ['?', ':']))      NodeHandlers::onSetElement($nodeValue, $this);
-        elseif (in_array($first, ['!', '&', '*'])) NodeHandlers::onNodeAction($nodeValue, $this);
+        return $previous->getParent();
+    }
+
+   /**
+     * Modify parent target when current Node indentation is superior to previous node indentation
+     *
+     * @param Node $previous The previous
+     *
+     * @return Node
+     */
+    public function getTargetOnMoreIndent(Node &$previous):Node
+    {
+        $target = $previous;
+        $deepest = $previous->getDeepestNode();
+        if ($deepest->isAwaitingChildren()) {
+            $target = $deepest;
+        }
+        return $target;
+    }
+
+    public function isAwaitingChildren()
+    {
+        return false;
+    }
+
+   /**
+     * According to the current Node type and deepest value
+     * this indicates if self::parse skips (or not) the parent and previous assignment
+     *
+     * @param  Node     $target    The current Node as target parent
+     *
+     * @return boolean  True if context, False otherwiser
+     * @todo   is this really necessary according ot other checkings out there ?
+     */
+    public function skipOnContext(Node &$target):bool
+    {
+        return false;
+    }
+
+
+    public function getValue(&$parent = null)
+    {
+        if (is_null($this->value))                return null;
+        elseif (is_string($this->value))          return $this->getScalar($this->value);
+        elseif ($this->value instanceof Node)     return $this->value->getValue($parent);
+        elseif ($this->value instanceof NodeList) return Builder::buildNodeList($this->value, $parent);
         else {
-            $characters = [ '#' =>  [Y::COMMENT, $nodeValue],
-                            '%' =>  [Y::DIRECTIVE, $nodeValue],
-                            '>' =>  [Y::LITT_FOLDED, null],
-                            '|' =>  [Y::LITT, null]
-                            ];
-            if (isset($characters[$first])) {
-                $this->type  = $characters[$first][0];
-                $this->value = $characters[$first][1];
-            } else {
-                $this->type  = Y::SCALAR;
-                $this->value = $nodeValue;
-            }
+            throw new \ParseError("Error trying to getValue of ".gettype($this->value));
         }
     }
+
+    /**
+     * Returns the correct PHP type according to the string value
+     *
+     * @param string $v a string value
+     *
+     * @return mixed The value with appropriate PHP type
+     * @throws \Exception if happens in Regex::isDate or Regex::isNumber
+     */
+    public static function getScalar(string $v)
+    {
+        if (Regex::isDate($v))   return self::$dateAsString ? $v : date_create($v);
+        if (Regex::isNumber($v)) return self::getNumber($v);
+        $types = ['yes'   => true,
+                    'no'    => false,
+                    'true'  => true,
+                    'false' => false,
+                    'null'  => null,
+                    '.inf'  => INF,
+                    '-.inf' => -INF,
+                    '.nan'  => NAN
+        ];
+        return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $v;
+    }
+
+    /**
+     * Returns the correct PHP type according to the string value
+     *
+     * @param string $v a string value
+     *
+     * @return int|float   The scalar value with appropriate PHP type
+     * @todo make sure there 's only ONE dot before cosndering a float
+     */
+    private static function getNumber(string $v)
+    {
+        if (preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
+        if (preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
+        return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
+    }
+
+    /**
+     * Generic function to distinguish between Node and NodeList
+     *
+     * @param mixed         $parent The parent
+     *
+     * @return mixed  ( description_of_the_return_value )
+     */
+    public function build(&$parent = null)
+    {
+        // if ($this->value instanceof NodeList) return Builder::buildNodeList($this->value, $parent);
+        // if ($this->value instanceof Node) return $this->build($parent);
+        // return self::build($parent);
+        return $this->getValue($this->value);
+    }
+
 
     /**
      * PHP internal function for debugging purpose : simplify output provided by 'var_dump'
@@ -200,11 +283,12 @@ final class Node
      */
     public function __debugInfo():array
     {
-        return ['line'  => $this->line,
+        $props = ['line'  => $this->line,
                 'indent'=> $this->indent,
-                'type'  => Y::getName($this->type).($this->identifier ? "($this->identifier)" : ''),
                 'value' => $this->value,
                 'raw'   => $this->raw,
             ];
+        if ($this->identifier) $props['identifier'] = "($this->identifier)";
+        return $props;
     }
 }

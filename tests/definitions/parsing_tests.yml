@@ -1,7 +1,7 @@
 blockChompingWithInsideBlank: |
   {"bar":"one\n\ntwo"}
 blockChompingWithKeepAndTrailing: |
-  {"foo":"one\ntwo","bar":"one\ntwo"}
+  {"foo":"one\ntwo\n","bar":"one\ntwo\n\n"}
 blockChompingWithKeep: |
   {"foo":"one\ntwo","bar":"one\ntwo"}
 blockChompingWithStripAndTrailing: |
@@ -13,9 +13,9 @@ comment_at_first_and_inside_map: |
 comment_between_keys: |
   {"a":{"b":"hello","d":"hello"}}
 comment_inside_litteral_in_subkey: |
-  {"test":"foo\n# bar\nbaz","collection":{"one":"foo\n# bar\nbaz","two":"foo\n# bar\nbaz"}}
+  {"test":"foo\nbaz","collection":{"one":"foo\nbaz","two":"foo\nbaz"}}
 comments_inside_litteral: |
-  {"pages":[{"title":"some title","content":"# comment 1\nheader\n\n    # comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter # comment3"}]}
+  {"pages":[{"title":"some title","content":"header\n    <body>\n        <h1>title</h1>\n    </body>\n\nfooter\n"}]}
 comment_with_a_colon: |
   {"foo":{"bar":"foobar"}}
 compact_array_inside_mapping: |
@@ -45,17 +45,15 @@ key_separated_by_blank_line: |
 keysWithTabs: |
   {"foo":"bar","baz":"bar","bor":"baz","boz":"biz"}
 literalfolded_keep_trailing: |
-  {"foo":"one two","bar":"one two"}
+  {"foo":"one two\n","bar":"one two\n\n"}
 literalFolded_strip_trailing: |
   {"foo":"one two","bar":"one two"}
-literalFolded_strip: |
-  {"foo":"one two","bar":"one two"}
-literalfolded: |
-  {"foo":"one two","bar":"one two"}
+literalFolded_clip: |
+  {"foo":"one two\n","bar":"one two\n"}
 literal_keep_trailing_leading: |
-  {"foo":"bar"}
+  {"foo":"\n\nbar"}
 literal_with_comment_at_lastline: |
-  {"content":"# comment 1\nheader\n\n    # comment 2\n<body>\n<h1>title</h1>\n</body>\n\nfooter # comment3"}
+  {"content":"header\n\n    <body>\n        <h1>title</h1>\n    </body>\n\nfooter"}
 map_in_an_empty_item: |
   {"foo":{"bar":"foobar"}}
 map_with_boolean_keys: |

@@ -30,8 +30,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
     public function jsonSerialize():array
     {
         $prop = get_object_vars($this);
-        if (count($prop) > 0) return $prop;
-        if (count($this) > 0) return iterator_to_array($this);
+        return count($prop) > 0 ? $prop : iterator_to_array($this);
     }
 
     /**
@@ -47,7 +46,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
         try {
             $out = new Compact($arrayOrObject);
         } catch (\Exception $e) {
-            throw new \Exception(__METHOD__.":only array or object can be made as compact syntax", null, $e);
+            throw new \Exception(__METHOD__.":only array or object can be made as compact syntax", 1, $e);
         }
         return $out;
     }

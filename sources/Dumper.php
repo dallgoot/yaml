@@ -1,7 +1,6 @@
 <?php
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml as Y;
 use \SplDoublyLinkedList as DLL;
 
 /**
@@ -52,7 +51,7 @@ class Dumper
         } else {
             self::dump($dataType, 0);
         }
-        $out = implode("\n", iterator_to_array(self::$result));//var_dump(iterator_to_array(self::$result));
+        $out = implode("\n", iterator_to_array(self::$result));
         self::$result = null;
         return $out;
     }
@@ -186,15 +185,13 @@ class Dumper
         if ($obj instanceof Compact) return self::dumpCompact($obj, $indent);
         //TODO:  consider dumping datetime as date strings according to a format provided by user or default
         if ($obj instanceof \DateTime) return $obj->format(self::DATE_FORMAT);
-        // if ($obj instanceof \SplString) {var_dump('splstrin',$obj);return '"'.$obj.'"';}
-        $propList = get_object_vars($obj);//var_dump($propList);
+        $propList = get_object_vars($obj);
         foreach ($propList as $property => $value) {
             if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime) {
-                self::add("$property: ".self::dump($value, $indent), $indent);//var_dump('IS SCALAR', $value);
+                self::add("$property: ".self::dump($value, $indent), $indent);
             } else {
                 self::add("$property:", $indent);
-                // self::add(self::dump($value, $indent + self::INDENT), $indent + self::INDENT);var_dump('NOT SCALAR');
-                self::dump($value, $indent + self::INDENT);//var_dump('NOT SCALAR');
+                self::dump($value, $indent + self::INDENT);
             }
         }
     }
@@ -211,11 +208,11 @@ class Dumper
      * @return string the string representation (JSON like) of the value
      */
     public static function dumpCompact($subject, int $indent)
-    {//var_dump('ICI');
+    {
         $pairs = [];
         if (is_array($subject) || $subject instanceof \ArrayIterator) {
             $max = count($subject);
-            $objectAsArray = is_array($subject) ? $subject : $subject->getArrayCopy();//var_dump(array_keys($objectAsArray), range(0, $max));
+            $objectAsArray = is_array($subject) ? $subject : $subject->getArrayCopy();
             if(array_keys($objectAsArray) !== range(0, $max-1)) {
                 $pairs = $objectAsArray;
             } else {

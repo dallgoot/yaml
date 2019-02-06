@@ -1,7 +1,6 @@
 <?php
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\{Yaml as Y};
 use \ReflectionMethod as RM;
 /**
  * TODO
@@ -46,7 +45,7 @@ class Tag
         }
         $this->tagName = $tagName;
         $this->raw = $raw;
-        if (empty($registeredHandlers)) $this->registerLegacyTags();
+        if (empty(self::$registeredHandlers)) $this->registerLegacyTags();
     }
 
     /**
@@ -59,9 +58,8 @@ class Tag
         $reflectAPI = new \ReflectionClass(self::class);
         $methodsList = [];
         $list = $reflectAPI->getMethods(RM::IS_FINAL | RM::IS_STATIC & RM::IS_PRIVATE);
-        // var_dump($list);die();
         foreach ($list as $method) {
-            $methodsList[$method->name] = $method->getClosure($this);// var_dump('XXX'.$method->name);//die();
+            $methodsList[$method->name] = $method->getClosure($this);
         }
         foreach (self::LEGACY_TAGS_HANDLERS as $tagName => $methodName) {
             self::$registeredHandlers[$tagName] = $methodsList[$methodName];
@@ -74,54 +72,81 @@ class Tag
      * @param string $tagName  The tag name
      * @param $node  $node     The candidate Node|NodeList which will be processed by handler
      *
-     * @throws     Exception  if $node is not Node or NodeList
+     * @throws \Exception  if $node is not Node or NodeList
      * @return null
      */
     private function checkHandlerArgument($tagName, $node)
     {
         if (!($node instanceof Node) && !($node instanceof NodeList) ) {
-            throw new Exception(sprintf(self::WRONG_VALUE, $tagName, get_class($node)));
+            throw new \Exception(sprintf(self::WRONG_VALUE, $tagName, gettype($node)));
         }
     }
 
     /**
      * Specific Handler for Symfony custom tag : 'php/object'
      *
-     * @param object $node   The node
-     * @param Node   $parent The parent
+     * @param object             $node   The node
+     * @param object|array|null  $parent The parent
      *
      * @throws Exception if unserialize fails OR if its a NodeList (no support of multiple values for this tag)
      * @return object    the unserialized object according to Node value
      */
-    private final static function symfonyPHPobjectHandler(object $node, Node &$parent = null)
+    private final static function symfonyPHPobjectHandler(object $node, &$parent = null)
     {
-        if ($node instanceof Node && $node->type & Y::SCALAR) {
+        if ($node instanceof NodeScalar) {
             $phpObject = unserialize($node->value);
             // NOTE : we assume this is only used for Object types (if a boolean false is serialized this will FAIL)
             if (is_bool($phpObject)) {
-                throw new Exception("value for tag 'php/object' could NOT be unserialized");
+                throw new \Exception("value for tag 'php/object' could NOT be unserialized");
             }
             return $phpObject;
         } elseif ($node instanceof NodeList) {
-            throw new Exception("tag 'php/object' can NOT be a NodeList");
+            throw new \Exception("tag 'php/object' can NOT be a NodeList");
         }
     }
+    /**
+     * Specific handler for 'inline' tag
+     *
+     * @param object $node
+     * @param object|array|null  $parent The parent
+     *
+     * @todo implements
+     */
+    private final static function inlineHandler(object $node, object &$parent = null)
+    {
+        return self::strHandler($node, $parent);
+    }
+
+
+    /**
+     * Specific handler for 'long' tag
+     *
+     * @param object $node
+     * @param object|array|null  $parent The parent
+     *
+     * @todo implements
+     */
+    private final static function longHandler(object $node, object &$parent = null)
+    {
+        return self::strHandler($node, $parent);
+    }
+
 
     /**
      * Specific Handler for 'str' tag
      *
      * @param object $node    The Node or NodeList
-     * @param object $parent  The parent (if applicable)
+     * @param object|array|null  $parent The parent
      *
      * @return string the value of Node converted to string if needed
      */
     private final static function strHandler(object $node, object &$parent = null)
     {
         if ($node instanceof Node) {
-            if ($node->type & Y::KEY) TypesBuilder::buildKey($node, $parent);
+            if ($node instanceof NodeKey) $node->build($parent);
             return ltrim($node->raw);
-        } elseif ($node instanceof NodeList) {
-            return Builder::buildLitteral($node, Y::LITT_FOLDED);
+        // } elseif ($node instanceof NodeList) {
+        //     return Builder::buildLitteral($node);
         }
     }
 
@@ -129,16 +154,22 @@ class Tag
      * Specific Handler for 'binary' tag
      *
      * @param object $node   The node or NodeList
-     * @param Node   $parent The parent (for handlers methods signature coherence, not used here)
+     * @param object|array|null  $parent The parent
      *
      * @return string  The value considered as 'binary' Note: the difference with strHandler is that multiline have not separation
      */
     private final static function binaryHandler(object $node, Node &$parent = null)
     {
         if ($node instanceof Node) {
-            return ltrim($node->raw);
-        } elseif ($node instanceof NodeList) {
-            return Builder::buildLitteral($node, Y::RAW);
+            $out = '';
+            $cursor = $node->value;
+            while ($cursor instanceof Node) {
+                $out .= $cursor->value;
+                $cursor = $cursor->value;
+            }
+            return ltrim($out);
+        // } elseif ($node instanceof NodeList) {
+        //     return Builder::buildLitteral($node, Y::RAW);
         }
     }
 
@@ -146,22 +177,21 @@ class Tag
      * Specific Handler for the '!set' tag
      *
      * @param      object     $node    The node
-     * @param      Node       $parent  The parent
+     * @param object|array|null  $parent The parent
      *
-     * @throws     Exception  if theres a set but no children (set keys or set values)
+     * @throws     \Exception  if theres a set but no children (set keys or set values)
      * @return     YamlObject|object  process the Set, ie. an object construction with properties as serialized JSON values
      */
     private final static function setHandler(object $node, Node &$parent = null)
     {
         if (!($node instanceof NodeList)) {
-            throw new Exception("tag '!!set' can NOT be a single Node");
+            throw new \Exception("tag '!!set' can NOT be a single Node");
         } else {
-            $node->type = Y::SET;
-            if ($parent instanceof YamlObject) {
-                Builder::buildNodeList($node, $parent);
-            } else {
-                return Builder::buildNodeList($node, $parent);
-            }
+            // if ($parent instanceof YamlObject) {
+            //     Builder::buildNodeList($node, $parent);
+            // } else {
+            //     return Builder::buildNodeList($node, $parent);
+            // }
         }
     }
 
@@ -169,22 +199,22 @@ class Tag
      * Specifi Handler for the 'omap' tag
      *
      * @param object $node   The node
-     * @param Node   $parent The parent
+     * @param object|array|null  $parent The parent
      *
-     * @throws Exception  if theres an omap but no map items
+     * @throws \Exception  if theres an omap but no map items
      * @return YamlObject|array process the omap
      */
     private final static function mapHandler(object $node, Node &$parent = null)
     {
         if (!($node instanceof NodeList)) {
-            throw new Exception("tag '!!omap' can NOT be a single Node");
+            throw new \Exception("tag '!!omap' can NOT be a single Node");
         } else {
-            $node->type = Y::SEQUENCE;
-            if ($parent instanceof YamlObject) {
-                Builder::buildNodeList($node, $parent);
-            } else {
-                return Builder::buildNodeList($node, $parent);
-            }
+            // $node->type = Y::SEQUENCE;
+            // if ($parent instanceof YamlObject) {
+            //     Builder::buildNodeList($node, $parent);
+            // } else {
+            //     return Builder::buildNodeList($node, $parent);
+            // }
         }
     }
 
@@ -195,15 +225,19 @@ class Tag
      *
      * @return mixed
      */
-    public function build(object &$parent = null)
+    public function build(&$parent = null)
     {
         if (is_scalar($this->raw) || is_null($this->raw)) {
             $this->value = $this->raw;
         } elseif ($this->isKnown()) {
-            $this->checkHandlerArgument($this->tagName, $this->raw);//var_dump(self::$registeredHandlers[$this->tagName]);die();
-            $this->value = (self::$registeredHandlers[$this->tagName])($this->raw, $parent);
+            $this->checkHandlerArgument($this->tagName, $this->raw);
+            $this->value = self::$registeredHandlers[$this->tagName]($this->raw, $parent);
+        } elseif ($this->value instanceof NodeKey) {
+            $this->value->build($parent);
+        } elseif ($this->value instanceof NodeItem) {
+            $this->value->build($parent);
         } else {
-            $this->value = Builder::build($this->raw, $parent);
+            $this->value->build($this->raw, $parent);
         }
     }
 
@@ -226,7 +260,7 @@ class Tag
      *
      * @throws     \Exception  Can NOT add handler without a name for the tag
      */
-    public static function addTagHandler(string $name, Closure $func)
+    public static function addTagHandler(string $name, \Closure $func)
     {
         if (empty($name)) {
             throw new \Exception(sprintf(self::NO_NAME, __METHOD__));

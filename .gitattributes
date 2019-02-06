@@ -1,0 +1,4 @@
+configuration/  export-ignore
+dependencies/   export-ignore
+/.*             export-ignore
+runtests        export-ignore

@@ -1,8 +1,6 @@
 <?php
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Yaml as Y;
-
 /**
  * TODO
  *
@@ -12,13 +10,10 @@ use Dallgoot\Yaml\Yaml as Y;
  */
 class NodeList extends \SplDoublyLinkedList
 {
-    /* @var null|int */
-    public $type = null;
-
     /**
      * NodeList constructor
-     * 
-     * @param Node $node (optional) a node that will be pushed as first element
+     *
+     * @param Node|null $node (optional) a node that will be pushed as first element
      */
     public function __construct(Node $node = null)
     {
@@ -28,64 +23,26 @@ class NodeList extends \SplDoublyLinkedList
         }
     }
 
-    /**
-     * Gets the types of the elements in this NodeList
-     *
-     * @return integer The "|-sum" of all the types.
-     */
-    public function getTypes():int
+    public function has(string $nodeType):bool
     {
-        $types = 0;
-        foreach ($this as $child) {
-            if ($child->type & Y::DOC_START) {//var_dump(__METHOD__.' theres a DOCSTART');
-                if ($child->value instanceof Node) {
-                    $types |= $child->value->type;
-                } elseif ($child->value instanceof NodeList) {
-                    $child->value->forceType();
-                    $types |= $child->value->type;
-                    // $types |= $child->value->getTypes();
-                }
-            } else {
-                $types |= $child->type;
-            }
+        $tmp = clone $this;
+        $tmp->rewind();
+        foreach ($tmp as $child) {
+            if (is_a($child, $nodeType)) return true;
         }
-        $this->rewind();
-        return $types;
+        return false;
     }
 
-    /**
-     * If no type is set for this NodeList, forces a type according to its children types
-     *
-     * @return self
-     * @throws \ParseError  (description)
-     */
-    public function forceType()
+    public function hasContent():bool
     {
-        if (is_null($this->type)) {
-            $childTypes = $this->getTypes();
-            if ($childTypes & (Y::KEY|Y::SET_KEY)) {
-                if ($childTypes & Y::ITEM) {
-                    throw new \ParseError(self::class.": Error conflicting types found");
-                }
-                $this->type = Y::MAPPING;
-            } else {
-                if ($childTypes & Y::ITEM) {
-                    $this->type = Y::SEQUENCE;
-                } elseif ($childTypes & Y::DOC_START && $this->count() === 1) {//var_dump(__METHOD__.' theres a DOCSTART');
-                    if ($child->value instanceof Node) {
-                        $this->type = $child->value->type;
-                    } elseif ($child->value instanceof NodeList) {
-                        $child->value->forceType();
-                        $this->type =  $child->value->type;
-                    }
-                } elseif (!($childTypes & Y::COMMENT)) {
-                    $this->type = Y::LITT_FOLDED;
-                } else {
-                    $this->type = Y::SCALAR;
-                }
-            }
+        $tmp = clone $this;
+        $tmp->rewind();
+        foreach ($tmp as $child) {
+            if (!($child instanceof NodeComment)
+                && !($child instanceof NodeDirective)
+                && !($child instanceof NodeDocstart && is_null($child->value)) ) return true;
         }
-        return $this;
+        return false;
     }
 
     /**
