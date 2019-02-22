@@ -12,16 +12,16 @@ class NodeSetKey extends Node
 {
     public function __construct(string $nodeString, int $line)
     {
-        $v = trim(substr($nodeString, 1));
+        parent::__construct($nodeString, $line);
+        $v = substr(trim($nodeString), 1);
         if (!empty($v)) {
-            // $node->value = new NodeList(new Node($v, $node->line));
-            $this->value = NodeFactory::get($v, $line);
+            $value = NodeFactory::get($v, $line);
+            $value->indent = null;
+            $this->value = $value;
         }
     }
 
     /**
-     * Builds a set key.
-     *
      * @param object $parent The parent
      *
      * @throws \Exception  if a problem occurs during serialisation (json format) of the key

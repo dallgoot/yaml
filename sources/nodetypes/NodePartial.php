@@ -10,13 +10,36 @@ namespace Dallgoot\Yaml;
  */
 class NodePartial extends Node
 {
-
-    public function specialProcess(Node &$previous, array &$emptyLines)
+    public function __construct(string $nodeString, int $line)
     {
-        $deepest = $previous->getDeepestNode();
-        //what first character to determine if escaped sequence are allowed
-        $val = ($this->value[-1] !== "\n" ? ' ' : '').substr($this->raw, $this->indent);
-        $this->getParent()->value = NodeFactory::get($this->value.$val, $deepest->line);
+        parent::__construct($nodeString, $line);
+        $this->value = ltrim($nodeString);
+    }
+
+    /**
+     * What first character to determine if escaped sequence are allowed
+     *
+     * @param      Node     $current     The current
+     * @param      array    $emptyLines  The empty lines
+     *
+     * @return     boolean  true to skip normal Loader process, false to continue
+     */
+    public function specialProcess(Node &$current, array &$emptyLines):bool
+    {
+        $parent = $this->getParent();
+        $addValue = ltrim($current->raw);
+        $separator = ' ';
+        if ($this->raw[-1] === ' ' || $this->raw[-1] === "\n") {
+            $separator = '';
+        }
+        if ($current instanceof NodeBlank) {
+            $addValue = "\n";
+            $separator = '';
+        }
+        $node = NodeFactory::get($this->raw.$separator.$addValue, $this->line);
+        $node->indent = null;
+        $parent->value = null;
+        $parent->add($node);
         return true;
     }
 }

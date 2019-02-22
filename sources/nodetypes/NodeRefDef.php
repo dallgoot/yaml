@@ -15,7 +15,7 @@ class NodeRefDef extends NodeActions
     //     parent::__construct($nodeString, $line);
     // }
 
-    public function isAwaitingChildren()
+    public function isAwaitingChildren():bool
     {
         return is_null($this->value);
     }

@@ -10,9 +10,6 @@ namespace Dallgoot\Yaml;
  */
 class Node
 {
-    /** @var bool */
-    public static $dateAsString = false;
-
     /** @var null|string|boolean */
     public $identifier;
     /** @var int */
@@ -21,28 +18,29 @@ class Node
     public $line;
     /** @var null|string */
     public $raw;
-    /** @var int */
-    // public $type;
-    /** @var null|Node|NodeList|string */
+    /** @var null|Node|NodeList */
     public $value;
 
+    /** @var string|null */
+    public $_anchor;
     /** @var null|Node */
-    private $parent;
+    protected $_parent;
+    /** @var string|null */
+    public $_tag;
 
     /**
      * Create the Node object and parses $nodeString IF not null (else assume a root type Node)
      *
      * @param string|null $nodeString The node string
      * @param int|null    $line       The line
+     * @todo make it more permissive to tabs but replacement
      */
     public function __construct(string $nodeString = null, $line = 0)
     {
         $this->raw = $nodeString;
         $this->line = (int) $line;
-         //permissive to tabs but replacement
         $nodeValue = preg_replace("/^\t+/m", " ", $nodeString);
         $this->indent = strspn($nodeValue, ' ');
-        // $this->value = $nodeString;
     }
 
     /**
@@ -54,7 +52,7 @@ class Node
      */
     public function setParent(Node $node):Node
     {
-        $this->parent = $node;
+        $this->_parent = $node;
         return $this;
     }
 
@@ -62,20 +60,31 @@ class Node
      * Gets the ancestor with specified $indent or the direct $parent OR the current Node itself
      *
      * @param int|null $indent The indent
-     * @param int $type  first ancestor of this YAML::type is returned
      *
      * @return Node   The parent.
      */
-    public function getParent(int $indent = null, $type = 0):Node
+    public function getParent(int $indent = null):Node
     {
-        if (!is_int($indent)) return $this->parent ?? $this;
-        $cursor = $this;
-        while ($cursor instanceof Node
-               && $cursor->indent !== $indent
-               && !($cursor->parent instanceof NodeRoot)) {
-            $cursor = $cursor->parent;
+        if (!is_int($indent)) return $this->_parent;
+        $cursor = $this->getParent();
+        while (!($cursor instanceof NodeRoot)
+                && (is_null($cursor->indent)
+                                || $cursor->indent >= $indent)) {
+            $cursor = $cursor->_parent;
         }
-        return $cursor->parent ?? $this;
+        return $cursor;
+    }
+
+    public function getRoot():Node
+    {
+        if (is_null($this->_parent)) {
+            throw new \Exception(__METHOD__.": can only be used when Node has a parent set", 1);
+        }
+        $cursor = $this;
+        while (!($cursor instanceof NodeRoot) && $cursor->_parent instanceof Node) {
+            $cursor = $cursor->_parent;
+        }
+        return $cursor;
     }
 
     /**
@@ -86,21 +95,20 @@ class Node
      *
      * @param Node $child The child
      *
-     * @todo  refine the conditions when Y::LITTERALS
+     * @return Node
      */
-    public function add(Node $child)
+    public function add(Node $child):Node
     {
         $child->setParent($this);
         if (is_null($this->value)) {
             $this->value = $child;
-        } elseif ($this->value instanceof Node) {
-            $this->value = new NodeList($this->value);
+        } else {
+            if ($this->value instanceof Node) {
+                $this->value = new NodeList($this->value);
+            }
             $this->value->push($child);
-        } elseif ($this->value instanceof NodeList) {
-            $this->value->push($child);
-        // } else {
-        //     $this->value = new NodeScalar($this->raw, $this->line);
         }
+        return $child;
     }
 
     /**
@@ -112,53 +120,23 @@ class Node
     {
         $cursor = $this;
         while ($cursor->value instanceof Node) {
-            if ($cursor->value instanceof NodeList) {
-                if ($cursor->value->count() > 0) {
-                    $cursor = $cursor->value->OffsetGet(0);
-                } else {
-                    // $cursor = $cursor;
-                    break;
-                }
-            } else {
-                $cursor = $cursor->value;
-            }
+            $cursor = $cursor->value;
         }
         return $cursor;
     }
 
-
-    /**
-     * For certain (special) Nodes types some actions are required BEFORE parent assignment
-     *
-     * @param Node   $previous   The previous Node
-     * @param array  $emptyLines The empty lines
-     *
-     * @return boolean  if True self::parse skips changing previous and adding to parent
-     * @see self::parse
-     */
-    public function needsSpecialProcess(Node &$previous, array &$emptyLines):bool
+    public function specialProcess(Node &$previous, array &$emptyLines):bool
     {
-        $deepest = $previous->getDeepestNode();
-        if ($deepest instanceof NodePartial) {
-            return $deepest->specialProcess($this, $emptyLines);
-        } else {
-            return $this->specialProcess($previous, $emptyLines);
-        }
-    }
-
-    public function specialProcess(Node &$previous, array &$emptyLines)
-    {
-        // $deepest = $previous->getDeepestNode();
-        // //what first character to determine if escaped sequence are allowed
-        // $val = ($deepest->value[-1] !== "\n" ? ' ' : '').substr($this->raw, $this->indent);
-        // $deepest->parse($deepest->value.$val);
         return false;
     }
 
-
-    public function getTargetOnLessIndent(Node $previous):Node
+    public function getTargetOnLessIndent(Node &$previous):Node
     {
-        return $previous->getParent($this->indent);
+        $candidate = $previous->getParent($this->indent);
+        // if ($this instanceof NodeItem) {
+        // var_dump(get_class($candidate).$candidate->identifier.$this->indent );
+        // }
+        return $candidate;
     }
 
     /**
@@ -168,8 +146,12 @@ class Node
      *
      * @return Node
      */
-    public function getTargetonEqualIndent(Node &$previous):Node
+    public function getTargetOnEqualIndent(Node &$previous):Node
     {
+        // if ($this instanceof NodeKey) {
+        //     # code...
+        // var_dump(get_class($this), get_class($previous->getParent()));
+        // }
         return $previous->getParent();
     }
 
@@ -182,82 +164,17 @@ class Node
      */
     public function getTargetOnMoreIndent(Node &$previous):Node
     {
-        $target = $previous;
-        $deepest = $previous->getDeepestNode();
-        if ($deepest->isAwaitingChildren()) {
-            $target = $deepest;
-        }
-        return $target;
+        // return $previous->getParent($this->indent)->getDeepestNode();
+        // return $previous->getParent($this->indent);
+        // if ($previous->value instanceof ) {
+        //     # code...
+        // }
+        return $previous;//->getParent();
     }
 
-    public function isAwaitingChildren()
+    public function isAwaitingChildren():bool
     {
-        return false;
-    }
-
-   /**
-     * According to the current Node type and deepest value
-     * this indicates if self::parse skips (or not) the parent and previous assignment
-     *
-     * @param  Node     $target    The current Node as target parent
-     *
-     * @return boolean  True if context, False otherwiser
-     * @todo   is this really necessary according ot other checkings out there ?
-     */
-    public function skipOnContext(Node &$target):bool
-    {
-        return false;
-    }
-
-
-    public function getValue(&$parent = null)
-    {
-        if (is_null($this->value))                return null;
-        elseif (is_string($this->value))          return $this->getScalar($this->value);
-        elseif ($this->value instanceof Node)     return $this->value->getValue($parent);
-        elseif ($this->value instanceof NodeList) return Builder::buildNodeList($this->value, $parent);
-        else {
-            throw new \ParseError("Error trying to getValue of ".gettype($this->value));
-        }
-    }
-
-    /**
-     * Returns the correct PHP type according to the string value
-     *
-     * @param string $v a string value
-     *
-     * @return mixed The value with appropriate PHP type
-     * @throws \Exception if happens in Regex::isDate or Regex::isNumber
-     */
-    public static function getScalar(string $v)
-    {
-        if (Regex::isDate($v))   return self::$dateAsString ? $v : date_create($v);
-        if (Regex::isNumber($v)) return self::getNumber($v);
-        $types = ['yes'   => true,
-                    'no'    => false,
-                    'true'  => true,
-                    'false' => false,
-                    'null'  => null,
-                    '.inf'  => INF,
-                    '-.inf' => -INF,
-                    '.nan'  => NAN
-        ];
-        return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $v;
-    }
-
-    /**
-     * Returns the correct PHP type according to the string value
-     *
-     * @param string $v a string value
-     *
-     * @return int|float   The scalar value with appropriate PHP type
-     * @todo make sure there 's only ONE dot before cosndering a float
-     */
-    private static function getNumber(string $v)
-    {
-        if (preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
-        if (preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
-        return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
+        return true;
     }
 
     /**
@@ -269,12 +186,24 @@ class Node
      */
     public function build(&$parent = null)
     {
-        // if ($this->value instanceof NodeList) return Builder::buildNodeList($this->value, $parent);
-        // if ($this->value instanceof Node) return $this->build($parent);
-        // return self::build($parent);
-        return $this->getValue($this->value);
+        if (!is_null($this->_tag)) {
+            if (TagFactory::isKnown($this->_tag)) {
+                return TagFactory::transform($this->_tag, $value)->build($parent);
+            } else {
+                // TODO : this workds for nodeItem or NodeKey
+                return new Tag($this->_tag, $this->value->build($parent));
+            }
+        }
+        if (!is_null($this->_anchor)) {
+            $yamlObject = $this->getRoot()->getYamlObject();
+            if ($this instanceof NodeAnchor){
+                return $this->build($parent);//$yamlObject->getReference(substr($this->_anchor, 1));
+            } else {
+                $yamlObject->addReference(substr($this->_anchor, 1), $this);
+                return $this;
+            }
+        }
     }
-
 
     /**
      * PHP internal function for debugging purpose : simplify output provided by 'var_dump'
@@ -283,12 +212,14 @@ class Node
      */
     public function __debugInfo():array
     {
-        $props = ['line'  => $this->line,
-                'indent'=> $this->indent,
-                'value' => $this->value,
-                'raw'   => $this->raw,
-            ];
+        $props = [];
+        $props['line->indent'] = "$this->line -> $this->indent";
         if ($this->identifier) $props['identifier'] = "($this->identifier)";
+        if ($this->_anchor)    $props['_anchor']    = "($this->_anchor)";
+        if ($this->_tag)       $props['_tag']       = "($this->_tag)";
+        $props['value'] = $this->value;
+        $props['raw']   = $this->raw;
+        if ($this->_parent)  $props['parent'] = get_class($this->_parent);
         return $props;
     }
 }

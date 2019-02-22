@@ -26,9 +26,11 @@ final class Loader
     /* @var null|string */
     private $filePath;
     /* @var integer */
-    private $debug = 0;///TODO: determine levels
+    private $_debug = 0;///TODO: determine levels
     /* @var integer */
-    private $options = 0;
+    private $_options = 0;
+    /* @var array */
+    private $_blankBuffer = [];
 
     //Exceptions messages
     private const INVALID_VALUE        = self::class.": at line %d";
@@ -45,8 +47,8 @@ final class Loader
      */
     public function __construct($absolutePath = null, $options = null, $debug = 0)
     {
-        $this->debug   = is_int($debug) ? min($debug, 3) : 1;
-        $this->options = is_int($options) ? $options : $this->options;
+        $this->_debug   = is_int($debug) ? min($debug, 3) : 1;
+        $this->_options = is_int($options) ? $options : $this->_options;
         if (is_string($absolutePath)) {
             $this->load($absolutePath);
         }
@@ -85,18 +87,16 @@ final class Loader
      * @param string|null $strContent  The string content
      *
      * @throws \Exception if self::content is empty or splitting on linefeed has failed
-     * @return \Closure  The source iterator.
+     * @return \Generator  The source iterator.
      */
-    private function getSourceIterator($strContent = null):\Closure
+    private function getSourceGenerator($strContent = null):\Generator
     {
         $source = $this->content ?? preg_split("/\n/m", preg_replace('/(\r\n|\r)/', "\n", $strContent), 0, PREG_SPLIT_DELIM_CAPTURE);
         //TODO : be more permissive on $strContent values
         if (!is_array($source) || !count($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
-        return function () use($source) {
-            foreach ($source as $key => $value) {
-                yield ++$key => $value;
-            }
-        };
+        foreach ($source as $key => $value) {
+            yield ++$key => $value;
+        }
     }
 
     /**
@@ -111,17 +111,13 @@ final class Loader
      */
     public function parse($strContent = null)
     {
-        $sourceIterator = $this->getSourceIterator($strContent)();
+        $generator = $this->getSourceGenerator($strContent);
         $previous = $root = new NodeRoot();
-        $emptyLines = [];
-        $currentLine = 0;
         try {
-            foreach ($sourceIterator as $lineNb => $lineString) {
-                $currentLine = $lineNb;
+            foreach ($generator as $lineNb => $lineString) {
                 $node = NodeFactory::get($lineString, $lineNb);
-                if ($node->needsSpecialProcess($previous, $emptyLines)) continue;
-                $this->attachBlankLines($emptyLines, $previous);
-                $emptyLines = [];
+                if ($this->needsSpecialProcess($node, $previous)) continue;
+                $this->attachBlankLines($previous);
                 switch ($node->indent <=> $previous->indent) {
                     case -1: $target = $node->getTargetOnLessIndent($previous);
                         break;
@@ -129,39 +125,58 @@ final class Loader
                         break;
                     default: $target = $node->getTargetOnMoreIndent($previous);
                 }
-                if ($node->skipOnContext($target)) continue;//var_dump(get_class($target));
-                $target->add($node);
-                $previous = $node;
+                $previous = $target->add($node);
             }
-            if ($this->debug === 2) print_r($root);
-            return Builder::buildContent($root, $this->debug);
+            $this->attachBlankLines($previous);
+            return Builder::buildContent($root, $this->_debug);
         } catch (\Error|\Exception|\ParseError $e) {
             $file = $this->filePath ? realpath($this->filePath) : '#YAML STRING#';
             $message = $e->getMessage()."\n ".$e->getFile().":".$e->getLine();
-            if ($this->options & self::NO_PARSING_EXCEPTIONS) {
+            if ($this->_options & self::NO_PARSING_EXCEPTIONS) {
                 self::$error = $message;
                 return null;
             }
-            throw new \Exception($message." for $file:$currentLine", 1, $e);
+            $line = $generator->key() ?? 'X';
+            throw new \Exception($message." for $file:".$line, 1, $e);
         }
     }
 
 
     /**
-     * Attach blank(empty) Nodes savec in $emptylines to their parent (it means they are needed)
+     * Attach blank(empty) Nodes savec in $blankBuffer to their parent (it means they are needed)
      *
      * @param array $emptyLines The empty lines
      * @param Node  $previous   The previous
      *
      * @return null
      */
-    public function attachBlankLines(array &$emptyLines, Node &$previous)
+    public function attachBlankLines(Node &$previous)
     {
-        foreach ($emptyLines as $blankNode) {
+        foreach ($this->_blankBuffer as $blankNode) {
             if ($blankNode !== $previous) {
                 $blankNode->getParent()->add($blankNode);
             }
         }
+        $this->_blankBuffer = [];
     }
 
+    /**
+     * For certain (special) Nodes types some actions are required BEFORE parent assignment
+     *
+     * @param Node   $previous   The previous Node
+     * @param array  $emptyLines The empty lines
+     *
+     * @return boolean  if True self::parse skips changing previous and adding to parent
+     * @see self::parse
+     */
+    public function needsSpecialProcess(Node $current, Node &$previous):bool
+    {
+        $deepest = $previous->getDeepestNode();
+        if ($deepest instanceof NodePartial) {
+            return $deepest->specialProcess($current,  $this->_blankBuffer);
+        } elseif(!($current instanceof NodePartial)) {
+            return $current->specialProcess($previous, $this->_blankBuffer);
+        }
+        return false;
+    }
 }

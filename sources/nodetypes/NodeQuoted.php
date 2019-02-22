@@ -10,14 +10,23 @@ namespace Dallgoot\Yaml;
  */
 class NodeQuoted extends Node
 {
-    public function __construct(string $nodeValue, $line)
+    public function __construct(string $nodeString, int $line)
     {
-        $this->line  = $line;
-        $this->value = trim($nodeValue);
+        parent::__construct($nodeString, $line);
+        $this->value = trim($nodeString);
     }
 
-    public function getValue(&$parent = null)
+    public function build(&$parent = null)
     {
-        return is_null($this->value) ? null : substr(trim((string) $this->value), 1, -1);
+        return substr(trim($this->value), 1,-1);
     }
+
+    //     public function getTargetOnMoreIndent(Node &$previous):Node
+    // {
+    //     if ($previous instanceof NodeScalar || $previous instanceof NodeBlank || $previous instanceof NodeQuoted) {
+    //         return $previous->getParent();
+    //     } else {
+    //         return parent::getTargetOnMoreIndent($previous);
+    //     }
+    // }
 }

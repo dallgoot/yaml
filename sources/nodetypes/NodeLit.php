@@ -10,34 +10,28 @@ namespace Dallgoot\Yaml;
  */
 class NodeLit extends NodeLiterals
 {
-
-    public static function buildLitt(NodeList &$list, $modifier = null):string
+    /**
+     * Gets the final string.
+     *
+     * @param      NodeList  $list   The list
+     *
+     * @return     string    The final string.
+     */
+    public function getFinalString(NodeList $list, $refIndent = null):string
     {
         $result = '';
-        if ($list->count()) {
-            if ($modifier !== '+') {
-                 self::litteralStripLeading($list);
+        if (!is_null($list) && $list->count()) {
+            if ($this->identifier !== '+') {
                  self::litteralStripTrailing($list);
             }
             $first = $list->shift();
-            $refIndent = $first->indent ?? 0;
-            $result = substr($first->raw, $first->indent);
+            $indent = $refIndent ?? $first->indent;
+            $result = $this->getChildValue($first, $indent);
             $list->setIteratorMode(NodeList::IT_MODE_DELETE);
-            foreach ($list as $key => $child) {
-                $noMoreContent = $list->has('NodeBlank');
-                if ($child->value instanceof NodeList) {
-                    $val = self::buildLitt($child->value);
-                } else {
-                    if ($child instanceof NodeBlank) {
-                        $val = $noMoreContent ? "\n" : "";
-                    } else {
-                        $val = substr($child->raw, $refIndent);
-                    }
-                }
-                $result .= "\n".$val;
+            foreach ($list->filterComment() as $key => $child) {
+                $result .= $child instanceof NodeBlank ? "\n" : "\n".$this->getChildValue($child, $indent);
             }
         }
         return $result;
     }
-
 }

@@ -15,27 +15,53 @@ class NodeKey extends Node
     public function __construct(string $nodeString, int $line, array $matches)
     {
         parent::__construct($nodeString, $line);
-        $this->identifier = trim($matches[1], '"\' ');
+        $this->setIdentifier(trim($matches[1], '"\' '));
         $value = isset($matches[2]) ? trim($matches[2]) : null;
-        if (!is_null($value)) {
-            $hasComment = strpos($value, ' #');
-            if (is_bool($hasComment) || Regex::isProperlyQuoted($value)) {
-                $child = NodeFactory::get(trim($value), $line);
-            } else {
-                $child = new NodeComment(trim(substr($value, 0, $hasComment)), $line);
-            }
+        if (!empty($value)) {
+            $child = NodeFactory::get($value, $line);
+            $child->indent = null;
             $this->add($child);
         }
     }
 
-    public function getTargetOnLessIndent(Node $previous):Node
+    public function setIdentifier(string $keyString)
     {
-        if ($this->indent === 0) {
-            return $previous->getParent(-1);//get root
+        if ($keyString === '') {
+           throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $this->line));
         } else {
-            return parent::getTargetOnLessIndent($previous);
+            $keyNode = NodeFactory::get($keyString);
+            if (!is_null($keyNode->_anchor)) {
+                $this->_anchor = $keyNode->_anchor;
+                $this->identifier = trim($keyNode->value->raw);
+            } elseif (!is_null($keyNode->_tag)) {
+                $this->_tag = $keyNode->_tag;
+                $this->identifier = trim($keyNode->value->raw);
+            } elseif ($keyNode instanceof NodeScalar) {
+                $this->identifier = trim($keyNode->raw);//$keyNode->build();
+            }
         }
     }
+
+    public function add(Node $child):Node
+    {
+        if ($this->value instanceof Node && isOneOf($this->getDeepestNode(), ['NodeLit','NodeLitFolded'])) {
+                return $this->getDeepestNode()->add($child);
+        } else {
+            if (is_null($this->value) && ($child instanceof NodeKey || $child instanceof NodeItem) ) {
+                $this->value = new NodeList;
+            }
+            return parent::add($child);
+        }
+    }
+
+    // public function getTargetOnLessIndent(Node &$previous):Node
+    // {
+    //     if ($this->indent === 0) {
+    //         return $previous->getRoot();
+    //     } else {
+    //         return parent::getTargetOnLessIndent($previous);
+    //     }
+    // }
 
     /**
      * Modify parent target when current Node indentation is equal to previous node indentation
@@ -44,21 +70,39 @@ class NodeKey extends Node
      *
      * @return Node
      */
-    public function getTargetonEqualIndent(Node &$previous):Node
+    public function getTargetOnEqualIndent(Node &$previous):Node
     {
         if ($this->indent === 0) {
-            return $previous->getParent(-1);//get root
+            return $previous->getRoot();
         } else {
-            return parent::getTargetonEqualIndent($previous);
+            return parent::getTargetOnEqualIndent($previous);
         }
     }
 
-    public function isAwaitingChildren()
+    public function getTargetOnMoreIndent(Node &$previous):Node
     {
-        return is_null($this->value);
+        if ($previous instanceof NodeItem) {
+            if (is_null($previous->value)) {
+                return $previous;
+            } else {
+                $deepest = $previous->getDeepestNode();
+                if ($deepest instanceof NodeKey || $deepest instanceof NodeItem) {
+                    return $deepest;
+                }
+            }
+            return $previous->getRoot();
+        } else {
+            return parent::getTargetOnMoreIndent($previous);
+        }
     }
 
 
+    public function isAwaitingChildren():bool
+    {
+        return is_null($this->value)
+                || ($this->value instanceof NodeComment)
+                || ($this->value instanceof NodeScalar);
+    }
 
     /**
      * Builds a key and set the property + value to the given parent
@@ -70,41 +114,19 @@ class NodeKey extends Node
      */
     public function build(&$parent = null)
     {
-        if (is_null($this->identifier)) {
-            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $this->line));
+        if (is_null($this->value)) {
+            $result = null;
+        } elseif (isOneOf($this->value, ['NodeKey', 'NodeItem'])) {
+            $tmp = new NodeList($this->value);
+            $result = $tmp->build();
         } else {
-            if (is_null($this->value)) {
-                $result = null;
-            } elseif ($this->value instanceof Node) {
-                $value = $this->value;
-                switch (get_class($this->value)) {
-                    case 'NodeItem':$mother = new NodeSequence();
-                                    $mother->add($this->value);
-                                    $value = $mother;
-                        break;
-                    case 'NodeKey': $mother = new NodeMapping();
-                                    $mother->add($this->value);
-                                    $value = $mother;
-                        break;
-                    case 'NodeSetKey':$mother = new NodeSet();
-                                    $mother->add($this->value);
-                                    $value = $mother;
-                        break;
-                }
-                $result = $value->build($parent);
-            } elseif ($this->value instanceof NodeList) {
-                $result = Builder::buildNodeList($this->value);
-            }
-            if (is_null($parent)) {
-                return $result;
-            } else {
-                if (is_array($parent)) {
-                    $parent[$this->identifier] = $result;
-                } else {
-                    $parent->{$this->identifier} = $result;
-                }
-            }
+            $result = $this->value->build();
         }
-    }
+        if (is_array($parent)) {
+            $parent[$this->identifier] = $result;
+        } else {
+            $parent->{$this->identifier} = $result;
+        }
+}
 
 }

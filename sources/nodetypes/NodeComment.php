@@ -10,32 +10,46 @@ namespace Dallgoot\Yaml;
  */
 class NodeComment extends Node
 {
-       /**
-     * According to the current Node type and deepest value
-     * this indicates if self::parse skips (or not) the parent and previous assignment
-     *
-     * @param      Node     $target    The parent target Node
-     *
-     * @return     boolean  True if context, False otherwiser
-     * @todo  is this really necessary according ot other checkings out there ?
-     */
-    public function skipOnContext(Node &$target):bool
-    {
-        if (!$this->identifier) {
-            $target = $target->getParent(-1);//if alone-on-line comment --> set parent to root
-            return true;
-        }
-        return false;
-    }
+    /**
+    * @param string  $nodeString  The node string
+    * @param int     $line        The node line
+    */
+    // public function __construct(string $nodeString, int $line)
+    // {
+    //     parent::__construct($nodeString, $line);
+    //     $this->value = NodeFactory$nodeString;
+    // }
 
-   public function needsSpecialProcess(Node &$previous, array &$emptyLines):bool
+   public function specialProcess(Node &$previous, array &$emptyLines):bool
    {
-        $deepest = $previous->getDeepestNode();
-        if (!($previous->getParent() instanceof NodeLiterals)
-            && !($deepest instanceof NodeLiterals)) {
-            $previous->getParent(-1)->add($this);
-            return true;
-        }
-        return false;
+        $previous->getRoot()->add($this);
+        return true;
+   }
+
+   public function getTargetOnLessIndent(Node &$previous):Node
+   {
+       return $previous->getRoot();
+   }
+
+   public function getTargetOnEqualIndent(Node &$previous):Node
+   {
+       return $previous->getRoot();
+   }
+
+   public function getTargetOnMoreIndent(Node &$previous):Node
+   {
+       return $previous->getRoot();
+   }
+
+   public function build(&$parent = null)
+   {
+      $target = $parent;
+      if ($target instanceof YamlObject) {
+         $target->addComment($this->line, $this->raw);
+      } else {
+        $root = $this->getRoot();
+        $yamlObject = $root->getYamlObject();
+        $yamlObject->addComment($this->line, $this->raw);
+      }
    }
 }

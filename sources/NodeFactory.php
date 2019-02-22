@@ -15,15 +15,14 @@ final class NodeFactory
 
     final public static function get($nodeString = null, $line = 0):Node
     {
-        $nodeTrimmed = ltrim($nodeString);
-        if ($nodeTrimmed === '') {
-            return new NodeBlank($nodeString, $line);
-        } elseif (substr($nodeTrimmed, 0, 3) === '...') {
-            return new NodeDocEnd($nodeString, $line);
-        } elseif (preg_match(Regex::KEY, $nodeTrimmed, $matches)) {
-            return new NodeKey($nodeString, $line, $matches);
-        } else {
-            $first = $nodeTrimmed[0];
+        $trimmed = ltrim($nodeString);
+        if ($trimmed === '')                                return new NodeBlank($nodeString, $line);
+        elseif (substr($trimmed, 0, 3) === '...')           return new NodeDocEnd($nodeString, $line);
+        elseif (preg_match(Regex::KEY, $trimmed, $matches)) return new NodeKey($nodeString, $line, $matches);
+        else {
+            $first = $trimmed[0];
+            $stringGroups = ["-" ,'>|' ,'"\'',"#%" ,"{[" ,":?" ,'*&!'];
+            $methodGroups = ['onHyphen','onLiteral','onQuoted','onSpecial','onCompact','onSetElement','onNodeAction'];
             $actions = ["-"   => 'onHyphen',
                         '>|'  => 'onLiteral',
                         '"\'' => 'onQuoted',
@@ -32,9 +31,14 @@ final class NodeFactory
                         ":?"  => 'onSetElement',
                         '*&!' => 'onNodeAction'
                     ];
-            foreach ($actions as $stringRef => $methodName) {
-                if (is_int(strrpos($stringRef, $first))) {
-                    return self::$methodName($nodeString, $line);
+            foreach ($stringGroups as $groupIndex => $stringRef) {
+                if (is_int(strpos($stringRef, $first))) {
+                    $methodName = $methodGroups[$groupIndex];
+                    try {
+                        return self::$methodName($first, $nodeString, $line);
+                    } catch (\Exception|\Error|\ParseError $e) {
+                        throw new \Exception(" could not create a Node, ", 1, $e);
+                    }
                 }
             }
         }
@@ -49,9 +53,10 @@ final class NodeFactory
      *
      * @return     Node
      */
-    final private static function onSpecial(string $nodeString, int $line):Node
+    final private static function onSpecial(string $first, string $nodeString, int $line):Node
     {
-        return $nodeString[0] === "#" ? new NodeComment($nodeString, $line) : new NodeDirective($nodeString, $line);
+        return $first === "#" ? new NodeComment(ltrim($nodeString), $line)
+                              : new NodeDirective(ltrim($nodeString), $line);
     }
 
     /**
@@ -62,10 +67,10 @@ final class NodeFactory
      *
      * @return     Node
      */
-    final private static function onQuoted(string $nodeString, int $line):Node
+    final private static function onQuoted(string $first, string $nodeString, int $line):Node
     {
-        $trimmed = trim($nodeString);
-        return Regex::isProperlyQuoted($trimmed) ? new NodeQuoted($trimmed, $line) : new NodeScalar($trimmed, $line);
+        return Regex::isProperlyQuoted(trim($nodeString)) ? new NodeQuoted($nodeString, $line)
+                                                          : new NodePartial($nodeString, $line);
     }
 
     /**
@@ -76,9 +81,10 @@ final class NodeFactory
      *
      * @return     Node
      */
-    final private static function onSetElement(string $nodeString, int $line):Node
+    final private static function onSetElement(string $first, string $nodeString, int $line):Node
     {
-        return $nodeString[0] === '?' ? new NodeSetKey($nodeString, $line) : new NodeSetValue($nodeString, $line);
+        return $first === '?' ? new NodeSetKey($nodeString, $line)
+                              : new NodeSetValue($nodeString, $line);
     }
 
     /**
@@ -89,12 +95,12 @@ final class NodeFactory
      *
      * @return     Node
      */
-    final private static function onCompact(string $nodeString, int $line):Node
+    final private static function onCompact(string $first, string $nodeString, int $line):Node
     {
         $json = json_decode($nodeString, false, 512, self::JSON_OPTIONS);
-        if (json_last_error() === \JSON_ERROR_NONE)       return new NodeJSON($nodeString, $line, $json);
-        elseif (preg_match(Regex::MAPPING, $nodeString))  return new NodeCompactMapping($nodeString, $line);
-        elseif (preg_match(Regex::SEQUENCE, $nodeString)) return new NodeCompactSequence($nodeString, $line);
+        if (json_last_error() === \JSON_ERROR_NONE)             return new NodeJSON($nodeString, $line);
+        elseif (preg_match(Regex::MAPPING, trim($nodeString)))  return new NodeCompactMapping($nodeString, $line);
+        elseif (preg_match(Regex::SEQUENCE, trim($nodeString))) return new NodeCompactSequence($nodeString, $line);
         else {
             return new NodePartial($nodeString, $line);
         }
@@ -108,10 +114,10 @@ final class NodeFactory
      *
      * @return     Node
      */
-    final private static function onHyphen(string $nodeString, int $line):Node
+    final private static function onHyphen(string $first, string $nodeString, int $line):Node
     {
-        if (substr($nodeString, 0, 3) === '---')       return new NodeDocStart($nodeString, $line);
-        elseif (preg_match(Regex::ITEM, $nodeString))  return new NodeItem($nodeString, $line);
+        if (substr($nodeString, 0, 3) === '---')              return new NodeDocStart($nodeString, $line);
+        elseif (preg_match(Regex::ITEM, ltrim($nodeString)))  return new NodeItem($nodeString, $line);
         else {
             return new NodeScalar($nodeString, $line);
         }
@@ -124,23 +130,33 @@ final class NodeFactory
      * @param int    $line       The line
      *
      */
-    final private static function onNodeAction(string $nodeString, int $line):Node
+    final private static function onNodeAction(string $first, string $nodeString, int $line):Node
     {
-        if ($nodeString[0] === '!')     return new NodeTag($nodeString, $line);
-        elseif ($nodeString[0] === '&') return new NodeRefDef($nodeString, $line);
-        elseif ($nodeString[0] === '*') return new NodeRefCall($nodeString, $line);
-        else {
-            throw new \ParseError("Not a action node !! $nodeString[0]");
+        if (!preg_match(Regex::NODE_ACTIONS, ltrim($nodeString), $matches)) {
+            return new NodeScalar($nodeString, $line);
+        }
+        if (isset($matches['content'])) {
+            $node = self::get($matches['content'], $line);
+        } else {
+            $node = new NodeTag($nodeString, $line);
+        }
+        $action = trim($matches['action']);
+        switch ($action[0]) {
+            case '!': $node->_tag    = $action;return $node;
+            case '&': $node->_anchor = $action;return $node;
+            case '*': return new NodeAnchor(trim($action), $line);
+            default:
+                throw new \ParseError("Not a action node !! '$action[0]' on line:$line".gettype($first));
         }
     }
 
-
-    final private static function onLiteral(string $nodeString, int $line):Node
+    final private static function onLiteral(string $first, string $nodeString, int $line):Node
     {
-        if ($nodeString[0] === '>')      return new NodeLitFolded($nodeString, $line);
-        elseif ($nodeString[0] === '|')  return new NodeLit($nodeString, $line);
-        else {
-            throw new \ParseError("Not a literal node !! $nodeString[0]");
+        switch ($first) {
+            case '>': return new NodeLitFolded($nodeString, $line);
+            case '|': return new NodeLit($nodeString, $line);
+            default:
+                throw new \ParseError("Not a literal node !! '$first' on line:$line");
         }
     }
 

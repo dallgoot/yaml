@@ -20,15 +20,18 @@ class NodeActions extends Node
             $this->identifier = strstr($v, ' ', true);
             $value = trim(substr($nodeString, $pos + 1));
             $value = Regex::isProperlyQuoted($value) ? trim($value, "\"'") : $value;
-            $this->add(NodeFactory::get($value, $line));
+            $child = NodeFactory::get($value, $line);
+            $child->indent = null;
+            $this->add($childw);
         }
 
     }
 
-    public static function buildReference($node, $parent)
+    public function build(&$parent = null)
     {
-        $tmp = is_null($node->value) ? null : $node->value->build($parent);
-        if ($node instanceof NodeRefDef) Builder::$_root->addReference($node->identifier, $tmp);
-        return Builder::$_root->getReference($node->identifier);
+        $tmp = is_null($this->value) ? null : $this->value->build($parent);
+        $yamlObject = $this->getRoot()->getYamlObject();
+        if ($this instanceof NodeRefDef) $yamlObject->addReference($this->identifier, $tmp);
+        return $yamlObject->getReference($this->identifier);
     }
 }

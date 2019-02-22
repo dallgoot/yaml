@@ -13,21 +13,49 @@ class NodeDocStart extends Node
     public function __construct(string $nodeString, int $line)
     {
         parent::__construct($nodeString, $line);
-        $rest = trim(substr($nodeString, 3));
+        $rest = substr(ltrim($nodeString), 3);
         if (!empty($rest)) {
-            // $n->indent = $indent + 4;
-            $this->add(NodeFactory::get($rest, $line));
+            $n = NodeFactory::get($rest, $line);
+            $n->indent = null;
+            $this->add($n);
         }
     }
 
-    // public function build(&$parent = NULL)
-    // {
-        // if (is_scalar($child->value)) {
-        //     $parent->setText(Node2PHP::get($child));
-        // } elseif ($child->value instanceof NodeTag){
-        //     $parent->addTag($child->value->identifier);
-        // } else {
-        //     $parent->setText(self::build($child->value));
-        // }
-    // }
+    public function add(Node $child):Node
+    {
+        if ($this->value instanceof Node) {
+            return $this->value->add($child);
+        } else {
+            return parent::add($child);
+        }
+    }
+
+    public function build(&$parent = null)
+    {
+        if (is_null($parent)) {
+            throw new Exception(__METHOD__." expects a YamlObject as parent", 1);
+        }
+        if (is_null($this->value)) {
+            return null;
+        } else {
+            if ($this->value instanceof NodeTag){
+                // $tagName =
+                $parent->addTag($this->value->identifier);
+                $this->value->build($parent);
+            } else {
+                $text = $this->value->build($parent);
+                !is_null($text) && $parent->setText($text);
+            }
+        }
+    }
+
+    public function isAwaitingChildren():bool
+    {
+        return $this->value && isOneOf($this->value, ['NodeRefDef', 'NodeLit', 'NodeLitFolded']);
+    }
+
+    public function getTargetOnEqualIndent(Node &$previous):Node
+    {
+        return $previous->getRoot();
+    }
 }

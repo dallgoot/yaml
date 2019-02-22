@@ -10,19 +10,21 @@ namespace Dallgoot\Yaml;
  */
 class NodeJSON extends Node
 {
-    public function __construct(string $nodeString, int $line, $json)
-    {
-        parent::__construct($nodeString, $line);
-        $this->value = $json;
-    }
+    private const JSON_OPTIONS = \JSON_PARTIAL_OUTPUT_ON_ERROR|\JSON_UNESCAPED_SLASHES;
 
-    public function isAwaitingChildren()
+    // public function __construct(string $nodeString, int $line, $json)
+    // {
+    //     parent::__construct($nodeString, $line);
+    //     $this->value = $json;
+    // }
+
+    public function isAwaitingChildren():bool
     {
         return false;
     }
 
-    public function getValue(&$parent = null)
+    public function build(&$parent = null)
     {
-        return $this->value;
+        return json_decode($this->raw, false, 512, self::JSON_OPTIONS);
     }
 }

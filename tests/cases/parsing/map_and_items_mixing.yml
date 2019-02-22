@@ -1,0 +1,11 @@
+sequence:
+- key: foo
+-
+  key1: foo
+- key2: foo
+  key3: foo
+sequence2:
+- keyempty:
+    subkeyempty:
+- keyempty2:
+  samelvlkey: foo

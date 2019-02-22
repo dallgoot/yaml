@@ -12,18 +12,19 @@ class NodeSetValue extends Node
 {
     public function __construct(string $nodeString, int $line)
     {
-        $v = trim(substr($nodeString, 1));
+        parent::__construct($nodeString, $line);
+        $v = substr(ltrim($nodeString), 1);
         if (!empty($v)) {
-            // $node->value = new NodeList(new Node($v, $node->line));
-            $this->value = new NodeList(NodeFactory::get($v, $line));
+            $value = NodeFactory::get($v, $line);
+            $value->indent = null;
+            $this->value = $value;
         }
     }
 
-    public function isAwaitingChildren()
-    {
-        return is_null($this->value);
-    }
-
+    // public function isAwaitingChildren()
+    // {
+    //     return is_null($this->value);
+    // }
 
     /**
      * Builds a set value.
@@ -31,20 +32,14 @@ class NodeSetValue extends Node
      * @param Node   $node   The node of type YAML::SET_VALUE
      * @param object $parent The parent (the document object or any previous object created through a mapping key)
      */
-    public static function buildSetValue(Node $node, &$parent = null)
+    public function build(&$parent = null)
     {
         $prop = array_keys(get_object_vars($parent));
         $key = end($prop);
-        $value = $node->value;
-        if ($value instanceof NodeItem) {
-            $mother = new NodeSequence();
-            $mother->add($value);
-            $value = $mother;
-        }
-        if ($value instanceof NodeKey) {
-            $mother = new NodeMapping();
-            $mother->add($value);
-            $value = $mother;
+        $value = $this->value;
+
+        if ($value instanceof NodeItem || $value instanceof NodeKey) {
+            $value = new NodeList($this->value);
         }
         $parent->{$key} = is_null($value) ? null: $value->build($parent);
     }

@@ -32,5 +32,8 @@
         "phan/phan": "^1.2",
         "symfony/yaml": "^4.2",
         "phpmetrics/phpmetrics": "^2.4"
+    },
+    "scripts" : {
+        "test" : "phpunit --configuration ./configuration/phpunit.xml --columns max --testsuite cases --no-logging --coverage-xml ./documentation/coverage.xml"
     }
 }

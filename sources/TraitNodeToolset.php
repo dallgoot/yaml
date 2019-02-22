@@ -8,7 +8,7 @@ namespace Dallgoot\Yaml;
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
-class NodeMultiline extends Node
+trait TraitNodeToolset
 {
 
 }

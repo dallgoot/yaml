@@ -16,7 +16,7 @@ final class Cases extends TestCase
     private function getGenerator($array) {
         $generator = function() use($array) {
             foreach ($array as $key => $value) {
-                yield [$key, $value];
+                yield [$key, rtrim($value)];
             }
         };
         return $generator();
@@ -26,18 +26,21 @@ final class Cases extends TestCase
     {
         $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/examples_tests.yml'));
         $this->assertArrayHasKey('Example_2_01', $nameResultPair, 'ERROR during Yaml::parseFile for ../definitions/examples_tests.yml');
+        $this->assertEquals(28, count($nameResultPair));
         return $this->getGenerator($nameResultPair);
     }
 
     public function parsingProvider()
     {
         $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/parsing_tests.yml'));//var_dump($nameResultPair);die();
+        $this->assertEquals(58, count($nameResultPair));
         return $this->getGenerator($nameResultPair);
     }
 
     public function failingProvider()
     {
         $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/failing_tests.yml'));
+        $this->assertEquals(20, count($nameResultPair));
         return $this->getGenerator($nameResultPair);
     }
 

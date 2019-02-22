@@ -10,5 +10,18 @@ namespace Dallgoot\Yaml;
  */
 class NodeDocEnd extends Node
 {
-    //TODO: can have something on same line ?
+    /**
+     * @param      string   $nodeString  The node string
+     * @param      integer  $line        The line
+     * @todo       can have something on same line ?
+     */
+    // public function __construct(string $nodeString, int $line)
+    // {
+    //     parent::__construct($nodeString, $line);
+    //     // $rest = substr(ltrim($nodeString), 3);
+    //     // if (!empty($rest)) {
+    //     //     $n = NodeFactory::get($rest, $line);
+    //     //     $this->add($n);
+    //     // }
+    // }
 }

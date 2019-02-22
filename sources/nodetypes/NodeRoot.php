@@ -10,19 +10,44 @@ namespace Dallgoot\Yaml;
  */
 class NodeRoot extends Node
 {
+    /** @var null|YamlObject */
+    private $_yamlObject;
+
     public function __construct()
     {
         $this->value = new NodeList();
-        $this->value->setIteratorMode(NodeList::IT_MODE_DELETE);
     }
 
     public function getParent(int $indent = null, $type = 0):Node
     {
+        if ($this->_parent !== null) {
+            throw new \ParseError(__CLASS__." can NOT have a parent, something's wrong", 1);
+        }
         return $this;
     }
 
-    public function getValue(&$parent = null)
+    public function getRoot():Node
     {
-        return $this->value;
+        return $this;
+    }
+
+    public function getYamlObject()
+    {
+        return $this->_yamlObject;
+    }
+
+    public function build(&$parent = null)
+    {
+        return $this->buildFinal($parent);
+    }
+
+    private function buildFinal(YamlObject $yamlObject):YamlObject
+    {
+        $this->_yamlObject = $yamlObject;
+        $this->value->setIteratorMode(NodeList::IT_MODE_DELETE);
+        foreach ($this->value as $key => $child) {
+            $child->build($yamlObject);
+        }
+        return $yamlObject;
     }
 }

@@ -10,23 +10,29 @@ namespace Dallgoot\Yaml;
  */
 class NodeCompactSequence extends Node
 {
-    public function __constructor(string $nodeString, int $line)
+    public function __construct(string $nodeString, int $line)
     {
         parent::__construct($nodeString, $line);
-        $this->value = new NodeList();
-        preg_match_all(Regex::SEQUENCE_VALUES, trim(substr(ltrim($nodeString), 1,-1)), $matches);
+        preg_match_all(Regex::SEQUENCE_VALUES, trim(substr(trim($nodeString), 1,-1)), $matches);
         foreach ($matches['item'] as $key => $item) {
-            $this->value->push(new NodeItem('- '.$item, $line));
+            $i = new NodeItem('', $line);
+            $i->indent = null;
+            $itemValue = NodeFactory::get(trim($item));
+            $itemValue->indent = null;
+            $i->add($itemValue);
+            $this->add($i);
         }
     }
 
     public function build(&$parent = null)
     {
-        $out = $parent ?? [];
-        $tmp = $this->value instanceof Node ? new NodeList($this->value) : $this->value;
-        foreach ($tmp as $child) {
-            $child->build($out);
+        if (is_null($this->value)) {
+            return null;
         }
-        return new Compact($out);
+        if ($this->value instanceof Node) {
+            $this->value = new NodeList($this->value);
+        }
+        $this->value->type = NodeList::SEQUENCE;
+        return new Compact($this->value->build());
     }
 }

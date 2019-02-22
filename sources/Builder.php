@@ -11,7 +11,9 @@ namespace Dallgoot\Yaml;
  */
 final class Builder
 {
-    public  static $_root;
+    /** @var bool */
+    public static $dateAsObject = false;
+
     private static $_debug;
 
     const INVALID_DOCUMENT = "DOCUMENT %d is invalid,";
@@ -27,22 +29,26 @@ final class Builder
     public static function buildContent(NodeRoot $root, int $_debug)
     {
         self::$_debug = $_debug;
+        if ($_debug === 2) {
+            print_r($root);
+            return;
+        }
         $documents = [];
         $buffer = new NodeList();
-        foreach ($root->getValue() as $child) {
-            if ($child instanceof NodeDocEnd && $child !== $root->value->top()) {
-                $buffer->push($child);
-                $documents[] = self::buildDocument($buffer, count($documents));
-                $buffer = new NodeList();
-                continue;
-            } elseif ($child instanceof NodeDocStart && $buffer->count() > 0 && $buffer->hasContent()) {
-                $documents[] = self::buildDocument($buffer, count($documents));
-                $buffer = new NodeList($child);
-                continue;
-            }
-            $buffer->push($child);
-        }
         try {
+            foreach ($root->value as $child) {
+                if ($child instanceof NodeDocEnd && $child !== $root->value->top()) {
+                    $buffer->push($child);
+                    $documents[] = self::buildDocument($buffer, count($documents));
+                    $buffer = new NodeList();
+                    continue;
+                } elseif ($child instanceof NodeDocStart && $buffer->count() > 0 && $buffer->hasContent()) {
+                    $documents[] = self::buildDocument($buffer, count($documents));
+                    $buffer = new NodeList($child);
+                    continue;
+                }
+                $buffer->push($child);
+            }
             $documents[] = self::buildDocument($buffer, count($documents));
         } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception($e->getMessage(), 1, $e);
@@ -58,44 +64,59 @@ final class Builder
      *
      * @return YamlObject the YAML document as an object
      */
-    private static function buildDocument(NodeList $list, int $docNum):YamlObject
+    private static function buildDocument(NodeList &$list, int $docNum):YamlObject
     {
-        self::$_root = new YamlObject;
+        $yamlObject = new YamlObject;
+        $rootNode = new NodeRoot();
+        $list->setIteratorMode(NodeList::IT_MODE_DELETE);
         try {
-            $out = self::buildNodeList($list, self::$_root);
-            if (is_string($out)) {
-                $out = self::$_root->setText($out);
+            foreach ($list as $child) {
+                $rootNode->add($child);
             }
-        } catch (\Exception|\Error $e) {
+            $out = $rootNode->build($yamlObject);
+        } catch (\Exception|\Error|\ParseError $e) {
             throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum).':'.$e->getMessage(), 2, $e);
         }
         return $out;
     }
 
+    /**
+     * Returns the correct PHP type according to the string value
+     *
+     * @param string $v a string value
+     *
+     * @return mixed The value with appropriate PHP type
+     * @throws \Exception if happens in Regex::isDate or Regex::isNumber
+     */
+    public static function getScalar(string $v, bool $onlyScalar = false)
+    {
+        if (Regex::isDate($v))   return self::$dateAsObject && !$onlyScalar ? date_create($v) : $v;
+        if (Regex::isNumber($v)) return self::getNumber($v);
+        $types = ['yes'   => true,
+                    'no'    => false,
+                    'true'  => true,
+                    'false' => false,
+                    'null'  => null,
+                    '.inf'  => INF,
+                    '-.inf' => -INF,
+                    '.nan'  => NAN
+        ];
+        return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $v;
+    }
 
     /**
-     * Builds a node list.
+     * Returns the correct PHP type according to the string value
      *
-     * @param NodeList $list   The node
-     * @param mixed    $parent The parent
+     * @param string $v a string value
      *
-     * @return mixed The parent (object|array) or a string representing the NodeList.
+     * @return int|float   The scalar value with appropriate PHP type
+     * @todo make sure there 's only ONE dot before cosndering a float
      */
-    public static function buildNodeList(NodeList $list, &$parent = null)
+    private static function getNumber(string $v)
     {
-        $out = '';
-        foreach ($list as $child) {
-            if ($child instanceof NodeDocStart) {
-                $child->build($parent);
-            } else {
-                $out .= ','.$child->build($parent);
-            }
-        }
-        if (is_string($out)) {
-            $result = implode(explode(',', $out));
-            $out = $result === '' ? null : Node::getScalar($result);
-        }
-        return is_null($out) ? $parent : $out;
+        if (preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
+        if (preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
+        return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
     }
 
 }

@@ -8,8 +8,10 @@ namespace Dallgoot\Yaml;
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
-class NodeLiterals extends Node
+abstract class NodeLiterals extends Node
 {
+    abstract function getFinalString(NodeList $list):string;
+
     public function __construct(string $nodeString, int $line)
     {
         parent::__construct($nodeString, $line);
@@ -18,18 +20,22 @@ class NodeLiterals extends Node
         }
     }
 
-    public function add(Node $child)
+    public function add(Node $child):Node
     {
-        $realValue = new NodeScalar(ltrim($child->raw), $child->line);
-        $this->value = new NodeList();
-        parent::add($realValue);
+        if (is_null($this->value)) $this->value = new NodeList();
+        $candidate = $child;
+        if (!isOneOf($child, ['NodeScalar', 'NodeBlank', 'NodeComment'])) {
+            $candidate = new NodeScalar($child->raw, $child->line);
+        } else if ($child instanceof NodeQuoted) {
+            $candidate = new NodeScalar($child->build(), $child->line);
+        }
+        return parent::add($candidate);
     }
 
-    public function isAwaitingChildren()
-    {
-        return is_null($this->value);
-    }
-
+    // public function isAwaitingChildren()
+    // {
+    //     return true;//is_null($this->value);
+    // }
 
     public static function litteralStripLeading(NodeList &$list)
     {
@@ -38,8 +44,8 @@ class NodeLiterals extends Node
             $list->shift();
             $list->rewind();
         }
+        $list->rewind();
     }
-
 
     public static function litteralStripTrailing(NodeList &$list)
     {
@@ -50,72 +56,49 @@ class NodeLiterals extends Node
         $list->rewind();
     }
 
-
     /**
-     * Builds a litteral (folded or not) or any NodeList that has YAML::RAW type (like a multiline value)
+     * Builds a litteral (folded or not) or any NodeList
      * As per Documentation : 8.1.1.2. Block Chomping Indicator
      * Chomping controls how final line breaks and trailing empty lines are interpreted.
      * YAML provides three chomping methods:
      *   Clip (default behavior)  : FINAL_LINE_BREAK, NO TRAILING EMPTY LINES
      *   Strip (“-” chomping indicator)  NO FINAL_LINE_BREAK, NO TRAILING EMPTY LINES
      *   Keep (“+” chomping indicator)  FINAL_LINE_BREAK && TRAILING EMPTY LINES
-     *
-     * @param NodeList $list The children
-     *
-     * @return string    The litteral.
-     * @todo   Example 6.1. Indentation Spaces  spaces must be considered as content
      */
-    public function buildLitteral(NodeList &$list):string
+    public function build(&$parent = null)
     {
         $result = '';
-        if ($this instanceof NodeLit) {
-            return self::buildLitt($list);
+        if (!is_null($this->value)) {
+            $tmp = $this->getFinalString($this->value->filterComment());
+            $result = $this->identifier === '-' ? $tmp : $tmp."\n";
         }
-        if ($this instanceof NodeRaw) {
-            return self::buildRaw($list);
+        if ($this->_parent instanceof NodeRoot) {
+            $this->getRoot()->getYamlObject()->setText($result);
+        } else {
+            return $result;
         }
-        if ($list->count()) {
-            if ($this->modifier !== '+') {
-                 self::litteralStripLeading($list);
-                 self::litteralStripTrailing($list);
-            }
-            $first = $list->shift();
-            $refIndent = $first->indent ?? 0;
-            // $refSeparator = [ Y::RAW => '', Y::LITT => "\n", Y::LITT_FOLDED => ' '][$type];
-            $refSeparator = ' ';
-            $result = substr($first->raw, $first->indent);
-            foreach ($list as $child) {
-                if ($this instanceof NodeLitFolded) {
-                    if($child->indent > $refIndent || ($child instanceof NodeBlank)) {
-                        $separator = "\n";
-                    } else {
-                        $separator = !empty($result) && $result[-1] === "\n" ? '' : $refSeparator;
-                    }
-                } else {
-                    $separator = $refSeparator;
-                }
-                $val = '';
-                if ($child->value instanceof NodeList) {
-                    $val = "\n".self::buildLitteral($child->value);
-                } else {
-                    if ($child instanceof NodeScalar) {
-                        $val = $child->value;
-                    } /*else {
-                        $cursor = $child;
-                        $val    = substr($child->raw, $child->indent);
-                        // while ($cursor->value instanceof Node) {
-                        //     $val .= substr($cursor->raw, $cursor->indent);
-                        //     $cursor = $cursor->value;
-                        // }
-                        // $val .= $cursor->value;
-                    }*/
-                }
-                $result .= $separator .$val;
-            }
-        }
-        return $result.($this->modifier === '-' ? "" : "\n");
     }
 
-
-
+    public function getChildValue(Node $child, int $refIndent):string
+    {
+        if ($child instanceof NodeScalar ) {
+            return $child->build();
+        } else {
+            $value = $child->value;
+            if ($value instanceof Node) {
+                if ($value->indent > 0) {
+                    return substr($child->raw."\n".$this->getChildValue($value, $refIndent), $refIndent);
+                } else {
+                    return substr($child->raw, $refIndent);
+                }
+            } elseif ($value instanceof NodeList) {
+                $start = '';
+                if ($child instanceof NodeKey || $child instanceof NodeItem) {
+                    $start = substr($child->raw, $refIndent)."\n";
+                }
+                return $start.$this->getFinalString($value, 0);
+            }
+        }
+        return '';
+    }
 }

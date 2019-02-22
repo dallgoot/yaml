@@ -10,25 +10,31 @@ namespace Dallgoot\Yaml;
  */
 class NodeBlank extends Node
 {
-    public function needsSpecialProcess(Node &$previous, array &$emptyLines):bool
+    public function add(Node $child):Node
+    {
+        if ($this->_parent) {
+            return $this->_parent->add($child);
+        } else {
+            return parent::add($child);
+        }
+    }
+
+    public function specialProcess(Node &$previous, array &$emptyLines):bool
     {
         $deepest = $previous->getDeepestNode();
         //what first character to determine if escaped sequence are allowed
         //if this is empty $separator depends on previous last character (escape slash)
         $separator = ' ';
-        // if ($deepest->value[-1] !== "\\") {
-        //     $deepest->parse(($deepest->value)."\n");
-        // } else {
-            // $this->specialProcess($previous, $emptyLines);
-        // }
-               if ($previous instanceof NodeScalar)   $emptyLines[] = $this->setParent($previous->getParent());
-        if ($deepest instanceof NodeLiterals) $emptyLines[] = $this->setParent($deepest);
+        if ($previous instanceof NodeScalar) {
+            $emptyLines[] = $this->setParent($previous->getParent());
+        } elseif ($deepest instanceof NodeLiterals) {
+            $emptyLines[] = $this->setParent($deepest);
+        }
         return true;
     }
 
-    // public function specialProcess(Node &$previous, array &$emptyLines)
-    // {
-    //     if ($previous instanceof NodeScalar)   $emptyLines[] = $this->setParent($previous->getParent());
-    //     if ($deepest instanceof NodeLiterals) $emptyLines[] = $this->setParent($deepest);
-    // }
+    public function build(&$parent = null)
+    {
+        return "\n";
+    }
 }

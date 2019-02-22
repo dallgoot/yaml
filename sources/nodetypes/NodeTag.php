@@ -14,6 +14,17 @@ class NodeTag extends NodeActions
     public function __construct(string $nodeString, int $line)
     {
         parent::__construct($nodeString, $line);
+        $trimmed = ltrim($nodeString);
+        $pos = strpos($trimmed, ' ');
+        if (is_int($pos)) {
+            $this->identifier = substr($trimmed, 0, $pos);
+            $rest = substr($trimmed, $pos);
+            if (!empty($rest)) {
+                $n = NodeFactory::get($rest, $line);
+                // $n->indent = $this->indent + 4;
+                $this->add($n);
+            }
+        }
     }
 
     /**
@@ -32,7 +43,7 @@ class NodeTag extends NodeActions
         return false;
     }
 
-    public function isAwaitingChildren()
+    public function isAwaitingChildren():bool
     {
         return is_null($this->value);
     }
@@ -49,20 +60,15 @@ class NodeTag extends NodeActions
     public function build(&$parent = null)
     {
         $value = $this->value;
-        if ($value instanceof NodeItem) {
-            $mother = new NodeSequence();
-            $mother->add($value);
-            $value = $mother;
+        if (is_null($parent) && ($value instanceof NodeItem || $value instanceof NodeKey)) {
+            $value = new NodeList($this->value);
         }
-        if ($value instanceof NodeKey) {
-            $mother = new NodeMapping();
-            $mother->add($value);
-            $value = $mother;
-        }
-        $tag = new Tag($this->identifier, $value);
         //soit le tag est connu et on build sa valeur transformée
-        $tag->build($parent);
-        return $tag->isKnown() ? $tag->value : $tag;
+        if (TagFactory::isKnown($this->_tag)) {
+            TagFactory::transform($this->_tag, $value)->build($parent);
+        } else {
+            return new Tag($this->_tag, is_null($value) ? null : $value->build($parent));
+        }
     }
 
 }

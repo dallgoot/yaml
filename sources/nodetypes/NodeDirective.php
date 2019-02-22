@@ -16,9 +16,17 @@ class NodeDirective extends Node
      *
      * @todo implement if required
      */
-    public static function buildDirective()
+    public function build(&$parent = null)
     {
-    //     // TODO : implement
+        if (is_null($this->value)) {
+            return null;
+        } else {
+            return $this->value->build($parent);
+        }
     }
 
+    public function add(Node $child):Node
+    {
+        return $this->getRoot()->add($child);
+    }
 }

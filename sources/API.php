@@ -117,7 +117,7 @@ class API
      */
     public function setText(string $value):YamlObject
     {
-        $this->value .= ltrim($value);
+        $this->value .= ltrim($value);//throw new \Exception(__METHOD__, 1);
         return $this->_obj;
     }
 

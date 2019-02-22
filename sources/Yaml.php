@@ -31,7 +31,7 @@ final class Yaml
     {
         try {
             return (new Loader(null, $options, $debug))->parse($someYaml);
-        } catch (\Exception|\Error $e) {
+        } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error while parsing YAML string", 1, $e);
         }
     }
@@ -56,7 +56,7 @@ final class Yaml
     {
         try {
             return (new Loader($fileName, $options, $debug))->parse();
-        } catch (\Exception|\Error $e) {
+        } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error during parsing '$fileName'", 1, $e);
         }
 
@@ -76,7 +76,7 @@ final class Yaml
     {
         try {
             return Dumper::toString($somePhpVar, $options);
-        } catch (\Exception|\Error $e) {
+        } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error dumping", 1, $e);
         }
     }
@@ -98,9 +98,20 @@ final class Yaml
     {
         try {
             return Dumper::toFile($fileName, $somePhpVar, $options);
-        } catch (\Exception|\Error $e) {
+        } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error during dumping '$fileName'", 1, $e);
         }
     }
 }
 
+function isOneOf(object $obj, array $comparison)
+{
+    if(!is_object($obj) || !is_array($comparison)) {
+        throw new Exception(__FUNCTION__." only object and array are allowed for comparison", 1);
+    }
+    foreach ($comparison as $className) {
+        $fqn = __NAMESPACE__."\\$className";
+        if ($obj instanceof $fqn) return true;
+    }
+    return false;
+}

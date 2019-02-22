@@ -15,26 +15,34 @@ class Regex
     const HEX_NUM   = "/^(0x[\da-f]+)$/i";
 
     const QUOTED = "(?'quot'(?'q'['\"]).*?(?<![\\\\])(?&q))";
-    const NUM    = "(?'num'[-+]?(?:\\d+\\.?(?:\\d*(e[+-]?\\d+)?)|(\\.(inf|nan))))";
-    const WORD   = "(?'word'[\\w ]+)";
+    const NUM    = "(?'num'[-+]?(?:\\d+\\.?(?:\\d*(e[+-]?\\d+)?)|(\\.(inf|nan)))\z)";
+    const WORD   = "(?'word'[^,]+)";
     const RC     = "(?'rc'\\*\\w+)"; //reference call
     const RD     = "(?'rd'&\\w+)"; //reference definition
-    const TAG    = "(?'tag'!+\\w+)";
+    const TAG    = "(?'tag'!!?\\w+!?)";
     const ALL    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&num)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
-    const MAP    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|\\w+) *?: *(?&all)) *,? *)* *?\\})";
+    const MAP    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|[^:]+) *?: *(?&all)) *,? *)* *?\\})";
     const SEQ    = "(?'seq'\\[ *(?:(?'i'(?&all)) *,? *)* *\\])";
-    const ALLDEF = "(?(DEFINE)".Regex::QUOTED.Regex::NUM.Regex::RC.Regex::WORD.Regex::TAG.Regex::RD.Regex::ALL.Regex::MAP.Regex::SEQ.")";
+    const ALLDEF = "(?(DEFINE)".Regex::QUOTED.
+                                Regex::NUM.
+                                Regex::RC.
+                                Regex::WORD.
+                                Regex::TAG.
+                                Regex::RD.
+                                Regex::ALL.
+                                Regex::MAP.
+                                Regex::SEQ.")";
 
-    const MAPPING  = "/".Regex::ALLDEF."(?&map)$/";
-    const MAPPING_VALUES = "/".Regex::ALLDEF."(?'k'(?&quot)|\\w+) *: *(?'v'(?&all))?/i";
+    const MAPPING  = "/".Regex::ALLDEF."^(?&map)$/";
+    const MAPPING_VALUES = "/".Regex::ALLDEF."(?'k'(?&quot)|[^:]+) *: *(?'v'(?&all))? *,? */i";
 
-    const SEQUENCE = "/".(Regex::ALLDEF)."(?&seq)/";
+    const SEQUENCE = "/".Regex::ALLDEF."^(?&seq)/";
     const SEQUENCE_VALUES = "/".Regex::ALLDEF."(?'item'(?&all)) *,? */i";
 
-    const KEY  = '/^([[:alnum:]_\'"~][[:alnum:]_ -.\/~]*[ \t]*)(?::[ \t]([^\n]+)|:)$/i';
+    const KEY  = '/^([\w\'"~][\w\'" \-.\/~]*[ \t]*)(?::([ \t][^\n]+)|:)$/i';
     const ITEM = '/^-([ \t]+(.*))?$/';
 
-
+    const NODE_ACTIONS = "/(?(DEFINE)".Regex::RC.Regex::RD.Regex::TAG.")(?'action'(?&rc)|(?&rd)|(?&tag))( +(?'content'.*))?$/";
 
     /**
      * Determines if a valid Date format

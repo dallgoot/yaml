@@ -1,3 +1,5 @@
+compact_with_emptystring_as_key: |
+  {"key":{"":"foo"}}
 compact_keyvalue_with_no_space:
 compact_with_invalid_reference_and_comment:
 compact_with_invalid_reference:
