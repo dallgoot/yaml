@@ -93,7 +93,6 @@ abstract class NodeLiterals extends Node
             }
             return $start.$this->getFinalString($value, $refIndent);
         }
-        return '';
     }
 
     public function isAwaitingChild(Node $node):bool

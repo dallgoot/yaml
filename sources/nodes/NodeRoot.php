@@ -35,7 +35,10 @@ class NodeRoot extends Node
 
     public function getYamlObject():YamlObject
     {
-        return $this->_yamlObject;
+        if ($this->_yamlObject) {
+            return $this->_yamlObject;
+        }
+        throw new \Exception("YamlObject has not been set yet", 1);
     }
 
     public function build(&$parent = null)

@@ -65,13 +65,14 @@ class NodeItem extends Node
             throw new \Exception("parent must be an ArrayIterator not ".
                 (is_object($parent) ? get_class($parent) : gettype($parent)));
         }
+        $value = $this->value ? $this->value->build() : null;
         if (is_null($parent)) {
-            return [$this->value ? $this->value->build() : null];
+            return [$value];
         } else {
             $ref = is_array($parent) ? $parent : iterator_to_array($parent);
             $numKeys = array_keys($ref);
             $key = count($numKeys) > 0 ? max($numKeys) + 1 : 0;
-            $parent[$key] = $this->value->build();
+            $parent[$key] = $value;
         }
     }
 
