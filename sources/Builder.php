@@ -38,16 +38,12 @@ final class Builder
         try {
             foreach ($root->value as $child) {
                 if ($child instanceof NodeDocEnd && $child !== $root->value->top()) {
-                    $buffer->push($child);
-                    $documents[] = self::buildDocument($buffer, count($documents));
-                    $buffer = new NodeList();
-                    continue;
+                    self::pushAndSave($child, $buffer, $documents);
                 } elseif ($child instanceof NodeDocStart && $buffer->count() > 0 && $buffer->hasContent()) {
-                    $documents[] = self::buildDocument($buffer, count($documents));
-                    $buffer = new NodeList($child);
-                    continue;
+                    self::saveAndPush($child, $buffer, $documents);
+                } else {
+                    $buffer->push($child);
                 }
-                $buffer->push($child);
             }
             $documents[] = self::buildDocument($buffer, count($documents));
         } catch (\Exception|\Error|\ParseError $e) {
@@ -116,6 +112,19 @@ final class Builder
         if (preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
         if (preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
         return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
+    }
+
+    private static function pushAndSave(Node $child, NodeList $buffer, array &$documents)
+    {
+        $buffer->push($child);
+        $documents[] = self::buildDocument($buffer, count($documents));
+        $buffer = new NodeList();
+    }
+
+    private static function saveAndPush(Node $child, NodeList $buffer, array &$documents)
+    {
+        $documents[] = self::buildDocument($buffer, count($documents));
+        $buffer = new NodeList($child);
     }
 
 }
