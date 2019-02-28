@@ -10,12 +10,6 @@ namespace Dallgoot\Yaml;
  */
 class NodePartial extends Node
 {
-    public function __construct(string $nodeString, int $line)
-    {
-        parent::__construct($nodeString, $line);
-        $this->value = ltrim($nodeString);
-    }
-
     /**
      * What first character to determine if escaped sequence are allowed
      *

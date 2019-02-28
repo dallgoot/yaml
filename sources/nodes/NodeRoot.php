@@ -12,6 +12,8 @@ class NodeRoot extends Node
 {
     /** @var null|YamlObject */
     private $_yamlObject;
+    /** @var NodeList */
+    public $value;
 
     public function __construct()
     {
@@ -31,7 +33,7 @@ class NodeRoot extends Node
         return $this;
     }
 
-    public function getYamlObject()
+    public function getYamlObject():YamlObject
     {
         return $this->_yamlObject;
     }

@@ -32,12 +32,12 @@ class NodeKey extends Node
             $keyNode = NodeFactory::get($keyString);
             if (!is_null($keyNode->_anchor)) {
                 $this->_anchor = $keyNode->_anchor;
-                $this->identifier = trim($keyNode->value->raw);
+                $this->identifier = ltrim($keyNode->raw);
             } elseif (!is_null($keyNode->_tag)) {
                 $this->_tag = $keyNode->_tag;
-                $this->identifier = trim($keyNode->value->raw);
+                $this->identifier = ltrim($keyNode->raw);
             } elseif ($keyNode instanceof NodeScalar) {
-                $this->identifier = trim($keyNode->raw);
+                $this->identifier = ltrim($keyNode->raw);
             }
         }
     }
@@ -103,7 +103,7 @@ class NodeKey extends Node
      * @param object|array $parent The parent
      *
      * @throws \ParseError if Key has no name(identifier) Note: empty string is allowed
-     * @return null
+     * @return null|\StdClass
      */
     public function build(&$parent = null)
     {

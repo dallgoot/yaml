@@ -84,7 +84,7 @@ class NodeList extends \SplDoublyLinkedList
        //         throw new \ParseError("Error : no coherence in types", 1);
        //     }
        // }
-       return true;
+       return (bool) $estimatedType;
     }
 
     public function build(&$parent = null)
@@ -114,13 +114,11 @@ class NodeList extends \SplDoublyLinkedList
 
     public function buildMultiline():string
     {
-        $collect = [];
         $output = '';
         if ($this->count() > 0) {
             $this->rewind();
             $first = $this->shift();
             $output = trim($first->raw);
-            $indent = $first->indent;
             foreach ($this as $child) {
                 if ($child instanceof NodeScalar) {
                     $separator = $output[-1] === "\n" ? '' : ' ';

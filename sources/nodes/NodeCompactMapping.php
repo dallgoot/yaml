@@ -29,8 +29,8 @@ class NodeCompactMapping extends Node
         }
         if ($this->value instanceof Node) {
             $this->value = new NodeList($this->value);
+            $this->value->type = NodeList::MAPPING;
         }
-        $this->value->type = NodeList::MAPPING;
         return new Compact($this->value->build());
     }
 }

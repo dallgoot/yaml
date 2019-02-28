@@ -65,12 +65,22 @@ abstract class Node
      */
     public function getParent(int $indent = null):Node
     {
-        if (!is_int($indent)) return $this->_parent;
+        if (!is_int($indent)){
+            if ($this->_parent instanceof Node) {
+                return $this->_parent;
+            } else {
+                throw new \Exception("Cannnot find a parent for ".get_class($this), 1);
+            }
+        }
         $cursor = $this->getParent();
         while (!($cursor instanceof NodeRoot)
                 && (is_null($cursor->indent)
                 || $cursor->indent >= $indent)) {
-            $cursor = $cursor->_parent;
+            if ($cursor->_parent) {
+                $cursor = $cursor->_parent;
+            } else {
+                break;
+            }
         }
         return $cursor;
     }
@@ -148,7 +158,7 @@ abstract class Node
                         $lastKey = $child;
                     }
                 }
-                return $child;
+                return $lastKey;
             }
         }
         return $supposedParent;

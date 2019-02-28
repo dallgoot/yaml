@@ -48,7 +48,7 @@ class NodeItem extends Node
 
     public function getTargetOnMoreIndent(Node &$node):Node
     {
-        return !is_null($this->value) && $this->value->isAwaitingChild($node) ? $this->value : $this;
+        return $this->value instanceof Node && $this->value->isAwaitingChild($node) ? $this->value : $this;
     }
 
     /**
@@ -66,7 +66,7 @@ class NodeItem extends Node
                 (is_object($parent) ? get_class($parent) : gettype($parent)));
         }
         if (is_null($parent)) {
-            return [$this->value->build()];
+            return [$this->value ? $this->value->build() : null];
         } else {
             $ref = is_array($parent) ? $parent : iterator_to_array($parent);
             $numKeys = array_keys($ref);

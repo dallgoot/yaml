@@ -104,14 +104,11 @@ final class Yaml
     }
 }
 
-function isOneOf(object $obj, array $comparison)
+function isOneOf($subject, array $comparison)
 {
-    if(!is_object($obj) || !is_array($comparison)) {
-        throw new Exception(__FUNCTION__." only object and array are allowed for comparison", 1);
-    }
     foreach ($comparison as $className) {
         $fqn = __NAMESPACE__."\\$className";
-        if ($obj instanceof $fqn) return true;
+        if ($subject instanceof $fqn) return true;
     }
     return false;
 }

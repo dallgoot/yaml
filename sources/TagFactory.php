@@ -167,7 +167,7 @@ class TagFactory
         }
     }
 
-    public static function transform(string $identifier, object $value)
+    public static function transform(string $identifier, $value)
     {
         if (self::isKnown($identifier)) {
             if (!($value instanceof Node) && !($value instanceof NodeList) ) {

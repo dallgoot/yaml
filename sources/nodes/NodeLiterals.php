@@ -11,7 +11,9 @@ namespace Dallgoot\Yaml;
  */
 abstract class NodeLiterals extends Node
 {
-    abstract protected function getFinalString(NodeList $list):string;
+    /** @var NodeList */
+    public $value;
+    abstract protected function getFinalString(NodeList $list, int $refIndent = null):string;
 
     public function __construct(string $nodeString, int $line)
     {
@@ -26,7 +28,7 @@ abstract class NodeLiterals extends Node
         if (is_null($this->value)) $this->value = new NodeList();
         $candidate = $child;
         if (!isOneOf($child, ['NodeScalar', 'NodeBlank', 'NodeComment', 'NodeQuoted'])) {
-            $candidate = new NodeScalar($child->raw, $child->line);
+            $candidate = new NodeScalar((string) $child->raw, $child->line);
         }
         return parent::add($candidate);
     }
@@ -79,15 +81,13 @@ abstract class NodeLiterals extends Node
     protected function getChildValue(Node $child, int $refIndent):string
     {
         $value = $child->value;
-        $start = '';
         if (is_null($value)) {
             return $child instanceof NodeQuoted ? $child->build() : ltrim($child->raw);
-        } elseif ($value instanceof Node) {
-            if ($child instanceof NodeKey || $child instanceof NodeItem) {
-                $start = ltrim($child->raw)."\n";
+        } else {
+            if ($value instanceof Node) {
+                $value = new NodeList($value);
             }
-            return $this->getFinalString(new NodeList($value), $refIndent);
-        } elseif ($value instanceof NodeList) {
+            $start = '';
             if ($child instanceof NodeKey || $child instanceof NodeItem) {
                 $start = ltrim($child->raw)."\n";
             }

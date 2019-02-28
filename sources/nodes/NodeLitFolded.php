@@ -16,7 +16,7 @@ class NodeLitFolded extends NodeLiterals
      * @return string    The litteral.
      * @todo   Example 6.1. Indentation Spaces  spaces must be considered as content
      */
-    public function getFinalString(NodeList $list):string
+    public function getFinalString(NodeList $list, int $refIndent = null):string
     {
         $result = '';
         if ($list->count()) {

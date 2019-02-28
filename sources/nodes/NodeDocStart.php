@@ -33,7 +33,7 @@ class NodeDocStart extends Node
     public function build(&$parent = null)
     {
         if (is_null($parent)) {
-            throw new Exception(__METHOD__." expects a YamlObject as parent", 1);
+            throw new \Exception(__METHOD__." expects a YamlObject as parent", 1);
         }
         if (is_null($this->value)) {
             return null;
@@ -55,7 +55,7 @@ class NodeDocStart extends Node
 
     public function getTargetOnEqualIndent(Node &$node):Node
     {
-        if ($this->value && $this->value->isAwaitingChild($node)) {
+        if ($this->value instanceof Node && $this->value->isAwaitingChild($node)) {
             return $this->value;
         }
         return $this->getParent();

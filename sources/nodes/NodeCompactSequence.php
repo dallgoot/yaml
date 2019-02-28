@@ -31,8 +31,8 @@ class NodeCompactSequence extends Node
         }
         if ($this->value instanceof Node) {
             $this->value = new NodeList($this->value);
+            $this->value->type = NodeList::SEQUENCE;
         }
-        $this->value->type = NodeList::SEQUENCE;
         return new Compact($this->value->build());
     }
 }

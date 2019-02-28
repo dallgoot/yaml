@@ -89,7 +89,7 @@ final class NodeFactory
      */
     final private static function onCompact(string $first, string $nodeString, int $line):Node
     {
-        $json = json_decode($nodeString, false, 512, self::JSON_OPTIONS);
+        json_decode($nodeString, false, 512, self::JSON_OPTIONS);
         if (json_last_error() === \JSON_ERROR_NONE)             return new NodeJSON($nodeString, $line);
         elseif (preg_match(Regex::MAPPING, trim($nodeString)))  return new NodeCompactMapping($nodeString, $line);
         elseif (preg_match(Regex::SEQUENCE, trim($nodeString))) return new NodeCompactSequence($nodeString, $line);

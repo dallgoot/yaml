@@ -40,13 +40,13 @@ class NodeTag extends NodeActions
         }
         $value = $this->value;
         if (is_null($parent) && isOneOf($value, ['NodeItem', 'NodeKey'])) {
-            $value = new NodeList($value);
+            $value = new NodeList(/** @scrutinizer ignore-type */ $value);
         }
-        if (TagFactory::isKnown($this->_tag)) {
+        if (TagFactory::isKnown((string) $this->_tag)) {
             if ($value instanceof NodeLiterals) {
                 $value = $value->value;
             }
-            $built = TagFactory::transform($this->_tag, $value);
+            $built = TagFactory::transform((string) $this->_tag, $value);
             if ($built instanceof Node || $built instanceof NodeList) {
                 return $built->build($parent);
             }
