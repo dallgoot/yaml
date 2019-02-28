@@ -90,7 +90,6 @@ class TagFactory
     {
         if ($node instanceof Node) {
             if ($node instanceof NodeKey) {
-                $node->identifier = (string) $node->identifier;
                 return $node;
             }
             $value = trim($node->raw);

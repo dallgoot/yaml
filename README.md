@@ -6,7 +6,13 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 ## Features:
 
-- define *appropriate* PHP datatypes for values ie. object for mappings, array for sequences, Compact syntax, JSON, DateTime, etc.
+- define *appropriate* PHP datatypes for values :
+    YamlObject for each Yaml Document
+    object for mappings
+    array for sequences
+    Compact syntax
+    tagged values as Tag Object
+    JSON, DateTime, etc.
 - recover from some parsing errors
 - tolerance to tabulations
 
@@ -46,6 +52,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
   - build classes docs
   - Examples of each function of the API
 - Benchmarks against other libs
+- double check references/anchors changes in YamlObject
 
 ## Improvements
 

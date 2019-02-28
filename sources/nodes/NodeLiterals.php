@@ -64,8 +64,8 @@ abstract class NodeLiterals extends Node
     public function build(&$parent = null)
     {
         $result = '';
-        if (!is_null($this->_tag)) {
-            return TagFactory::transform($this->_tag, $this->value)->build($parent);
+        if (!is_null($this->tag)) {
+            return TagFactory::transform($this->tag, $this->value)->build($parent);
         }
         if (!is_null($this->value)) {
             $tmp = $this->getFinalString($this->value->filterComment());

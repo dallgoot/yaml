@@ -12,9 +12,9 @@ class NodeAnchor extends NodeActions
 {
     public function build(&$parent = null)
     {
-        $name = substr($this->_anchor, 1);
+        $name = substr($this->anchor, 1);
         $yamlObject = $this->getRoot()->getYamlObject();
-        if ($this->_anchor[0] === "*") {
+        if ($this->anchor[0] === "*") {
             return $yamlObject->getReference($name);
         } else {
             $built = $this->value->build($parent);

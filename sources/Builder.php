@@ -28,11 +28,11 @@ final class Builder
      */
     public static function buildContent(NodeRoot $root, int $_debug)
     {
-        self::$_debug = $_debug;
         if ($_debug === 2) {
             print_r($root);
             return;
         }
+        self::$_debug = $_debug;
         $documents = [];
         $buffer = new NodeList();
         try {
@@ -73,11 +73,10 @@ final class Builder
             foreach ($list as $child) {
                 $rootNode->add($child);
             }
-            $out = $rootNode->build($yamlObject);
+            return $rootNode->build($yamlObject);
         } catch (\Exception|\Error|\ParseError $e) {
             throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum).':'.$e->getMessage(), 2, $e);
         }
-        return $out;
     }
 
     /**
@@ -93,13 +92,13 @@ final class Builder
         if (Regex::isDate($v))   return self::$dateAsObject && !$onlyScalar ? date_create($v) : $v;
         if (Regex::isNumber($v)) return self::getNumber($v);
         $types = ['yes'   => true,
-                    'no'    => false,
-                    'true'  => true,
-                    'false' => false,
-                    'null'  => null,
-                    '.inf'  => INF,
-                    '-.inf' => -INF,
-                    '.nan'  => NAN
+                  'no'    => false,
+                  'true'  => true,
+                  'false' => false,
+                  'null'  => null,
+                  '.inf'  => \INF,
+                  '-.inf' => -\INF,
+                  '.nan'  => \NAN
         ];
         return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $v;
     }

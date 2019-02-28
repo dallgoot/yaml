@@ -26,9 +26,9 @@ class NodeActions extends Node
             }
         }
         if ($this instanceof NodeTag) {
-            $this->_tag = $name;
+            $this->tag = $name;
         } else {
-            $this->_anchor = $name;
+            $this->anchor = $name;
         }
     }
 

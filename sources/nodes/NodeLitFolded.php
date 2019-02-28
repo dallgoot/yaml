@@ -16,31 +16,27 @@ class NodeLitFolded extends NodeLiterals
      * @return string    The litteral.
      * @todo   Example 6.1. Indentation Spaces  spaces must be considered as content
      */
-    public function getFinalString(NodeList $list, int $refIndent = null):string
+    public function getFinalString(NodeList $value, int $refIndent = null):string
     {
         $result = '';
+        $list = $value->filterComment();
+        if ($this->identifier !== '+') {
+             self::litteralStripLeading($list);
+             self::litteralStripTrailing($list);
+        }
         if ($list->count()) {
-            if ($this->identifier !== '+') {
-                 self::litteralStripLeading($list);
-                 self::litteralStripTrailing($list);
-            }
-            $first = $list->shift();
-            $refIndent = $first->indent ?? 0;
             $refSeparator = ' ';
-            $result = substr($first->raw, $first->indent);
+            $first = $list->shift();
+            $indent = $refIndent ?? $first->indent;
+            $result = $this->getChildValue($first, $indent);
             foreach ($list as $child) {
-                if($child->indent > $refIndent || ($child instanceof NodeBlank)) {
+                $separator = ($result && $result[-1] === "\n") ? '' : $refSeparator;
+                if($child->indent > $indent || $child instanceof NodeBlank) {
                     $separator = "\n";
-                } else {
-                    $separator = !empty($result) && $result[-1] === "\n" ? '' : $refSeparator;
                 }
-                $val = '';
+                $val = $this->getChildValue($child, $indent);
                 if ($child->value instanceof NodeList) {
-                    $val = "\n".$this->getFinalString($child->value);
-                } else {
-                    if ($child instanceof NodeScalar) {
-                        $val = $child->build();
-                    }
+                    $val = "\n".$this->getFinalString($child->value, $indent);
                 }
                 $result .= $separator .$val;
             }

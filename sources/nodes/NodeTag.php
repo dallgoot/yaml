@@ -35,24 +35,24 @@ class NodeTag extends NodeActions
     public function build(&$parent = null)
     {
         if ($this->getParent() instanceof NodeRoot && is_null($this->value)) {
-            $this->getParent()->getYamlObject()->addTag($this->_tag);
+            $this->getParent()->getYamlObject()->addTag($this->tag);
             return;
         }
         $value = $this->value;
         if (is_null($parent) && isOneOf($value, ['NodeItem', 'NodeKey'])) {
             $value = new NodeList(/** @scrutinizer ignore-type */ $value);
         }
-        if (TagFactory::isKnown((string) $this->_tag)) {
+        if (TagFactory::isKnown((string) $this->tag)) {
             if ($value instanceof NodeLiterals) {
                 $value = $value->value;
             }
-            $built = TagFactory::transform((string) $this->_tag, $value);
+            $built = TagFactory::transform((string) $this->tag, $value);
             if ($built instanceof Node || $built instanceof NodeList) {
                 return $built->build($parent);
             }
             return $built;
         } else {
-            return new Tag($this->_tag, is_null($value) ? null : $value->build($parent));
+            return new Tag($this->tag, is_null($value) ? null : $value->build($parent));
         }
     }
 }

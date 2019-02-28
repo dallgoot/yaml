@@ -30,11 +30,11 @@ class NodeKey extends Node
            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $this->line));
         } else {
             $keyNode = NodeFactory::get($keyString);
-            if (!is_null($keyNode->_anchor)) {
-                $this->_anchor = $keyNode->_anchor;
+            if (!is_null($keyNode->anchor)) {
+                $this->anchor = $keyNode->anchor;
                 $this->identifier = ltrim($keyNode->raw);
-            } elseif (!is_null($keyNode->_tag)) {
-                $this->_tag = $keyNode->_tag;
+            } elseif (!is_null($keyNode->tag)) {
+                $this->tag = $keyNode->tag;
                 $this->identifier = ltrim($keyNode->raw);
             } elseif ($keyNode instanceof NodeScalar) {
                 $this->identifier = ltrim($keyNode->raw);
@@ -107,8 +107,8 @@ class NodeKey extends Node
      */
     public function build(&$parent = null)
     {
-        if (!is_null($this->_tag)) {
-            return TagFactory::transform($this->_tag, $this)->build($parent);
+        if (!is_null($this->tag)) {
+            return TagFactory::transform($this->tag, $this)->build($parent);
         }
         $result = is_null($this->value) ? null : $this->value->build();
         if (is_null($parent)) {

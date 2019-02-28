@@ -39,7 +39,7 @@ class NodeDocStart extends Node
             return null;
         } else {
             if ($this->value instanceof NodeTag){
-                $parent->addTag($this->value->_tag);
+                $parent->addTag($this->value->tag);
                 $this->value->build($parent);
             } else {
                 $text = $this->value->build($parent);

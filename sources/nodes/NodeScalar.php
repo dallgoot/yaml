@@ -31,8 +31,8 @@ class NodeScalar extends Node
 
     public function build(&$parent = null)
     {
-        if (!is_null($this->_tag)) {
-            $tagged = TagFactory::transform($this->_tag, $this);
+        if (!is_null($this->tag)) {
+            $tagged = TagFactory::transform($this->tag, $this);
             if ($tagged instanceof Node || $tagged instanceof NodeList) {
                 return $tagged->build();
             }

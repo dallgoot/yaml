@@ -31,7 +31,8 @@ class NodeItem extends Node
             } elseif ($value->isAwaitingChild($child)){
                 return $value->add($child);
             } else {
-                throw new \ParseError('key ('.$value->identifier.')@'.$value->line.' has already a value', 1);
+                // throw new \ParseError('key ('.$value->identifier.')@'.$value->line.' has already a value', 1);
+                throw new \ParseError('key @'.$value->line.' has already a value', 1);
             }
         }
         return parent::add($child);

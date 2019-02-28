@@ -11,7 +11,10 @@ namespace Dallgoot\Yaml;
 abstract class Node
 {
     /** @var null|string|boolean */
-    public $identifier;
+    protected $identifier;
+    /** @var null|Node */
+    protected $_parent;
+
     /** @var int */
     public $indent = -1;
     /** @var int */
@@ -20,22 +23,19 @@ abstract class Node
     public $raw;
     /** @var null|Node|NodeList */
     public $value;
-
     /** @var string|null */
-    public $_anchor;
-    /** @var null|Node */
-    protected $_parent;
+    public $anchor;
     /** @var string|null */
-    public $_tag;
+    public $tag;
 
     /**
-     * Create the Node object and parses $nodeString IF not null (else assume a root type Node)
+     * Create the Node object and parses $nodeString
      *
      * @param string|null $nodeString The node string
      * @param int|null    $line       The line
      * @todo make it more permissive to tabs but replacement
      */
-    public function __construct(string $nodeString = null, $line = 0)
+    public function __construct(string $nodeString, $line = 0)
     {
         $this->raw = $nodeString;
         $this->line = (int) $line;
@@ -211,9 +211,9 @@ abstract class Node
         $props = [];
         $props['line->indent'] = "$this->line -> $this->indent";
         if ($this->identifier) $props['identifier'] = "($this->identifier)";
-        if ($this->_anchor)    $props['_anchor']    = "($this->_anchor)";
-        if ($this->_tag)       $props['_tag']       = "($this->_tag)";
-        if ($this->value)      $props['value']       = $this->value;
+        if ($this->anchor)     $props['anchor']     = "($this->anchor)";
+        if ($this->tag)        $props['tag']        = "($this->tag)";
+        if ($this->value)      $props['value']      = $this->value;
         // $props['value'] = $this->value;
         $props['raw']   = $this->raw;
         if (!$this->_parent)  $props['parent'] = 'NO PARENT!!!';

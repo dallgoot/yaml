@@ -21,15 +21,15 @@ class NodeLit extends NodeLiterals
     {
         $result = '';
         $list = $value->filterComment();
-        if (!is_null($list) && $list->count()) {
-            if ($this->identifier !== '+') {
-                 self::litteralStripTrailing($list);
-            }
+        if ($this->identifier !== '+') {
+             self::litteralStripTrailing($list);
+        }
+        if ($list->count()) {
             $list->setIteratorMode(NodeList::IT_MODE_DELETE);
             $first  = $list->shift();
             $indent = $refIndent ?? $first->indent;
             $result = $this->getChildValue($first, $indent);
-            foreach ($list as $key => $child) {
+            foreach ($list as $child) {
                 $value = "\n";
                 if (!($child instanceof NodeBlank)) {
                     $newIndent = $indent > 0 ? $child->indent - $indent : 0;

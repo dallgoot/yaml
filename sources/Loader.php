@@ -36,12 +36,12 @@ final class Loader
     private const INVALID_VALUE        = self::class.": at line %d";
     private const EXCEPTION_NO_FILE    = self::class.": file '%s' does not exists (or path is incorrect?)";
     private const EXCEPTION_READ_ERROR = self::class.": file '%s' failed to be loaded (permission denied ?)";
-    private const EXCEPTION_LINE_SPLIT = self::class.": content is not a string(maybe a file error?)";
+    private const EXCEPTION_LINE_SPLIT = self::class.": content is not a string (maybe a file error?)";
 
     /**
      * Loader constructor
      *
-     * @param string|null       $absolutePath The absolute file path
+     * @param string|null       $absolutePath The file absolute path
      * @param int|null          $options      The options (bitmask as int value)
      * @param integer|bool|null $debug        The debug level as either boolean (true=1) or any integer
      */
@@ -130,14 +130,7 @@ final class Loader
             $this->attachBlankLines($previous);
             return Builder::buildContent($root, $this->_debug);
         } catch (\Error|\Exception|\ParseError $e) {
-            $file = $this->filePath ? realpath($this->filePath) : '#YAML STRING#';
-            $message = $e->getMessage()."\n ".$e->getFile().":".$e->getLine();
-            if ($this->_options & self::NO_PARSING_EXCEPTIONS) {
-                self::$error = $message;
-                return null;
-            }
-            $line = $generator->key() ?? 'X';
-            throw new \Exception($message." for $file:".$line, 1, $e);
+            $this->onError($e, $generator);
         }
     }
 
@@ -178,5 +171,17 @@ final class Loader
             return $current->specialProcess($previous, $this->_blankBuffer);
         }
         return false;
+    }
+
+    public function onError(object $e, $generator)
+    {
+        $file = $this->filePath ? realpath($this->filePath) : '#YAML STRING#';
+        $message = $e->getMessage()."\n ".$e->getFile().":".$e->getLine();
+        if ($this->_options & self::NO_PARSING_EXCEPTIONS) {
+            self::$error = $message;
+            return null;
+        }
+        $line = $generator->key() ?? 'X';
+        throw new \Exception($message." for $file:".$line, 1, $e);
     }
 }
