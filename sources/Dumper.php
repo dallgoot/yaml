@@ -83,12 +83,12 @@ class Dumper
     private static function dump($dataType, int $indent)
     {
         if (is_scalar($dataType)) {
-            if ($dataType === INF) return '.inf';
-            if ($dataType === -INF) return '-.inf';
+            if ($dataType === \INF) return '.inf';
+            if ($dataType === -\INF) return '-.inf';
             switch (gettype($dataType)) {
                 case 'boolean': return $dataType ? 'true' : 'false';
                 case 'float': //fall through
-                case 'double': return is_nan($dataType) ? '.nan' : sprintf('%.'.self::$floatPrecision.'F', $dataType);
+                case 'double': return is_nan((double) $dataType) ? '.nan' : sprintf('%.'.self::$floatPrecision.'F', $dataType);
                 default:
                     return $dataType;
             }
@@ -170,7 +170,6 @@ class Dumper
      * @param      object   $obj     The object
      * @param      integer  $indent  The indent
      *
-     * @return     <type>   ( description_of_the_return_value )
      */
     private static function dumpObject(object $obj, int $indent)
     {
