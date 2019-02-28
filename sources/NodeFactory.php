@@ -22,18 +22,10 @@ final class NodeFactory
         else {
             $first = $trimmed[0];
             $stringGroups = ["-" ,'>|' ,'"\'',"#%" ,"{[" ,":?" ,'*&!'];
-            $methodGroups = ['onHyphen','onLiteral','onQuoted','onSpecial','onCompact','onSetElement','onNodeAction'];
-            $actions = ["-"   => 'onHyphen',
-                        '>|'  => 'onLiteral',
-                        '"\'' => 'onQuoted',
-                        "#%"  => 'onSpecial',
-                        "{["  => 'onCompact',
-                        ":?"  => 'onSetElement',
-                        '*&!' => 'onNodeAction'
-                    ];
+            $methodGroups = ['Hyphen','Literal','Quoted','Special','Compact','SetElement','NodeAction'];
             foreach ($stringGroups as $groupIndex => $stringRef) {
                 if (is_int(strpos($stringRef, $first))) {
-                    $methodName = $methodGroups[$groupIndex];
+                    $methodName = 'on'.$methodGroups[$groupIndex];
                     try {
                         return self::$methodName($first, $nodeString, $line);
                     } catch (\Exception|\Error|\ParseError $e) {
@@ -135,16 +127,11 @@ final class NodeFactory
         if (!preg_match(Regex::NODE_ACTIONS, ltrim($nodeString), $matches)) {
             return new NodeScalar($nodeString, $line);
         }
-        if (isset($matches['content'])) {
-            $node = self::get($matches['content'], $line);
-        } else {
-            $node = new NodeTag($nodeString, $line);
-        }
-        $action = trim($matches['action']);
+        $action = trim($matches['action']);//var_dump($matches);
         switch ($action[0]) {
-            case '!': $node->_tag    = $action;return $node;
-            case '&': $node->_anchor = $action;return $node;
-            case '*': return new NodeAnchor(trim($action), $line);
+            case '!': return new NodeTag   ($nodeString, $line);
+            case '&': return new NodeAnchor($nodeString, $line);
+            case '*': return new NodeAnchor($nodeString, $line);
             default:
                 throw new \ParseError("Not a action node !! '$action[0]' on line:$line".gettype($first));
         }

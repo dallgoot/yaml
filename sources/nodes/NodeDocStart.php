@@ -39,8 +39,7 @@ class NodeDocStart extends Node
             return null;
         } else {
             if ($this->value instanceof NodeTag){
-                // $tagName =
-                $parent->addTag($this->value->identifier);
+                $parent->addTag($this->value->_tag);
                 $this->value->build($parent);
             } else {
                 $text = $this->value->build($parent);
@@ -49,13 +48,16 @@ class NodeDocStart extends Node
         }
     }
 
-    public function isAwaitingChildren():bool
+    public function isAwaitingChild(Node $node):bool
     {
         return $this->value && isOneOf($this->value, ['NodeRefDef', 'NodeLit', 'NodeLitFolded']);
     }
 
-    public function getTargetOnEqualIndent(Node &$previous):Node
+    public function getTargetOnEqualIndent(Node &$node):Node
     {
-        return $previous->getRoot();
+        if ($this->value && $this->value->isAwaitingChild($node)) {
+            return $this->value;
+        }
+        return $this->getParent();
     }
 }

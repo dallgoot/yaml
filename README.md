@@ -51,6 +51,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 - better/more precise errors identification (Yaml validation) with explanation in YAML content
 - Unicode checking (???)
+- OPTION : parse dates as DateTime
 - OPTION: Force renaming key names that are not valid PHP property name
 - directives : currently ignored
 

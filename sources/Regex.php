@@ -19,7 +19,7 @@ class Regex
     const WORD   = "(?'word'[^,]+)";
     const RC     = "(?'rc'\\*\\w+)"; //reference call
     const RD     = "(?'rd'&\\w+)"; //reference definition
-    const TAG    = "(?'tag'!!?\\w+!?)";
+    const TAG    = "(?'tag'!!?[\\w\\/\\-]+!?)";
     const ALL    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&num)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
     const MAP    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|[^:]+) *?: *(?&all)) *,? *)* *?\\})";
     const SEQ    = "(?'seq'\\[ *(?:(?'i'(?&all)) *,? *)* *\\])";
@@ -43,6 +43,7 @@ class Regex
     const ITEM = '/^-([ \t]+(.*))?$/';
 
     const NODE_ACTIONS = "/(?(DEFINE)".Regex::RC.Regex::RD.Regex::TAG.")(?'action'(?&rc)|(?&rd)|(?&tag))( +(?'content'.*))?$/";
+
 
     /**
      * Determines if a valid Date format

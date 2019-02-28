@@ -392,16 +392,16 @@
         },
         {
             "name": "phan/phan",
-            "version": "1.2.4",
+            "version": "1.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phan/phan.git",
-                "reference": "bf1fc09b21e6bb64dca56d0e99a0f3099c00280a"
+                "reference": "c987c6621a8b7595320c851bd8553115e49436b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phan/phan/zipball/bf1fc09b21e6bb64dca56d0e99a0f3099c00280a",
-                "reference": "bf1fc09b21e6bb64dca56d0e99a0f3099c00280a",
+                "url": "https://api.github.com/repos/phan/phan/zipball/c987c6621a8b7595320c851bd8553115e49436b1",
+                "reference": "c987c6621a8b7595320c851bd8553115e49436b1",
                 "shasum": ""
             },
             "require": {
@@ -420,6 +420,7 @@
             },
             "suggest": {
                 "ext-ast": "Needed for parsing ASTs (unless --use-fallback-parser is used). 1.0.1+ is recommended, php-ast ^0.1.5|^1.0.0 is needed.",
+                "ext-igbinary": "Improves performance of polyfill when ext-ast is unavailable",
                 "ext-tokenizer": "Needed for non-AST support and file/line-based suppressions."
             },
             "bin": [
@@ -454,7 +455,7 @@
                 "php",
                 "static"
             ],
-            "time": "2019-02-18T21:01:26+00:00"
+            "time": "2019-02-27T14:10:48+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -991,16 +992,16 @@
         },
         {
             "name": "phpunit/php-timer",
-            "version": "2.0.0",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-timer.git",
-                "reference": "8b8454ea6958c3dee38453d3bd571e023108c91f"
+                "reference": "8b389aebe1b8b0578430bda0c7c95a829608e059"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-timer/zipball/8b8454ea6958c3dee38453d3bd571e023108c91f",
-                "reference": "8b8454ea6958c3dee38453d3bd571e023108c91f",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-timer/zipball/8b389aebe1b8b0578430bda0c7c95a829608e059",
+                "reference": "8b389aebe1b8b0578430bda0c7c95a829608e059",
                 "shasum": ""
             },
             "require": {
@@ -1012,7 +1013,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.0-dev"
+                    "dev-master": "2.1-dev"
                 }
             },
             "autoload": {
@@ -1036,7 +1037,7 @@
             "keywords": [
                 "timer"
             ],
-            "time": "2018-02-01T13:07:23+00:00"
+            "time": "2019-02-20T10:12:59+00:00"
         },
         {
             "name": "phpunit/php-token-stream",

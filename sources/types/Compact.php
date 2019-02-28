@@ -2,7 +2,6 @@
 
 namespace Dallgoot\Yaml;
 
-
 /**
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
@@ -32,23 +31,4 @@ class Compact extends \ArrayIterator implements \JsonSerializable
         $prop = get_object_vars($this);
         return count($prop) > 0 ? $prop : iterator_to_array($this);
     }
-
-    /**
-     * Transforms an object/array into a new Compact object
-     *
-     * @param array|object $arrayOrObject the variable to mutate as Compact
-     *
-     * @return Compact
-     * @throws \Exception if type can not be made "compact"
-     */
-    public static function wrap($arrayOrObject)
-    {
-        try {
-            $out = new Compact($arrayOrObject);
-        } catch (\Exception $e) {
-            throw new \Exception(__METHOD__.":only array or object can be made as compact syntax", 1, $e);
-        }
-        return $out;
-    }
-
 }

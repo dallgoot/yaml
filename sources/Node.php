@@ -8,7 +8,7 @@ namespace Dallgoot\Yaml;
  * @license Apache 2.0
  * @link    TODO : url to specific online doc
  */
-class Node
+abstract class Node
 {
     /** @var null|string|boolean */
     public $identifier;
@@ -50,14 +50,14 @@ class Node
      *
      * @return Node|self The currentNode
      */
-    public function setParent(Node $node):Node
+    protected function setParent(Node $node):Node
     {
         $this->_parent = $node;
         return $this;
     }
 
     /**
-     * Gets the ancestor with specified $indent or the direct $parent OR the current Node itself
+     * Gets the ancestor with specified $indent or the direct $_parent
      *
      * @param int|null $indent The indent
      *
@@ -69,13 +69,13 @@ class Node
         $cursor = $this->getParent();
         while (!($cursor instanceof NodeRoot)
                 && (is_null($cursor->indent)
-                                || $cursor->indent >= $indent)) {
+                || $cursor->indent >= $indent)) {
             $cursor = $cursor->_parent;
         }
         return $cursor;
     }
 
-    public function getRoot():Node
+    protected function getRoot():Node
     {
         if (is_null($this->_parent)) {
             throw new \Exception(__METHOD__.": can only be used when Node has a parent set", 1);
@@ -91,7 +91,7 @@ class Node
      * Set the value for the current Node :
      * - if value is null , then value = $child (Node)
      * - if value is Node, then value is a NodeList with (previous value AND $child)
-     * - if value is a NodeList, push $child into and set NodeList type accordingly
+     * - if value is a NodeList, push $child into
      *
      * @param Node $child The child
      *
@@ -130,80 +130,66 @@ class Node
         return false;
     }
 
-    public function getTargetOnLessIndent(Node &$previous):Node
-    {
-        $candidate = $previous->getParent($this->indent);
-        // if ($this instanceof NodeItem) {
-        // var_dump(get_class($candidate).$candidate->identifier.$this->indent );
-        // }
-        return $candidate;
-    }
-
-    /**
-     * Modify parent target when current Node indentation is equal to previous node indentation
+   /**
+     * Find parent target when current Node indentation is lesser than previous node indentation
      *
      * @param Node $previous The previous
      *
      * @return Node
      */
-    public function getTargetOnEqualIndent(Node &$previous):Node
+    public function getTargetOnLessIndent(Node &$node):Node
     {
-        // if ($this instanceof NodeKey) {
-        //     # code...
-        // var_dump(get_class($this), get_class($previous->getParent()));
-        // }
-        return $previous->getParent();
+        $supposedParent = $this->getParent($node->indent);
+        if ($node instanceof NodeItem && $supposedParent instanceof NodeRoot) {
+            if ($supposedParent->value->has('NodeKey')) {
+                $lastKey = null;
+                foreach ($supposedParent->value as $key => $child) {
+                    if ($child instanceof NodeKey) {
+                        $lastKey = $child;
+                    }
+                }
+                return $child;
+            }
+        }
+        return $supposedParent;
+    }
+
+    /**
+     * Find parent target when current Node indentation is equal to previous node indentation
+     *
+     * @param Node $previous The previous
+     *
+     * @return Node
+     */
+    public function getTargetOnEqualIndent(Node &$node):Node
+    {
+        return $this->getParent();
     }
 
    /**
-     * Modify parent target when current Node indentation is superior to previous node indentation
+     * Find parent target when current Node indentation is superior than previous node indentation
      *
      * @param Node $previous The previous
      *
      * @return Node
      */
-    public function getTargetOnMoreIndent(Node &$previous):Node
+    public function getTargetOnMoreIndent(Node &$node):Node
     {
-        // return $previous->getParent($this->indent)->getDeepestNode();
-        // return $previous->getParent($this->indent);
-        // if ($previous->value instanceof ) {
-        //     # code...
-        // }
-        return $previous;//->getParent();
+        return $this->isAwaitingChild($node) ? $this : $this->getParent();
     }
 
-    public function isAwaitingChildren():bool
+    protected function isAwaitingChild(Node $node):bool
     {
-        return true;
+        return false;
     }
 
     /**
-     * Generic function to distinguish between Node and NodeList
      *
-     * @param mixed         $parent The parent
+     * @param Array|Object|null         $parent The parent collector or NULL otherwise
      *
-     * @return mixed  ( description_of_the_return_value )
+     * @return mixed  whatever the build process returns
      */
-    public function build(&$parent = null)
-    {
-        if (!is_null($this->_tag)) {
-            if (TagFactory::isKnown($this->_tag)) {
-                return TagFactory::transform($this->_tag, $value)->build($parent);
-            } else {
-                // TODO : this workds for nodeItem or NodeKey
-                return new Tag($this->_tag, $this->value->build($parent));
-            }
-        }
-        if (!is_null($this->_anchor)) {
-            $yamlObject = $this->getRoot()->getYamlObject();
-            if ($this instanceof NodeAnchor){
-                return $this->build($parent);//$yamlObject->getReference(substr($this->_anchor, 1));
-            } else {
-                $yamlObject->addReference(substr($this->_anchor, 1), $this);
-                return $this;
-            }
-        }
-    }
+    abstract function build(&$parent = null);
 
     /**
      * PHP internal function for debugging purpose : simplify output provided by 'var_dump'
@@ -217,9 +203,10 @@ class Node
         if ($this->identifier) $props['identifier'] = "($this->identifier)";
         if ($this->_anchor)    $props['_anchor']    = "($this->_anchor)";
         if ($this->_tag)       $props['_tag']       = "($this->_tag)";
-        $props['value'] = $this->value;
+        if ($this->value)      $props['value']       = $this->value;
+        // $props['value'] = $this->value;
         $props['raw']   = $this->raw;
-        if ($this->_parent)  $props['parent'] = get_class($this->_parent);
+        if (!$this->_parent)  $props['parent'] = 'NO PARENT!!!';
         return $props;
     }
 }

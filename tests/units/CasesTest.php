@@ -8,7 +8,8 @@ use Dallgoot\Yaml\{Yaml as Y, Loader};
 final class Cases extends TestCase
 {
     private $testFolder = __DIR__."/../cases/";
-    private const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR;
+    // private const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR;
+    private const JSON_OPTIONS = JSON_UNESCAPED_SLASHES  | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR;
 
     // Batch tests
     // first declare Providers
@@ -16,7 +17,7 @@ final class Cases extends TestCase
     private function getGenerator($array) {
         $generator = function() use($array) {
             foreach ($array as $key => $value) {
-                yield [$key, rtrim($value)];
+                yield [$key, $value];
             }
         };
         return $generator();

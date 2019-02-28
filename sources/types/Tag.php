@@ -13,13 +13,10 @@ class Tag
 {
     /** @var string */
     public $tagName;
-    /** @var Node|null|string */
+    /** @var mixed */
     public $value;
-    /** @var null|Node|NodeList */
-    private $raw;
 
     private const NO_NAME = '%s Error: a tag MUST have a name';
-    private const WRONG_VALUE = "Error : cannot transform tag '%s' for type '%s'";
 
     /**
      * Tag constructor.
@@ -29,12 +26,12 @@ class Tag
      *
      * @throws \Exception if $tagName is an invalid string or absent
      */
-    public function __construct(string $tagName, $raw)
+    public function __construct(string $tagName, $value)
     {
         if (empty($tagName)) {
             throw new \Exception(sprintf(self::NO_NAME, __METHOD__));
         }
         $this->tagName = $tagName;
-        $this->raw = $raw;
+        $this->value   = $value;
     }
 }

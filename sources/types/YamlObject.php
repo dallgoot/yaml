@@ -76,6 +76,6 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         unset($prop["__yaml__object__api"]);
         if (count($prop) > 0) return $prop;
         if (count($this) > 0) return iterator_to_array($this);
-        return $this->__yaml__object__api->value ?? "Empty YamlObject";
+        return $this->__yaml__object__api->value ?? "_Empty YamlObject_";
     }
 }

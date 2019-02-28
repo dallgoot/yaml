@@ -10,7 +10,6 @@ namespace Dallgoot\Yaml;
  */
 class NodeCompactMapping extends Node
 {
-    // use traitNodeToolset { traitNodeToolset::buildCompact as build};
     public function __construct(string $nodeString, int $line)
     {
         parent::__construct($nodeString, $line);

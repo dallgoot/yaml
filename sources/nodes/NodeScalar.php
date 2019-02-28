@@ -31,29 +31,27 @@ class NodeScalar extends Node
 
     public function build(&$parent = null)
     {
+        if (!is_null($this->_tag)) {
+            $tagged = TagFactory::transform($this->_tag, $this);
+            if ($tagged instanceof Node || $tagged instanceof NodeList) {
+                return $tagged->build();
+            }
+            return $tagged;
+        }
         return is_null($this->value) ? Builder::getScalar(trim($this->raw)) : $this->value->build();
     }
 
-    // public function add(Node $child):Node
-    // {
-    //     return $this->parent ? $this->parent->add($child) : parent::add($child);
-    // }
-
-    public function getTargetOnLessIndent(Node &$previous):Node
+    public function getTargetOnLessIndent(Node &$node):Node
     {
-        if ($previous instanceof NodeScalar || $previous instanceof NodeBlank ) {
-            return $previous->getParent();
+        if ($node instanceof NodeScalar || $node instanceof NodeBlank ) {
+            return $this->getParent();
         } else {
-            return parent::getTargetOnLessIndent($previous);
+            return $this->getParent($node->indent);
         }
     }
 
-    public function getTargetOnMoreIndent(Node &$previous):Node
+    public function getTargetOnMoreIndent(Node &$node):Node
     {
-        if ($previous instanceof NodeScalar || $previous instanceof NodeBlank ) {
-            return $previous->getParent();
-        } else {
-            return parent::getTargetOnMoreIndent($previous);
-        }
+        return $this->getParent();
     }
 }

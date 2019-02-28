@@ -15,16 +15,17 @@ class API
     private $_hasDocStart; // null = no docstart, true = docstart before document comments, false = docstart after document comments
     /** @var null|YamlObject */
     private $_obj;
-    private $_references = [];
-    private $_comments   = [];
-    // private $_documents  = [];
-    private $_tags = [];
-    /** @var null|int */
-    // public $type = Y::MAPPING;
+    /** @var array */
+    private $_anchors  = [];
+    /** @var array */
+    private $_comments = [];
+    /** @var array */
+    private $_tags     = [];
+
     /** @var null|string */
     public $value;
 
-    const UNKNOWN_REFERENCE = "no reference named: '%s'";
+    const UNKNOWN_REFERENCE = "no reference named: '%s' known are : (%s)";
     const UNAMED_REFERENCE  = "reference MUST have a name";
 
     /**
@@ -51,7 +52,7 @@ class API
         if (empty($name)) {
             throw new \UnexpectedValueException(self::UNAMED_REFERENCE);
         }
-        $this->_references[$name] = $value;
+        $this->_anchors[$name] = $value;
     }
 
     /**
@@ -64,10 +65,12 @@ class API
      */
     public function &getReference($name)
     {
-        if (array_key_exists($name, $this->_references)) {
-            return $this->_references[$name];
+        if (array_key_exists($name, $this->_anchors)) {
+            return $this->_anchors[$name];
         }
-        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE, $name));
+        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE,
+                                                    $name, implode(',',array_keys($this->_anchors)))
+                                                );
     }
 
     /**
@@ -77,7 +80,7 @@ class API
      */
     public function getAllReferences():array
     {
-        return $this->_references;
+        return $this->_anchors;
     }
 
     /**
@@ -88,7 +91,7 @@ class API
      *
      * @return null
      */
-    public function addComment(int $lineNumber, $value)
+    public function addComment(int $lineNumber, string $value)
     {
         $this->_comments[$lineNumber] = $value;
     }
@@ -117,7 +120,7 @@ class API
      */
     public function setText(string $value):YamlObject
     {
-        $this->value .= ltrim($value);//throw new \Exception(__METHOD__, 1);
+        $this->value .= ltrim($value);
         return $this->_obj;
     }
 
@@ -137,9 +140,9 @@ class API
     /**
      * Determines if it has YAML document start string => '---'.
      *
-     * @return boolean  True if has document start, False otherwise.
+     * @return boolean  True if document has start, False otherwise.
      */
-    public function hasDocStart()
+    public function hasDocStart():bool
     {
         return is_bool($this->_hasDocStart);
     }

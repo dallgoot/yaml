@@ -13,7 +13,6 @@ class NodeDirective extends Node
     /**
      * Builds a directive. ---NOT IMPLEMENTED YET---
      *
-     *
      * @todo implement if required
      */
     public function build(&$parent = null)

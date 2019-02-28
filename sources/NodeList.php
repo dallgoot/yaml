@@ -24,7 +24,6 @@ class NodeList extends \SplDoublyLinkedList
      */
     public function __construct(Node $node = null)
     {
-        // $this->setIteratorMode(NodeList::IT_MODE_KEEP);
         if (!is_null($node)) {
             $this->push($node);
         }
@@ -70,6 +69,14 @@ class NodeList extends \SplDoublyLinkedList
         parent::push($node);
     }
 
+    /**
+     * Verify that the estimated type is coherent with this list current $type
+     *
+     * @param      int      $estimatedType  The estimated type
+     *
+     * @return     boolean  True if coherent, False otherwise
+     * @todo       implement invalid cases
+     */
     public function checkTypeCoherence($estimatedType):bool
     {
        // if ($this->type === self::MAPPING) {

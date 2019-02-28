@@ -1,116 +1,116 @@
-blockChompingWithInsideBlank: |
+blockChompingWithInsideBlank: |-
   {"bar":"one\n\ntwo\n"}
-blockChompingWithKeepAndTrailing: |
-  {"foo":"one\ntwo\n","bar":"one\ntwo\n\n"}
-blockChompingWithKeep: |
+blockChompingWithKeepAndTrailing: |-
+  {"foo":"one\ntwo\n\n","bar":"one\ntwo\n\n\n"}
+blockChompingWithKeep: |-
   {"foo":"one\ntwo\n","bar":"one\ntwo\n"}
-blockChompingWithStripAndTrailing: |
+blockChompingWithStripAndTrailing: |-
   {"foo":"one\ntwo","bar":"one\ntwo"}
-blockChomping: |
+blockChomping: |-
   {"foo":"one\ntwo","bar":"one\ntwo"}
-comment_at_first_and_inside_map: |
+comment_at_first_and_inside_map: |-
   {"services":{"app.foo_service":{"class":"Foo"},"app/bar_service":{"class":"Bar"}}}
-comment_between_keys: |
+comment_between_keys: |-
   {"a":{"b":"hello","d":"hello"}}
-comment_inside_litteral_in_subkey: |
-  {"test":"foo\nbaz\n","collection":{"one":"foo\nbaz\n","two":"foo\nbaz\n"}}
-comments_inside_litteral: |
-  {"pages":[{"title":"some title","content":"header\n    <body>\n        <h1>title</h1>\n    </body>\n\nfooter\n"}]}
-comment_with_a_colon: |
+comment_inside_litteral_in_subkey: |-
+  {"test":"foo\nbaz\n","collection":[{"one":"foo\nbaz\n"},{"two":"foo\nbaz\n"}]}
+comments_inside_litteral: |-
+  {"pages":[{"title":"some title","content":"header\n\n    <body>\n        <h1>title</h1>\n    </body>\n\nfooter\n"}]}
+comment_with_a_colon: |-
   {"foo":{"bar":"foobar"}}
-compact_array_inside_mapping: |
+compact_array_inside_mapping: |-
   {"foo":{"fiz":["cat"]}}
-compact_in_a_key_separated_by_comment: |
-  {"foo":{"bar":{"baz":[1,2,3]}}}
-complex_mapping_in_item: |
+compact_in_a_key_separated_by_comment: |-
+  {"foo":[{"bar":{"baz":[1,2,3]}}]}
+complex_mapping_in_item: |-
   [{"1":{"name":"végétalien"}}]
-complex_mapping_in_key: |
+complex_mapping_in_key: |-
   {"diet":{"1":{"name":"végétalien"}}}
-complex_mapping: |
+complex_mapping: |-
   {"1":{"name":"végétalien"}}
-directive_at_start: |
+directive_at_start: |-
   {"foo":1,"bar":2}
-encoding_non_utf8: |
+encoding_non_utf8: |-
   {"foo":"äöüß","euro":"€","cp1252":"©ÉÇáñ"}
-endOfDocumentMapping: |
+endOfDocumentMapping: |-
   {"foo":"bar"}
-endOfDocumentSequence: |
+endOfDocumentSequence: |-
   [1,2,3]
-folded_with_alpha_keys: |
+folded_with_alpha_keys: |-
   {"folded_with_alpha_keys":"- alphakey: alphakey_value\n- 0: a\n- 1: b\n- 2: c\n"}
-key_separated_by_blank_line: |
+key_separated_by_blank_line: |-
   {"foo":{"bar":"baz"}}
-keysWithTabs: |
+keysWithTabs: |-
   {"foo":"bar","baz":"bar","bor":"baz","boz":"biz"}
-literalfolded_keep_trailing: |
+literalfolded_keep_trailing: |-
   {"foo":"one two\n","bar":"one two\n\n"}
-literalFolded_strip_trailing: |
+literalFolded_strip_trailing: |-
   {"foo":"one two","bar":"one two"}
-literalFolded_clip: |
+literalFolded_clip: |-
   {"foo":"one two\n","bar":"one two\n"}
-literal_keep_trailing_leading: |
+literal_keep_trailing_leading: |-
   {"foo":"\n\nbar"}
-literal_with_comment_at_lastline: |
+literal_with_comment_at_lastline: |-
   {"content":"header\n\n    <body>\n        <h1>title</h1>\n    </body>\n\nfooter\n"}
-map_in_an_empty_item: |
-  {"foo":{"bar":"foobar"}}
-map_with_boolean_keys: |
+map_in_an_empty_item: |-
+  {"foo":[{"bar":"foobar"}]}
+map_with_boolean_keys: |-
   {"true":"foo","false":"bar"}
-map_with_comment_inside_item: |
+map_with_comment_inside_item: |-
   {"foo":[{"bar":"foobar","baz":"foobaz"}]}
-map_with_duplicate_keys: |
+map_with_duplicate_keys: |-
   {"parent":{"child":"duplicate"}}
-map_with_float_keys: |
+map_with_float_keys: |-
   {"foo":{"1.2":"bar","1.3":"baz"}}
-map_with_number_keys: |
+map_with_number_keys: |-
   {"map":{"1":"one","2":"two"}}
-map_with_quoted_number_keys: |
+map_with_quoted_number_keys: |-
   {"map":{"0":"one","1":"two"}}
-map_with_seq_and_embed_comment: |
+map_with_seq_and_embed_comment: |-
   {"a":{"b":["c"],"d":"e"}}
-multidoc_mapping: |
+multidoc_mapping: |-
   [{"a":"Mark McGwire","b":"Sammy Sosa","c":"Ken Griffey"},{"a":"Chicago Cubs","b":"St Louis Cardinals"}]
-multidoc_sequence: |
+multidoc_sequence: |-
   [["Mark McGwire","Sammy Sosa","Ken Griffey"],["Chicago Cubs","St Louis Cardinals"]]
-multiline_indented.keyslookalike: |
+multiline_indented.keyslookalike: |-
   {"a":"b c"}
-multiline_quoted_in_subkey: |
-  {"foo":{"foobar":"foo #bar","bar":"baz"}}
-multiline_quoted_with_blank: |
+multiline_quoted_in_subkey: |-
+  "{"foo":{"foobar":"foo #bar","bar":"baz"}}"
+multiline_quoted_with_blank: |-
   {"foobar":"foo\nbar"}
-multiline_quoted_with_slash: |
+multiline_quoted_with_slash: |-
   {"foobar":"foo\\ bar"}
-multiline_quoted: |
+multiline_quoted: |-
   {"foo":"bar baz foobar foo","bar":"baz"}
-multiline_unquoted_in_seqitem: |
-  {"foo":{"bar":"one\ntwo three"}}
-multiline_unquoted: |
+multiline_unquoted_in_seqitem: |-
+  {"foo":[{"bar":"one\ntwo three"}]}
+multiline_unquoted: |-
   {"foo":"bar baz foobar foo","bar":"baz"}
-multiline_with_boolean_strings: |
+multiline_with_boolean_strings: |-
   {"test":"You can have things that don't look like strings here true yes you can"}
-references_inside_compact: |
+references_inside_compact: |-
   {"var":"var-value","scalar":"var-value","list":["var-value"],"list_in_list":[["var-value"]],"map_in_list":[{"key":"var-value"}],"embedded_mapping":{"key":"var-value"},"map":{"key":"var-value"},"list_in_map":{"key":["var-value"]},"map_in_map":{"foo":{"bar":"var-value"}}}
-sequence_item_with_multiple_keys: |
+sequence_item_with_multiple_keys: |-
   {"collection":[{"key":"foo","foo":"bar"}]}
-sequence_with_duplicate_keys: |
-  {"array":{"key":"two"}}
-sequence_with_linefeed_and_key: |
-  {"a":{"b":{"bar":"baz"},"0":"foo"},"d":"e"}
-tags_as_casting: |
+sequence_with_duplicate_keys: |-
+  {"array":[{"key":"one"},{"key":"two"}]}
+sequence_with_linefeed_and_key: |-
+  {"a":[{"b":[{"bar":"baz"}]},"foo"],"d":"e"}
+tags_as_casting: |-
   {"1.2":"bar","1.3":"baz","true":"foo","false":"bar","null":null,"~":"null"}
-tags_in_compact: |
-  [{"tagName":"foo","value":["foo","bar"]},{"tagName":"quz","value":{"foo":"bar","quz":{"tagName":"bar","value":{"one":"bar"}}}}]
-tags_in_item_with_sequence: |
-  [{"tagName":"foo","value":["yaml"]},{"tagName":"quz","value":["bar"]}]
-tags_inline_long: |
-  {"foo":"bar","quz":"this is a long text"}
-tags_in_litteral: |
+tags_in_compact: |-
+  [{"tagName":"!foo","value":["foo","bar"]},{"tagName":"!quz","value":{"foo":"bar","quz":{"tagName":"!bar","value":{"one":"bar"}}}}]
+tags_in_item_with_sequence: |-
+  [{"tagName":"!foo","value":["yaml"]},{"tagName":"!quz","value":["bar"]}]
+tags_inline_long: |-
+  {"foo":"bar","quz":{"tagName":"!long","value":"this is a long text\n"}}
+tags_in_litteral: |-
   {"data":"SGVsbG8gd29ybGQ="}
-tags_in_mapping: |
-  {"foo":{"tagName":"quz","value":["bar"]},"quz":{"tagName":"foo","value":{"quz":"bar"}}}
-tags_with_quotes: |
+tags_in_mapping: |-
+  {"foo":{"tagName":"!quz","value":["bar"]},"quz":{"tagName":"!foo","value":{"quz":"bar"}}}
+tags_with_quotes: |-
   {"data":"SGVsbG8gd29ybGQ=","enclosed with single quotes":"SGVsbG8gd29ybGQ=","containing spaces":"SGVs bG8gd 29ybGQ="}
-tag_symfony_phpobject: |
+tag_symfony_phpobject: |-
   {"foo":{"__PHP_Incomplete_Class_Name":"Symfony\\Component\\Yaml\\Tests\\B","b":"foo"},"bar":1}
-yaml_in_literal_folded: |
+yaml_in_literal_folded: |-
   {"yamlObject_indices":"-\n  - 1\n  - 2\n  - 3\n-\n  memberOfO: some really really really really really really really really really very long text as a simple string\n"}

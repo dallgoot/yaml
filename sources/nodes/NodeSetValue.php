@@ -17,14 +17,9 @@ class NodeSetValue extends Node
         if (!empty($v)) {
             $value = NodeFactory::get($v, $line);
             $value->indent = null;
-            $this->value = $value;
+            $this->add($value);
         }
     }
-
-    // public function isAwaitingChildren()
-    // {
-    //     return is_null($this->value);
-    // }
 
     /**
      * Builds a set value.
@@ -36,12 +31,11 @@ class NodeSetValue extends Node
     {
         $prop = array_keys(get_object_vars($parent));
         $key = end($prop);
-        $value = $this->value;
-
-        if ($value instanceof NodeItem || $value instanceof NodeKey) {
-            $value = new NodeList($this->value);
-        }
-        $parent->{$key} = is_null($value) ? null: $value->build($parent);
+        $parent->{$key} = is_null($this->value) ? null: $this->value->build();
     }
 
+    public function isAwaitingChild(Node $node):bool
+    {
+        return is_null($this->value) || $this->getDeepestNode()->isAwaitingChild($node);
+    }
 }

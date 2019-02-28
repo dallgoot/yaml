@@ -42,4 +42,9 @@ class NodePartial extends Node
         $parent->add($node);
         return true;
     }
+
+    public function build(&$parent = null)
+    {
+        throw new \ParseError("Partial value found at line $this->line", 1);
+    }
 }

@@ -12,11 +12,7 @@ class NodeBlank extends Node
 {
     public function add(Node $child):Node
     {
-        if ($this->_parent) {
-            return $this->_parent->add($child);
-        } else {
-            return parent::add($child);
-        }
+        return parent::add($child);
     }
 
     public function specialProcess(Node &$previous, array &$emptyLines):bool
@@ -36,5 +32,15 @@ class NodeBlank extends Node
     public function build(&$parent = null)
     {
         return "\n";
+    }
+
+    public function getTargetOnEqualIndent(Node &$node):Node
+    {
+        return $this->getParent($node->indent);
+    }
+
+    public function getTargetOnMoreIndent(Node &$node):Node
+    {
+        return $this->getParent($node->indent);
     }
 }

@@ -15,12 +15,12 @@ final class Loader
     //public
     /* @var null|string */
     public static $error;
-    public const IGNORE_DIRECTIVES = 1;//DONT include_directive
-    public const IGNORE_COMMENTS    = 2;//DONT include_comments
+    public const IGNORE_DIRECTIVES     = 1;//DONT include_directive
+    public const IGNORE_COMMENTS       = 2;//DONT include_comments
     public const NO_PARSING_EXCEPTIONS = 4;//DONT throw Exception on parsing errors
-    public const NO_OBJECT_FOR_DATE = 8;//DONT import date strings as dateTime Object
+    public const NO_OBJECT_FOR_DATE    = 8;//DONT import date strings as dateTime Object
 
-    //privates
+    //private
     /* @var null|false|array */
     private $content;
     /* @var null|string */
@@ -119,11 +119,11 @@ final class Loader
                 if ($this->needsSpecialProcess($node, $previous)) continue;
                 $this->attachBlankLines($previous);
                 switch ($node->indent <=> $previous->indent) {
-                    case -1: $target = $node->getTargetOnLessIndent($previous);
+                    case -1: $target = $previous->getTargetOnLessIndent($node);
                         break;
-                    case 0:  $target = $node->getTargetOnEqualIndent($previous);
+                    case 0:  $target = $previous->getTargetOnEqualIndent($node);
                         break;
-                    default: $target = $node->getTargetOnMoreIndent($previous);
+                    default: $target = $previous->getTargetOnMoreIndent($node);
                 }
                 $previous = $target->add($node);
             }
