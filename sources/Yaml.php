@@ -1,6 +1,6 @@
 <?php
 
-namespace Dallgoot\Yaml;
+namespace Dallgoot;
 
 /**
  * TODO
@@ -30,7 +30,7 @@ final class Yaml
     public static function parse(string $someYaml, $options = null, $debug = null)
     {
         try {
-            return (new Loader(null, $options, $debug))->parse($someYaml);
+            return (new Yaml\Loader(null, $options, $debug))->parse($someYaml);
         } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error while parsing YAML string", 1, $e);
         }
@@ -55,7 +55,7 @@ final class Yaml
     public static function parseFile(string $fileName, $options = null, $debug = null)
     {
         try {
-            return (new Loader($fileName, $options, $debug))->parse();
+            return (new Yaml\Loader($fileName, $options, (int) $debug))->parse();
         } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error during parsing '$fileName'", 1, $e);
         }
@@ -75,7 +75,7 @@ final class Yaml
     public static function dump($somePhpVar, $options = null):string
     {
         try {
-            return Dumper::toString($somePhpVar, $options);
+            return Yaml\Dumper::toString($somePhpVar, $options);
         } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error dumping", 1, $e);
         }
@@ -97,13 +97,14 @@ final class Yaml
     public static function dumpFile(string $fileName, $somePhpVar, $options = null):bool
     {
         try {
-            return Dumper::toFile($fileName, $somePhpVar, $options);
+            return Yaml\Dumper::toFile($fileName, $somePhpVar, $options);
         } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error during dumping '$fileName'", 1, $e);
         }
     }
 }
 
+namespace Dallgoot\Yaml;
 function isOneOf($subject, array $comparison)
 {
     foreach ($comparison as $className) {

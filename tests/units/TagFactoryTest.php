@@ -4,25 +4,26 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Dumper;
-use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\TagFactory;
+use Dallgoot\Yaml\Node;
+use Closure;
 
 /**
- * Class DumperTest.
+ * Class TagFactoryTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Dumper
+ * @covers \Dallgoot\Yaml\TagFactory
  */
-class DumperTest extends TestCase
+class TagFactoryTest extends TestCase
 {
     /**
-     * @var Dumper $dumper An instance of "Dumper" to test.
+     * @var TagFactory $tagFactory An instance of "TagFactory" to test.
      */
-    private $dumper;
+    private $tagFactory;
 
     /**
      * {@inheritdoc}
@@ -30,85 +31,94 @@ class DumperTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->dumper = new Dumper();
+        $this->tagFactory = new TagFactory();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::toString
+     * @covers \Dallgoot\Yaml\TagFactory::registerLegacyTags
      */
-    public function testToString(): void
+    public function testRegisterLegacyTags(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::toFile
+     * @covers \Dallgoot\Yaml\TagFactory::symfonyPHPobjectHandler
      */
-    public function testToFile(): void
+    public function testSymfonyPHPobjectHandler(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dump
+     * @covers \Dallgoot\Yaml\TagFactory::inlineHandler
      */
-    public function testDump(): void
+    public function testInlineHandler(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpYamlObject
+     * @covers \Dallgoot\Yaml\TagFactory::strHandler
      */
-    public function testDumpYamlObject(): void
+    public function testStrHandler(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::add
+     * @covers \Dallgoot\Yaml\TagFactory::binaryHandler
      */
-    public function testAdd(): void
+    public function testBinaryHandler(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpArray
+     * @covers \Dallgoot\Yaml\TagFactory::setHandler
      */
-    public function testDumpArray(): void
+    public function testSetHandler(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::insertComments
+     * @covers \Dallgoot\Yaml\TagFactory::omapHandler
      */
-    public function testInsertComments(): void
+    public function testOmapHandler(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpObject
+     * @covers \Dallgoot\Yaml\TagFactory::transform
      */
-    public function testDumpObject(): void
+    public function testTransform(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpCompact
+     * @covers \Dallgoot\Yaml\TagFactory::isKnown
      */
-    public function testDumpCompact(): void
+    public function testIsKnown(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\TagFactory::addTagHandler
+     */
+    public function testAddTagHandler(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

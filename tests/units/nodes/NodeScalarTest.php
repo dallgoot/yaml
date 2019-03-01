@@ -4,74 +4,66 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class YamlTest.
+ * Class NodeScalarTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Yaml
+ * @covers \Dallgoot\Yaml\NodeScalar
  */
-class YamlTest extends TestCase
+class NodeScalarTest extends TestCase
 {
     /**
-     * @var Yaml $yaml An instance of "Yaml" to test.
+     * @var NodeScalar $nodeScalar An instance of "NodeScalar" to test.
      */
-    private $yaml;
+    private $nodeScalar;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
-        $this->yaml = new Yaml();
+        /** @todo Maybe check arguments of this constructor. */
+        $this->nodeScalar = new NodeScalar("a string to test", 42);
     }
 
     /**
-     * Covers the global function "isOneOf".
+     * @covers \Dallgoot\Yaml\NodeScalar::__construct
      */
-    public function testIsOneOf(): void
+    public function testConstruct(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parse
+     * @covers \Dallgoot\Yaml\NodeScalar::build
      */
-    public function testParse(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parseFile
+     * @covers \Dallgoot\Yaml\NodeScalar::getTargetOnLessIndent
      */
-    public function testParseFile(): void
+    public function testGetTargetOnLessIndent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::dump
+     * @covers \Dallgoot\Yaml\NodeScalar::getTargetOnMoreIndent
      */
-    public function testDump(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Yaml::dumpFile
-     */
-    public function testDumpFile(): void
+    public function testGetTargetOnMoreIndent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

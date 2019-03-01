@@ -4,56 +4,57 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\NodeSetValue;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class RegexTest.
+ * Class NodeSetValueTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Regex
+ * @covers \Dallgoot\Yaml\NodeSetValue
  */
-class RegexTest extends TestCase
+class NodeSetValueTest extends TestCase
 {
     /**
-     * @var Regex $regex An instance of "Regex" to test.
+     * @var NodeSetValue $nodeSetValue An instance of "NodeSetValue" to test.
      */
-    private $regex;
+    private $nodeSetValue;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
-        $this->regex = new Regex();
+        /** @todo Maybe check arguments of this constructor. */
+        $this->nodeSetValue = new NodeSetValue("a string to test", 42);
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isDate
+     * @covers \Dallgoot\Yaml\NodeSetValue::__construct
      */
-    public function testIsDate(): void
+    public function testConstruct(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isNumber
+     * @covers \Dallgoot\Yaml\NodeSetValue::build
      */
-    public function testIsNumber(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isProperlyQuoted
+     * @covers \Dallgoot\Yaml\NodeSetValue::isAwaitingChild
      */
-    public function testIsProperlyQuoted(): void
+    public function testIsAwaitingChild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

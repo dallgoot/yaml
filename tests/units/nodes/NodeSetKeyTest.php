@@ -4,56 +4,57 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\NodeSetKey;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class RegexTest.
+ * Class NodeSetKeyTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Regex
+ * @covers \Dallgoot\Yaml\NodeSetKey
  */
-class RegexTest extends TestCase
+class NodeSetKeyTest extends TestCase
 {
     /**
-     * @var Regex $regex An instance of "Regex" to test.
+     * @var NodeSetKey $nodeSetKey An instance of "NodeSetKey" to test.
      */
-    private $regex;
+    private $nodeSetKey;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
-        $this->regex = new Regex();
+        /** @todo Maybe check arguments of this constructor. */
+        $this->nodeSetKey = new NodeSetKey("a string to test", 42);
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isDate
+     * @covers \Dallgoot\Yaml\NodeSetKey::__construct
      */
-    public function testIsDate(): void
+    public function testConstruct(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isNumber
+     * @covers \Dallgoot\Yaml\NodeSetKey::build
      */
-    public function testIsNumber(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isProperlyQuoted
+     * @covers \Dallgoot\Yaml\NodeSetKey::isAwaitingChild
      */
-    public function testIsProperlyQuoted(): void
+    public function testIsAwaitingChild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

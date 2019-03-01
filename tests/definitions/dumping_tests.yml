@@ -1,23 +1,23 @@
-array: |
+array: |-
   - a
   - b
   - c
-array_with_alphakey: |
+array_with_alphakey: |-
   - alphakey: alphakey_value
   - 0: a
   - 1: b
   - 2: c
-compact_array_in_object: |
+compact_array_in_object: |-
   key1: {array: [1, 2, 3]}
-compact_array: |
+compact_array: |-
   key1: [1, 2, 3]
-compact_object_in_array: |
+compact_object_in_array: |-
   key1: [1, 2, {key: a}]
-compact_object: |
+compact_object: |-
   key1: {key1: a, key2: b}
-dateTime: |
+dateTime: |-
   key: 2000-01-01
-floats_double: |
+floats_double: |-
   positiveFloat: 0.5353
   negativeFloat: -2.6500
   castedPositiveFloat: 2.0000
@@ -27,16 +27,16 @@ floats_double: |
   positiveInfinity: .inf
   negativeInfinity: -.inf
   notANumber: .nan
-stdObject: |
+stdObject: |-
   prop: my property
-yamlObject_indices: |
+yamlObject_indices: |-
   -
     - 1
     - 2
     - 3
   -
     memberOfO: some really really really really really really really really really very long text as a simple string
-yamlObject_properties: |
+yamlObject_properties: |-
   propA:
     - 1
     - 2

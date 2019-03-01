@@ -4,24 +4,25 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\NodeTag;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class YamlTest.
+ * Class NodeTagTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Yaml
+ * @covers \Dallgoot\Yaml\NodeTag
  */
-class YamlTest extends TestCase
+class NodeTagTest extends TestCase
 {
     /**
-     * @var Yaml $yaml An instance of "Yaml" to test.
+     * @var NodeTag $nodeTag An instance of "NodeTag" to test.
      */
-    private $yaml;
+    private $nodeTag;
 
     /**
      * {@inheritdoc}
@@ -29,49 +30,31 @@ class YamlTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->yaml = new Yaml();
+        $this->nodeTag = new NodeTag();
     }
 
     /**
-     * Covers the global function "isOneOf".
+     * @covers \Dallgoot\Yaml\NodeTag::isAwaitingChild
      */
-    public function testIsOneOf(): void
+    public function testIsAwaitingChild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parse
+     * @covers \Dallgoot\Yaml\NodeTag::getTargetOnEqualIndent
      */
-    public function testParse(): void
+    public function testGetTargetOnEqualIndent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parseFile
+     * @covers \Dallgoot\Yaml\NodeTag::build
      */
-    public function testParseFile(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Yaml::dump
-     */
-    public function testDump(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Yaml::dumpFile
-     */
-    public function testDumpFile(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

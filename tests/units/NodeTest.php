@@ -1,90 +1,153 @@
 <?php
-declare(strict_types=1);
 
+namespace Test\Dallgoot\Yaml;
+
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Dallgoot\Yaml\Node;
 
-use Dallgoot\Yaml\Yaml as Y;
-
-final class NodeTest extends TestCase
+/**
+ * Class NodeTest.
+ *
+ * @author Stephane Rebai <stephane.rebai@gmail.com>.
+ * @license https://opensource.org/licenses/MIT The MIT license.
+ * @link https://github.com/john-doe/my-awesome-project
+ * @since File available since Release 1.0.0
+ *
+ * @covers \Dallgoot\Yaml\Node
+ */
+class NodeTest extends TestCase
 {
-    public function test__construct($value='')
+    /**
+     * @var Node $node An instance of "Node" to test.
+     */
+    private $node;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Maybe check arguments of this constructor. */
+        $this->node = $this->getMockBuilder(Node::class)
+            ->setConstructorArgs(["a string to test", "a string to test"])
+            ->getMockForAbstractClass();
     }
 
-    public function testSetParent($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::__construct
+     */
+    public function testConstruct(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testGetParent($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::setParent
+     */
+    public function testSetParent(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testAdd($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::getParent
+     */
+    public function testGetParent(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testGetDeepestNode($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::getRoot
+     */
+    public function testGetRoot(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testParse($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::add
+     */
+    public function testAdd(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testDefine($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::getDeepestNode
+     */
+    public function testGetDeepestNode(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testOnKey($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::specialProcess
+     */
+    public function testSpecialProcess(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testOnObject($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::getTargetOnLessIndent
+     */
+    public function testGetTargetOnLessIndent(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testOnHyphen($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::getTargetOnEqualIndent
+     */
+    public function testGetTargetOnEqualIndent(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testOnNodeAction($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::getTargetOnMoreIndent
+     */
+    public function testGetTargetOnMoreIndent(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testGetPhpValue($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::isAwaitingChild
+     */
+    public function testIsAwaitingChild(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testGetScalar($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::build
+     */
+    public function testBuild(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testGetNumber($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Node::__debugInfo
+     */
+    public function testDebugInfo(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
-
-    public function testGetCompact($value='')
-    {
-        $this->markTestIncomplete('This test has not been implemented yet.');
-    }
-
-    public function test__debugInfo($value='')
-    {
-        $this->markTestIncomplete('This test has not been implemented yet.');
-    }
-
 }

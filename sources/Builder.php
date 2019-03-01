@@ -45,7 +45,7 @@ final class Builder
                     $buffer->push($child);
                 }
             }
-            $documents[] = self::buildDocument($buffer, count($documents));
+            $documents[] = self::buildDocument($buffer, count($documents) +1);
         } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception($e->getMessage(), 1, $e);
         }
@@ -63,11 +63,15 @@ final class Builder
     private static function buildDocument(NodeList &$list, int $docNum):YamlObject
     {
         $yamlObject = new YamlObject;
-        $rootNode = new NodeRoot();
+        $rootNode   = new NodeRoot();
         $list->setIteratorMode(NodeList::IT_MODE_DELETE);
         try {
             foreach ($list as $child) {
                 $rootNode->add($child);
+            }
+            if (self::$_debug === 3) {
+                echo "Document #$docNum\n";
+                print_r($rootNode);
             }
             return $rootNode->build($yamlObject);
         } catch (\Exception|\Error|\ParseError $e) {
@@ -117,14 +121,15 @@ final class Builder
     private static function pushAndSave(Node $child, NodeList $buffer, array &$documents)
     {
         $buffer->push($child);
-        $documents[] = self::buildDocument($buffer, count($documents));
+        $documents[] = self::buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList();
     }
 
     private static function saveAndPush(Node $child, NodeList $buffer, array &$documents)
     {
-        $documents[] = self::buildDocument($buffer, count($documents));
+        $documents[] = self::buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList($child);
     }
+
 
 }

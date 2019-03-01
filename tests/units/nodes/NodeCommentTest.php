@@ -4,24 +4,25 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\NodeComment;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class RegexTest.
+ * Class NodeCommentTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Regex
+ * @covers \Dallgoot\Yaml\NodeComment
  */
-class RegexTest extends TestCase
+class NodeCommentTest extends TestCase
 {
     /**
-     * @var Regex $regex An instance of "Regex" to test.
+     * @var NodeComment $nodeComment An instance of "NodeComment" to test.
      */
-    private $regex;
+    private $nodeComment;
 
     /**
      * {@inheritdoc}
@@ -29,31 +30,22 @@ class RegexTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->regex = new Regex();
+        $this->nodeComment = new NodeComment();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isDate
+     * @covers \Dallgoot\Yaml\NodeComment::specialProcess
      */
-    public function testIsDate(): void
+    public function testSpecialProcess(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isNumber
+     * @covers \Dallgoot\Yaml\NodeComment::build
      */
-    public function testIsNumber(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Regex::isProperlyQuoted
-     */
-    public function testIsProperlyQuoted(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

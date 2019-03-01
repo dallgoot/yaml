@@ -1,6 +1,6 @@
 {
     "name": "dallgoot/yaml",
-    "description": "Provides loader, dumper and an API for YAML files. Loader builds to equivalent data types in PHP7",
+    "description": "Provides loader, dumper and an API for YAML files. Loader builds to equivalent data types in PHP 7.3",
     "type": "library",
     "license": "Apache-2.0",
     "config": {
@@ -15,12 +15,11 @@
       "autoload": {
         "classmap": [
           "sources",
-          "tests",
-          "dependencies"
+          "tests"
         ]
     },
     "require": {
-        "php": ">=7.2",
+        "php": ">=7.3.2",
         "ext-json": "*",
         "ext-pcre": "*",
         "ext-Reflection": "*",
@@ -28,10 +27,12 @@
         "lib-pcre": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^7.3",
-        "phan/phan": "^1.2",
-        "symfony/yaml": "^4.2",
-        "phpmetrics/phpmetrics": "^2.4"
+        "phpunit/phpunit": "*",
+        "phan/phan": "*",
+        "symfony/yaml": "*",
+        "nikic/php-parser": "^3",
+        "phpmetrics/phpmetrics": "*",
+        "paulthebaud/phpunit-generator": "^2"
     },
     "scripts" : {
         "test" : "phpunit --configuration ./configuration/phpunit.xml --columns max --testsuite cases --no-logging --coverage-xml ./documentation/coverage.xml"

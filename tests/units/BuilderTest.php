@@ -1,76 +1,92 @@
 <?php
-declare(strict_types=1);
 
+namespace Test\Dallgoot\Yaml;
+
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Dallgoot\Yaml\Builder;
+use Dallgoot\Yaml\NodeRoot;
+use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\Node;
 
-use Dallgoot\Yaml\Yaml as Y;
-
-final class BuilderTest extends TestCase
+/**
+ * Class BuilderTest.
+ *
+ * @author Stephane Rebai <stephane.rebai@gmail.com>.
+ * @license https://opensource.org/licenses/MIT The MIT license.
+ * @link https://github.com/john-doe/my-awesome-project
+ * @since File available since Release 1.0.0
+ *
+ * @covers \Dallgoot\Yaml\Builder
+ */
+class BuilderTest extends TestCase
 {
-    public function testBuild($value='')
+    /**
+     * @var Builder $builder An instance of "Builder" to test.
+     */
+    private $builder;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Maybe add some arguments to this constructor */
+        $this->builder = new Builder();
     }
 
-    public function testBuildNodeList($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Builder::buildContent
+     */
+    public function testBuildContent(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testBuildNode($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Builder::buildDocument
+     */
+    public function testBuildDocument(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testBuildKey($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Builder::getScalar
+     */
+    public function testGetScalar(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testBuildItem($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Builder::getNumber
+     */
+    public function testGetNumber(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testBuildContent($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Builder::pushAndSave
+     */
+    public function testPushAndSave(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testBuildDocument($value='')
+    /**
+     * @covers \Dallgoot\Yaml\Builder::saveAndPush
+     */
+    public function testSaveAndPush(): void
     {
-        $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
-
-    public function testBuildLitteral($value='')
-    {
-        $this->markTestIncomplete('This test has not been implemented yet.');
-    }
-
-    public function testBuildSetKey($value='')
-    {
-        $this->markTestIncomplete('This test has not been implemented yet.');
-    }
-
-    public function testBuildSetValue($value='')
-    {
-        $this->markTestIncomplete('This test has not been implemented yet.');
-    }
-
-    public function testBuildTag($value='')
-    {
-        $this->markTestIncomplete('This test has not been implemented yet.');
-    }
-
-    public function testBuildComment($value='')
-    {
-        $this->markTestIncomplete('This test has not been implemented yet.');
-    }
-
-    public function testBuildDirective($value='')
-    {
-        $this->markTestIncomplete('This test has not been implemented yet.');
-    }
-
-
 }

@@ -2,8 +2,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-
-use Dallgoot\Yaml\{Yaml as Y, Loader};
+use Symfony\Component\Yaml\Yaml;
 
 final class SymfonyYamlCases extends TestCase
 {
@@ -16,28 +15,28 @@ final class SymfonyYamlCases extends TestCase
     private function getGenerator($array) {
         $generator = function() use($array) {
             foreach ($array as $key => $value) {
-                yield [$key, $value];
+                yield [$key, rtrim($value)];
             }
         };
         return $generator();
     }
 
-    public function examplesProvider()
+    public function examplestestSymfonyProvider()
     {
-        $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/examples_tests.yml'));
+        $nameResultPair = Yaml::parseFile(__DIR__.'/../definitions/examples_tests.yml');
         $this->assertArrayHasKey('Example_2_01', $nameResultPair, 'ERROR during Yaml::parseFile for ../definitions/examples_tests.yml');
         return $this->getGenerator($nameResultPair);
     }
 
-    public function parsingProvider()
+    public function parsingtestSymfonyProvider()
     {
-        $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/parsing_tests.yml'));
+        $nameResultPair = Yaml::parseFile(__DIR__.'/../definitions/parsing_tests.yml');
         return $this->getGenerator($nameResultPair);
     }
 
-    public function failingProvider()
+    public function failingtestSymfonyProvider()
     {
-        $nameResultPair = get_object_vars(Y::parseFile(__DIR__.'/../definitions/failing_tests.yml'));
+        $nameResultPair = Yaml::parseFile(__DIR__.'/../definitions/failing_tests.yml');
         return $this->getGenerator($nameResultPair);
     }
 
@@ -45,17 +44,16 @@ final class SymfonyYamlCases extends TestCase
      * @dataProvider examplesProvider
      * @group cases
      */
-    public function testBatchExamples($fileName, $expected)
+    public function testSymfonyBatchExamples($fileName, $expected)
     {
-        $output = Y::parseFile($this->testFolder.'examples/'.$fileName.'.yml');
+        $output = Yaml::parseFile($this->testFolder.'examples/'.$fileName.'.yml');
         $result = json_encode($output, self::JSON_OPTIONS);
         $this->assertContains(json_last_error(), [JSON_ERROR_NONE, JSON_ERROR_INF_OR_NAN], json_last_error_msg());
-        // $this->assertEquals($expected, $result, is_array($output) ? $output[0]->getComment(1) : $output->getComment(1));
-        $this->assertEquals($expected, $result, $fileName.(is_null($output) ? "\t".Loader::$error : ''));
+        $this->assertEquals($expected, $result);
     }
 
     /**
-     * @dataProvider failingProvider
+     * @dataProvider failingtestSymfonyProvider
      * @group cases
      */
     // public function testBatchFailing($fileName)
@@ -67,16 +65,16 @@ final class SymfonyYamlCases extends TestCase
     // }
 
     /**
-     * @dataProvider parsingProvider
+     * @dataProvider parsingtestSymfonyProvider
      * @group cases
      * @todo verify that every test file has a result in tests/definitions/parsing.yml
      */
-    public function testBatchParsing($fileName, $expected)
+    public function testSymfonyBatchParsing($fileName, $expected)
     {
         $yaml = file_get_contents($this->testFolder."parsing/$fileName.yml");
-        $output = Y::parse($yaml, Loader::NO_PARSING_EXCEPTIONS);
+        $output = Yaml::parse($yaml, Yaml::PARSE_CUSTOM_TAGS);
         $result = json_encode($output, self::JSON_OPTIONS);
         $this->assertContains(json_last_error(), [JSON_ERROR_NONE, JSON_ERROR_INF_OR_NAN], json_last_error_msg());
-        $this->assertEquals($expected, $result, $fileName.(is_null($output) ? "\t".Loader::$error : ''));
+        $this->assertEquals($expected, $result);
     }
 }

@@ -1,60 +1,134 @@
 <?php
-declare(strict_types=1);
 
+namespace Test\Dallgoot\Yaml;
+
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Dallgoot\Yaml\API;
+use Dallgoot\Yaml\YamlObject;
 
-use Dallgoot\Yaml\Yaml as Y;
-
-final class APITest extends TestCase
+/**
+ * Class APITest.
+ *
+ * @author Stephane Rebai <stephane.rebai@gmail.com>.
+ * @license https://opensource.org/licenses/MIT The MIT license.
+ * @link https://github.com/john-doe/my-awesome-project
+ * @since File available since Release 1.0.0
+ *
+ * @covers \Dallgoot\Yaml\API
+ */
+class APITest extends TestCase
 {
-    public function testaddReference($value='')
-    {
-             $this->markTestIncomplete('This test has not been implemented yet.');
+    /**
+     * @var API $aPI An instance of "API" to test.
+     */
+    private $aPI;
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function setUp(): void
+    {
+        /** @todo Maybe check arguments of this constructor. */
+        $this->aPI = new API($this->createMock(YamlObject::class));
     }
 
     /**
-     * @depends testAddReference
+     * @covers \Dallgoot\Yaml\API::__construct
      */
-    public function testGetReference($value='')
+    public function testConstruct(): void
     {
-             $this->markTestIncomplete('This test has not been implemented yet.');
-
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
     /**
-     * @depends testAddReference
+     * @covers \Dallgoot\Yaml\API::addReference
      */
-    public function testGetAllReferences($value='')
+    public function testAddReference(): void
     {
-             $this->markTestIncomplete('This test has not been implemented yet.');
-
-    }
-
-    public function testAddComment($value='')
-    {
-             $this->markTestIncomplete('This test has not been implemented yet.');
-
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
     /**
-     * @depends testAddComment
+     * @covers \Dallgoot\Yaml\API::getReference
      */
-    public function testGetComment($value='')
+    public function testGetReference(): void
     {
-             $this->markTestIncomplete('This test has not been implemented yet.');
-
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testSetText($value='')
+    /**
+     * @covers \Dallgoot\Yaml\API::getAllReferences
+     */
+    public function testGetAllReferences(): void
     {
-             $this->markTestIncomplete('This test has not been implemented yet.');
-
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 
-    public function testAddTag($value='')
+    /**
+     * @covers \Dallgoot\Yaml\API::addComment
+     */
+    public function testAddComment(): void
     {
-             $this->markTestIncomplete('This test has not been implemented yet.');
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
 
+    /**
+     * @covers \Dallgoot\Yaml\API::getComment
+     */
+    public function testGetComment(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\API::setText
+     */
+    public function testSetText(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\API::addTag
+     */
+    public function testAddTag(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\API::hasDocStart
+     */
+    public function testHasDocStart(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\API::setDocStart
+     */
+    public function testSetDocStart(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\API::isTagged
+     */
+    public function testIsTagged(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
     }
 }

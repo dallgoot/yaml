@@ -4,24 +4,26 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\NodeRoot;
+use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\YamlObject;
 
 /**
- * Class YamlTest.
+ * Class NodeRootTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Yaml
+ * @covers \Dallgoot\Yaml\NodeRoot
  */
-class YamlTest extends TestCase
+class NodeRootTest extends TestCase
 {
     /**
-     * @var Yaml $yaml An instance of "Yaml" to test.
+     * @var NodeRoot $nodeRoot An instance of "NodeRoot" to test.
      */
-    private $yaml;
+    private $nodeRoot;
 
     /**
      * {@inheritdoc}
@@ -29,49 +31,58 @@ class YamlTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->yaml = new Yaml();
+        $this->nodeRoot = new NodeRoot();
     }
 
     /**
-     * Covers the global function "isOneOf".
+     * @covers \Dallgoot\Yaml\NodeRoot::__construct
      */
-    public function testIsOneOf(): void
+    public function testConstruct(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parse
+     * @covers \Dallgoot\Yaml\NodeRoot::getParent
      */
-    public function testParse(): void
+    public function testGetParent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parseFile
+     * @covers \Dallgoot\Yaml\NodeRoot::getRoot
      */
-    public function testParseFile(): void
+    public function testGetRoot(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::dump
+     * @covers \Dallgoot\Yaml\NodeRoot::getYamlObject
      */
-    public function testDump(): void
+    public function testGetYamlObject(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::dumpFile
+     * @covers \Dallgoot\Yaml\NodeRoot::build
      */
-    public function testDumpFile(): void
+    public function testBuild(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\NodeRoot::buildFinal
+     */
+    public function testBuildFinal(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

@@ -4,73 +4,58 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Dumper;
-use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\NodeLiterals;
+use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class DumperTest.
+ * Class NodeLiteralsTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Dumper
+ * @covers \Dallgoot\Yaml\NodeLiterals
  */
-class DumperTest extends TestCase
+class NodeLiteralsTest extends TestCase
 {
     /**
-     * @var Dumper $dumper An instance of "Dumper" to test.
+     * @var NodeLiterals $nodeLiterals An instance of "NodeLiterals" to test.
      */
-    private $dumper;
+    private $nodeLiterals;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
-        $this->dumper = new Dumper();
+        /** @todo Maybe check arguments of this constructor. */
+        $this->nodeLiterals = $this->getMockBuilder(NodeLiterals::class)
+            ->setConstructorArgs(["a string to test", 42])
+            ->getMockForAbstractClass();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::toString
+     * @covers \Dallgoot\Yaml\NodeLiterals::getFinalString
      */
-    public function testToString(): void
+    public function testGetFinalString(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::toFile
+     * @covers \Dallgoot\Yaml\NodeLiterals::__construct
      */
-    public function testToFile(): void
+    public function testConstruct(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dump
-     */
-    public function testDump(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpYamlObject
-     */
-    public function testDumpYamlObject(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Dumper::add
+     * @covers \Dallgoot\Yaml\NodeLiterals::add
      */
     public function testAdd(): void
     {
@@ -79,36 +64,45 @@ class DumperTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpArray
+     * @covers \Dallgoot\Yaml\NodeLiterals::litteralStripLeading
      */
-    public function testDumpArray(): void
+    public function testLitteralStripLeading(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::insertComments
+     * @covers \Dallgoot\Yaml\NodeLiterals::litteralStripTrailing
      */
-    public function testInsertComments(): void
+    public function testLitteralStripTrailing(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpObject
+     * @covers \Dallgoot\Yaml\NodeLiterals::build
      */
-    public function testDumpObject(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpCompact
+     * @covers \Dallgoot\Yaml\NodeLiterals::getChildValue
      */
-    public function testDumpCompact(): void
+    public function testGetChildValue(): void
+    {
+        /** @todo Complete this unit test method. */
+        $this->markTestIncomplete();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\NodeLiterals::isAwaitingChild
+     */
+    public function testIsAwaitingChild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

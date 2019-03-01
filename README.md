@@ -7,14 +7,18 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 ## Features:
 
 - define *appropriate* PHP datatypes for values :
-    YamlObject for each Yaml Document
-    object for mappings
-    array for sequences
-    Compact syntax
-    tagged values as Tag Object
-    JSON, DateTime, etc.
+    - YamlObject for each Yaml Document
+    - object for mappings
+    - array for sequences
+    - Compact syntax
+    - tagged values as Tag Object
+    - JSON, DateTime, etc.
 - recover from some parsing errors
 - tolerance to tabulations
+- DEFINE debug levels :
+  - 1 : print each line Node Type class
+  - 2 : print Loader global map structure
+  - 3 : print each document NodeList
 
 ## Support:
 
@@ -30,20 +34,17 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 - coherent data types (see [coherence.md](./documentation/coherence.md) for explanations)
 - support multiple documents in one YAML content (string or file)
-- JSON validation (if valid as per PHP function *json_encode*)
+- JSON format validation (if valid as per PHP function *json_encode*)
 - complex mapping (Note: keys are JSON encoded strings)
 - real reference behaviour : changing reference value modify other reference calls
 
 ## Todo
 
-- implement/verify Loader::Options, Dumper::Options
 - DUMPER:
+  - implement/verify Dumper::Options
   - finish implementation
   - quote strings that are not valid values in YAML syntax
   - set up tests
-- DEFINE debug levels :
-  - print Loader Tree structure
-  - ???
 - Code coverage : Units tests for each classes methods
 - implement specific unit test for each YAML spec. invalid cases (what must not happen)
 - define levels for Exceptions
@@ -60,7 +61,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - Unicode checking (???)
 - OPTION : parse dates as DateTime
 - OPTION: Force renaming key names that are not valid PHP property name
-- directives : currently ignored
+- directives : currently ignored, should handle tag determination : local tag associated with global URI tag directive
 
 ## Performances
 

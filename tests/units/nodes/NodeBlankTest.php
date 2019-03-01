@@ -4,24 +4,25 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class YamlTest.
+ * Class NodeBlankTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Yaml
+ * @covers \Dallgoot\Yaml\NodeBlank
  */
-class YamlTest extends TestCase
+class NodeBlankTest extends TestCase
 {
     /**
-     * @var Yaml $yaml An instance of "Yaml" to test.
+     * @var NodeBlank $nodeBlank An instance of "NodeBlank" to test.
      */
-    private $yaml;
+    private $nodeBlank;
 
     /**
      * {@inheritdoc}
@@ -29,49 +30,49 @@ class YamlTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->yaml = new Yaml();
+        $this->nodeBlank = new NodeBlank();
     }
 
     /**
-     * Covers the global function "isOneOf".
+     * @covers \Dallgoot\Yaml\NodeBlank::add
      */
-    public function testIsOneOf(): void
+    public function testAdd(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parse
+     * @covers \Dallgoot\Yaml\NodeBlank::specialProcess
      */
-    public function testParse(): void
+    public function testSpecialProcess(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parseFile
+     * @covers \Dallgoot\Yaml\NodeBlank::build
      */
-    public function testParseFile(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::dump
+     * @covers \Dallgoot\Yaml\NodeBlank::getTargetOnEqualIndent
      */
-    public function testDump(): void
+    public function testGetTargetOnEqualIndent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::dumpFile
+     * @covers \Dallgoot\Yaml\NodeBlank::getTargetOnMoreIndent
      */
-    public function testDumpFile(): void
+    public function testGetTargetOnMoreIndent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

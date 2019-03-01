@@ -8,6 +8,6 @@ $o = new \Stdclass;
 
 $o->key = 'a';
 
-$yaml->key1 = Compact::wrap([1,2,$o]);
+$yaml->key1 = new Compact([1,2,$o]);
 
 return $yaml;

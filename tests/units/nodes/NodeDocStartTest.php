@@ -4,74 +4,75 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\NodeDocStart;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class YamlTest.
+ * Class NodeDocStartTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Yaml
+ * @covers \Dallgoot\Yaml\NodeDocStart
  */
-class YamlTest extends TestCase
+class NodeDocStartTest extends TestCase
 {
     /**
-     * @var Yaml $yaml An instance of "Yaml" to test.
+     * @var NodeDocStart $nodeDocStart An instance of "NodeDocStart" to test.
      */
-    private $yaml;
+    private $nodeDocStart;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
-        $this->yaml = new Yaml();
+        /** @todo Maybe check arguments of this constructor. */
+        $this->nodeDocStart = new NodeDocStart("a string to test", 42);
     }
 
     /**
-     * Covers the global function "isOneOf".
+     * @covers \Dallgoot\Yaml\NodeDocStart::__construct
      */
-    public function testIsOneOf(): void
+    public function testConstruct(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parse
+     * @covers \Dallgoot\Yaml\NodeDocStart::add
      */
-    public function testParse(): void
+    public function testAdd(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::parseFile
+     * @covers \Dallgoot\Yaml\NodeDocStart::build
      */
-    public function testParseFile(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::dump
+     * @covers \Dallgoot\Yaml\NodeDocStart::isAwaitingChild
      */
-    public function testDump(): void
+    public function testIsAwaitingChild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Yaml::dumpFile
+     * @covers \Dallgoot\Yaml\NodeDocStart::getTargetOnEqualIndent
      */
-    public function testDumpFile(): void
+    public function testGetTargetOnEqualIndent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

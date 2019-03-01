@@ -21,15 +21,12 @@
          timeoutForMediumTests="10"
          timeoutForLargeTests="60"
          colors="true"
-         verbose="false">
+         verbose="true">
    <testsuites>
-      <testsuite name="all">
-         <directory>../tests/units/*Test.php</directory>
-      </testsuite>
       <testsuite name="units">
-         <directory>../tests/units/*Test.php</directory>
-         <exclude>../tests/units/DumperTest.php</exclude>
+         <directory>../tests/units/</directory>
          <exclude>../tests/units/CasesTest.php</exclude>
+         <exclude>../tests/units/DumperTest.php</exclude>
          <exclude>../tests/units/SymfonyYamlTest.php</exclude>
       </testsuite>
       <testsuite name="cases">

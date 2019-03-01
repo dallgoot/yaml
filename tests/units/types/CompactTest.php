@@ -4,56 +4,47 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\Compact;
 
 /**
- * Class RegexTest.
+ * Class CompactTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Regex
+ * @covers \Dallgoot\Yaml\Compact
  */
-class RegexTest extends TestCase
+class CompactTest extends TestCase
 {
     /**
-     * @var Regex $regex An instance of "Regex" to test.
+     * @var Compact $compact An instance of "Compact" to test.
      */
-    private $regex;
+    private $compact;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
-        $this->regex = new Regex();
+        /** @todo Maybe check arguments of this constructor. */
+        $this->compact = new Compact("a string to test");
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isDate
+     * @covers \Dallgoot\Yaml\Compact::__construct
      */
-    public function testIsDate(): void
+    public function testConstruct(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isNumber
+     * @covers \Dallgoot\Yaml\Compact::jsonSerialize
      */
-    public function testIsNumber(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Regex::isProperlyQuoted
-     */
-    public function testIsProperlyQuoted(): void
+    public function testJsonSerialize(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

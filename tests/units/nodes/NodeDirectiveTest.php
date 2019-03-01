@@ -4,24 +4,25 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\NodeDirective;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class RegexTest.
+ * Class NodeDirectiveTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Regex
+ * @covers \Dallgoot\Yaml\NodeDirective
  */
-class RegexTest extends TestCase
+class NodeDirectiveTest extends TestCase
 {
     /**
-     * @var Regex $regex An instance of "Regex" to test.
+     * @var NodeDirective $nodeDirective An instance of "NodeDirective" to test.
      */
-    private $regex;
+    private $nodeDirective;
 
     /**
      * {@inheritdoc}
@@ -29,31 +30,22 @@ class RegexTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->regex = new Regex();
+        $this->nodeDirective = new NodeDirective();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isDate
+     * @covers \Dallgoot\Yaml\NodeDirective::build
      */
-    public function testIsDate(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Regex::isNumber
+     * @covers \Dallgoot\Yaml\NodeDirective::add
      */
-    public function testIsNumber(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Regex::isProperlyQuoted
-     */
-    public function testIsProperlyQuoted(): void
+    public function testAdd(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

@@ -4,25 +4,25 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Dumper;
-use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\NodeFactory;
+use Dallgoot\Yaml\Node;
 
 /**
- * Class DumperTest.
+ * Class NodeFactoryTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Dumper
+ * @covers \Dallgoot\Yaml\NodeFactory
  */
-class DumperTest extends TestCase
+class NodeFactoryTest extends TestCase
 {
     /**
-     * @var Dumper $dumper An instance of "Dumper" to test.
+     * @var NodeFactory $nodeFactory An instance of "NodeFactory" to test.
      */
-    private $dumper;
+    private $nodeFactory;
 
     /**
      * {@inheritdoc}
@@ -30,85 +30,76 @@ class DumperTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->dumper = new Dumper();
+        $this->nodeFactory = new NodeFactory();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::toString
+     * @covers \Dallgoot\Yaml\NodeFactory::get
      */
-    public function testToString(): void
+    public function testGet(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::toFile
+     * @covers \Dallgoot\Yaml\NodeFactory::onSpecial
      */
-    public function testToFile(): void
+    public function testOnSpecial(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dump
+     * @covers \Dallgoot\Yaml\NodeFactory::onQuoted
      */
-    public function testDump(): void
+    public function testOnQuoted(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpYamlObject
+     * @covers \Dallgoot\Yaml\NodeFactory::onSetElement
      */
-    public function testDumpYamlObject(): void
+    public function testOnSetElement(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::add
+     * @covers \Dallgoot\Yaml\NodeFactory::onCompact
      */
-    public function testAdd(): void
+    public function testOnCompact(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpArray
+     * @covers \Dallgoot\Yaml\NodeFactory::onHyphen
      */
-    public function testDumpArray(): void
+    public function testOnHyphen(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::insertComments
+     * @covers \Dallgoot\Yaml\NodeFactory::onNodeAction
      */
-    public function testInsertComments(): void
+    public function testOnNodeAction(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpObject
+     * @covers \Dallgoot\Yaml\NodeFactory::onLiteral
      */
-    public function testDumpObject(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Dumper::dumpCompact
-     */
-    public function testDumpCompact(): void
+    public function testOnLiteral(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();

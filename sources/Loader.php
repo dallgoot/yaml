@@ -26,7 +26,7 @@ final class Loader
     /* @var null|string */
     private $filePath;
     /* @var integer */
-    private $_debug = 0;///TODO: determine levels
+    private $_debug = 0;
     /* @var integer */
     private $_options = 0;
     /* @var array */
@@ -47,7 +47,7 @@ final class Loader
      */
     public function __construct($absolutePath = null, $options = null, $debug = 0)
     {
-        $this->_debug   = is_int($debug) ? min($debug, 3) : 1;
+        $this->_debug   = is_null($debug) ? 0 : min($debug, 3);
         $this->_options = is_int($options) ? $options : $this->_options;
         if (is_string($absolutePath)) {
             $this->load($absolutePath);
@@ -116,6 +116,7 @@ final class Loader
         try {
             foreach ($generator as $lineNb => $lineString) {
                 $node = NodeFactory::get($lineString, $lineNb);
+                if ($this->_debug === 1) echo get_class($node)."\n";
                 if ($this->needsSpecialProcess($node, $previous)) continue;
                 $this->attachBlankLines($previous);
                 switch ($node->indent <=> $previous->indent) {
@@ -128,6 +129,9 @@ final class Loader
                 $previous = $target->add($node);
             }
             $this->attachBlankLines($previous);
+            if ($this->_debug === 1){
+                return;
+            }
             return Builder::buildContent($root, $this->_debug);
         } catch (\Error|\Exception|\ParseError $e) {
             $this->onError($e, $generator);

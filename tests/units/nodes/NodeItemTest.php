@@ -4,26 +4,25 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Loader;
-use Generator;
+use Dallgoot\Yaml\NodeItem;
 use Dallgoot\Yaml\Node;
 
 /**
- * Class LoaderTest.
+ * Class NodeItemTest.
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
  * @link https://github.com/john-doe/my-awesome-project
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Loader
+ * @covers \Dallgoot\Yaml\NodeItem
  */
-class LoaderTest extends TestCase
+class NodeItemTest extends TestCase
 {
     /**
-     * @var Loader $loader An instance of "Loader" to test.
+     * @var NodeItem $nodeItem An instance of "NodeItem" to test.
      */
-    private $loader;
+    private $nodeItem;
 
     /**
      * {@inheritdoc}
@@ -31,11 +30,11 @@ class LoaderTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe check arguments of this constructor. */
-        $this->loader = new Loader("a string to test", "a string to test", "a string to test");
+        $this->nodeItem = new NodeItem("a string to test", 42);
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Loader::__construct
+     * @covers \Dallgoot\Yaml\NodeItem::__construct
      */
     public function testConstruct(): void
     {
@@ -44,54 +43,45 @@ class LoaderTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Loader::load
+     * @covers \Dallgoot\Yaml\NodeItem::add
      */
-    public function testLoad(): void
+    public function testAdd(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Loader::getSourceGenerator
+     * @covers \Dallgoot\Yaml\NodeItem::getTargetOnEqualIndent
      */
-    public function testGetSourceGenerator(): void
+    public function testGetTargetOnEqualIndent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Loader::parse
+     * @covers \Dallgoot\Yaml\NodeItem::getTargetOnMoreIndent
      */
-    public function testParse(): void
+    public function testGetTargetOnMoreIndent(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Loader::attachBlankLines
+     * @covers \Dallgoot\Yaml\NodeItem::build
      */
-    public function testAttachBlankLines(): void
+    public function testBuild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Loader::needsSpecialProcess
+     * @covers \Dallgoot\Yaml\NodeItem::isAwaitingChild
      */
-    public function testNeedsSpecialProcess(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Loader::onError
-     */
-    public function testOnError(): void
+    public function testIsAwaitingChild(): void
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
