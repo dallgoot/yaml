@@ -14,3 +14,4 @@ example.php
 .phpunit.result.cache
 configuration/daux.json
 emptyFile.test
+documentation/codecoverage

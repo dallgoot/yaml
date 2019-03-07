@@ -1,8 +1,6 @@
 language: php
 php:
-  - '7.2.8'
+  - '7.3.2'
 before_script:
-  # - phpenv config-rm xdebug.ini
-  # - composer require phpunit/phpunit ^7.3
   - composer install
-script: dependencies/bin/phpunit --colors=always --configuration ./configuration/phpunit.xml --testsuite Cases
+script: dependencies/bin/phpunit --colors=always --configuration ./configuration/phpunit.xml --testsuite all
