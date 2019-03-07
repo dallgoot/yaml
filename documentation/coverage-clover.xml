@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1551981866">
-  <project timestamp="1551981866">
+<coverage generated="1551982254">
+  <project timestamp="1551982254">
     <package name="Dallgoot\Yaml">
       <file name="/mnt/d/code/php/yamlLoader/sources/API.php">
         <class name="Dallgoot\Yaml\API" namespace="Dallgoot\Yaml">

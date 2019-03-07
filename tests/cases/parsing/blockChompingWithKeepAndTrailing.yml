@@ -1,8 +1,10 @@
-foo: |-
+foo: |+
     one
     two
 
-bar: |-
+bar: |+
     one
     two
 
+
+    
