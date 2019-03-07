@@ -35,6 +35,6 @@
         "daux/daux.io": "^0.8.1"
     },
     "scripts" : {
-        "test" : "phpunit --configuration ./configuration/phpunit.xml --columns max --testsuite cases --no-logging --coverage-xml ./documentation/coverage.xml"
+        "test" : "phpunit --configuration ./configuration/phpunit.xml --testsuite all"
     }
 }
