@@ -48,7 +48,7 @@
 <logging>
   <log type="coverage-html" target="../documentation/codecoverage" lowUpperBound="35"
        highLowerBound="70"/>
-  <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
+  <!-- <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/> -->
   <log type="coverage-clover" target="../documentation/coverage-clover.xml"/>
    </logging>
 </phpunit>
