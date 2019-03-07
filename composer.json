@@ -30,9 +30,9 @@
         "phpunit/phpunit": "*",
         "phan/phan": "*",
         "symfony/yaml": "*",
-        "nikic/php-parser": "^3",
         "phpmetrics/phpmetrics": "*",
-        "paulthebaud/phpunit-generator": "^2"
+        "roave/better-reflection": "dev-master#c87d856",
+        "daux/daux.io": "^0.8.1"
     },
     "scripts" : {
         "test" : "phpunit --configuration ./configuration/phpunit.xml --columns max --testsuite cases --no-logging --coverage-xml ./documentation/coverage.xml"

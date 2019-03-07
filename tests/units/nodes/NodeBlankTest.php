@@ -6,6 +6,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeBlank;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeLit;
+use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\NodeList;
 
 /**
  * Class NodeBlankTest.
@@ -30,7 +34,7 @@ class NodeBlankTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeBlank = new NodeBlank();
+        $this->nodeBlank = new NodeBlank('', 1);
     }
 
     /**
@@ -38,8 +42,14 @@ class NodeBlankTest extends TestCase
      */
     public function testAdd(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $nodeLit = new NodeLit('|', 1);
+        $this->assertTrue(is_null($nodeLit->value));
+        $nodeLit->add($this->nodeBlank);
+        $this->assertTrue($nodeLit->value->offsetGet(0) === $this->nodeBlank);
+        $nodeScalar = new NodeScalar('sometext', 3);
+        $this->nodeBlank->add($nodeScalar);
+        $this->assertTrue($nodeLit->value instanceof NodeList);
+        $this->assertTrue($nodeLit->value->offsetGet(1) === $nodeScalar);
     }
 
     /**
@@ -47,8 +57,19 @@ class NodeBlankTest extends TestCase
      */
     public function testSpecialProcess(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $blankBuffer = [];
+        $previousScalarParent = new NodeLit('|-', 1);
+        $previousScalar       = new NodeScalar('    sometext', 2);
+        $previousScalarParent->add($previousScalar);
+        $this->assertTrue($this->nodeBlank->specialProcess($previousScalar, $blankBuffer));
+        $this->assertEquals($this->nodeBlank, $blankBuffer[0]);
+        $this->assertEquals($this->nodeBlank->getParent(), $previousScalarParent);
+        $blankBuffer = [];
+        $keyNode = new NodeKey(' somelit: |', 1);
+        $this->assertTrue($this->nodeBlank->specialProcess($keyNode, $blankBuffer));
+        $this->assertEquals($this->nodeBlank, $blankBuffer[0]);
+        $this->assertEquals($this->nodeBlank->getParent(), $keyNode->value);
+
     }
 
     /**
@@ -56,8 +77,7 @@ class NodeBlankTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals("\n", $this->nodeBlank->build());
     }
 
     /**
@@ -65,8 +85,11 @@ class NodeBlankTest extends TestCase
      */
     public function testGetTargetOnEqualIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $uselessNode = new NodeScalar('sometext with no indent', 3);
+        $blankBuffer = [];
+        $keyNode = new NodeKey(' somelit: |', 1);
+        $keyNode->add($this->nodeBlank);
+        $this->assertEquals($this->nodeBlank->getTargetOnEqualIndent($uselessNode), $keyNode);
     }
 
     /**
@@ -74,7 +97,9 @@ class NodeBlankTest extends TestCase
      */
     public function testGetTargetOnMoreIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
+        $uselessNode = new NodeScalar('sometext with no indent', 3);
+        $blankBuffer = [];
+        $keyNode = new NodeKey(' somelit: |', 1);
+        $keyNode->add($this->nodeBlank);
+        $this->assertEquals($this->nodeBlank->getTargetOnMoreIndent($uselessNode), $keyNode);    }
 }

@@ -30,7 +30,7 @@ class NodePartialTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodePartial = new NodePartial();
+        $this->nodePartial = new NodePartial('{ partial: map');
     }
 
     /**

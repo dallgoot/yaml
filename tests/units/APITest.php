@@ -4,6 +4,7 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Assert;
 use Dallgoot\Yaml\API;
 use Dallgoot\Yaml\YamlObject;
 
@@ -20,17 +21,19 @@ use Dallgoot\Yaml\YamlObject;
 class APITest extends TestCase
 {
     /**
-     * @var API $aPI An instance of "API" to test.
+     * @var API $api An instance of "API" to test.
      */
-    private $aPI;
+    private $api;
+
+    private $refValue = 123;
+    private $commentValue = '# this a full line comment';
 
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        /** @todo Maybe check arguments of this constructor. */
-        $this->aPI = new API($this->createMock(YamlObject::class));
+        $this->api = new API(new YamlObject);
     }
 
     /**
@@ -40,6 +43,7 @@ class APITest extends TestCase
     {
         /** @todo Complete this unit test method. */
         $this->markTestIncomplete();
+        //should test that property '_obj' is null BEFORE construct ???
     }
 
     /**
@@ -47,8 +51,9 @@ class APITest extends TestCase
      */
     public function testAddReference(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals($this->api->getAllReferences(), []);
+        $this->api->addReference('referenceName', $this->refValue);
+        $this->assertEquals($this->api->getReference('referenceName'), $this->refValue);
     }
 
     /**
@@ -56,8 +61,9 @@ class APITest extends TestCase
      */
     public function testGetReference(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals($this->api->getAllReferences(), []);
+        $this->api->addReference('referenceName', $this->refValue);
+        $this->assertEquals($this->api->getReference('referenceName'), $this->refValue);
     }
 
     /**
@@ -65,8 +71,9 @@ class APITest extends TestCase
      */
     public function testGetAllReferences(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals($this->api->getAllReferences(), []);
+        $this->api->addReference('referenceName', $this->refValue);
+        $this->assertEquals($this->api->getAllReferences(), ['referenceName' => $this->refValue]);
     }
 
     /**
@@ -74,17 +81,20 @@ class APITest extends TestCase
      */
     public function testAddComment(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals($this->api->getComment(), []);
+        $this->api->addComment(20, $this->commentValue);
+        $this->assertEquals($this->api->getComment(20), $this->commentValue);
     }
 
     /**
      * @covers \Dallgoot\Yaml\API::getComment
+     * @depends testAddComment
      */
     public function testGetComment(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals($this->api->getComment(), []);
+        $this->api->addComment(20, $this->commentValue);
+        $this->assertEquals($this->api->getComment(20), $this->commentValue);
     }
 
     /**
@@ -92,8 +102,11 @@ class APITest extends TestCase
      */
     public function testSetText(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue(is_null($this->api->value));
+        $txt = '      a  text with leading spaces';
+        $yamlObject = $this->api->setText($txt);
+        $this->assertTrue($this->api->value === ltrim($txt));
+        $this->assertTrue($yamlObject instanceof YamlObject);
     }
 
     /**
@@ -101,8 +114,9 @@ class APITest extends TestCase
      */
     public function testAddTag(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertFalse($this->api->isTagged());
+        $this->api->addTag('!tagName');
+        $this->assertTrue($this->api->isTagged());
     }
 
     /**
@@ -110,8 +124,13 @@ class APITest extends TestCase
      */
     public function testHasDocStart(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertFalse($this->api->hasDocStart());
+        $this->api->setDocStart(false);
+        $this->assertTrue($this->api->hasDocStart());
+        $this->api->setDocStart(true);
+        $this->assertTrue($this->api->hasDocStart());
+        $this->api->setDocStart(null);
+        $this->assertFalse($this->api->hasDocStart());
     }
 
     /**
@@ -119,8 +138,13 @@ class APITest extends TestCase
      */
     public function testSetDocStart(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertFalse($this->api->hasDocStart());
+        $this->api->setDocStart(false);
+        $this->assertTrue($this->api->hasDocStart());
+        $this->api->setDocStart(true);
+        $this->assertTrue($this->api->hasDocStart());
+        $this->api->setDocStart(null);
+        $this->assertFalse($this->api->hasDocStart());
     }
 
     /**
@@ -128,7 +152,8 @@ class APITest extends TestCase
      */
     public function testIsTagged(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertFalse($this->api->isTagged());
+        $this->api->addTag('!tagName');
+        $this->assertTrue($this->api->isTagged());
     }
 }

@@ -24,6 +24,8 @@ class NodeList extends \SplDoublyLinkedList
      */
     public function __construct(Node $node = null)
     {
+        // parent::__construct();
+        // $this->setIteratorMode(self::IT_MODE_KEEP);
         if (!is_null($node)) {
             $this->push($node);
         }
@@ -47,7 +49,9 @@ class NodeList extends \SplDoublyLinkedList
         foreach ($tmp as $child) {
             if (!($child instanceof NodeComment)
                 && !($child instanceof NodeDirective)
-                && !($child instanceof NodeDocstart && is_null($child->value)) ) return true;
+                && !($child instanceof NodeBlank)
+                && !($child instanceof NodeDocstart
+                && is_null($child->value)) ) return true;
         }
         return false;
     }
@@ -115,13 +119,14 @@ class NodeList extends \SplDoublyLinkedList
     public function buildMultiline():string
     {
         $output = '';
-        if ($this->count() > 0) {
-            $this->rewind();
-            $first = $this->shift();
+        $list = clone $this;
+        if ($list->count() > 0) {
+            $list->rewind();
+            $first = $list->shift();
             $output = trim($first->raw);
-            foreach ($this as $child) {
+            foreach ($list as $child) {
                 if ($child instanceof NodeScalar) {
-                    $separator = $output[-1] === "\n" ? '' : ' ';
+                    $separator = isset($output[-1])  && $output[-1] === "\n" ? '' : ' ';
                     $output .= $separator.trim($child->raw);
                 } elseif ($child instanceof NodeBlank) {
                     $output .= "\n";
@@ -139,17 +144,18 @@ class NodeList extends \SplDoublyLinkedList
         $out = new NodeList;
         foreach ($this as $index => $child) {
             if ($child instanceof NodeComment) {
-                $child->build();
+                // $child->build();
             } else {
                 if($child->value instanceof NodeComment) {
-                    $child->value->build();
-                    $child->value = null;
+                    // $child->value->build();
+                    // $child->value = null;
                 } elseif($child->value instanceof NodeList) {
                     $child->value = $child->value->filterComment();
                 }
                 $out->push($child);
             }
         }
+        // $this->rewind();
         $out->rewind();
         return $out;
     }

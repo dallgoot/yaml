@@ -34,7 +34,7 @@ class Regex
                                 Regex::SEQ.")";
 
     const MAPPING  = "/".Regex::ALLDEF."^(?&map)$/";
-    const MAPPING_VALUES = "/".Regex::ALLDEF."(?'k'(?&quot)|[^:]+) *: *(?'v'(?&all))? *,? */i";
+    const MAPPING_VALUES = "/".Regex::ALLDEF."(?'k'(?&quot)|[^:]+) *: *(?'v'(?&all)) *,? */i";
 
     const SEQUENCE = "/".Regex::ALLDEF."^(?&seq)/";
     const SEQUENCE_VALUES = "/".Regex::ALLDEF."(?'item'(?&all)) *,? */i";
@@ -75,7 +75,7 @@ class Regex
      * @param string $var A string value
      *
      * @return boolean  True if number, False otherwise.
-     * @todo   replace regex expression with class constants
+     * @todo   replace regex expression with class constants, use is_numeric ?
      */
     public static function isNumber(string $var):bool
     {

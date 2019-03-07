@@ -26,7 +26,7 @@ final class Builder
      *
      * @return array|YamlObject      list of documents or just one.
      */
-    public static function buildContent(NodeRoot $root, int $_debug)
+    public static function buildContent(NodeRoot $root, int $_debug = 0)
     {
         if ($_debug === 2) {
             print_r($root);
@@ -60,7 +60,7 @@ final class Builder
      *
      * @return YamlObject the YAML document as an object
      */
-    private static function buildDocument(NodeList &$list, int $docNum):YamlObject
+    public static function buildDocument(NodeList &$list, int $docNum):YamlObject
     {
         $yamlObject = new YamlObject;
         $rootNode   = new NodeRoot();
@@ -115,17 +115,17 @@ final class Builder
     {
         if (preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
         if (preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
-        return is_bool(strpos($v, '.')) ? intval($v) : floatval($v);
+        return is_bool(strpos($v, '.')) || substr_count($v, '.') > 1 ? intval($v) : floatval($v);
     }
 
-    private static function pushAndSave(Node $child, NodeList $buffer, array &$documents)
+    public static function pushAndSave(Node $child, NodeList &$buffer, array &$documents)
     {
         $buffer->push($child);
         $documents[] = self::buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList();
     }
 
-    private static function saveAndPush(Node $child, NodeList $buffer, array &$documents)
+    public static function saveAndPush(Node $child, NodeList &$buffer, array &$documents)
     {
         $documents[] = self::buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList($child);

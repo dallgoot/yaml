@@ -28,8 +28,7 @@ class CompactTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe check arguments of this constructor. */
-        $this->compact = new Compact("a string to test");
+        $this->compact = new Compact([]);
     }
 
     /**
@@ -37,8 +36,10 @@ class CompactTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->compact[12] = 'abc';
+        $this->assertEquals('abc', $this->compact[12]);
+        $this->compact->prop = '123';
+        $this->assertEquals('123', $this->compact->prop);
     }
 
     /**
@@ -46,7 +47,6 @@ class CompactTest extends TestCase
      */
     public function testJsonSerialize(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue(is_array($this->compact->jsonSerialize()));
     }
 }

@@ -27,13 +27,13 @@ class NodeActions extends Node
         }
         if ($this instanceof NodeTag) {
             $this->tag = $name;
-        } else {
-            $this->anchor = $name;
+            return;
         }
+        $this->anchor = $name;
     }
 
     public function build(&$parent = null)
     {
-        // Nothing to do here
+        // Nothing to do here : on purpose
     }
 }

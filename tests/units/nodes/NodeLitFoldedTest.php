@@ -30,7 +30,7 @@ class NodeLitFoldedTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeLitFolded = new NodeLitFolded();
+        $this->nodeLitFolded = new NodeLitFolded('>-', 1);
     }
 
     /**

@@ -17,15 +17,16 @@ class NodeDirective extends Node
      */
     public function build(&$parent = null)
     {
-        if (is_null($this->value)) {
-            return null;
-        } else {
-            return $this->value->build($parent);
-        }
+        // if (is_null($this->value)) {
+        //     return null;
+        // } else {
+        //     return $this->value->build($parent);
+        // }
     }
 
     public function add(Node $child):Node
     {
-        return $this->getRoot()->add($child);
+        return $child;
+        // return $this->getRoot()->add($child);
     }
 }

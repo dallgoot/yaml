@@ -102,14 +102,13 @@ final class Yaml
             throw new \Exception(__CLASS__." Error during dumping '$fileName'", 1, $e);
         }
     }
-}
 
-namespace Dallgoot\Yaml;
-function isOneOf($subject, array $comparison)
-{
-    foreach ($comparison as $className) {
-        $fqn = __NAMESPACE__."\\$className";
-        if ($subject instanceof $fqn) return true;
+    public static function isOneOf($subject, array $comparison):bool
+    {
+        foreach ($comparison as $className) {
+            $fqn = __NAMESPACE__."\\Yaml\\$className";
+            if ($subject instanceof $fqn) return true;
+        }
+        return false;
     }
-    return false;
 }

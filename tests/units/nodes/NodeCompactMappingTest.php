@@ -4,7 +4,12 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
+use Dallgoot\Yaml\Compact;
 use Dallgoot\Yaml\NodeCompactMapping;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\NodeScalar;
 
 /**
  * Class NodeCompactMappingTest.
@@ -29,7 +34,7 @@ class NodeCompactMappingTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe check arguments of this constructor. */
-        $this->nodeCompactMapping = new NodeCompactMapping("a string to test", 42);
+        $this->nodeCompactMapping = new NodeCompactMapping(" {a : 123, b: abc }  ", 42);
     }
 
     /**
@@ -37,8 +42,12 @@ class NodeCompactMappingTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $children = $this->nodeCompactMapping->value;
+        $this->assertTrue($children instanceof NodeList);
+        $this->assertTrue($children[0] instanceof NodeKey);
+        $this->assertTrue($children[0]->value instanceof NodeScalar);
+        $this->assertTrue($children[1] instanceof NodeKey);
+        $this->assertTrue($children[1]->value instanceof NodeScalar);
     }
 
     /**
@@ -46,7 +55,13 @@ class NodeCompactMappingTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $result = $this->nodeCompactMapping->build();
+        $this->assertTrue($result instanceof Compact);
+        $this->assertTrue(property_exists($result, 'a'));
+        $this->assertEquals(123, $result->a);
+        $this->assertTrue(property_exists($result, 'b'));
+        $this->assertEquals('abc', $result->b);
+        $this->nodeCompactMapping->value = null;
+        $this->assertTrue(is_null($this->nodeCompactMapping->build()));
     }
 }

@@ -6,6 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeKey;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeScalar;
 
 /**
  * Class NodeKeyTest.
@@ -30,7 +31,7 @@ class NodeKeyTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe check arguments of this constructor. */
-        $this->nodeKey = new NodeKey("a string to test", 42, ["a", "strings", "array"]);
+        $this->nodeKey = new NodeKey("key: value", 1);
     }
 
     /**
@@ -38,8 +39,9 @@ class NodeKeyTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue($this->nodeKey->value instanceof NodeScalar);
+        $this->nodeKey = new NodeKey("key:", 1);
+        $this->assertTrue(is_null($this->nodeKey->value));
     }
 
     /**
@@ -47,8 +49,26 @@ class NodeKeyTest extends TestCase
      */
     public function testSetIdentifier(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $reflector = new \ReflectionClass($this->nodeKey);
+        $identifier = $reflector->getProperty('identifier');
+        $identifier->setAccessible(true);
+
+        $this->nodeKey->setIdentifier('newkey');
+        $this->assertEquals('newkey', $identifier->getValue($this->nodeKey));
+
+        $this->nodeKey->setIdentifier('!!str 1.2');
+        $this->assertEquals('!!str', $this->nodeKey->tag);
+        $this->assertEquals('1.2', $identifier->getValue($this->nodeKey));
+
+        $this->nodeKey->setIdentifier('&anchor 1.2');
+        $this->assertEquals('&anchor', $this->nodeKey->anchor);
+        $this->assertEquals('1.2', $identifier->getValue($this->nodeKey));
+    }
+
+    private function setIdentifierAsEmptyString()
+    {
+        $this->expectException(\Exception::class);
+        $this->nodeKey->setIdentifier('');
     }
 
     /**
@@ -56,8 +76,25 @@ class NodeKeyTest extends TestCase
      */
     public function testAdd(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $scalarNode = new NodeScalar('sometext', 2);
+        $this->nodeKey = new NodeKey("key:", 1);
+        $this->nodeKey->add($scalarNode);
+        $this->assertEquals($scalarNode, $this->nodeKey->value);
+        //
+        $this->nodeKey = new NodeKey("key: |", 1);
+        $this->nodeKey->add($scalarNode);
+        $nodeLit = $this->nodeKey->value;
+        $this->assertEquals($scalarNode, $nodeLit->value->offsetGet(0));
+        //
+        $this->nodeKey = new NodeKey("key: >", 1);
+        $this->nodeKey->add($scalarNode);
+        $nodeLitFolded = $this->nodeKey->value;
+        $this->assertEquals($scalarNode, $nodeLitFolded->value->offsetGet(0));
+        //
+        $this->nodeKey = new NodeKey("key: &anchor", 1);
+        $this->nodeKey->add($scalarNode);
+        $nodeAnchor = $this->nodeKey->value;
+        $this->assertEquals($scalarNode, $nodeAnchor->value);
     }
 
     /**

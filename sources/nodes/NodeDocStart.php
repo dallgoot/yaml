@@ -1,7 +1,7 @@
 <?php
 
 namespace Dallgoot\Yaml;
-
+use Dallgoot\Yaml;
 /**
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
@@ -50,7 +50,7 @@ class NodeDocStart extends Node
 
     public function isAwaitingChild(Node $node):bool
     {
-        return $this->value && isOneOf($this->value, ['NodeRefDef', 'NodeLit', 'NodeLitFolded']);
+        return $this->value && Yaml::isOneOf($this->value, ['NodeAnchor', 'NodeLit', 'NodeLitFolded']);
     }
 
     public function getTargetOnEqualIndent(Node &$node):Node

@@ -29,7 +29,7 @@ class NodeQuotedTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeQuoted = new NodeQuoted();
+        $this->nodeQuoted = new NodeQuoted('"a quoted string"');
     }
 
     /**

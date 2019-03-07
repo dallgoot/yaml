@@ -49,11 +49,12 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - implement specific unit test for each YAML spec. invalid cases (what must not happen)
 - define levels for Exceptions
 - verify YAML DEFINITIONS files before launching tests
-- Documentation :
+- double check references/anchors changes in YamlObject
+- Documentation : (doxygen ?)
   - build classes docs
   - Examples of each function of the API
+- docker-compose for easy testing
 - Benchmarks against other libs
-- double check references/anchors changes in YamlObject
 
 ## Improvements
 
@@ -62,6 +63,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - OPTION : parse dates as DateTime
 - OPTION: Force renaming key names that are not valid PHP property name
 - directives : currently ignored, should handle tag determination : local tag associated with global URI tag directive
+- TAG : function for 'php/object' that provides the correct namespace to build
 
 ## Performances
 

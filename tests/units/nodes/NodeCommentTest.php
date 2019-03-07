@@ -6,6 +6,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeComment;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeRoot;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\YamlObject;
 
 /**
  * Class NodeCommentTest.
@@ -24,13 +27,14 @@ class NodeCommentTest extends TestCase
      */
     private $nodeComment;
 
+    private $commentLine = 5;
     /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeComment = new NodeComment();
+        $this->nodeComment = new NodeComment('#this is a comment for test', $this->commentLine);
     }
 
     /**
@@ -38,8 +42,11 @@ class NodeCommentTest extends TestCase
      */
     public function testSpecialProcess(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $keyNode = new NodeKey('  key: keyvalue',1);
+        $rootNode = new NodeRoot();
+        $rootNode->add($keyNode);
+        $blankBuffer = [];
+        $this->assertTrue($this->nodeComment->specialProcess($keyNode, $blankBuffer));
     }
 
     /**
@@ -47,7 +54,14 @@ class NodeCommentTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $yamlObject = new YamlObject;
+        $rootNode = new NodeRoot;
+        $reflector = new \ReflectionClass($rootNode);
+        $method = $reflector->getMethod('buildFinal');
+        $method->setAccessible(true);
+        $method->invoke($rootNode, $yamlObject);
+        $rootNode->add($this->nodeComment);
+        $this->nodeComment->build();
+        $this->assertEquals($yamlObject->getComment($this->commentLine), $this->nodeComment->raw);
     }
 }

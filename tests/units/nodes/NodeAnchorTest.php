@@ -4,8 +4,12 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
+use Dallgoot\Yaml\YamlObject;
 use Dallgoot\Yaml\NodeAnchor;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeRoot;
+use Dallgoot\Yaml\NodeBlank;
 
 /**
  * Class NodeAnchorTest.
@@ -29,8 +33,7 @@ class NodeAnchorTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
-        $this->nodeAnchor = new NodeAnchor();
+        $this->nodeAnchor = new NodeAnchor('&aaa sometext', 1);
     }
 
     /**
@@ -38,8 +41,14 @@ class NodeAnchorTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $yamlObject = new YamlObject();
+        $rootNode   = new NodeRoot();
+        $rootNode->add($this->nodeAnchor);
+        $reflector  = new \ReflectionClass($rootNode);
+        $buildFinal = $reflector->getMethod('buildFinal');
+        $buildFinal->setAccessible(true);
+        $buildFinal->invoke($rootNode, $yamlObject);
+        $this->assertEquals('sometext', $this->nodeAnchor->build());
     }
 
     /**
@@ -47,7 +56,9 @@ class NodeAnchorTest extends TestCase
      */
     public function testIsAwaitingChild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $uselessNode = new NodeBlank('', 1);
+        $this->assertFalse($this->nodeAnchor->IsAwaitingChild($uselessNode));
+        $this->nodeAnchor->value = null;
+        $this->assertTrue($this->nodeAnchor->IsAwaitingChild($uselessNode));
     }
 }

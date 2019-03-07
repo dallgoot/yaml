@@ -30,7 +30,7 @@ class NodeLitTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeLit = new NodeLit();
+        $this->nodeLit = new NodeLit('|', 1);
     }
 
     /**

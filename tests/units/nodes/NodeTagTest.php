@@ -30,7 +30,7 @@ class NodeTagTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeTag = new NodeTag();
+        $this->nodeTag = new NodeTag('!!str 654',1);
     }
 
     /**

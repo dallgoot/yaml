@@ -4,7 +4,15 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Dallgoot\Yaml;
+use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodeItem;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeLit;
+use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\NodeRoot;
 
 /**
  * Class NodeTest.
@@ -30,8 +38,8 @@ class NodeTest extends TestCase
     {
         /** @todo Maybe check arguments of this constructor. */
         $this->node = $this->getMockBuilder(Node::class)
-            ->setConstructorArgs(["a string to test", "a string to test"])
-            ->getMockForAbstractClass();
+                            ->setConstructorArgs(["a string to test", 1])
+                            ->getMockForAbstractClass();
     }
 
     /**
@@ -39,8 +47,12 @@ class NodeTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $rawValue = '    somestring';
+        $lineNumber = 45;
+        $this->node->__construct($rawValue, $lineNumber);
+        $this->assertEquals($rawValue, $this->node->raw);
+        $this->assertEquals($lineNumber, $this->node->line);
+        $this->assertEquals(4, $this->node->indent);
     }
 
     /**
@@ -48,8 +60,16 @@ class NodeTest extends TestCase
      */
     public function testSetParent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $nodeRoot = new NodeRoot();
+        $reflector = new \ReflectionClass($this->node);
+        $method   = $reflector->getMethod('setParent');
+        $property = $reflector->getProperty('_parent');
+        $method->setAccessible(true);
+        $property->setAccessible(true);
+
+        $result  = $method->invoke($this->node, $nodeRoot);
+        $this->assertTrue($result instanceof Node);
+        $this->assertTrue($property->getValue($this->node) instanceof NodeRoot);
     }
 
     /**
@@ -57,8 +77,20 @@ class NodeTest extends TestCase
      */
     public function testGetParent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        //direct parent : $indent = null
+        $nodeRoot = new NodeRoot();
+        $nodeRoot->add($this->node);
+        $this->assertTrue($this->node->getParent() instanceof NodeRoot, 'parent is not a NodeRoot');
+        //undirect parent : $indent = 2
+        $nodeRoot = new NodeRoot();
+        $nodeKey  = new NodeKey('  sequence:', 1);
+        $nodeItem = new NodeItem('    -', 2);
+        $nodeKeyInside = new NodeKey('       keyinitem: value', 3);
+        $nodeKeyInside->add($this->node);
+        $nodeItem->add($nodeKeyInside);
+        $nodeKey->add($nodeItem);
+        $nodeRoot->add($nodeKey);
+        $this->assertEquals($nodeKey, $this->node->getParent(4));
     }
 
     /**
@@ -66,8 +98,18 @@ class NodeTest extends TestCase
      */
     public function testGetRoot(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $nodeRoot = new NodeRoot();
+        $nodeKey  = new NodeKey('  sequence:', 1);
+        $nodeItem = new NodeItem('    -', 2);
+        $nodeKeyInside = new NodeKey('       keyinitem: value', 3);
+        $nodeKeyInside->add($this->node);
+        $nodeItem->add($nodeKeyInside);
+        $nodeKey->add($nodeItem);
+        $nodeRoot->add($nodeKey);
+        $reflector = new \ReflectionClass($this->node);
+        $getRoot = $reflector->getMethod('getRoot');
+        $getRoot->setAccessible(true);
+        $this->assertEquals($nodeRoot, $getRoot->invoke($this->node));
     }
 
     /**
@@ -75,8 +117,20 @@ class NodeTest extends TestCase
      */
     public function testAdd(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        // value is empty
+        $this->assertEquals(null, $this->node->value);
+        // add one Node
+        $blankNode = new NodeBlank('', 1);
+        $addResult = $this->node->add($blankNode);
+        $this->assertEquals($blankNode, $addResult);
+        $this->assertEquals($blankNode, $this->node->value);
+        //value is already a node : add one
+        $addResult2 = $this->node->add($blankNode);
+        $this->assertEquals($blankNode, $addResult2);
+        //  should change to NodeList
+        $this->assertTrue($this->node->value instanceof NodeList);
+        //and theres 2 children
+        $this->assertEquals(2, $this->node->value->count());
     }
 
     /**
@@ -84,17 +138,21 @@ class NodeTest extends TestCase
      */
     public function testGetDeepestNode(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $child = NodeFactory::get('    key: &anchor |', 1);
+        $this->node->add($child);
+        $this->assertTrue($child->getDeepestNode() instanceof NodeLit);
+        $this->assertTrue($this->node->getDeepestNode() instanceof NodeLit);
     }
 
     /**
      * @covers \Dallgoot\Yaml\Node::specialProcess
+     * @todo : test call for ALL NODETYPES using folder "types" listing and object creation
      */
     public function testSpecialProcess(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $previous = new NodeBlank('', 1);
+        $blankBuffer = [];
+        $this->assertFalse($this->node->specialProcess($previous, $blankBuffer));
     }
 
     /**
@@ -102,17 +160,25 @@ class NodeTest extends TestCase
      */
     public function testGetTargetOnLessIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $blankNode = new NodeBlank('', 1);
+        $nodeRoot  = new NodeRoot();
+        $nodeRoot->add($this->node);
+        $this->assertEquals($nodeRoot, $this->node->getTargetOnLessIndent($blankNode));
     }
 
     /**
      * @covers \Dallgoot\Yaml\Node::getTargetOnEqualIndent
+     * @todo test with more content before this one
      */
     public function testGetTargetOnEqualIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $nodeRoot  = new NodeRoot();
+        $keyNode = new NodeKey('sequence:', 1);
+        $itemNode1 = new NodeItem('    - item1', 2);
+        $itemNode2 = new NodeItem('    - item2', 3);
+        $nodeRoot->add($keyNode);
+        $keyNode->add($itemNode1);
+        $this->assertEquals($keyNode, $itemNode1->getTargetOnEqualIndent($itemNode2));
     }
 
     /**
@@ -120,8 +186,9 @@ class NodeTest extends TestCase
      */
     public function testGetTargetOnMoreIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $previousNode = new NodeKey('emptykey:',1);
+        $nextNode = new NodeItem('    - itemvalue',2);
+        $this->assertEquals($previousNode, $previousNode->getTargetOnMoreIndent($nextNode));
     }
 
     /**
@@ -129,17 +196,10 @@ class NodeTest extends TestCase
      */
     public function testIsAwaitingChild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Node::build
-     */
-    public function testBuild(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $reflector = new \ReflectionClass($this->node);
+        $isAwaitingChild = $reflector->getMethod('isAwaitingChild');
+        $isAwaitingChild->setAccessible(true);
+        $this->assertFalse($isAwaitingChild->invoke($this->node, new NodeBlank('', 1)));
     }
 
     /**
@@ -147,7 +207,6 @@ class NodeTest extends TestCase
      */
     public function testDebugInfo(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue(is_array($this->node->__debugInfo()));
     }
 }

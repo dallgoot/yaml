@@ -34,11 +34,17 @@ class RegexTest extends TestCase
 
     /**
      * @covers \Dallgoot\Yaml\Regex::isDate
+     * @todo : support other date formats ???
      */
     public function testIsDate(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue($this->regex::isDate('2002-12-14'));
+        $this->assertTrue($this->regex::isDate('2002/12/14'));
+        $this->assertTrue($this->regex::isDate('2001-12-15T02:59:43.1Z'));
+        $this->assertTrue($this->regex::isDate('2001-12-14 21:59:43.10 -5'));
+        $this->assertTrue($this->regex::isDate('2001-12-14t21:59:43.10-05:00'));
+        //not conforing dates
+        $this->assertFalse($this->regex::isDate('20-12-2004'));
     }
 
     /**
@@ -46,8 +52,15 @@ class RegexTest extends TestCase
      */
     public function testIsNumber(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue($this->regex::isNumber('0o45'));
+        $this->assertTrue($this->regex::isNumber('0xa7'));
+        $this->assertTrue($this->regex::isNumber('123'));
+        $this->assertTrue($this->regex::isNumber('123.456'));
+        $this->assertTrue($this->regex::isNumber('.6'));
+        // not standard numbers
+        $this->assertFalse($this->regex::isNumber('123.45.6'));
+        $this->assertFalse($this->regex::isNumber('0x'));
+        $this->assertFalse($this->regex::isNumber('0o'));
     }
 
     /**
@@ -55,7 +68,15 @@ class RegexTest extends TestCase
      */
     public function testIsProperlyQuoted(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue($this->regex::isProperlyQuoted(' "  "  '));
+        $this->assertTrue($this->regex::isProperlyQuoted(' " \" "  '));
+        $this->assertTrue($this->regex::isProperlyQuoted(" '  '  "));
+        $this->assertTrue($this->regex::isProperlyQuoted(" ' \' '  "));
+        $this->assertTrue($this->regex::isProperlyQuoted("' 'a' 'b'  '"));
+        $this->assertTrue($this->regex::isProperlyQuoted('" "a" "b"  "'));
+        $this->assertTrue($this->regex::isProperlyQuoted('" \"a\" \'b\'  "'));
+
+        $this->assertFalse($this->regex::isProperlyQuoted('" \"a\" \'b\'  '));
+
     }
 }

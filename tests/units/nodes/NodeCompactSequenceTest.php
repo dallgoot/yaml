@@ -4,7 +4,13 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
+use Dallgoot\Yaml\Compact;
 use Dallgoot\Yaml\NodeCompactSequence;
+use Dallgoot\Yaml\NodeItem;
+use Dallgoot\Yaml\NodeJSON;
+use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\NodeScalar;
 
 /**
  * Class NodeCompactSequenceTest.
@@ -29,7 +35,7 @@ class NodeCompactSequenceTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe check arguments of this constructor. */
-        $this->nodeCompactSequence = new NodeCompactSequence("a string to test", 42);
+        $this->nodeCompactSequence = new NodeCompactSequence(" [ 1, ad, [456] ]", 42);
     }
 
     /**
@@ -37,8 +43,14 @@ class NodeCompactSequenceTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $children = $this->nodeCompactSequence->value;
+        $this->assertTrue($children instanceof NodeList);
+        $this->assertTrue($children[0] instanceof NodeItem);
+        $this->assertTrue($children[0]->value instanceof NodeScalar);
+        $this->assertTrue($children[1] instanceof NodeItem);
+        $this->assertTrue($children[1]->value instanceof NodeScalar);
+        $this->assertTrue($children[2] instanceof Nodeitem);
+        $this->assertTrue($children[2]->value instanceof NodeJSON);
     }
 
     /**
@@ -46,7 +58,15 @@ class NodeCompactSequenceTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $result = $this->nodeCompactSequence->build();
+        $this->assertTrue($result instanceof Compact);
+        $this->assertArrayHasKey(0, $result);
+        $this->assertEquals(1, $result[0]);
+        $this->assertArrayHasKey(1, $result);
+        $this->assertEquals('ad', $result[1]);
+        $this->assertArrayHasKey(2, $result);
+        $this->assertEquals([456], $result[2]);
+        $this->nodeCompactSequence->value = null;
+        $this->assertTrue(is_null($this->nodeCompactSequence->build()));
     }
 }

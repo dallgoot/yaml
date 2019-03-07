@@ -5,6 +5,7 @@ namespace Test\Dallgoot\Yaml;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeActions;
+use Dallgoot\Yaml\NodeScalar;
 
 /**
  * Class NodeActionsTest.
@@ -28,8 +29,7 @@ class NodeActionsTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe check arguments of this constructor. */
-        $this->nodeActions = new NodeActions("a string to test", 42);
+        $this->nodeActions = new NodeActions("   !!str    sometext", 42);
     }
 
     /**
@@ -37,8 +37,9 @@ class NodeActionsTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals("!!str", $this->nodeActions->anchor);
+        $this->assertTrue($this->nodeActions->value instanceof NodeScalar);
+        $this->assertEquals("sometext", $this->nodeActions->value->raw);
     }
 
     /**
@@ -46,7 +47,6 @@ class NodeActionsTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals(null, $this->nodeActions->build() );
     }
 }

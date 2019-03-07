@@ -124,7 +124,7 @@ final class NodeFactory
      */
     final private static function onNodeAction(string $first, string $nodeString, int $line):Node
     {
-        if (!preg_match(Regex::NODE_ACTIONS, ltrim($nodeString), $matches)) {
+        if (!preg_match(Regex::NODE_ACTIONS, trim($nodeString), $matches)) {
             return new NodeScalar($nodeString, $line);
         }
         $action = trim($matches['action']);//var_dump($matches);

@@ -29,7 +29,7 @@ class NodeJSONTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeJSON = new NodeJSON();
+        $this->nodeJSON = new NodeJSON('  [1,2,3]',1);
     }
 
     /**
@@ -37,7 +37,6 @@ class NodeJSONTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals([1,2,3], $this->nodeJSON->build());
     }
 }

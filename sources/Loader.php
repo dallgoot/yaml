@@ -177,7 +177,7 @@ final class Loader
         return false;
     }
 
-    public function onError(object $e, $generator)
+    public function onError(object $e, \Generator $generator)
     {
         $file = $this->filePath ? realpath($this->filePath) : '#YAML STRING#';
         $message = $e->getMessage()."\n ".$e->getFile().":".$e->getLine();

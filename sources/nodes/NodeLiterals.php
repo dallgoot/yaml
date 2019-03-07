@@ -1,7 +1,7 @@
 <?php
 
 namespace Dallgoot\Yaml;
-
+use Dallgoot\Yaml;
 /**
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
@@ -27,7 +27,7 @@ abstract class NodeLiterals extends Node
     {
         if (is_null($this->value)) $this->value = new NodeList();
         $candidate = $child;
-        if (!isOneOf($child, ['NodeScalar', 'NodeBlank', 'NodeComment', 'NodeQuoted'])) {
+        if (!Yaml::isOneOf($child, ['NodeScalar', 'NodeBlank', 'NodeComment', 'NodeQuoted'])) {
             $candidate = new NodeScalar((string) $child->raw, $child->line);
         }
         return parent::add($candidate);

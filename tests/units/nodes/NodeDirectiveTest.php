@@ -6,6 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeDirective;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeBlank;
 
 /**
  * Class NodeDirectiveTest.
@@ -30,7 +31,7 @@ class NodeDirectiveTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeDirective = new NodeDirective();
+        $this->nodeDirective = new NodeDirective('%YAML 1.2');
     }
 
     /**
@@ -38,8 +39,7 @@ class NodeDirectiveTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue(is_null($this->nodeDirective->build()));
     }
 
     /**
@@ -47,7 +47,7 @@ class NodeDirectiveTest extends TestCase
      */
     public function testAdd(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $uselessNode = new NodeBlank('', 2);
+        $this->assertTrue($this->nodeDirective->add($uselessNode) === $uselessNode);
     }
 }

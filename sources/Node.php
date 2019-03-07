@@ -37,9 +37,9 @@ abstract class Node
      */
     public function __construct(string $nodeString, $line = 0)
     {
-        $this->raw = $nodeString;
-        $this->line = (int) $line;
-        $nodeValue = preg_replace("/^\t+/m", " ", $nodeString);
+        $this->raw    = $nodeString;
+        $this->line   = (int) $line;
+        $nodeValue    = preg_replace("/^\t+/m", " ", $nodeString);
         $this->indent = strspn($nodeValue, ' ');
     }
 

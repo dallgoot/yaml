@@ -5,6 +5,7 @@ namespace Test\Dallgoot\Yaml;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\API;
 
 /**
  * Class YamlObjectTest.
@@ -37,17 +38,22 @@ class YamlObjectTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $reflector = new \ReflectionClass($this->yamlObject);
+        $__yaml__object__api = $reflector->getProperty('__yaml__object__api');
+        $__yaml__object__api->setAccessible(true);
+        $this->yamlObject->__construct();
+        $this->assertTrue($__yaml__object__api->getValue($this->yamlObject) instanceof API);
     }
 
     /**
      * @covers \Dallgoot\Yaml\YamlObject::__call
+     * @todo : test ALL API public methods ???
      */
     public function testCall(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue(is_bool($this->yamlObject->hasDocStart()));
+        $this->assertTrue(is_array($this->yamlObject->getComment()));
+        $this->assertTrue(is_array($this->yamlObject->getAllReferences()));
     }
 
     /**
@@ -55,8 +61,8 @@ class YamlObjectTest extends TestCase
      */
     public function testToString(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->yamlObject->setText('some text value');
+        $this->assertTrue(is_string(''.$this->yamlObject));
     }
 
     /**
@@ -64,7 +70,6 @@ class YamlObjectTest extends TestCase
      */
     public function testJsonSerialize(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals("_Empty YamlObject_", $this->yamlObject->jsonSerialize());
     }
 }

@@ -13,7 +13,7 @@ class NodeCompactMapping extends Node
     public function __construct(string $nodeString, int $line)
     {
         parent::__construct($nodeString, $line);
-        preg_match_all(Regex::MAPPING_VALUES, trim(substr(ltrim($nodeString), 1,-1)), $matches);
+        preg_match_all(Regex::MAPPING_VALUES, trim(substr(trim($nodeString), 1,-1)), $matches);
         foreach ($matches['k'] as $index => $property) {
             $pair = $property.': '.trim($matches['v'][$index]);
             $child = NodeFactory::get($pair, $line);

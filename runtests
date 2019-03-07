@@ -1,11 +1,7 @@
 #!/bin/bash
 export XDEBUG_CONFIG="idekey=VSCODE"
 
-# --coverage-clover clover.xml \ 
+# --coverage-clover clover.xml \
 ./dependencies/bin/phpunit --color=always \
 --configuration ./configuration/phpunit.xml \
---columns max \
 --testsuite $1 \
---no-logging \
---coverage-xml ./documentation/coverage.xml \
-# --dump-xdebug-filter xdebug_filter

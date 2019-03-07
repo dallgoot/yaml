@@ -12,7 +12,7 @@ class NodeBlank extends Node
 {
     public function add(Node $child):Node
     {
-        return parent::add($child);
+        return $this->_parent->add($child);
     }
 
     public function specialProcess(Node &$previous, array &$emptyLines):bool

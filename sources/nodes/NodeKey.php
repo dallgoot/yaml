@@ -1,6 +1,7 @@
 <?php
 
 namespace Dallgoot\Yaml;
+use Dallgoot\Yaml;
 
 /**
  *
@@ -12,9 +13,12 @@ class NodeKey extends Node
 {
     const ERROR_NO_KEYNAME = self::class.": key has NO IDENTIFIER on line %d";
 
-    public function __construct(string $nodeString, int $line, array $matches)
+    public function __construct(string $nodeString, int $line, array $matches = null)
     {
         parent::__construct($nodeString, $line);
+        if (is_null($matches)) {
+            preg_match(Regex::KEY, ltrim($nodeString), $matches);
+        }
         $this->setIdentifier(trim($matches[1], '"\' '));
         $value = isset($matches[2]) ? trim($matches[2]) : null;
         if (!empty($value)) {
@@ -32,10 +36,14 @@ class NodeKey extends Node
             $keyNode = NodeFactory::get($keyString);
             if (!is_null($keyNode->anchor)) {
                 $this->anchor = $keyNode->anchor;
-                $this->identifier = ltrim($keyNode->raw);
+                $anchor = $keyNode->anchor;
+                $pos = strlen($keyNode->anchor);
+                $this->identifier = $keyNode->value->raw;
             } elseif (!is_null($keyNode->tag)) {
                 $this->tag = $keyNode->tag;
-                $this->identifier = ltrim($keyNode->raw);
+                $raw = $keyNode->raw;
+                $pos = strlen($keyNode->tag);
+                $this->identifier = trim(substr($raw, $pos));
             } elseif ($keyNode instanceof NodeScalar) {
                 $this->identifier = ltrim($keyNode->raw);
             }
@@ -44,7 +52,7 @@ class NodeKey extends Node
 
     public function add(Node $child):Node
     {
-        if ($this->value instanceof Node && isOneOf($this->value, ['NodeLit','NodeLitFolded', 'NodeAnchor'])) {
+        if ($this->value instanceof Node && Yaml::isOneOf($this->value, ['NodeLit','NodeLitFolded', 'NodeAnchor'])) {
             return $this->value->add($child);
         } else {
             return parent::add($child);
@@ -80,7 +88,7 @@ class NodeKey extends Node
             return true;
         }
         if($current instanceof NodeScalar) {
-            return isOneOf($node, ['NodeScalar', 'NodeBlank']);
+            return Yaml::isOneOf($node, ['NodeScalar', 'NodeBlank']);
         }
         if ($current instanceof NodeItem) {
             return $node instanceof NodeItem;

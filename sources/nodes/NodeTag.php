@@ -1,7 +1,7 @@
 <?php
 
 namespace Dallgoot\Yaml;
-
+use Dallgoot\Yaml;
 /**
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
@@ -39,7 +39,7 @@ class NodeTag extends NodeActions
             return;
         }
         $value = $this->value;
-        if (is_null($parent) && isOneOf($value, ['NodeItem', 'NodeKey'])) {
+        if (is_null($parent) && Yaml::isOneOf($value, ['NodeItem', 'NodeKey'])) {
             $value = new NodeList(/** @scrutinizer ignore-type */ $value);
         }
         if (TagFactory::isKnown((string) $this->tag)) {

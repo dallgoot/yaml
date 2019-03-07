@@ -29,7 +29,7 @@ class NodeDocEndTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodeDocEnd = new NodeDocEnd();
+        $this->nodeDocEnd = new NodeDocEnd('...');
     }
 
     /**
@@ -37,7 +37,6 @@ class NodeDocEndTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue(is_null($this->nodeDocEnd->build()));
     }
 }
