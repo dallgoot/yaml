@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /mnt/d/code/php/yamlLoader/sources</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="_css/bootstrap.min.css" rel="stylesheet" type="text/css">
+  <link href="_css/nv.d3.min.css" rel="stylesheet" type="text/css">
+  <link href="_css/style.css" rel="stylesheet" type="text/css">
+  <link href="_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="index.html">/mnt/d/code/php/yamlLoader/sources</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Dumper.php.html#12">Dallgoot\Yaml\Dumper</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#12">Dallgoot\Yaml\TagFactory</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Yaml.php.html#12">Dallgoot\Yaml</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLit.php.html#11">Dallgoot\Yaml\NodeLit</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLitFolded.php.html#11">Dallgoot\Yaml\NodeLitFolded</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#12">Dallgoot\Yaml\NodeLiterals</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodePartial.php.html#11">Dallgoot\Yaml\NodePartial</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeQuoted.php.html#11">Dallgoot\Yaml\NodeQuoted</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#11">Dallgoot\Yaml\NodeRoot</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#11">Dallgoot\Yaml\NodeScalar</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeSetKey.php.html#11">Dallgoot\Yaml\NodeSetKey</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeSetValue.php.html#11">Dallgoot\Yaml\NodeSetValue</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeTag.php.html#12">Dallgoot\Yaml\NodeTag</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#12">Dallgoot\Yaml\NodeKey</a></td><td class="text-right">45%</td></tr>
+       <tr><td><a href="Loader.php.html#13">Dallgoot\Yaml\Loader</a></td><td class="text-right">68%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Dumper.php.html#12">Dallgoot\Yaml\Dumper</a></td><td class="text-right">2352</td></tr>
+       <tr><td><a href="TagFactory.php.html#12">Dallgoot\Yaml\TagFactory</a></td><td class="text-right">992</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#12">Dallgoot\Yaml\NodeLiterals</a></td><td class="text-right">552</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#12">Dallgoot\Yaml\NodeKey</a></td><td class="text-right">183</td></tr>
+       <tr><td><a href="nodes/NodeTag.php.html#12">Dallgoot\Yaml\NodeTag</a></td><td class="text-right">182</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#11">Dallgoot\Yaml\NodeScalar</a></td><td class="text-right">156</td></tr>
+       <tr><td><a href="Yaml.php.html#12">Dallgoot\Yaml</a></td><td class="text-right">132</td></tr>
+       <tr><td><a href="nodes/NodeLitFolded.php.html#11">Dallgoot\Yaml\NodeLitFolded</a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#11">Dallgoot\Yaml\NodeRoot</a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="nodes/NodeSetKey.php.html#11">Dallgoot\Yaml\NodeSetKey</a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="Loader.php.html#13">Dallgoot\Yaml\Loader</a></td><td class="text-right">57</td></tr>
+       <tr><td><a href="nodes/NodeLit.php.html#11">Dallgoot\Yaml\NodeLit</a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="nodes/NodeSetValue.php.html#11">Dallgoot\Yaml\NodeSetValue</a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="nodes/NodePartial.php.html#11">Dallgoot\Yaml\NodePartial</a></td><td class="text-right">30</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="nodes/NodeTag.php.html#35"><abbr title="Dallgoot\Yaml\NodeTag::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#31"><abbr title="Dallgoot\Yaml\NodeRoot::getRoot">getRoot</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLit.php.html#20"><abbr title="Dallgoot\Yaml\NodeLit::getFinalString">getFinalString</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLitFolded.php.html#19"><abbr title="Dallgoot\Yaml\NodeLitFolded::getFinalString">getFinalString</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#18"><abbr title="Dallgoot\Yaml\NodeLiterals::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#26"><abbr title="Dallgoot\Yaml\NodeLiterals::add">add</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#36"><abbr title="Dallgoot\Yaml\NodeLiterals::litteralStripLeading">litteralStripLeading</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#46"><abbr title="Dallgoot\Yaml\NodeLiterals::litteralStripTrailing">litteralStripTrailing</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#64"><abbr title="Dallgoot\Yaml\NodeLiterals::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#81"><abbr title="Dallgoot\Yaml\NodeLiterals::getChildValue">getChildValue</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#98"><abbr title="Dallgoot\Yaml\NodeLiterals::isAwaitingChild">isAwaitingChild</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodePartial.php.html#21"><abbr title="Dallgoot\Yaml\NodePartial::specialProcess">specialProcess</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodePartial.php.html#40"><abbr title="Dallgoot\Yaml\NodePartial::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeQuoted.php.html#13"><abbr title="Dallgoot\Yaml\NodeQuoted::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#18"><abbr title="Dallgoot\Yaml\NodeRoot::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#23"><abbr title="Dallgoot\Yaml\NodeRoot::getParent">getParent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#36"><abbr title="Dallgoot\Yaml\NodeRoot::getYamlObject">getYamlObject</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#81"><abbr title="Dallgoot\Yaml\NodeKey::isAwaitingChild">isAwaitingChild</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#44"><abbr title="Dallgoot\Yaml\NodeRoot::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#49"><abbr title="Dallgoot\Yaml\NodeRoot::buildFinal">buildFinal</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#13"><abbr title="Dallgoot\Yaml\NodeScalar::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#32"><abbr title="Dallgoot\Yaml\NodeScalar::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#44"><abbr title="Dallgoot\Yaml\NodeScalar::getTargetOnLessIndent">getTargetOnLessIndent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#53"><abbr title="Dallgoot\Yaml\NodeScalar::getTargetOnMoreIndent">getTargetOnMoreIndent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeSetKey.php.html#13"><abbr title="Dallgoot\Yaml\NodeSetKey::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeSetKey.php.html#29"><abbr title="Dallgoot\Yaml\NodeSetKey::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeSetKey.php.html#38"><abbr title="Dallgoot\Yaml\NodeSetKey::isAwaitingChild">isAwaitingChild</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeSetValue.php.html#13"><abbr title="Dallgoot\Yaml\NodeSetValue::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeSetValue.php.html#30"><abbr title="Dallgoot\Yaml\NodeSetValue::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeSetValue.php.html#37"><abbr title="Dallgoot\Yaml\NodeSetValue::isAwaitingChild">isAwaitingChild</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeTag.php.html#14"><abbr title="Dallgoot\Yaml\NodeTag::isAwaitingChild">isAwaitingChild</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeTag.php.html#19"><abbr title="Dallgoot\Yaml\NodeTag::getTargetOnEqualIndent">getTargetOnEqualIndent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#116"><abbr title="Dallgoot\Yaml\NodeKey::build">build</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#70"><abbr title="Dallgoot\Yaml\NodeKey::getTargetOnMoreIndent">getTargetOnMoreIndent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#76"><abbr title="Dallgoot\Yaml\TagFactory::inlineHandler">inlineHandler</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#83"><abbr title="Dallgoot\Yaml\Dumper::dump">dump</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#126"><abbr title="Dallgoot\Yaml\Dumper::add">add</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#140"><abbr title="Dallgoot\Yaml\Dumper::dumpArray">dumpArray</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#160"><abbr title="Dallgoot\Yaml\Dumper::insertComments">insertComments</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#174"><abbr title="Dallgoot\Yaml\Dumper::dumpObject">dumpObject</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#209"><abbr title="Dallgoot\Yaml\Dumper::dumpCompact">dumpCompact</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Node.php.html#174"><abbr title="Dallgoot\Yaml\Node::getTargetOnEqualIndent">getTargetOnEqualIndent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Node.php.html#186"><abbr title="Dallgoot\Yaml\Node::getTargetOnMoreIndent">getTargetOnMoreIndent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#32"><abbr title="Dallgoot\Yaml\TagFactory::registerLegacyTags">registerLegacyTags</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#54"><abbr title="Dallgoot\Yaml\TagFactory::symfonyPHPobjectHandler">symfonyPHPobjectHandler</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#62"><abbr title="Dallgoot\Yaml\NodeKey::getTargetOnEqualIndent">getTargetOnEqualIndent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#89"><abbr title="Dallgoot\Yaml\TagFactory::strHandler">strHandler</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#117"><abbr title="Dallgoot\Yaml\TagFactory::binaryHandler">binaryHandler</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#131"><abbr title="Dallgoot\Yaml\TagFactory::setHandler">setHandler</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#149"><abbr title="Dallgoot\Yaml\TagFactory::omapHandler">omapHandler</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#169"><abbr title="Dallgoot\Yaml\TagFactory::transform">transform</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#186"><abbr title="Dallgoot\Yaml\TagFactory::isKnown">isKnown</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TagFactory.php.html#203"><abbr title="Dallgoot\Yaml\TagFactory::addTagHandler">addTagHandler</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Yaml.php.html#30"><abbr title="Dallgoot\Yaml::parse">parse</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Yaml.php.html#55"><abbr title="Dallgoot\Yaml::parseFile">parseFile</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Yaml.php.html#75"><abbr title="Dallgoot\Yaml::dump">dump</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Yaml.php.html#97"><abbr title="Dallgoot\Yaml::dumpFile">dumpFile</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Yaml.php.html#106"><abbr title="Dallgoot\Yaml::isOneOf">isOneOf</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#70"><abbr title="Dallgoot\Yaml\Dumper::toFile">toFile</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#42"><abbr title="Dallgoot\Yaml\Dumper::toString">toString</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Dumper.php.html#107"><abbr title="Dallgoot\Yaml\Dumper::dumpYamlObject">dumpYamlObject</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Loader.php.html#66"><abbr title="Dallgoot\Yaml\Loader::load">load</abbr></a></td><td class="text-right">16%</td></tr>
+       <tr><td><a href="nodes/NodeItem.php.html#63"><abbr title="Dallgoot\Yaml\NodeItem::build">build</abbr></a></td><td class="text-right">27%</td></tr>
+       <tr><td><a href="Node.php.html#150"><abbr title="Dallgoot\Yaml\Node::getTargetOnLessIndent">getTargetOnLessIndent</abbr></a></td><td class="text-right">33%</td></tr>
+       <tr><td><a href="API.php.html#66"><abbr title="Dallgoot\Yaml\API::getReference">getReference</abbr></a></td><td class="text-right">50%</td></tr>
+       <tr><td><a href="Builder.php.html#63"><abbr title="Dallgoot\Yaml\Builder::buildDocument">buildDocument</abbr></a></td><td class="text-right">63%</td></tr>
+       <tr><td><a href="nodes/NodeCompactMapping.php.html#25"><abbr title="Dallgoot\Yaml\NodeCompactMapping::build">build</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="nodes/NodeCompactSequence.php.html#27"><abbr title="Dallgoot\Yaml\NodeCompactSequence::build">build</abbr></a></td><td class="text-right">66%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Dumper.php.html#83"><abbr title="Dallgoot\Yaml\Dumper::dump">dump</abbr></a></td><td class="text-right">132</td></tr>
+       <tr><td><a href="nodes/NodeTag.php.html#35"><abbr title="Dallgoot\Yaml\NodeTag::build">build</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#81"><abbr title="Dallgoot\Yaml\NodeKey::isAwaitingChild">isAwaitingChild</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="Dumper.php.html#209"><abbr title="Dallgoot\Yaml\Dumper::dumpCompact">dumpCompact</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="Dumper.php.html#174"><abbr title="Dallgoot\Yaml\Dumper::dumpObject">dumpObject</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="nodes/NodeLitFolded.php.html#19"><abbr title="Dallgoot\Yaml\NodeLitFolded::getFinalString">getFinalString</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="nodes/NodeLit.php.html#20"><abbr title="Dallgoot\Yaml\NodeLit::getFinalString">getFinalString</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="TagFactory.php.html#149"><abbr title="Dallgoot\Yaml\TagFactory::omapHandler">omapHandler</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Dumper.php.html#42"><abbr title="Dallgoot\Yaml\Dumper::toString">toString</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#81"><abbr title="Dallgoot\Yaml\NodeLiterals::getChildValue">getChildValue</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="TagFactory.php.html#89"><abbr title="Dallgoot\Yaml\TagFactory::strHandler">strHandler</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="nodes/NodeItem.php.html#63"><abbr title="Dallgoot\Yaml\NodeItem::build">build</abbr></a></td><td class="text-right">40</td></tr>
+       <tr><td><a href="nodes/NodeSetKey.php.html#29"><abbr title="Dallgoot\Yaml\NodeSetKey::build">build</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#64"><abbr title="Dallgoot\Yaml\NodeLiterals::build">build</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#32"><abbr title="Dallgoot\Yaml\NodeScalar::build">build</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#116"><abbr title="Dallgoot\Yaml\NodeKey::build">build</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="nodes/NodePartial.php.html#21"><abbr title="Dallgoot\Yaml\NodePartial::specialProcess">specialProcess</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="TagFactory.php.html#169"><abbr title="Dallgoot\Yaml\TagFactory::transform">transform</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Dumper.php.html#107"><abbr title="Dallgoot\Yaml\Dumper::dumpYamlObject">dumpYamlObject</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Dumper.php.html#140"><abbr title="Dallgoot\Yaml\Dumper::dumpArray">dumpArray</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="TagFactory.php.html#54"><abbr title="Dallgoot\Yaml\TagFactory::symfonyPHPobjectHandler">symfonyPHPobjectHandler</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Loader.php.html#66"><abbr title="Dallgoot\Yaml\Loader::load">load</abbr></a></td><td class="text-right">19</td></tr>
+       <tr><td><a href="Node.php.html#150"><abbr title="Dallgoot\Yaml\Node::getTargetOnLessIndent">getTargetOnLessIndent</abbr></a></td><td class="text-right">16</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#26"><abbr title="Dallgoot\Yaml\NodeLiterals::add">add</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#44"><abbr title="Dallgoot\Yaml\NodeScalar::getTargetOnLessIndent">getTargetOnLessIndent</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#70"><abbr title="Dallgoot\Yaml\NodeKey::getTargetOnMoreIndent">getTargetOnMoreIndent</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#18"><abbr title="Dallgoot\Yaml\NodeLiterals::__construct">__construct</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="TagFactory.php.html#32"><abbr title="Dallgoot\Yaml\TagFactory::registerLegacyTags">registerLegacyTags</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Yaml.php.html#106"><abbr title="Dallgoot\Yaml::isOneOf">isOneOf</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="nodes/NodeScalar.php.html#13"><abbr title="Dallgoot\Yaml\NodeScalar::__construct">__construct</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#46"><abbr title="Dallgoot\Yaml\NodeLiterals::litteralStripTrailing">litteralStripTrailing</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#23"><abbr title="Dallgoot\Yaml\NodeRoot::getParent">getParent</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#36"><abbr title="Dallgoot\Yaml\NodeRoot::getYamlObject">getYamlObject</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeRoot.php.html#49"><abbr title="Dallgoot\Yaml\NodeRoot::buildFinal">buildFinal</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeSetValue.php.html#13"><abbr title="Dallgoot\Yaml\NodeSetValue::__construct">__construct</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeSetKey.php.html#13"><abbr title="Dallgoot\Yaml\NodeSetKey::__construct">__construct</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeTag.php.html#19"><abbr title="Dallgoot\Yaml\NodeTag::getTargetOnEqualIndent">getTargetOnEqualIndent</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeLiterals.php.html#36"><abbr title="Dallgoot\Yaml\NodeLiterals::litteralStripLeading">litteralStripLeading</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeKey.php.html#62"><abbr title="Dallgoot\Yaml\NodeKey::getTargetOnEqualIndent">getTargetOnEqualIndent</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeSetValue.php.html#37"><abbr title="Dallgoot\Yaml\NodeSetValue::isAwaitingChild">isAwaitingChild</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Yaml.php.html#97"><abbr title="Dallgoot\Yaml::dumpFile">dumpFile</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Yaml.php.html#75"><abbr title="Dallgoot\Yaml::dump">dump</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Yaml.php.html#55"><abbr title="Dallgoot\Yaml::parseFile">parseFile</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Yaml.php.html#30"><abbr title="Dallgoot\Yaml::parse">parse</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="TagFactory.php.html#203"><abbr title="Dallgoot\Yaml\TagFactory::addTagHandler">addTagHandler</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="TagFactory.php.html#186"><abbr title="Dallgoot\Yaml\TagFactory::isKnown">isKnown</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="TagFactory.php.html#131"><abbr title="Dallgoot\Yaml\TagFactory::setHandler">setHandler</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Node.php.html#186"><abbr title="Dallgoot\Yaml\Node::getTargetOnMoreIndent">getTargetOnMoreIndent</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Dumper.php.html#160"><abbr title="Dallgoot\Yaml\Dumper::insertComments">insertComments</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Dumper.php.html#126"><abbr title="Dallgoot\Yaml\Dumper::add">add</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="nodes/NodeSetValue.php.html#30"><abbr title="Dallgoot\Yaml\NodeSetValue::build">build</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Builder.php.html#63"><abbr title="Dallgoot\Yaml\Builder::buildDocument">buildDocument</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="nodes/NodeCompactSequence.php.html#27"><abbr title="Dallgoot\Yaml\NodeCompactSequence::build">build</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="nodes/NodeCompactMapping.php.html#25"><abbr title="Dallgoot\Yaml\NodeCompactMapping::build">build</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="API.php.html#66"><abbr title="Dallgoot\Yaml\API::getReference">getReference</abbr></a></td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 7.0.3</a> using <a href="https://secure.php.net/" target="_top">PHP 7.3.2</a> with <a href="https://xdebug.org/">Xdebug 2.7.0</a> and <a href="https://phpunit.de/">PHPUnit 8.0.4</a> at Thu Mar 7 12:24:38 UTC 2019.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="_js/jquery.min.js" type="text/javascript"></script>
+  <script src="_js/d3.min.js" type="text/javascript"></script>
+  <script src="_js/nv.d3.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([13,0,0,0,0,1,0,1,1,9,4,6], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([61,0,1,1,1,0,1,3,7,14,4,64], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[87.5,14,"<a href=\"API.php.html#12\">Dallgoot\\Yaml\\API<\/a>"],[80.48780487804879,27,"<a href=\"Builder.php.html#12\">Dallgoot\\Yaml\\Builder<\/a>"],[0,48,"<a href=\"Dumper.php.html#12\">Dallgoot\\Yaml\\Dumper<\/a>"],[68.85245901639344,30,"<a href=\"Loader.php.html#13\">Dallgoot\\Yaml\\Loader<\/a>"],[81.03448275862068,36,"<a href=\"Node.php.html#11\">Dallgoot\\Yaml\\Node<\/a>"],[87.5,28,"<a href=\"NodeFactory.php.html#12\">Dallgoot\\Yaml\\NodeFactory<\/a>"],[91.30434782608695,39,"<a href=\"NodeList.php.html#11\">Dallgoot\\Yaml\\NodeList<\/a>"],[93.33333333333333,10,"<a href=\"Regex.php.html#12\">Dallgoot\\Yaml\\Regex<\/a>"],[0,31,"<a href=\"TagFactory.php.html#12\">Dallgoot\\Yaml\\TagFactory<\/a>"],[0,11,"<a href=\"Yaml.php.html#12\">Dallgoot\\Yaml<\/a>"],[88.23529411764706,5,"<a href=\"nodes\/NodeActions.php.html#11\">Dallgoot\\Yaml\\NodeActions<\/a>"],[87.5,3,"<a href=\"nodes\/NodeAnchor.php.html#11\">Dallgoot\\Yaml\\NodeAnchor<\/a>"],[100,7,"<a href=\"nodes\/NodeBlank.php.html#11\">Dallgoot\\Yaml\\NodeBlank<\/a>"],[100,2,"<a href=\"nodes\/NodeComment.php.html#11\">Dallgoot\\Yaml\\NodeComment<\/a>"],[85.71428571428571,5,"<a href=\"nodes\/NodeCompactMapping.php.html#11\">Dallgoot\\Yaml\\NodeCompactMapping<\/a>"],[87.5,5,"<a href=\"nodes\/NodeCompactSequence.php.html#11\">Dallgoot\\Yaml\\NodeCompactSequence<\/a>"],[100,2,"<a href=\"nodes\/NodeDirective.php.html#11\">Dallgoot\\Yaml\\NodeDirective<\/a>"],[100,1,"<a href=\"nodes\/NodeDocEnd.php.html#11\">Dallgoot\\Yaml\\NodeDocEnd<\/a>"],[95.83333333333334,14,"<a href=\"nodes\/NodeDocStart.php.html#11\">Dallgoot\\Yaml\\NodeDocStart<\/a>"],[70.27027027027027,26,"<a href=\"nodes\/NodeItem.php.html#11\">Dallgoot\\Yaml\\NodeItem<\/a>"],[100,1,"<a href=\"nodes\/NodeJSON.php.html#11\">Dallgoot\\Yaml\\NodeJSON<\/a>"],[45.90163934426229,31,"<a href=\"nodes\/NodeKey.php.html#12\">Dallgoot\\Yaml\\NodeKey<\/a>"],[0,6,"<a href=\"nodes\/NodeLit.php.html#11\">Dallgoot\\Yaml\\NodeLit<\/a>"],[0,9,"<a href=\"nodes\/NodeLitFolded.php.html#11\">Dallgoot\\Yaml\\NodeLitFolded<\/a>"],[0,23,"<a href=\"nodes\/NodeLiterals.php.html#12\">Dallgoot\\Yaml\\NodeLiterals<\/a>"],[0,5,"<a href=\"nodes\/NodePartial.php.html#11\">Dallgoot\\Yaml\\NodePartial<\/a>"],[0,1,"<a href=\"nodes\/NodeQuoted.php.html#11\">Dallgoot\\Yaml\\NodeQuoted<\/a>"],[0,9,"<a href=\"nodes\/NodeRoot.php.html#11\">Dallgoot\\Yaml\\NodeRoot<\/a>"],[0,12,"<a href=\"nodes\/NodeScalar.php.html#11\">Dallgoot\\Yaml\\NodeScalar<\/a>"],[0,8,"<a href=\"nodes\/NodeSetKey.php.html#11\">Dallgoot\\Yaml\\NodeSetKey<\/a>"],[0,6,"<a href=\"nodes\/NodeSetValue.php.html#11\">Dallgoot\\Yaml\\NodeSetValue<\/a>"],[0,13,"<a href=\"nodes\/NodeTag.php.html#12\">Dallgoot\\Yaml\\NodeTag<\/a>"],[100,3,"<a href=\"types\/Compact.php.html#11\">Dallgoot\\Yaml\\Compact<\/a>"],[80,2,"<a href=\"types\/Tag.php.html#12\">Dallgoot\\Yaml\\Tag<\/a>"],[92.85714285714286,7,"<a href=\"types\/YamlObject.php.html#20\">Dallgoot\\Yaml\\YamlObject<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"API.php.html#36\">Dallgoot\\Yaml\\API::__construct<\/a>"],[75,2,"<a href=\"API.php.html#50\">Dallgoot\\Yaml\\API::addReference<\/a>"],[50,2,"<a href=\"API.php.html#66\">Dallgoot\\Yaml\\API::getReference<\/a>"],[100,1,"<a href=\"API.php.html#81\">Dallgoot\\Yaml\\API::getAllReferences<\/a>"],[100,1,"<a href=\"API.php.html#94\">Dallgoot\\Yaml\\API::addComment<\/a>"],[100,2,"<a href=\"API.php.html#106\">Dallgoot\\Yaml\\API::getComment<\/a>"],[100,1,"<a href=\"API.php.html#121\">Dallgoot\\Yaml\\API::setText<\/a>"],[100,1,"<a href=\"API.php.html#135\">Dallgoot\\Yaml\\API::addTag<\/a>"],[100,1,"<a href=\"API.php.html#145\">Dallgoot\\Yaml\\API::hasDocStart<\/a>"],[100,1,"<a href=\"API.php.html#157\">Dallgoot\\Yaml\\API::setDocStart<\/a>"],[100,1,"<a href=\"API.php.html#167\">Dallgoot\\Yaml\\API::isTagged<\/a>"],[75,10,"<a href=\"Builder.php.html#29\">Dallgoot\\Yaml\\Builder::buildContent<\/a>"],[63.63636363636363,4,"<a href=\"Builder.php.html#63\">Dallgoot\\Yaml\\Builder::buildDocument<\/a>"],[100,6,"<a href=\"Builder.php.html#90\">Dallgoot\\Yaml\\Builder::getScalar<\/a>"],[100,5,"<a href=\"Builder.php.html#114\">Dallgoot\\Yaml\\Builder::getNumber<\/a>"],[100,1,"<a href=\"Builder.php.html#121\">Dallgoot\\Yaml\\Builder::pushAndSave<\/a>"],[100,1,"<a href=\"Builder.php.html#128\">Dallgoot\\Yaml\\Builder::saveAndPush<\/a>"],[0,6,"<a href=\"Dumper.php.html#42\">Dallgoot\\Yaml\\Dumper::toString<\/a>"],[0,1,"<a href=\"Dumper.php.html#70\">Dallgoot\\Yaml\\Dumper::toFile<\/a>"],[0,11,"<a href=\"Dumper.php.html#83\">Dallgoot\\Yaml\\Dumper::dump<\/a>"],[0,4,"<a href=\"Dumper.php.html#107\">Dallgoot\\Yaml\\Dumper::dumpYamlObject<\/a>"],[0,2,"<a href=\"Dumper.php.html#126\">Dallgoot\\Yaml\\Dumper::add<\/a>"],[0,4,"<a href=\"Dumper.php.html#140\">Dallgoot\\Yaml\\Dumper::dumpArray<\/a>"],[0,2,"<a href=\"Dumper.php.html#160\">Dallgoot\\Yaml\\Dumper::insertComments<\/a>"],[0,9,"<a href=\"Dumper.php.html#174\">Dallgoot\\Yaml\\Dumper::dumpObject<\/a>"],[0,9,"<a href=\"Dumper.php.html#209\">Dallgoot\\Yaml\\Dumper::dumpCompact<\/a>"],[100,4,"<a href=\"Loader.php.html#48\">Dallgoot\\Yaml\\Loader::__construct<\/a>"],[16.666666666666664,5,"<a href=\"Loader.php.html#66\">Dallgoot\\Yaml\\Loader::load<\/a>"],[100,4,"<a href=\"Loader.php.html#92\">Dallgoot\\Yaml\\Loader::getSourceGenerator<\/a>"],[71.42857142857143,8,"<a href=\"Loader.php.html#112\">Dallgoot\\Yaml\\Loader::parse<\/a>"],[100,3,"<a href=\"Loader.php.html#150\">Dallgoot\\Yaml\\Loader::attachBlankLines<\/a>"],[83.33333333333334,3,"<a href=\"Loader.php.html#169\">Dallgoot\\Yaml\\Loader::needsSpecialProcess<\/a>"],[71.42857142857143,3,"<a href=\"Loader.php.html#180\">Dallgoot\\Yaml\\Loader::onError<\/a>"],[100,1,"<a href=\"Node.php.html#38\">Dallgoot\\Yaml\\Node::__construct<\/a>"],[100,1,"<a href=\"Node.php.html#53\">Dallgoot\\Yaml\\Node::setParent<\/a>"],[83.33333333333334,7,"<a href=\"Node.php.html#66\">Dallgoot\\Yaml\\Node::getParent<\/a>"],[83.33333333333334,4,"<a href=\"Node.php.html#88\">Dallgoot\\Yaml\\Node::getRoot<\/a>"],[100,3,"<a href=\"Node.php.html#110\">Dallgoot\\Yaml\\Node::add<\/a>"],[100,2,"<a href=\"Node.php.html#129\">Dallgoot\\Yaml\\Node::getDeepestNode<\/a>"],[100,1,"<a href=\"Node.php.html#138\">Dallgoot\\Yaml\\Node::specialProcess<\/a>"],[33.33333333333333,6,"<a href=\"Node.php.html#150\">Dallgoot\\Yaml\\Node::getTargetOnLessIndent<\/a>"],[0,1,"<a href=\"Node.php.html#174\">Dallgoot\\Yaml\\Node::getTargetOnEqualIndent<\/a>"],[0,2,"<a href=\"Node.php.html#186\">Dallgoot\\Yaml\\Node::getTargetOnMoreIndent<\/a>"],[100,1,"<a href=\"Node.php.html#191\">Dallgoot\\Yaml\\Node::isAwaitingChild<\/a>"],[100,1,"<a href=\"Node.php.html#202\">Dallgoot\\Yaml\\Node::build<\/a>"],[100,6,"<a href=\"Node.php.html#209\">Dallgoot\\Yaml\\Node::__debugInfo<\/a>"],[85.71428571428571,7,"<a href=\"NodeFactory.php.html#16\">Dallgoot\\Yaml\\NodeFactory::get<\/a>"],[100,2,"<a href=\"NodeFactory.php.html#48\">Dallgoot\\Yaml\\NodeFactory::onSpecial<\/a>"],[100,2,"<a href=\"NodeFactory.php.html#62\">Dallgoot\\Yaml\\NodeFactory::onQuoted<\/a>"],[100,2,"<a href=\"NodeFactory.php.html#76\">Dallgoot\\Yaml\\NodeFactory::onSetElement<\/a>"],[80,4,"<a href=\"NodeFactory.php.html#90\">Dallgoot\\Yaml\\NodeFactory::onCompact<\/a>"],[100,3,"<a href=\"NodeFactory.php.html#109\">Dallgoot\\Yaml\\NodeFactory::onHyphen<\/a>"],[87.5,5,"<a href=\"NodeFactory.php.html#125\">Dallgoot\\Yaml\\NodeFactory::onNodeAction<\/a>"],[75,3,"<a href=\"NodeFactory.php.html#140\">Dallgoot\\Yaml\\NodeFactory::onLiteral<\/a>"],[100,2,"<a href=\"NodeList.php.html#25\">Dallgoot\\Yaml\\NodeList::__construct<\/a>"],[83.33333333333334,3,"<a href=\"NodeList.php.html#34\">Dallgoot\\Yaml\\NodeList::has<\/a>"],[88.88888888888889,7,"<a href=\"NodeList.php.html#45\">Dallgoot\\Yaml\\NodeList::hasContent<\/a>"],[100,8,"<a href=\"NodeList.php.html#59\">Dallgoot\\Yaml\\NodeList::push<\/a>"],[100,1,"<a href=\"NodeList.php.html#84\">Dallgoot\\Yaml\\NodeList::checkTypeCoherence<\/a>"],[100,4,"<a href=\"NodeList.php.html#94\">Dallgoot\\Yaml\\NodeList::build<\/a>"],[100,2,"<a href=\"NodeList.php.html#110\">Dallgoot\\Yaml\\NodeList::buildList<\/a>"],[78.57142857142857,7,"<a href=\"NodeList.php.html#119\">Dallgoot\\Yaml\\NodeList::buildMultiline<\/a>"],[90,5,"<a href=\"NodeList.php.html#141\">Dallgoot\\Yaml\\NodeList::filterComment<\/a>"],[92.3076923076923,8,"<a href=\"Regex.php.html#54\">Dallgoot\\Yaml\\Regex::isDate<\/a>"],[100,1,"<a href=\"Regex.php.html#80\">Dallgoot\\Yaml\\Regex::isNumber<\/a>"],[100,1,"<a href=\"Regex.php.html#93\">Dallgoot\\Yaml\\Regex::isProperlyQuoted<\/a>"],[0,3,"<a href=\"TagFactory.php.html#32\">Dallgoot\\Yaml\\TagFactory::registerLegacyTags<\/a>"],[0,4,"<a href=\"TagFactory.php.html#54\">Dallgoot\\Yaml\\TagFactory::symfonyPHPobjectHandler<\/a>"],[0,1,"<a href=\"TagFactory.php.html#76\">Dallgoot\\Yaml\\TagFactory::inlineHandler<\/a>"],[0,6,"<a href=\"TagFactory.php.html#89\">Dallgoot\\Yaml\\TagFactory::strHandler<\/a>"],[0,1,"<a href=\"TagFactory.php.html#117\">Dallgoot\\Yaml\\TagFactory::binaryHandler<\/a>"],[0,2,"<a href=\"TagFactory.php.html#131\">Dallgoot\\Yaml\\TagFactory::setHandler<\/a>"],[0,6,"<a href=\"TagFactory.php.html#149\">Dallgoot\\Yaml\\TagFactory::omapHandler<\/a>"],[0,4,"<a href=\"TagFactory.php.html#169\">Dallgoot\\Yaml\\TagFactory::transform<\/a>"],[0,2,"<a href=\"TagFactory.php.html#186\">Dallgoot\\Yaml\\TagFactory::isKnown<\/a>"],[0,2,"<a href=\"TagFactory.php.html#203\">Dallgoot\\Yaml\\TagFactory::addTagHandler<\/a>"],[0,2,"<a href=\"Yaml.php.html#30\">Dallgoot\\Yaml::parse<\/a>"],[0,2,"<a href=\"Yaml.php.html#55\">Dallgoot\\Yaml::parseFile<\/a>"],[0,2,"<a href=\"Yaml.php.html#75\">Dallgoot\\Yaml::dump<\/a>"],[0,2,"<a href=\"Yaml.php.html#97\">Dallgoot\\Yaml::dumpFile<\/a>"],[0,3,"<a href=\"Yaml.php.html#106\">Dallgoot\\Yaml::isOneOf<\/a>"],[87.5,4,"<a href=\"nodes\/NodeActions.php.html#13\">Dallgoot\\Yaml\\NodeActions::__construct<\/a>"],[100,1,"<a href=\"nodes\/NodeActions.php.html#35\">Dallgoot\\Yaml\\NodeActions::build<\/a>"],[85.71428571428571,2,"<a href=\"nodes\/NodeAnchor.php.html#13\">Dallgoot\\Yaml\\NodeAnchor::build<\/a>"],[100,1,"<a href=\"nodes\/NodeAnchor.php.html#26\">Dallgoot\\Yaml\\NodeAnchor::isAwaitingChild<\/a>"],[100,1,"<a href=\"nodes\/NodeBlank.php.html#13\">Dallgoot\\Yaml\\NodeBlank::add<\/a>"],[100,3,"<a href=\"nodes\/NodeBlank.php.html#18\">Dallgoot\\Yaml\\NodeBlank::specialProcess<\/a>"],[100,1,"<a href=\"nodes\/NodeBlank.php.html#32\">Dallgoot\\Yaml\\NodeBlank::build<\/a>"],[100,1,"<a href=\"nodes\/NodeBlank.php.html#37\">Dallgoot\\Yaml\\NodeBlank::getTargetOnEqualIndent<\/a>"],[100,1,"<a href=\"nodes\/NodeBlank.php.html#42\">Dallgoot\\Yaml\\NodeBlank::getTargetOnMoreIndent<\/a>"],[100,1,"<a href=\"nodes\/NodeComment.php.html#13\">Dallgoot\\Yaml\\NodeComment::specialProcess<\/a>"],[100,1,"<a href=\"nodes\/NodeComment.php.html#19\">Dallgoot\\Yaml\\NodeComment::build<\/a>"],[100,2,"<a href=\"nodes\/NodeCompactMapping.php.html#13\">Dallgoot\\Yaml\\NodeCompactMapping::__construct<\/a>"],[66.66666666666666,3,"<a href=\"nodes\/NodeCompactMapping.php.html#25\">Dallgoot\\Yaml\\NodeCompactMapping::build<\/a>"],[100,2,"<a href=\"nodes\/NodeCompactSequence.php.html#13\">Dallgoot\\Yaml\\NodeCompactSequence::__construct<\/a>"],[66.66666666666666,3,"<a href=\"nodes\/NodeCompactSequence.php.html#27\">Dallgoot\\Yaml\\NodeCompactSequence::build<\/a>"],[100,1,"<a href=\"nodes\/NodeDirective.php.html#18\">Dallgoot\\Yaml\\NodeDirective::build<\/a>"],[100,1,"<a href=\"nodes\/NodeDirective.php.html#27\">Dallgoot\\Yaml\\NodeDirective::add<\/a>"],[100,1,"<a href=\"nodes\/NodeDocEnd.php.html#13\">Dallgoot\\Yaml\\NodeDocEnd::build<\/a>"],[100,2,"<a href=\"nodes\/NodeDocStart.php.html#13\">Dallgoot\\Yaml\\NodeDocStart::__construct<\/a>"],[100,2,"<a href=\"nodes\/NodeDocStart.php.html#24\">Dallgoot\\Yaml\\NodeDocStart::add<\/a>"],[90,5,"<a href=\"nodes\/NodeDocStart.php.html#33\">Dallgoot\\Yaml\\NodeDocStart::build<\/a>"],[100,2,"<a href=\"nodes\/NodeDocStart.php.html#51\">Dallgoot\\Yaml\\NodeDocStart::isAwaitingChild<\/a>"],[100,3,"<a href=\"nodes\/NodeDocStart.php.html#56\">Dallgoot\\Yaml\\NodeDocStart::getTargetOnEqualIndent<\/a>"],[100,3,"<a href=\"nodes\/NodeItem.php.html#13\">Dallgoot\\Yaml\\NodeItem::__construct<\/a>"],[87.5,5,"<a href=\"nodes\/NodeItem.php.html#25\">Dallgoot\\Yaml\\NodeItem::add<\/a>"],[75,2,"<a href=\"nodes\/NodeItem.php.html#41\">Dallgoot\\Yaml\\NodeItem::getTargetOnEqualIndent<\/a>"],[100,3,"<a href=\"nodes\/NodeItem.php.html#50\">Dallgoot\\Yaml\\NodeItem::getTargetOnMoreIndent<\/a>"],[27.27272727272727,9,"<a href=\"nodes\/NodeItem.php.html#63\">Dallgoot\\Yaml\\NodeItem::build<\/a>"],[80,4,"<a href=\"nodes\/NodeItem.php.html#80\">Dallgoot\\Yaml\\NodeItem::isAwaitingChild<\/a>"],[100,1,"<a href=\"nodes\/NodeJSON.php.html#15\">Dallgoot\\Yaml\\NodeJSON::build<\/a>"],[100,4,"<a href=\"nodes\/NodeKey.php.html#16\">Dallgoot\\Yaml\\NodeKey::__construct<\/a>"],[93.75,5,"<a href=\"nodes\/NodeKey.php.html#31\">Dallgoot\\Yaml\\NodeKey::setIdentifier<\/a>"],[100,3,"<a href=\"nodes\/NodeKey.php.html#53\">Dallgoot\\Yaml\\NodeKey::add<\/a>"],[0,2,"<a href=\"nodes\/NodeKey.php.html#62\">Dallgoot\\Yaml\\NodeKey::getTargetOnEqualIndent<\/a>"],[0,3,"<a href=\"nodes\/NodeKey.php.html#70\">Dallgoot\\Yaml\\NodeKey::getTargetOnMoreIndent<\/a>"],[0,10,"<a href=\"nodes\/NodeKey.php.html#81\">Dallgoot\\Yaml\\NodeKey::isAwaitingChild<\/a>"],[0,4,"<a href=\"nodes\/NodeKey.php.html#116\">Dallgoot\\Yaml\\NodeKey::build<\/a>"],[0,6,"<a href=\"nodes\/NodeLit.php.html#20\">Dallgoot\\Yaml\\NodeLit::getFinalString<\/a>"],[0,9,"<a href=\"nodes\/NodeLitFolded.php.html#19\">Dallgoot\\Yaml\\NodeLitFolded::getFinalString<\/a>"],[100,1,"<a href=\"nodes\/NodeLiterals.php.html#16\">Dallgoot\\Yaml\\NodeLiterals::getFinalString<\/a>"],[0,3,"<a href=\"nodes\/NodeLiterals.php.html#18\">Dallgoot\\Yaml\\NodeLiterals::__construct<\/a>"],[0,3,"<a href=\"nodes\/NodeLiterals.php.html#26\">Dallgoot\\Yaml\\NodeLiterals::add<\/a>"],[0,2,"<a href=\"nodes\/NodeLiterals.php.html#36\">Dallgoot\\Yaml\\NodeLiterals::litteralStripLeading<\/a>"],[0,2,"<a href=\"nodes\/NodeLiterals.php.html#46\">Dallgoot\\Yaml\\NodeLiterals::litteralStripTrailing<\/a>"],[0,5,"<a href=\"nodes\/NodeLiterals.php.html#64\">Dallgoot\\Yaml\\NodeLiterals::build<\/a>"],[0,6,"<a href=\"nodes\/NodeLiterals.php.html#81\">Dallgoot\\Yaml\\NodeLiterals::getChildValue<\/a>"],[0,1,"<a href=\"nodes\/NodeLiterals.php.html#98\">Dallgoot\\Yaml\\NodeLiterals::isAwaitingChild<\/a>"],[0,4,"<a href=\"nodes\/NodePartial.php.html#21\">Dallgoot\\Yaml\\NodePartial::specialProcess<\/a>"],[0,1,"<a href=\"nodes\/NodePartial.php.html#40\">Dallgoot\\Yaml\\NodePartial::build<\/a>"],[0,1,"<a href=\"nodes\/NodeQuoted.php.html#13\">Dallgoot\\Yaml\\NodeQuoted::build<\/a>"],[0,1,"<a href=\"nodes\/NodeRoot.php.html#18\">Dallgoot\\Yaml\\NodeRoot::__construct<\/a>"],[0,2,"<a href=\"nodes\/NodeRoot.php.html#23\">Dallgoot\\Yaml\\NodeRoot::getParent<\/a>"],[0,1,"<a href=\"nodes\/NodeRoot.php.html#31\">Dallgoot\\Yaml\\NodeRoot::getRoot<\/a>"],[0,2,"<a href=\"nodes\/NodeRoot.php.html#36\">Dallgoot\\Yaml\\NodeRoot::getYamlObject<\/a>"],[0,1,"<a href=\"nodes\/NodeRoot.php.html#44\">Dallgoot\\Yaml\\NodeRoot::build<\/a>"],[0,2,"<a href=\"nodes\/NodeRoot.php.html#49\">Dallgoot\\Yaml\\NodeRoot::buildFinal<\/a>"],[0,3,"<a href=\"nodes\/NodeScalar.php.html#13\">Dallgoot\\Yaml\\NodeScalar::__construct<\/a>"],[0,5,"<a href=\"nodes\/NodeScalar.php.html#32\">Dallgoot\\Yaml\\NodeScalar::build<\/a>"],[0,3,"<a href=\"nodes\/NodeScalar.php.html#44\">Dallgoot\\Yaml\\NodeScalar::getTargetOnLessIndent<\/a>"],[0,1,"<a href=\"nodes\/NodeScalar.php.html#53\">Dallgoot\\Yaml\\NodeScalar::getTargetOnMoreIndent<\/a>"],[0,2,"<a href=\"nodes\/NodeSetKey.php.html#13\">Dallgoot\\Yaml\\NodeSetKey::__construct<\/a>"],[0,5,"<a href=\"nodes\/NodeSetKey.php.html#29\">Dallgoot\\Yaml\\NodeSetKey::build<\/a>"],[0,1,"<a href=\"nodes\/NodeSetKey.php.html#38\">Dallgoot\\Yaml\\NodeSetKey::isAwaitingChild<\/a>"],[0,2,"<a href=\"nodes\/NodeSetValue.php.html#13\">Dallgoot\\Yaml\\NodeSetValue::__construct<\/a>"],[0,2,"<a href=\"nodes\/NodeSetValue.php.html#30\">Dallgoot\\Yaml\\NodeSetValue::build<\/a>"],[0,2,"<a href=\"nodes\/NodeSetValue.php.html#37\">Dallgoot\\Yaml\\NodeSetValue::isAwaitingChild<\/a>"],[0,1,"<a href=\"nodes\/NodeTag.php.html#14\">Dallgoot\\Yaml\\NodeTag::isAwaitingChild<\/a>"],[0,2,"<a href=\"nodes\/NodeTag.php.html#19\">Dallgoot\\Yaml\\NodeTag::getTargetOnEqualIndent<\/a>"],[0,10,"<a href=\"nodes\/NodeTag.php.html#35\">Dallgoot\\Yaml\\NodeTag::build<\/a>"],[100,1,"<a href=\"types\/Compact.php.html#18\">Dallgoot\\Yaml\\Compact::__construct<\/a>"],[100,2,"<a href=\"types\/Compact.php.html#29\">Dallgoot\\Yaml\\Compact::jsonSerialize<\/a>"],[80,2,"<a href=\"types\/Tag.php.html#29\">Dallgoot\\Yaml\\Tag::__construct<\/a>"],[100,1,"<a href=\"types\/YamlObject.php.html#31\">Dallgoot\\Yaml\\YamlObject::__construct<\/a>"],[80,2,"<a href=\"types\/YamlObject.php.html#46\">Dallgoot\\Yaml\\YamlObject::__call<\/a>"],[100,1,"<a href=\"types\/YamlObject.php.html#63\">Dallgoot\\Yaml\\YamlObject::__toString<\/a>"],[100,3,"<a href=\"types\/YamlObject.php.html#73\">Dallgoot\\Yaml\\YamlObject::jsonSerialize<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>
