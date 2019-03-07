@@ -51,7 +51,7 @@ final class Cases extends TestCase
      */
     public function testBatchExamples($fileName, $expected)
     {
-        $output = Yaml::parseFile('examples/'.$fileName.'.yml');
+        $output = Yaml::parseFile(__DIR__."/examples/$fileName.yml");
         $result = json_encode($output, self::JSON_OPTIONS);
         $this->assertContains(json_last_error(), [JSON_ERROR_NONE, JSON_ERROR_INF_OR_NAN], json_last_error_msg());
         // $this->assertEquals($expected, $result, is_array($output) ? $output[0]->getComment(1) : $output->getComment(1));
@@ -77,7 +77,7 @@ final class Cases extends TestCase
      */
     public function testBatchParsing($fileName, $expected)
     {
-        $yaml = file_get_contents("parsing/$fileName.yml");
+        $yaml = file_get_contents(__DIR__."/parsing/$fileName.yml");
         $output = Yaml::parse($yaml, Yaml\Loader::NO_PARSING_EXCEPTIONS);
         $result = json_encode($output, self::JSON_OPTIONS);
         $this->assertContains(json_last_error(), [JSON_ERROR_NONE, JSON_ERROR_INF_OR_NAN], json_last_error_msg());
