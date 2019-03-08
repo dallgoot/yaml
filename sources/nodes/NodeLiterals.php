@@ -36,9 +36,8 @@ abstract class NodeLiterals extends Node
     protected static function litteralStripLeading(NodeList &$list)
     {
         $list->rewind();
-        while ($list->bottom() instanceof NodeBlank) {//remove leading blank
+        while (!$list->isEmpty() && $list->bottom() instanceof NodeBlank) {//remove leading blank
             $list->shift();
-            $list->rewind();
         }
         $list->rewind();
     }
@@ -46,7 +45,7 @@ abstract class NodeLiterals extends Node
     protected static function litteralStripTrailing(NodeList &$list)
     {
         $list->rewind();
-        while ($list->top() instanceof NodeBlank) {//remove trailing blank
+        while (!$list->isEmpty() && $list->top() instanceof NodeBlank) {//remove trailing blank
             $list->pop();
         }
         $list->rewind();
@@ -78,6 +77,15 @@ abstract class NodeLiterals extends Node
         }
     }
 
+    /**
+     * Gets the correct string for child value.
+     *
+     * @param      Node         $child      The child
+     * @param      integer      $refIndent  The reference indent
+     *
+     * @return     Node|string  The child value.
+     * @todo       double check behaviour for KEY and ITEM
+     */
     protected function getChildValue(Node $child, int $refIndent):string
     {
         $value = $child->value;
@@ -88,7 +96,7 @@ abstract class NodeLiterals extends Node
                 $value = new NodeList($value);
             }
             $start = '';
-            if ($child instanceof NodeKey || $child instanceof NodeItem) {
+            if (($child instanceof NodeKey || $child instanceof NodeItem) && $value instanceof NodeList) {
                 $start = ltrim($child->raw)."\n";
             }
             return $start.$this->getFinalString($value, $refIndent);

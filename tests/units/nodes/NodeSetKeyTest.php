@@ -6,6 +6,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeSetKey;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodeScalar;
 
 /**
  * Class NodeSetKeyTest.
@@ -30,7 +32,7 @@ class NodeSetKeyTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe check arguments of this constructor. */
-        $this->nodeSetKey = new NodeSetKey("a string to test", 42);
+        $this->nodeSetKey = new NodeSetKey("   ?  someStringKey", 42);
     }
 
     /**
@@ -38,8 +40,8 @@ class NodeSetKeyTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue($this->nodeSetKey->value instanceof NodeScalar);
+        $this->assertEquals('someStringKey', $this->nodeSetKey->value->build());
     }
 
     /**
@@ -47,8 +49,10 @@ class NodeSetKeyTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $parent = new \StdClass;
+        $built = $this->nodeSetKey->build($parent);
+        $this->assertTrue(property_exists($parent, 'someStringKey'));
+        $this->assertEquals(null, $parent->someStringKey);
     }
 
     /**
@@ -56,7 +60,9 @@ class NodeSetKeyTest extends TestCase
      */
     public function testIsAwaitingChild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $uselessNode = new NodeBlank('', 1);
+        $this->assertFalse($this->nodeSetKey->isAwaitingChild($uselessNode));
+        $this->nodeSetKey->value = null;
+        $this->assertTrue($this->nodeSetKey->isAwaitingChild($uselessNode));
     }
 }

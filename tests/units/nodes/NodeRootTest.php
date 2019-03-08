@@ -6,6 +6,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeRoot;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\YamlObject;
 
 /**
@@ -39,8 +41,7 @@ class NodeRootTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue($this->nodeRoot->value instanceof NodeList);
     }
 
     /**
@@ -48,8 +49,11 @@ class NodeRootTest extends TestCase
      */
     public function testGetParent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals($this->nodeRoot, $this->nodeRoot->getParent());
+        $keyNode = new NodeKey(' falsekey:', 1);
+        $keyNode->add($this->nodeRoot);
+        $this->expectException(\ParseError::class);
+        $this->nodeRoot->getParent();
     }
 
     /**
@@ -57,17 +61,31 @@ class NodeRootTest extends TestCase
      */
     public function testGetRoot(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals($this->nodeRoot, $this->nodeRoot->getRoot());
     }
 
     /**
      * @covers \Dallgoot\Yaml\NodeRoot::getYamlObject
      */
-    public function testGetYamlObject(): void
+    public function testYamlObjectAbsent()
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->expectException(\Exception::class);
+        $this->nodeRoot->getYamlObject();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\NodeRoot::getYamlObject
+     * @depends testBuildFinal
+     */
+    public function testYamlObjectPresent()
+    {
+        $buildFinal = new \ReflectionMethod($this->nodeRoot, 'buildFinal');
+        $buildFinal->setAccessible(true);
+        $yamlObject = new YamlObject;
+        $result = $buildFinal->invoke($this->nodeRoot, $yamlObject);
+
+        $this->assertEquals($yamlObject, $result);
+        $this->assertEquals($yamlObject, $this->nodeRoot->getYamlObject());
     }
 
     /**
@@ -75,8 +93,8 @@ class NodeRootTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $yamlObject = new YamlObject;
+        $this->assertTrue($this->nodeRoot->build($yamlObject) instanceof YamlObject);
     }
 
     /**
@@ -84,7 +102,10 @@ class NodeRootTest extends TestCase
      */
     public function testBuildFinal(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $buildFinal = new \ReflectionMethod($this->nodeRoot, 'buildFinal');
+        $buildFinal->setAccessible(true);
+        $yamlObject = new YamlObject;
+        $result = $buildFinal->invoke($this->nodeRoot, $yamlObject);
+        $this->assertEquals($yamlObject, $result);
     }
 }

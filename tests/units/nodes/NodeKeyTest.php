@@ -6,7 +6,15 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeKey;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodeItem;
+use Dallgoot\Yaml\NodeLit;
+use Dallgoot\Yaml\NodeRoot;
 use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\NodeComment;
+use Dallgoot\Yaml\NodeLiterals;
+use Dallgoot\Yaml\NodeAnchor;
+use Dallgoot\Yaml\YamlObject;
 
 /**
  * Class NodeKeyTest.
@@ -102,8 +110,14 @@ class NodeKeyTest extends TestCase
      */
     public function testGetTargetOnEqualIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $nodeItem = new NodeItem('  - an_item', 2);
+        $this->nodeKey = new NodeKey("  key:", 1);
+        $this->assertEquals($this->nodeKey, $this->nodeKey->getTargetOnEqualIndent($nodeItem));
+
+        $blankNode = new NodeBlank('', 3);
+        $rootNode = new NodeRoot;
+        $rootNode->add($this->nodeKey);
+        $this->assertEquals($this->nodeKey->getParent(), $this->nodeKey->getTargetOnEqualIndent($blankNode));
     }
 
     /**
@@ -111,8 +125,12 @@ class NodeKeyTest extends TestCase
      */
     public function testGetTargetOnMoreIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $blankNode = new NodeBlank('', 2);
+        $this->assertEquals($this->nodeKey, $this->nodeKey->getTargetOnMoreIndent($blankNode));
+
+        $this->nodeKey = new NodeKey("  key: &anchor |", 1);
+        $anchorNode = $this->nodeKey->value;
+        $this->assertEquals($anchorNode->value, $this->nodeKey->getTargetOnMoreIndent($blankNode));
     }
 
     /**
@@ -120,16 +138,52 @@ class NodeKeyTest extends TestCase
      */
     public function testIsAwaitingChild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $blankNode = new NodeBlank('', 42);
+        $this->assertTrue($this->nodeKey->isAwaitingChild($blankNode));
+        //
+        $this->nodeKey->value = new NodeComment('# this is a comment', 1);
+        $this->assertTrue($this->nodeKey->isAwaitingChild($blankNode));
+        //
+        $this->nodeKey->value = new NodeScalar('this is a text', 1);
+        $this->assertTrue($this->nodeKey->isAwaitingChild($blankNode));
+        //
+        $this->nodeKey->value = new NodeItem(' - item', 1);
+        $this->assertTrue($this->nodeKey->isAwaitingChild(new NodeItem(' - item2', 2)));
+        //
+        $this->nodeKey->value = new NodeKey(' key1:', 1);
+        $this->assertTrue($this->nodeKey->isAwaitingChild(new NodeKey(' key2:', 2)));
+        //
+        $this->nodeKey->value = new NodeLit(' |', 1);
+        $this->assertTrue($this->nodeKey->isAwaitingChild(new NodeKey('  key2:', 2)));
+        //
+        $this->nodeKey->value = new NodeAnchor(' &anchor', 1);
+        $this->assertTrue($this->nodeKey->isAwaitingChild(new NodeKey('  key2:', 2)));
+        //
+        $this->nodeKey->value = new NodeAnchor(' &anchor already have a value', 1);
+        $this->assertFalse($this->nodeKey->isAwaitingChild(new NodeKey('  key2:', 2)));
     }
-
     /**
      * @covers \Dallgoot\Yaml\NodeKey::build
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $built = $this->nodeKey->build();
+        $this->assertTrue(property_exists($built, 'key'));
+        $this->assertEquals('value', $built->key);
+        //
+        $parent = new \StdClass;
+        $built = $this->nodeKey->build($parent);
+        $this->assertTrue(property_exists($parent, 'key'));
+        $this->assertEquals('value', $parent->key);
+        //
+        $parent = new YamlObject;
+        $built = $this->nodeKey->build($parent);
+        $this->assertTrue(property_exists($parent, 'key'));
+        $this->assertEquals('value', $parent->key);
+        //
+        $this->nodeKey->value = null;
+        $built = $this->nodeKey->build();
+        $this->assertTrue(property_exists($built, 'key'));
+        $this->assertEquals(null, $built->key);
     }
 }

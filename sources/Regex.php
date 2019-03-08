@@ -63,7 +63,7 @@ class Regex
         $matchCanonical = preg_match($canonical, $v);
         $matchSpaced    = preg_match($spaced, $v);
         $matchIso       = preg_match($iso8601, $v);
-        if (is_bool($matchDate) || is_bool($matchCanonical) || is_bool($matchSpaced) || is_bool($matchIso)) {
+        if (empty($v) || is_bool($matchDate) || is_bool($matchCanonical) || is_bool($matchSpaced) || is_bool($matchIso)) {
             throw new \Exception(__METHOD__." regex ERROR");
         }
         return $matchDate || $matchCanonical || $matchSpaced || $matchIso;

@@ -48,6 +48,15 @@ class RegexTest extends TestCase
     }
 
     /**
+     * @covers \Dallgoot\Yaml\Regex::isDate
+     */
+    public function testIsDateWithNoString(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->regex::isDate('');
+    }
+
+    /**
      * @covers \Dallgoot\Yaml\Regex::isNumber
      */
     public function testIsNumber(): void

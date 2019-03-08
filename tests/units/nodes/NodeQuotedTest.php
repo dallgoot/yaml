@@ -37,7 +37,6 @@ class NodeQuotedTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals("a quoted string", $this->nodeQuoted->build());
     }
 }

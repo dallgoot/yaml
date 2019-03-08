@@ -14,7 +14,8 @@ class NodeLitFolded extends NodeLiterals
      * @param NodeList $list The children
      *
      * @return string    The litteral.
-     * @todo   Example 6.1. Indentation Spaces  spaces must be considered as content
+     * @todo   Example 6.1. Indentation Spaces  spaces must be considered as content,
+     *          Whend indent is reduced : do we insert a line break too ?
      */
     public function getFinalString(NodeList $value, int $refIndent = null):string
     {

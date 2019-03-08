@@ -6,6 +6,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeScalar;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeLit;
+use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\NodeComment;
 
 /**
  * Class NodeScalarTest.
@@ -29,7 +33,6 @@ class NodeScalarTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe check arguments of this constructor. */
         $this->nodeScalar = new NodeScalar("a string to test", 42);
     }
 
@@ -38,8 +41,13 @@ class NodeScalarTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        // only a Sclar Node
+        $this->assertTrue(is_null($this->nodeScalar->value));
+        // with a comment
+        $nodeScalar = new NodeScalar(' value # a comment', 1);
+        $this->assertTrue($nodeScalar->value instanceof NodeList);
+        $this->assertTrue($nodeScalar->value->offsetGet(0) instanceof NodeScalar);
+        $this->assertTrue($nodeScalar->value->offsetGet(1) instanceof NodeComment);
     }
 
     /**
@@ -47,8 +55,9 @@ class NodeScalarTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals("a string to test", $this->nodeScalar->build());
+        $this->nodeScalar->value = new NodeScalar('another string', 2);
+        $this->assertEquals('another string', $this->nodeScalar->build());
     }
 
     /**
@@ -56,8 +65,17 @@ class NodeScalarTest extends TestCase
      */
     public function testGetTargetOnLessIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $parent = new NodeKey('  emptykey: |', 1);
+        $nodeScalar = new NodeScalar(' somestring', 2);
+        $parent->add($this->nodeScalar);
+        $this->assertEquals($parent, $this->nodeScalar->getTargetOnLessIndent($parent));
+        $this->assertTrue($this->nodeScalar->getParent() instanceof NodeLit);
+        //
+        $parent2 = new NodeKey('  emptykey2:', 1);
+        $this->nodeScalar = new NodeScalar('somestring', 2);
+        $parent2->add($this->nodeScalar);
+        $this->assertEquals($parent2, $this->nodeScalar->getTargetOnLessIndent($parent2));
+        $this->assertEquals($parent2, $this->nodeScalar->getParent());
     }
 
     /**
@@ -65,7 +83,8 @@ class NodeScalarTest extends TestCase
      */
     public function testGetTargetOnMoreIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $parent = new NodeKey('  emptykey:', 1);
+        $parent->add($this->nodeScalar);
+        $this->assertEquals($parent, $this->nodeScalar->getTargetOnMoreIndent($parent));
     }
 }

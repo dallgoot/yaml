@@ -55,6 +55,9 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
   - Examples of each function of the API
 - docker-compose for easy testing
 - Benchmarks against other libs
+- verify LICENSE nature and set up in docblocks accordingly
+- set up @link to github in docblocks
+- verify TODOS in code
 
 ## Improvements
 

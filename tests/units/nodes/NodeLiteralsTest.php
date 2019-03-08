@@ -4,9 +4,16 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\NodeLiterals;
-use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodeItem;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\NodeLit;
+use Dallgoot\Yaml\NodeLitFolded;
+use Dallgoot\Yaml\NodeLiterals;
+use Dallgoot\Yaml\NodeQuoted;
+use Dallgoot\Yaml\NodeScalar;
 
 /**
  * Class NodeLiteralsTest.
@@ -32,26 +39,49 @@ class NodeLiteralsTest extends TestCase
     {
         /** @todo Maybe check arguments of this constructor. */
         $this->nodeLiterals = $this->getMockBuilder(NodeLiterals::class)
-            ->setConstructorArgs(["a string to test", 42])
+            ->setConstructorArgs(["|-", 42])
             ->getMockForAbstractClass();
     }
 
     /**
-     * @covers \Dallgoot\Yaml\NodeLiterals::getFinalString
-     */
-    public function testGetFinalString(): void
-    {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-    }
+    //  * @covers \Dallgoot\Yaml\NodeLiterals::getFinalString
+    //  */
+    // public function testGetFinalString(): void
+    // {
+    //     /** @todo Complete this unit test method. */
+    //     $this->markTestIncomplete();
+    // }
 
     /**
      * @covers \Dallgoot\Yaml\NodeLiterals::__construct
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->nodeLiterals = $this->getMockBuilder(NodeLiterals::class)
+            ->setConstructorArgs(["|", 42])
+            ->getMockForAbstractClass();
+        $reflector = new \ReflectionClass($this->nodeLiterals);//var_dump($this->nodeLiterals);
+        $identifier = $reflector->getProperty('identifier');
+        $identifier->setAccessible(true);
+        $this->assertEquals(null, $identifier->getValue($this->nodeLiterals));
+        //
+        $this->nodeLiterals = $this->getMockBuilder(NodeLiterals::class)
+            ->setConstructorArgs(["|-", 42])
+            ->getMockForAbstractClass();
+        //
+        $this->nodeLiterals = $this->getMockBuilder(NodeLiterals::class)
+            ->setConstructorArgs(["|+", 42])
+            ->getMockForAbstractClass();
+        $this->assertEquals('+', $identifier->getValue($this->nodeLiterals));
+        //
+        $this->nodeLiterals = $this->getMockBuilder(NodeLiterals::class)
+            ->setConstructorArgs([">-", 42])
+            ->getMockForAbstractClass();
+        //
+        $this->nodeLiterals = $this->getMockBuilder(NodeLiterals::class)
+            ->setConstructorArgs([">+", 42])
+            ->getMockForAbstractClass();
+        $this->assertEquals('+', $identifier->getValue($this->nodeLiterals));
     }
 
     /**
@@ -59,8 +89,15 @@ class NodeLiteralsTest extends TestCase
      */
     public function testAdd(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue(is_null($this->nodeLiterals->value));
+        $this->nodeLiterals->add(new NodeScalar(' some text', 2));
+        $this->assertTrue($this->nodeLiterals->value instanceof NodeList);
+        //
+        $this->nodeLiterals->value = null;
+        $falseItem = new NodeItem(' - not an item', 2);
+
+        $this->assertTrue($this->nodeLiterals->add($falseItem) instanceof NodeScalar);
+        $this->assertFalse($this->nodeLiterals->value->offsetGet(0) instanceof NodeItem);
     }
 
     /**
@@ -68,8 +105,12 @@ class NodeLiteralsTest extends TestCase
      */
     public function testLitteralStripLeading(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $list = new NodeList(new NodeBlank('', 1));
+        $list->push(new NodeBlank('', 2));
+        $stripLeading = new \ReflectionMethod(NodeLiterals::class, 'litteralStripLeading');
+        $stripLeading->setAccessible(true);
+        $stripLeading->invokeArgs(null, [&$list]);
+        $this->assertEquals(0, $list->count());
     }
 
     /**
@@ -77,8 +118,12 @@ class NodeLiteralsTest extends TestCase
      */
     public function testLitteralStripTrailing(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $list = new NodeList(new NodeBlank('', 1));
+        $list->push(new NodeBlank('', 2));
+        $stripTrailing = new \ReflectionMethod(NodeLiterals::class, 'litteralStripTrailing');
+        $stripTrailing->setAccessible(true);
+        $stripTrailing->invokeArgs(null, [&$list]);
+        $this->assertEquals(0, $list->count());
     }
 
     /**
@@ -86,8 +131,35 @@ class NodeLiteralsTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals('', $this->nodeLiterals->build());
+        //
+        $nodeLit = new NodeLit("|", 42);
+        $nodeLit->add(new NodeScalar('   sometext', 2));
+        $nodeLit->add(new NodeScalar('   othertext', 2));
+        $this->assertTrue($nodeLit->value instanceof NodeList);
+        $this->assertTrue($nodeLit->value->offsetGet(0) instanceof NodeScalar);
+        $this->assertEquals("sometext\nothertext\n", $nodeLit->build());
+        // //
+        $nodeLitClipped = new NodeLit("|-", 42);
+        $nodeLitClipped->add(new NodeScalar('   sometext', 2));
+        $nodeLitClipped->add(new NodeScalar('   othertext', 2));
+        $this->assertTrue($nodeLitClipped->value instanceof NodeList);
+        $this->assertTrue($nodeLitClipped->value->offsetGet(0) instanceof NodeScalar);
+        $this->assertEquals("sometext\nothertext", $nodeLitClipped->build());
+        //
+        $nodeLitFolded = new NodeLitFolded(">", 42);
+        $nodeLitFolded->add(new NodeScalar('   sometext', 2));
+        $nodeLitFolded->add(new NodeScalar('   othertext', 2));
+        $this->assertTrue($nodeLitFolded->value instanceof NodeList);
+        $this->assertTrue($nodeLitFolded->value->offsetGet(0) instanceof NodeScalar);
+        $this->assertEquals("sometext othertext\n", $nodeLitFolded->build());
+        // //
+        $nodeLitFoldedClipped = new NodeLitFolded(">-", 42);
+        $nodeLitFoldedClipped->add(new NodeScalar('   sometext', 2));
+        $nodeLitFoldedClipped->add(new NodeScalar('   othertext', 2));
+        $this->assertTrue($nodeLitFoldedClipped->value instanceof NodeList);
+        $this->assertTrue($nodeLitFoldedClipped->value->offsetGet(0) instanceof NodeScalar);
+        $this->assertEquals("sometext othertext", $nodeLitFoldedClipped->build());
     }
 
     /**
@@ -95,8 +167,24 @@ class NodeLiteralsTest extends TestCase
      */
     public function testGetChildValue(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $getChildValue = new \ReflectionMethod($this->nodeLiterals, 'getChildValue');
+        $getChildValue->setAccessible(true);
+        $nodeQuoted = new NodeQuoted('    "sometext"', 1);
+        $nodeScalar = new NodeScalar('    sometext', 1);
+        $nodeItem   = new NodeItem('    -  itemtext', 1);
+        $nodeKey    = new NodeKey('    key: somevalue', 1);
+        //
+        $scalarResult = $getChildValue->invokeArgs($this->nodeLiterals, [$nodeScalar, 4]);
+        $this->assertEquals('sometext', $scalarResult);
+        //
+        $keyResult = $getChildValue->invokeArgs($this->nodeLiterals, [$nodeKey, 4]);
+        $this->assertEquals("key: somevalue\n", $keyResult);
+        //
+        $itemResult = $getChildValue->invokeArgs($this->nodeLiterals, [$nodeItem, 4]);
+        $this->assertEquals("-  itemtext\n", $itemResult);
+
+        $quotedResult = $getChildValue->invokeArgs($this->nodeLiterals, [$nodeQuoted, 4]);
+        $this->assertEquals("sometext", $quotedResult);
     }
 
     /**
@@ -104,7 +192,7 @@ class NodeLiteralsTest extends TestCase
      */
     public function testIsAwaitingChild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $uselessNode = new NodeBlank('', 1);
+        $this->assertTrue($this->nodeLiterals->isAwaitingChild($uselessNode));
     }
 }

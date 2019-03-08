@@ -6,6 +6,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeSetValue;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodeScalar;
 
 /**
  * Class NodeSetValueTest.
@@ -30,7 +32,7 @@ class NodeSetValueTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe check arguments of this constructor. */
-        $this->nodeSetValue = new NodeSetValue("a string to test", 42);
+        $this->nodeSetValue = new NodeSetValue("  :   a string to test", 42);
     }
 
     /**
@@ -38,8 +40,8 @@ class NodeSetValueTest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertTrue($this->nodeSetValue->value instanceof NodeScalar);
+        $this->assertEquals('a string to test', $this->nodeSetValue->value->build());
     }
 
     /**
@@ -47,8 +49,11 @@ class NodeSetValueTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $parent = new \StdClass;
+        $parent->lastKey = null;
+        $this->nodeSetValue->build($parent);
+        $this->assertTrue(property_exists($parent, 'lastKey'));
+        $this->assertEquals('a string to test', $parent->lastKey);
     }
 
     /**
@@ -56,7 +61,9 @@ class NodeSetValueTest extends TestCase
      */
     public function testIsAwaitingChild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $uselessNode = new NodeBlank('', 1);
+        $this->assertFalse($this->nodeSetValue->isAwaitingChild($uselessNode));
+        $this->nodeSetValue->value = null;
+        $this->assertTrue($this->nodeSetValue->isAwaitingChild($uselessNode));
     }
 }

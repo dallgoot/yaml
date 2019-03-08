@@ -55,6 +55,14 @@ class YamlObjectTest extends TestCase
         $this->assertTrue(is_array($this->yamlObject->getComment()));
         $this->assertTrue(is_array($this->yamlObject->getAllReferences()));
     }
+/**
+     * @covers \Dallgoot\Yaml\YamlObject::__call
+     */
+    public function testCallWrongName(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->yamlObject->unknownMethodName();
+    }
 
     /**
      * @covers \Dallgoot\Yaml\YamlObject::__toString

@@ -6,6 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeLit;
 use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\NodeScalar;
 
 /**
  * Class NodeLitTest.
@@ -38,7 +39,14 @@ class NodeLitTest extends TestCase
      */
     public function testGetFinalString(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $line1 = new NodeScalar('    some text', 2);
+        $line2 = new NodeScalar('      some more indented text', 3);
+        $line3 = new NodeScalar('    other less indented text', 4);
+        $list = new NodeList;
+        $list->push($line1);
+        $list->push($line2);
+        $list->push($line3);
+        $this->assertEquals("some text\n  some more indented text\nother less indented text",
+                            $this->nodeLit->getFinalString($list));
     }
 }

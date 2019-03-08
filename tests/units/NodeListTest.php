@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Node;
 use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodeDocStart;
 use Dallgoot\Yaml\NodeComment;
 use Dallgoot\Yaml\NodeItem;
 use Dallgoot\Yaml\NodeKey;
@@ -52,6 +53,7 @@ class NodeListTest extends TestCase
     public function testHas(): void
     {
         $this->assertTrue($this->nodeList->has('NodeBlank'));
+        $this->assertFalse($this->nodeList->has('NodeItem'));
     }
 
     /**
@@ -60,6 +62,16 @@ class NodeListTest extends TestCase
     public function testHasContent(): void
     {
         $this->assertFalse($this->nodeList->hasContent());
+    }
+
+   /**
+     * @covers \Dallgoot\Yaml\NodeList::hasContent
+     */
+    public function testHasContentWithDocStart(): void
+    {
+        $docstartNode = new NodeDocStart('---  some value', 1);
+        $this->nodeList->push($docstartNode);
+        $this->assertTrue($this->nodeList->hasContent());
     }
 
     /**
@@ -132,19 +144,22 @@ class NodeListTest extends TestCase
      */
     public function testBuildMultiline(): void
     {
-        // var_dump($this->nodeList);
         //test when empty
         $this->assertEquals(1, $this->nodeList->count(), 'NodeList count is wrong (+1 Nodeblank on setUp)');
         $this->assertEquals('', $this->nodeList->buildMultiline(), 'buildMultiline did not return a string');
-        // var_dump($this->nodeList);
         //test with one child
         $this->nodeList->push(new NodeScalar('some string', 2));//var_dump($this->nodeList);
         $this->assertEquals(2, $this->nodeList->count(), 'NodeList does NOT contain 2 children');
         $this->assertEquals('some string', $this->nodeList->buildMultiline(), 'buildMultiline failed with 2 children');
+        //test with one child AND one blank
+        $this->nodeList->push(new NodeBlank('', 2));//var_dump($this->nodeList);
+        $this->nodeList->push(new NodeScalar('other string', 3));//var_dump($this->nodeList);
+        $this->assertEquals(4, $this->nodeList->count(), 'NodeList does NOT contain 2 children');
+        $this->assertEquals("some string\nother string", $this->nodeList->buildMultiline(), 'buildMultiline failed with 2 children');
         //test with two child
         $this->nodeList->push(new NodeScalar('and some other string', 3));
-        $this->assertEquals(3, $this->nodeList->count(), 'NodeList does NOT contain 3 nodes');
-        $this->assertEquals('some string and some other string', $this->nodeList->buildMultiline(), "buildMultiline failed to provide correct string");
+        $this->assertEquals(5, $this->nodeList->count(), 'NodeList does NOT contain 3 nodes');
+        $this->assertEquals("some string\nother string and some other string", $this->nodeList->buildMultiline(), "buildMultiline failed to provide correct string");
     }
 
     /**

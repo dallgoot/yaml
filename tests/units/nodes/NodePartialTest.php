@@ -6,6 +6,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodePartial;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeQuoted;
 
 /**
  * Class NodePartialTest.
@@ -30,7 +33,7 @@ class NodePartialTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->nodePartial = new NodePartial('{ partial: map');
+        $this->nodePartial = new NodePartial(' " partially quoted');
     }
 
     /**
@@ -38,8 +41,13 @@ class NodePartialTest extends TestCase
      */
     public function testSpecialProcess(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $blankBuffer = [];
+        $node = new NodeScalar(' end of quoting"', 2);
+        $parent = new NodeScalar(' emptykey:', 1);
+        $parent->add($this->nodePartial);
+        $this->assertTrue($this->nodePartial->specialProcess($node, $blankBuffer));
+        $this->assertTrue($parent->value instanceof NodeQuoted);
+        $this->assertEquals(" partially quoted end of quoting", $parent->value->build());
     }
 
     /**
@@ -47,7 +55,7 @@ class NodePartialTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->expectException(\ParseError::class);
+        $this->nodePartial->build();
     }
 }

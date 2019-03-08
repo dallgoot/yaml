@@ -28,7 +28,6 @@ class TagTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe check arguments of this constructor. */
         $this->tag = new Tag("tagName", "a string to test");
     }
 
@@ -39,5 +38,14 @@ class TagTest extends TestCase
     {
         $this->assertEquals("tagName",$this->tag->tagName);
         $this->assertEquals("a string to test",$this->tag->value);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Tag::__construct
+     */
+    public function testConstructEmptyName(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->tag = new Tag("", "a string to test");
     }
 }

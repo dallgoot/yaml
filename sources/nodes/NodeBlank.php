@@ -12,7 +12,11 @@ class NodeBlank extends Node
 {
     public function add(Node $child):Node
     {
-        return $this->_parent->add($child);
+        if($this->_parent instanceof Node) {
+            return $this->_parent->add($child);
+        } else {
+            throw new \ParseError(__METHOD__." no parent to add to", 1);
+        }
     }
 
     public function specialProcess(Node &$previous, array &$emptyLines):bool

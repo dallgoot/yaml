@@ -6,6 +6,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeTag;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeRoot;
+use Dallgoot\Yaml\YamlObject;
 
 /**
  * Class NodeTagTest.
@@ -38,8 +42,8 @@ class NodeTagTest extends TestCase
      */
     public function testIsAwaitingChild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $uselessNode = new NodeBlank('', 1);
+        $this->assertFalse($this->nodeTag->isAwaitingChild($uselessNode));
     }
 
     /**
@@ -47,8 +51,12 @@ class NodeTagTest extends TestCase
      */
     public function testGetTargetOnEqualIndent(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $uselessNode = new NodeBlank('', 1);
+        $parent = new NodeKey(' key:', 1);
+        $parent->add($this->nodeTag);
+        $this->assertEquals($parent, $this->nodeTag->getTargetOnEqualIndent($uselessNode));
+        $this->nodeTag->value = null;
+        $this->assertEquals($this->nodeTag, $this->nodeTag->getTargetOnEqualIndent($uselessNode));
     }
 
     /**
@@ -56,7 +64,19 @@ class NodeTagTest extends TestCase
      */
     public function testBuild(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        // test value tranformed
+        $parent = new NodeKey(' key:',1);
+        $parent->add($this->nodeTag);
+        $built = $this->nodeTag->build();
+        $this->assertEquals('654', $built);
+        // test apply tag to YamlObject (cause value is null and parent is a NodeRoot)
+        $rootNode = new NodeRoot();
+        $rootNode->add($this->nodeTag);
+        $this->nodeTag->value = null;
+        $yamlObject = new YamlObject;
+        $this->assertFalse($yamlObject->isTagged());
+        // add yamlObject to NodeRoot
+        $rootNode->build($yamlObject);// this triggers this->nodeTag->build
+        $this->assertTrue($yamlObject->isTagged());
     }
 }
