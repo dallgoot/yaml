@@ -49,6 +49,18 @@ class NodeAnchorTest extends TestCase
         $buildFinal->setAccessible(true);
         $buildFinal->invoke($rootNode, $yamlObject);
         $this->assertEquals('sometext', $this->nodeAnchor->build());
+        // test exsting reference
+        $anchorValue = '12345';
+        $yamlObject = new YamlObject();
+        $rootNode   = new NodeRoot();
+        $this->nodeAnchor = new NodeAnchor('*aaa', 1);
+
+        $rootNode->add($this->nodeAnchor);
+        $yamlObject->addReference('aaa', $anchorValue);
+        $buildFinal  = new \ReflectionMethod($rootNode, 'buildFinal');
+        $buildFinal->setAccessible(true);
+        $buildFinal->invoke($rootNode, $yamlObject);
+        $this->assertEquals('12345', $this->nodeAnchor->build());
     }
 
     /**

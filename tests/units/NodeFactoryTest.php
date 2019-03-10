@@ -120,8 +120,7 @@ class NodeFactoryTest extends TestCase
      */
     public function testOnCompact(): void
     {
-        $reflector = new \ReflectionClass($this->nodeFactory);
-        $method = $reflector->getMethod('onCompact');
+        $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
         $method->setAccessible(true);
         $nodeString = '["a","b","c"]';
         $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof NodeJSON,
@@ -135,6 +134,11 @@ class NodeFactoryTest extends TestCase
         $nodeString = '[a,b,c]';
         $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof NodeCompactSequence,
                 'Not a NodeCompactSequence');
+        $nodeString = ' { a: b, ';
+        $result = $method->invoke(null, '', $nodeString, 1);
+        $this->assertTrue($result instanceof NodePartial,
+                'Not a NodeScalar');
+
     }
 
     /**
@@ -164,8 +168,7 @@ class NodeFactoryTest extends TestCase
      */
     public function testOnNodeAction(): void
     {
-        $reflector = new \ReflectionClass($this->nodeFactory);
-        $method = $reflector->getMethod('onNodeAction');
+        $method = new \ReflectionMethod($this->nodeFactory, 'onNodeAction');
         $method->setAccessible(true);
         $nodeString = '***';
         $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof NodeScalar,
@@ -187,13 +190,13 @@ class NodeFactoryTest extends TestCase
                 'Not a NodeTag');
     }
 
+
     /**
      * @covers \Dallgoot\Yaml\NodeFactory::onLiteral
      */
     public function testOnLiteral(): void
     {
-        $reflector = new \ReflectionClass($this->nodeFactory);
-        $method = $reflector->getMethod('onLiteral');
+        $method = new \ReflectionMethod($this->nodeFactory, 'onLiteral');
         $method->setAccessible(true);
         $nodeString = '  |-   ';
         $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof NodeLit,
@@ -201,5 +204,17 @@ class NodeFactoryTest extends TestCase
         $nodeString = '  >+   ';
         $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof NodeLitFolded,
                 'Not a NodeLitFolded');
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\NodeFactory::onLiteral
+     */
+    public function testOnLiteralFail(): void
+    {
+        $method = new \ReflectionMethod($this->nodeFactory, 'onLiteral');
+        $method->setAccessible(true);
+        $nodeString = ' x ';
+        $this->expectException(\ParseError::class);
+        $method->invoke(null, trim($nodeString)[0], $nodeString, 1);
     }
 }

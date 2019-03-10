@@ -113,8 +113,8 @@ final class Builder
      */
     private static function getNumber(string $v)
     {
-        if (preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
-        if (preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
+        if ((bool) preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
+        if ((bool) preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
         return is_bool(strpos($v, '.')) || substr_count($v, '.') > 1 ? intval($v) : floatval($v);
     }
 

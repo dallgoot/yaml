@@ -34,7 +34,6 @@ class NodeCompactSequenceTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe check arguments of this constructor. */
         $this->nodeCompactSequence = new NodeCompactSequence(" [ 1, ad, [456] ]", 42);
     }
 
@@ -68,5 +67,11 @@ class NodeCompactSequenceTest extends TestCase
         $this->assertEquals([456], $result[2]);
         $this->nodeCompactSequence->value = null;
         $this->assertTrue(is_null($this->nodeCompactSequence->build()));
+        //test single Node absorbed in NodeList
+        $this->nodeCompactSequence = new NodeCompactSequence(" [ [456] ]", 42);
+        $result = $this->nodeCompactSequence->build();
+        $this->assertTrue($result instanceof Compact);
+        $this->assertArrayHasKey(0, $result);
+        $this->assertEquals([456], $result[0]);
     }
 }

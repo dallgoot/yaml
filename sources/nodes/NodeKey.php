@@ -17,7 +17,9 @@ class NodeKey extends Node
     {
         parent::__construct($nodeString, $line);
         if (is_null($matches)) {
-            preg_match(Regex::KEY, ltrim($nodeString), $matches);
+            if (!((bool) preg_match(Regex::KEY, ltrim($nodeString), $matches))) {
+                throw new \Exception("Not a KEY:VALUE syntax ($nodeString)", 1);
+            }
         }
         $this->setIdentifier(trim($matches[1], '"\' '));
         $value = isset($matches[2]) ? trim($matches[2]) : null;

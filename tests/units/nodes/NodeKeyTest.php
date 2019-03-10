@@ -50,6 +50,8 @@ class NodeKeyTest extends TestCase
         $this->assertTrue($this->nodeKey->value instanceof NodeScalar);
         $this->nodeKey = new NodeKey("key:", 1);
         $this->assertTrue(is_null($this->nodeKey->value));
+        $this->nodeKey = new NodeKey("key: ", 1);
+        $this->assertTrue(is_null($this->nodeKey->value));
     }
 
     /**
@@ -73,6 +75,9 @@ class NodeKeyTest extends TestCase
         $this->assertEquals('1.2', $identifier->getValue($this->nodeKey));
     }
 
+    /**
+     * @covers \Dallgoot\Yaml\NodeKey::setIdentifier
+     */
     private function setIdentifierAsEmptyString()
     {
         $this->expectException(\Exception::class);

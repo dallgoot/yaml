@@ -6,6 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeActions;
 use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\NodeTag;
 
 /**
  * Class NodeActionsTest.
@@ -37,9 +38,21 @@ class NodeActionsTest extends TestCase
      */
     public function testConstruct(): void
     {
+        //note : true behaviour for Tag is "testConstructWithTag"
         $this->assertEquals("!!str", $this->nodeActions->anchor);
         $this->assertTrue($this->nodeActions->value instanceof NodeScalar);
         $this->assertEquals("sometext", $this->nodeActions->value->raw);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\NodeActions::__construct
+     */
+    public function testConstructWithTag(): void
+    {
+        $tagNode = new NodeTag("   !!str    sometext", 42);
+        $this->assertEquals("!!str", $tagNode->tag);
+        $this->assertTrue($tagNode->value instanceof NodeScalar);
+        $this->assertEquals("sometext", $tagNode->value->raw);
     }
 
     /**

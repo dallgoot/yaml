@@ -11,6 +11,7 @@ use Dallgoot\Yaml\Node;
 use Dallgoot\Yaml\NodeRoot;
 use Dallgoot\Yaml\NodeKey;
 use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodePartial;
 use Dallgoot\Yaml\NodeScalar;
 
 /**
@@ -52,8 +53,17 @@ class LoaderTest extends TestCase
      */
     public function testLoad(): void
     {
+        // $this->expectException(\Exception::class);
+        $this->assertEquals($this->loader, $this->loader->load(__DIR__.'/../definitions/parsing_tests.yml'));
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Loader::load
+     */
+    public function testLoadNoRights(): void
+    {
         $this->expectException(\Exception::class);
-        $this->loader->load('http://www.example.com/');
+        $this->loader->load('ssh:example.com');
     }
 
     /**
@@ -74,12 +84,23 @@ class LoaderTest extends TestCase
      */
     public function testParse(): void
     {
+        $result = $this->loader->parse('key: keyvalue\n  other string\notherkey: othervalue');
+        $this->assertTrue($result instanceof YamlObject);
         $result = $this->loader->parse('key: keyvalue');
         $this->assertTrue($result instanceof YamlObject);
         $multidoc = $this->loader->parse("---\nkey1: key1value\n---\nkey1: key1value\n");
         $this->assertTrue(is_array($multidoc), 'result is NOT a multi-documents (ie. array)');
         $this->assertTrue($multidoc[0] instanceof YamlObject, 'array #0 is NOT a YamlObject');
         $this->assertTrue($multidoc[1] instanceof YamlObject, 'array #1 is NOT a YamlObject');
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Loader::parse
+     */
+    public function testParseWithError(): void
+    {
+        $this->expectException(\Error::class);
+        $result = $this->loader->parse(new StdClass);
     }
 
     /**
@@ -127,6 +148,8 @@ class LoaderTest extends TestCase
         $previous = new NodeKey('key: "partial value', 1);
         $current  = new NodeScalar(' end of partial value"',2);
         $this->assertTrue($this->loader->needsSpecialProcess($current, $previous));
+        $current = new NodePartial(' " oddly quoted');
+        $this->assertFalse($this->loader->needsSpecialProcess($current, $previous));
     }
 
     /**
@@ -140,5 +163,18 @@ class LoaderTest extends TestCase
             yield 2 => 'this is the second line';
         };
         $this->loader->onError(new \Exception, $generator());
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Loader::onError
+     */
+    public function testOnErrorButNoException(): void
+    {
+        $this->loader = new Loader(null, Loader::NO_PARSING_EXCEPTIONS);
+        $generator = function() {
+            yield 1 => 'this is the first line';
+            yield 2 => 'this is the second line';
+        };
+        $this->assertEquals(null, $this->loader->onError(new \Exception, $generator()));
     }
 }

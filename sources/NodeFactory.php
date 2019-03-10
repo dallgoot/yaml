@@ -18,7 +18,7 @@ final class NodeFactory
         $trimmed = ltrim($nodeString);
         if ($trimmed === '')                                return new NodeBlank($nodeString, $line);
         elseif (substr($trimmed, 0, 3) === '...')           return new NodeDocEnd($nodeString, $line);
-        elseif (preg_match(Regex::KEY, $trimmed, $matches)) return new NodeKey($nodeString, $line, $matches);
+        elseif ((bool) preg_match(Regex::KEY, $trimmed, $matches)) return new NodeKey($nodeString, $line, $matches);
         else {
             $first = $trimmed[0];
             $stringGroups = ["-" ,'>|' ,'"\'',"#%" ,"{[" ,":?" ,'*&!'];
@@ -91,8 +91,8 @@ final class NodeFactory
     {
         json_decode($nodeString, false, 512, self::JSON_OPTIONS);
         if (json_last_error() === \JSON_ERROR_NONE)             return new NodeJSON($nodeString, $line);
-        elseif (preg_match(Regex::MAPPING, trim($nodeString)))  return new NodeCompactMapping($nodeString, $line);
-        elseif (preg_match(Regex::SEQUENCE, trim($nodeString))) return new NodeCompactSequence($nodeString, $line);
+        elseif ((bool) preg_match(Regex::MAPPING, trim($nodeString)))  return new NodeCompactMapping($nodeString, $line);
+        elseif ((bool) preg_match(Regex::SEQUENCE, trim($nodeString))) return new NodeCompactSequence($nodeString, $line);
         else {
             return new NodePartial($nodeString, $line);
         }
@@ -109,7 +109,7 @@ final class NodeFactory
     final private static function onHyphen(string $first, string $nodeString, int $line):Node
     {
         if (substr($nodeString, 0, 3) === '---')              return new NodeDocStart($nodeString, $line);
-        elseif (preg_match(Regex::ITEM, ltrim($nodeString)))  return new NodeItem($nodeString, $line);
+        elseif ((bool) preg_match(Regex::ITEM, ltrim($nodeString)))  return new NodeItem($nodeString, $line);
         else {
             return new NodeScalar($nodeString, $line);
         }
@@ -124,7 +124,7 @@ final class NodeFactory
      */
     final private static function onNodeAction(string $first, string $nodeString, int $line):Node
     {
-        if (!preg_match(Regex::NODE_ACTIONS, trim($nodeString), $matches)) {
+        if (!((bool) preg_match(Regex::NODE_ACTIONS, trim($nodeString), $matches))) {
             return new NodeScalar($nodeString, $line);
         }
         $action = trim($matches['action']);//var_dump($matches);
@@ -132,8 +132,8 @@ final class NodeFactory
             case '!': return new NodeTag   ($nodeString, $line);
             case '&': return new NodeAnchor($nodeString, $line);
             case '*': return new NodeAnchor($nodeString, $line);
-            default:
-                throw new \ParseError("Not a action node !! '$action[0]' on line:$line".gettype($first));
+            // default:
+            //     throw new \ParseError("Not a action node !! '$action[0]' on line:$line".gettype($first));
         }
     }
 

@@ -33,7 +33,6 @@ class NodeCompactMappingTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe check arguments of this constructor. */
         $this->nodeCompactMapping = new NodeCompactMapping(" {a : 123, b: abc }  ", 42);
     }
 
@@ -63,5 +62,11 @@ class NodeCompactMappingTest extends TestCase
         $this->assertEquals('abc', $result->b);
         $this->nodeCompactMapping->value = null;
         $this->assertTrue(is_null($this->nodeCompactMapping->build()));
+        // test single value converted to list
+        $this->nodeCompactMapping = new NodeCompactMapping(" {  a : 123 }  ", 42);
+        $result = $this->nodeCompactMapping->build();
+        $this->assertTrue($result instanceof Compact);
+        $this->assertTrue(property_exists($result, 'a'));
+        $this->assertEquals(123, $result->a);
     }
 }

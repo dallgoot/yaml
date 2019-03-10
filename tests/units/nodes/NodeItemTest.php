@@ -13,6 +13,7 @@ use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\NodeRoot;
 use Dallgoot\Yaml\NodeSetKey;
 use Dallgoot\Yaml\NodeSetValue;
+use Dallgoot\Yaml\YamlObject;
 
 /**
  * Class NodeItemTest.
@@ -72,6 +73,17 @@ class NodeItemTest extends TestCase
     }
 
     /**
+     * @covers \Dallgoot\Yaml\NodeItem::add
+     */
+    public function testAddException(): void
+    {
+        $this->expectException(\ParseError::class);
+        $this->nodeItem = new NodeItem('  - keyinside: keyvalue', 1);
+        $keyNode        = new  NodeKey('        anotherkey: anothervalue', 3);
+        $this->nodeItem->add($keyNode);
+    }
+
+    /**
      * @covers \Dallgoot\Yaml\NodeItem::getTargetOnEqualIndent
      */
     public function testGetTargetOnEqualIndent(): void
@@ -81,12 +93,12 @@ class NodeItemTest extends TestCase
         $itemNode = new NodeItem('- item2', 1);
         $this->assertEquals($rootNode, $this->nodeItem->getTargetOnEqualIndent($itemNode));
         //
-        $this->nodeItem = new NodeItem('- sameindentitem', 2);
+        $this->nodeItem = new NodeItem('- sameindentitem', 3);
         $rootNode->add($this->nodeItem);
         $keyNode = new NodeKey('key_with_no_indent_a_sequence:', 1);
         $this->nodeItem->add($keyNode);
-        $keyNode2 = new NodeKey('key_with_no_indent: 123', 3);
-        $parent = $this->nodeItem->getTargetOnEqualIndent($keyNode2);
+        $itemNode2 = new NodeItem('- item_with_no_indent: 123', 2);
+        $parent = $this->nodeItem->getTargetOnEqualIndent($itemNode2);
         $this->assertEquals($rootNode, $parent);
     }
 
@@ -107,18 +119,30 @@ class NodeItemTest extends TestCase
      */
     public function testBuild(): void
     {
-        $this->parentIsString();
-        $this->parentIsObject();
+        // no parent
+        $this->assertEquals([null], $this->nodeItem->build());
+        $parent = [];
+        $this->assertEquals(null, $this->nodeItem->build($parent));
+        $this->assertEquals([0 => null], $parent);
+        $parent = new YamlObject;
+        $this->assertEquals(null, $this->nodeItem->build($parent));
+        $this->assertArrayHasKey(0, $parent);
     }
 
-    private function parentIsString()
+    /**
+     * @covers \Dallgoot\Yaml\NodeItem::build
+     */
+    private function buildWhenParentIsString()
     {
         $this->expectException(\Exception::class);
         $parent = '';
         $this->nodeItem->build($parent);
     }
 
-    private function parentIsObject()
+    /**
+     * @covers \Dallgoot\Yaml\NodeItem::build
+     */
+    private function buildWhenParentIsObject()
     {
         $this->expectException(\Exception::class);
         $parent = new \StdClass;
@@ -137,5 +161,11 @@ class NodeItemTest extends TestCase
         $setvalueNode = new NodeSetValue(': setvalue', 2);
         $this->nodeItem->add($setkeyNode);
         $this->assertTrue($this->nodeItem->isAwaitingChild($setvalueNode));
+        //
+        $this->nodeItem->value = null;
+        $keyNode = new NodeKey(' key: ', 42);
+        $scalarNode = new NodeScalar('  some text', 43);
+        $this->nodeItem->add($keyNode);
+        $this->assertTrue($this->nodeItem->isAwaitingChild($scalarNode));
     }
 }

@@ -94,6 +94,15 @@ class NodeTest extends TestCase
     }
 
     /**
+     * @covers \Dallgoot\Yaml\Node::getParent
+     */
+    public function testGetParentException(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->node->getParent();
+    }
+
+    /**
      * @covers \Dallgoot\Yaml\Node::getRoot
      */
     public function testGetRoot(): void
@@ -112,6 +121,15 @@ class NodeTest extends TestCase
         $this->assertEquals($nodeRoot, $getRoot->invoke($this->node));
     }
 
+    /**
+     * @covers \Dallgoot\Yaml\Node::getRoot
+     */
+    public function testGetRootException(): void
+    {
+        $method = new \ReflectionMethod($this->node, 'getRoot');
+        $this->expectException(\Exception::class);
+        $method->invoke($this->node);
+    }
     /**
      * @covers \Dallgoot\Yaml\Node::add
      */
@@ -156,21 +174,22 @@ class NodeTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Node::getTargetOnLessIndent
+     * @covers \Dallgoot\Yaml\Node::getTargetOnEqualIndent
      */
-    public function testGetTargetOnLessIndent(): void
+    public function testGetTargetOnEqualIndent(): void
     {
         $blankNode = new NodeBlank('', 1);
         $nodeRoot  = new NodeRoot();
         $nodeRoot->add($this->node);
-        $this->assertEquals($nodeRoot, $this->node->getTargetOnLessIndent($blankNode));
+        $this->assertEquals($nodeRoot, $this->node->getTargetOnEqualIndent($blankNode));
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Node::getTargetOnEqualIndent
+     * @covers \Dallgoot\Yaml\Node::getTargetOnLessIndent
+     *
      * @todo test with more content before this one
      */
-    public function testGetTargetOnEqualIndent(): void
+    public function testGetTargetOnLessIndent(): void
     {
         $nodeRoot  = new NodeRoot();
         $keyNode = new NodeKey('sequence:', 1);
@@ -178,7 +197,7 @@ class NodeTest extends TestCase
         $itemNode2 = new NodeItem('    - item2', 3);
         $nodeRoot->add($keyNode);
         $keyNode->add($itemNode1);
-        $this->assertEquals($keyNode, $itemNode1->getTargetOnEqualIndent($itemNode2));
+        $this->assertEquals($keyNode, $itemNode1->getTargetOnLessIndent($itemNode2));
     }
 
     /**
