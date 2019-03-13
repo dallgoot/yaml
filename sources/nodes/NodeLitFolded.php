@@ -35,11 +35,7 @@ class NodeLitFolded extends NodeLiterals
                 if($child->indent > $indent || $child instanceof NodeBlank) {
                     $separator = "\n";
                 }
-                $val = $this->getChildValue($child, $indent);
-                if ($child->value instanceof NodeList) {
-                    $val = "\n".$this->getFinalString($child->value, $indent);
-                }
-                $result .= $separator .$val;
+                $result .= $separator .$this->getChildValue($child, $indent);
             }
         }
         return $result;

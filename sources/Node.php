@@ -85,6 +85,13 @@ abstract class Node
         return $cursor;
     }
 
+    /**
+     * Gets the root of the structure map (or current Yaml document)
+     *
+     * @throws     \Exception  (description)
+     *
+     * @return     Node|self   The root.
+     */
     protected function getRoot():Node
     {
         if (is_null($this->_parent)) {

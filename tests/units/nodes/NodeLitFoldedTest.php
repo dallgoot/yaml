@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeLitFolded;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\NodeItem;
 
 /**
  * Class NodeLitFoldedTest.
@@ -39,14 +40,19 @@ class NodeLitFoldedTest extends TestCase
      */
     public function testGetFinalString(): void
     {
-        $line1 = new NodeScalar('    some text', 2);
-        $line2 = new NodeScalar('      some more indented text', 3);
-        $line3 = new NodeScalar('    other less indented text', 4);
+        $line1 = new NodeScalar(' - with inside', 2);
+        $line1a = new NodeScalar('    two', 3);
+        $line1b = new NodeScalar('    children', 4);
+        $line2 = new NodeScalar('      some more indented text', 5);
+        $line3 = new NodeScalar('    other less indented text', 6);
         $list = new NodeList;
         $list->push($line1);
+        $list->push($line1a);
+        $list->push($line1b);
         $list->push($line2);
         $list->push($line3);
-        $this->assertEquals("some text\nsome more indented text other less indented text",
-                            $this->nodeLitFolded->getFinalString($list));
+        $this->assertEquals(
+            "- with inside\ntwo\nchildren\nsome more indented text\nother less indented text",
+            $this->nodeLitFolded->getFinalString($list));
     }
 }

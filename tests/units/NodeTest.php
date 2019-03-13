@@ -126,9 +126,10 @@ class NodeTest extends TestCase
      */
     public function testGetRootException(): void
     {
-        $method = new \ReflectionMethod($this->node, 'getRoot');
         $this->expectException(\Exception::class);
-        $method->invoke($this->node);
+        $method = new \ReflectionMethod($this->node, 'getRoot');
+        $method->setAccessible(true);
+        $method->invoke($this->node, null);
     }
     /**
      * @covers \Dallgoot\Yaml\Node::add

@@ -39,7 +39,7 @@ class Regex
     const SEQUENCE = "/".Regex::ALLDEF."^(?&seq)/";
     const SEQUENCE_VALUES = "/".Regex::ALLDEF."(?'item'(?&all)) *,? */i";
 
-    const KEY  = '/^([\w\'"~][\w\'" \-.\/~]*[ \t]*)(?::([ \t]+[^\n]+)|:[ \t]*)$/i';
+    const KEY  = '/^([\w\'"~!][\w\'" \-.\/~!]*[ \t]*)(?::([ \t]+[^\n]+)|:[ \t]*)$/i';
     const ITEM = '/^-([ \t]+(.*))?$/';
 
     const NODE_ACTIONS = "/(?(DEFINE)".Regex::RC.Regex::RD.Regex::TAG.")(?'action'(?&rc)|(?&rd)|(?&tag))( +(?'content'.*))?$/";

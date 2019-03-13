@@ -21,7 +21,7 @@ class NodeKey extends Node
                 throw new \Exception("Not a KEY:VALUE syntax ($nodeString)", 1);
             }
         }
-        $this->setIdentifier(trim($matches[1], '"\' '));
+        $this->setIdentifier($matches[1]);
         $value = isset($matches[2]) ? trim($matches[2]) : null;
         if (!empty($value)) {
             $child = NodeFactory::get($value, $line);
@@ -36,19 +36,24 @@ class NodeKey extends Node
            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $this->line));
         } else {
             $keyNode = NodeFactory::get($keyString);
-            if (!is_null($keyNode->anchor)) {
-                $this->anchor = $keyNode->anchor;
-                $anchor = $keyNode->anchor;
-                $pos = strlen($keyNode->anchor);
-                $this->identifier = $keyNode->value->raw;
-            } elseif (!is_null($keyNode->tag)) {
-                $this->tag = $keyNode->tag;
-                $raw = $keyNode->raw;
-                $pos = strlen($keyNode->tag);
-                $this->identifier = trim(substr($raw, $pos));
+            if ($keyNode instanceof NodeTag || $keyNode instanceof NodeQuoted) {
+                $this->identifier = $keyNode->build();
             } elseif ($keyNode instanceof NodeScalar) {
-                $this->identifier = ltrim($keyNode->raw);
+                $this->identifier = trim($keyNode->raw);
             }
+            // if (!is_null($keyNode->anchor)) {
+            //     $this->anchor = $keyNode->anchor;
+            //     $anchor = $keyNode->anchor;
+            //     $pos = strlen($keyNode->anchor);
+            //     $this->identifier = $keyNode->value->raw;
+            // } elseif (!is_null($keyNode->tag)) {
+            //     $this->tag = $keyNode->tag;
+            //     $raw = $keyNode->raw;
+            //     $pos = strlen($keyNode->tag);
+            //     $this->identifier = trim(substr($raw, $pos));
+            // } elseif ($keyNode instanceof NodeScalar) {
+            //     $this->identifier = ltrim($keyNode->raw);
+            // }
         }
     }
 
@@ -117,9 +122,9 @@ class NodeKey extends Node
      */
     public function build(&$parent = null)
     {
-        if (!is_null($this->tag)) {
-            return TagFactory::transform($this->tag, $this)->build($parent);
-        }
+        // if (!is_null($this->tag)) {
+        //     return TagFactory::transform($this->tag, $this)->build($parent);
+        // }
         $result = is_null($this->value) ? null : $this->value->build();
         if (is_null($parent)) {
             $parent = new \StdClass;

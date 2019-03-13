@@ -89,18 +89,20 @@ class TagFactory
     private final static function strHandler(object $node, object &$parent = null)
     {
         if ($node instanceof Node) {
-            if ($node instanceof NodeKey) {
-                return $node;
-            }
+            // if ($node instanceof NodeKey) {
+            //     return $node;
+            // }
             $value = trim($node->raw);
             if ($node instanceof NodeQuoted) {
                 $value = $node->build();
             }
-            return new NodeScalar($value, $node->line);
+            // return new NodeQuoted("'".$value.'"', $node->line);
+            return $value;
         } elseif ($node instanceof NodeList) {
             $list = [];
             foreach ($node as $key => $child) {
-                $list[] = self::strHandler($child)->raw;
+                // $list[] = self::strHandler($child)->raw;
+                $list[] = self::strHandler($child);
             }
             return new NodeScalar(implode('',$list), 0);
         }

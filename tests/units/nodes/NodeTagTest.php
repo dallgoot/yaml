@@ -10,6 +10,7 @@ use Dallgoot\Yaml\NodeBlank;
 use Dallgoot\Yaml\NodeKey;
 use Dallgoot\Yaml\NodeRoot;
 use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\Tag;
 
 /**
  * Class NodeTagTest.
@@ -33,7 +34,6 @@ class NodeTagTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
         $this->nodeTag = new NodeTag('!!str 654',1);
     }
 
@@ -78,5 +78,11 @@ class NodeTagTest extends TestCase
         // add yamlObject to NodeRoot
         $rootNode->build($yamlObject);// this triggers this->nodeTag->build
         $this->assertTrue($yamlObject->isTagged());
+        // test "unknown" ag: must return a Tag object
+        $this->nodeTag = new NodeTag('!!unknown 654',1);
+        $built = $this->nodeTag->build();
+        $this->assertTrue($built instanceof Tag);
+        $this->assertEquals("!!unknown", $built->tagName);
+        $this->assertEquals("654", $built->value);
     }
 }

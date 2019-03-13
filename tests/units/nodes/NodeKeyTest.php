@@ -4,6 +4,7 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\NodeKey;
 use Dallgoot\Yaml\Node;
 use Dallgoot\Yaml\NodeBlank;
@@ -55,6 +56,15 @@ class NodeKeyTest extends TestCase
     }
 
     /**
+     * @covers \Dallgoot\Yaml\NodeKey::__construct
+     */
+    public function testConstructException(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->nodeKey->__construct('not a key at all and no matches', 1);
+    }
+
+    /**
      * @covers \Dallgoot\Yaml\NodeKey::setIdentifier
      */
     public function testSetIdentifier(): void
@@ -67,20 +77,20 @@ class NodeKeyTest extends TestCase
         $this->assertEquals('newkey', $identifier->getValue($this->nodeKey));
 
         $this->nodeKey->setIdentifier('!!str 1.2');
-        $this->assertEquals('!!str', $this->nodeKey->tag);
+        $this->assertEquals(null, $this->nodeKey->tag);
         $this->assertEquals('1.2', $identifier->getValue($this->nodeKey));
 
         $this->nodeKey->setIdentifier('&anchor 1.2');
-        $this->assertEquals('&anchor', $this->nodeKey->anchor);
+        $this->assertEquals(null, $this->nodeKey->anchor);
         $this->assertEquals('1.2', $identifier->getValue($this->nodeKey));
     }
 
     /**
      * @covers \Dallgoot\Yaml\NodeKey::setIdentifier
      */
-    private function setIdentifierAsEmptyString()
+    public function testSetIdentifierAsEmptyString()
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(\ParseError::class);
         $this->nodeKey->setIdentifier('');
     }
 
@@ -172,6 +182,11 @@ class NodeKeyTest extends TestCase
      */
     public function testBuild(): void
     {
+        $keyTagged = new NodeKey('!!str 1.2: value', 1);
+        $built = $keyTagged->build();
+        $this->assertTrue(property_exists($built, '1.2'));
+        $this->assertEquals('value', $built->{'1.2'});
+        //
         $built = $this->nodeKey->build();
         $this->assertTrue(property_exists($built, 'key'));
         $this->assertEquals('value', $built->key);

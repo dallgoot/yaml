@@ -6,6 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodeScalar;
 use Dallgoot\Yaml\Node;
+use Dallgoot\Yaml\NodeBlank;
 use Dallgoot\Yaml\NodeKey;
 use Dallgoot\Yaml\NodeLit;
 use Dallgoot\Yaml\NodeList;
@@ -56,8 +57,23 @@ class NodeScalarTest extends TestCase
     public function testBuild(): void
     {
         $this->assertEquals("a string to test", $this->nodeScalar->build());
+        //
         $this->nodeScalar->value = new NodeScalar('another string', 2);
         $this->assertEquals('another string', $this->nodeScalar->build());
+        //
+        $this->nodeScalar->raw = "123";
+        $this->nodeScalar->value = null;
+        $this->assertEquals(123, $this->nodeScalar->build());
+    }
+
+        /**
+     * @covers \Dallgoot\Yaml\NodeScalar::build
+     */
+    public function testBuildTagged(): void
+    {
+        $this->nodeScalar = new NodeScalar("123", 42);
+        $this->nodeScalar->tag = '!!str';
+        $this->assertEquals('123', $this->nodeScalar->build());
     }
 
     /**
@@ -74,7 +90,8 @@ class NodeScalarTest extends TestCase
         $parent2 = new NodeKey('  emptykey2:', 1);
         $this->nodeScalar = new NodeScalar('somestring', 2);
         $parent2->add($this->nodeScalar);
-        $this->assertEquals($parent2, $this->nodeScalar->getTargetOnLessIndent($parent2));
+        $blankNode = new NodeBlank('', 3);
+        $this->assertEquals($parent2, $this->nodeScalar->getTargetOnLessIndent($blankNode));
         $this->assertEquals($parent2, $this->nodeScalar->getParent());
     }
 

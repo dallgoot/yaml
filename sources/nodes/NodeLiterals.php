@@ -80,27 +80,31 @@ abstract class NodeLiterals extends Node
     /**
      * Gets the correct string for child value.
      *
-     * @param      Node         $child      The child
+     * @param      object         $child      The child
      * @param      integer      $refIndent  The reference indent
      *
      * @return     Node|string  The child value.
      * @todo       double check behaviour for KEY and ITEM
      */
-    protected function getChildValue(Node $child, int $refIndent):string
+    protected function getChildValue(object $child, int $refIndent):string
     {
         $value = $child->value;
+        $start = '';
         if (is_null($value)) {
-            return $child instanceof NodeQuoted ? $child->build() : ltrim($child->raw);
-        } else {
-            if ($value instanceof Node) {
-                $value = new NodeList($value);
+            if ($child instanceof NodeQuoted) {
+                return $child->build();
+            } elseif ($child instanceof NodeBlank) {
+                return '';
+            } else {
+                return ltrim($child->raw);
             }
-            $start = '';
-            if (($child instanceof NodeKey || $child instanceof NodeItem) && $value instanceof NodeList) {
-                $start = ltrim($child->raw)."\n";
-            }
-            return $start.$this->getFinalString($value, $refIndent);
+        } elseif ($value instanceof NodeScalar) {
+            $value = new NodeList($value);
+
+        } elseif ($value instanceof NodeList && !($child instanceof NodeScalar)) {
+            $start = ltrim($child->raw)."\n";
         }
+        return $start.$this->getFinalString($value, $refIndent);
     }
 
     public function isAwaitingChild(Node $node):bool

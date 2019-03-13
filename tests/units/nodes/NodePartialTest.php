@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\NodePartial;
 use Dallgoot\Yaml\Node;
 use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\NodeBlank;
 use Dallgoot\Yaml\NodeKey;
 use Dallgoot\Yaml\NodeQuoted;
 
@@ -32,7 +33,6 @@ class NodePartialTest extends TestCase
      */
     protected function setUp(): void
     {
-        /** @todo Maybe add some arguments to this constructor */
         $this->nodePartial = new NodePartial(' " partially quoted');
     }
 
@@ -48,6 +48,36 @@ class NodePartialTest extends TestCase
         $this->assertTrue($this->nodePartial->specialProcess($node, $blankBuffer));
         $this->assertTrue($parent->value instanceof NodeQuoted);
         $this->assertEquals(" partially quoted end of quoting", $parent->value->build());
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\NodePartial::specialProcess
+     */
+    public function testSpecialProcessWithPreviousLineFeed(): void
+    {
+        $this->nodePartial = new NodePartial(" ' partially quoted\n");
+        $blankBuffer = [];
+        $node = new NodeScalar(" end of quoting'", 2);
+        $parent = new NodeScalar(' emptykey:', 1);
+        $parent->add($this->nodePartial);
+        $this->assertTrue($this->nodePartial->specialProcess($node, $blankBuffer));
+        $this->assertTrue($parent->value instanceof NodeQuoted);
+        $this->assertEquals(" partially quoted\nend of quoting", $parent->value->build());
+
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\NodePartial::specialProcess
+     */
+    public function testSpecialProcessWithNodeBlank(): void
+    {
+        $blankBuffer = [];
+        $current = new NodeBlank('', 2);
+        $parent = new NodeScalar(' emptykey:', 1);
+        $parent->add($this->nodePartial);
+        $this->assertTrue($this->nodePartial->specialProcess($current, $blankBuffer));
+        $this->assertTrue($parent->value instanceof NodePartial);
+        $this->assertEquals(" \" partially quoted\n", $parent->value->raw);
     }
 
     /**

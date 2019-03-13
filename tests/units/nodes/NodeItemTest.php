@@ -93,10 +93,12 @@ class NodeItemTest extends TestCase
         $itemNode = new NodeItem('- item2', 1);
         $this->assertEquals($rootNode, $this->nodeItem->getTargetOnEqualIndent($itemNode));
         //
+        $rootNode = new NodeRoot;
         $this->nodeItem = new NodeItem('- sameindentitem', 3);
-        $rootNode->add($this->nodeItem);
         $keyNode = new NodeKey('key_with_no_indent_a_sequence:', 1);
-        $this->nodeItem->add($keyNode);
+        $rootNode->add($keyNode);
+        $keyNode->add($this->nodeItem);
+        // $this->nodeItem->add($keyNode);
         $itemNode2 = new NodeItem('- item_with_no_indent: 123', 2);
         $parent = $this->nodeItem->getTargetOnEqualIndent($itemNode2);
         $this->assertEquals($rootNode, $parent);
@@ -132,7 +134,7 @@ class NodeItemTest extends TestCase
     /**
      * @covers \Dallgoot\Yaml\NodeItem::build
      */
-    private function buildWhenParentIsString()
+    public function testBuildWhenParentIsString()
     {
         $this->expectException(\Exception::class);
         $parent = '';
@@ -142,7 +144,7 @@ class NodeItemTest extends TestCase
     /**
      * @covers \Dallgoot\Yaml\NodeItem::build
      */
-    private function buildWhenParentIsObject()
+    public function testBuildWhenParentIsObject()
     {
         $this->expectException(\Exception::class);
         $parent = new \StdClass;

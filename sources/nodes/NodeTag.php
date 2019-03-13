@@ -34,7 +34,7 @@ class NodeTag extends NodeActions
      */
     public function build(&$parent = null)
     {
-        if ($this->getParent() instanceof NodeRoot && is_null($this->value)) {
+        if (is_null($this->value) && $this->getParent() instanceof NodeRoot) {
             $this->getParent()->getYamlObject()->addTag($this->tag);
             return;
         }

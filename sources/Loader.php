@@ -93,7 +93,9 @@ final class Loader
     {
         $source = $this->content ?? preg_split("/\n/m", preg_replace('/(\r\n|\r)/', "\n", $strContent), 0, PREG_SPLIT_DELIM_CAPTURE);
         //TODO : be more permissive on $strContent values
-        if (!is_array($source) || !count($source)) throw new \Exception(self::EXCEPTION_LINE_SPLIT);
+        if ($strContent==='' || !is_array($source) || !count($source)) {
+            throw new \Exception(self::EXCEPTION_LINE_SPLIT);
+        }
         foreach ($source as $key => $value) {
             yield ++$key => $value;
         }
