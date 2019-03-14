@@ -21,7 +21,7 @@ final class Loader
     public const NO_OBJECT_FOR_DATE    = 8;//DONT import date strings as dateTime Object
 
     //private
-    /* @var null|false|array */
+    /* @var null|array */
     private $content;
     /* @var null|string */
     private $filePath;
