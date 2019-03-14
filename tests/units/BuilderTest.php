@@ -5,13 +5,17 @@ namespace Test\Dallgoot\Yaml;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\Builder;
-use Dallgoot\Yaml\NodeRoot;
-use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Node;
-use Dallgoot\Yaml\NodeKey;
-use Dallgoot\Yaml\NodeItem;
 use Dallgoot\Yaml\NodeBlank;
+use Dallgoot\Yaml\NodeDocStart;
+use Dallgoot\Yaml\NodeDocEnd;
+use Dallgoot\Yaml\NodeItem;
+use Dallgoot\Yaml\NodeKey;
+use Dallgoot\Yaml\NodeRoot;
+use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\NodeSetKey;
 
 /**
  * Class BuilderTest.
@@ -49,9 +53,22 @@ class BuilderTest extends TestCase
 
     private function buildSimpleSequence()
     {
-        // create a yaml mapping
+        // create a yaml sequence
         $root = new NodeRoot;
         $root->add(new NodeItem('- itemvalue', 1));
+        return $this->builder::buildContent($root);
+    }
+
+    private function buildMultiDoc()
+    {
+        $root = new NodeRoot;
+        $root->add(new NodeDocStart('---', 1));
+        $root->add(new NodeKey('key: value', 2));
+        $root->add(new NodeDocEnd('...', 3));
+        $root->add(new NodeDocStart('---', 4));
+        $root->add(new NodeKey('key: value', 5));
+        $root->add(new NodeDocStart('---', 6));
+        $root->add(new NodeKey('key: value', 7));
         return $this->builder::buildContent($root);
     }
 
@@ -77,7 +94,31 @@ class BuilderTest extends TestCase
         $this->assertTrue($yamlSequence instanceof YamlObject);
         $this->assertArrayHasKey(0, $yamlSequence);
         $this->assertEquals($yamlSequence[0], 'itemvalue');
+        // test multi document
+        $multiDoc = $this->buildMultiDoc();
+        $this->assertTrue(is_array($multiDoc));
+        $this->assertTrue(count($multiDoc) === 3);
+        $this->assertArrayHasKey(0, $multiDoc);
+        $this->assertTrue($multiDoc[0] instanceof YamlObject);
+        $this->assertArrayHasKey(1, $multiDoc);
+        $this->assertTrue($multiDoc[1] instanceof YamlObject);
+        $this->assertArrayHasKey(2, $multiDoc);
+        $this->assertTrue($multiDoc[2] instanceof YamlObject);
+    }
 
+    /**
+     * @covers \Dallgoot\Yaml\Builder::buildContent
+     * @todo   test :
+     *  simple literal
+     *  only JSON content
+     *  multidocument
+     */
+    public function testBuildContentException(): void
+    {
+        $this->expectException(\Exception::class);
+        $root = new NodeRoot;
+        $root->value = null;
+        $this->builder::buildContent($root);
     }
 
     /**
@@ -91,6 +132,55 @@ class BuilderTest extends TestCase
         $this->assertTrue($yamlObject instanceof YamlObject);
     }
 
+    /**
+     * @covers \Dallgoot\Yaml\Builder::buildDocument
+     */
+    public function testBuildDocumentDebug(): void
+    {
+        // ob_start();
+        // ob_end_clean();
+        $output = <<<'EOF'
+Document #0
+Dallgoot\Yaml\NodeRoot Object
+(
+    [line->indent] =>  -> -1
+    [value] => Dallgoot\Yaml\NodeList Object
+        (
+            [type] => 
+            [flags:SplDoublyLinkedList:private] => 0
+            [dllist:SplDoublyLinkedList:private] => Array
+                (
+                )
+
+        )
+
+    [raw] => 
+    [parent] => NO PARENT!!!
+)
+
+EOF;
+        $debug = new \ReflectionProperty(Builder::class, '_debug');
+        $debug->setAccessible(true);
+        $debug->setValue(3);
+        $list = new NodeList;
+        $this->builder::buildDocument($list, 0);
+        $this->expectOutputString($output);
+        $debug->setValue(0);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Builder::buildDocument
+     */
+    public function testBuildDocumentException(): void
+    {
+        $this->expectException(\ParseError::class);
+        // $nodekey = new NodeDocStart('', 1);
+        // $nodekey = new \StdClass;
+        // $list = new NodeList($nodekey);
+        $list = new NodeList();
+        $list->push(new \StdClass);
+        $yamlObject = $this->builder->buildDocument($list, 0);
+    }
     /**
      * @covers \Dallgoot\Yaml\Builder::getScalar
      */

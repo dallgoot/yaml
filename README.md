@@ -58,6 +58,12 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - verify LICENSE nature and set up in docblocks accordingly
 - set up @link to github in docblocks
 - verify TODOS in code
+- verify gitattributes
+- create composer metrics command ?
+- composer update + tests before release
+- move example.php + d.php to examples/
+- check LICENSE type (MIT ?)
+- keep ./runtests ???
 
 ## Improvements
 

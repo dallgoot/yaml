@@ -60,7 +60,7 @@ class NodeKeyTest extends TestCase
      */
     public function testConstructException(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(\ParseError::class);
         $this->nodeKey->__construct('not a key at all and no matches', 1);
     }
 

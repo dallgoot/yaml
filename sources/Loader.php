@@ -72,7 +72,7 @@ final class Loader
         $adle = "auto_detect_line_endings";
         $prevADLE = ini_get($adle);
         !$prevADLE && ini_set($adle, "true");
-        $content = file($absolutePath, FILE_IGNORE_NEW_LINES);
+        $content = @file($absolutePath, FILE_IGNORE_NEW_LINES);
         !$prevADLE && ini_set($adle, "false");
         if (is_bool($content)) {
             throw new \Exception(sprintf(self::EXCEPTION_READ_ERROR, $absolutePath));
@@ -91,9 +91,16 @@ final class Loader
      */
     private function getSourceGenerator($strContent = null):\Generator
     {
-        $source = $this->content ?? preg_split("/\n/m", preg_replace('/(\r\n|\r)/', "\n", $strContent), 0, PREG_SPLIT_DELIM_CAPTURE);
-        //TODO : be more permissive on $strContent values
-        if ($strContent==='' || !is_array($source) || !count($source)) {
+        if (is_null($strContent) && is_null($this->content)) {
+            throw new \Exception(self::EXCEPTION_LINE_SPLIT);
+        }
+        if (!is_null($this->content)) {
+            $source = $this->content;
+        } else { //TODO : be more permissive on $strContent values
+            $simplerLineFeeds = preg_replace('/(\r\n|\r)/', "\n", $strContent);
+            $source = preg_split("/\n/m", $simplerLineFeeds, 0, PREG_SPLIT_DELIM_CAPTURE);
+        }
+        if (!is_array($source) || !count($source)) {
             throw new \Exception(self::EXCEPTION_LINE_SPLIT);
         }
         foreach ($source as $key => $value) {

@@ -50,10 +50,10 @@ class LoaderTest extends TestCase
 
     /**
      * @covers \Dallgoot\Yaml\Loader::load
+     * @covers \Dallgoot\Yaml\Loader::getSourceGenerator
      */
     public function testLoad(): void
     {
-        // $this->expectException(\Exception::class);
         $this->assertEquals($this->loader, $this->loader->load(__DIR__.'/../definitions/parsing_tests.yml'));
     }
 
@@ -63,7 +63,7 @@ class LoaderTest extends TestCase
     public function testLoadNoRights(): void
     {
         $this->expectException(\Exception::class);
-        $this->loader->load('ssh:example.com');
+        $this->loader->load('/etc/shadow');
     }
 
     /**
@@ -71,12 +71,22 @@ class LoaderTest extends TestCase
      */
     public function testGetSourceGenerator(): void
     {
-        // $this->expectException(\Exception::class);
-        $reflector = new \ReflectionClass($this->loader);
-        $method = $reflector->getMethod('getSourceGenerator');
+        $method = new \ReflectionMethod($this->loader, 'getSourceGenerator');
         $method->setAccessible(true);
-        $result = $method->invoke($this->loader);
+        $result = $method->invoke($this->loader, '');
         $this->assertTrue($result instanceof \Generator, 'getSourceGenerator is NOT a \\Generator');
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Loader::getSourceGenerator
+     */
+    public function testGetSourceGeneratorException(): void
+    {
+        $this->expectException(\Exception::class);
+        $method = new \ReflectionMethod($this->loader, 'getSourceGenerator');
+        $method->setAccessible(true);
+        $generator = $method->invoke($this->loader, null);
+        $generator->next();
     }
 
     /**
@@ -84,7 +94,7 @@ class LoaderTest extends TestCase
      */
     public function testParse(): void
     {
-        $result = $this->loader->parse('key: keyvalue\n  other string\notherkey: othervalue');
+        $result = $this->loader->parse("key: keyvalue\n  other string\notherkey: othervalue");
         $this->assertTrue($result instanceof YamlObject);
         $result = $this->loader->parse('key: keyvalue');
         $this->assertTrue($result instanceof YamlObject);
@@ -92,6 +102,9 @@ class LoaderTest extends TestCase
         $this->assertTrue(is_array($multidoc), 'result is NOT a multi-documents (ie. array)');
         $this->assertTrue($multidoc[0] instanceof YamlObject, 'array #0 is NOT a YamlObject');
         $this->assertTrue($multidoc[1] instanceof YamlObject, 'array #1 is NOT a YamlObject');
+        $yamlMapping = $this->loader->parse("key:\n    insidekey: value\nlessindent: value");
+        $this->assertTrue($yamlMapping instanceof YamlObject);
+        $this->assertTrue(\property_exists($yamlMapping, 'key'));
     }
 
     /**
@@ -99,8 +112,9 @@ class LoaderTest extends TestCase
      */
     public function testParseWithError(): void
     {
-        $this->expectException(\Error::class);
-        $result = $this->loader->parse(new StdClass);
+        $this->expectException(\Exception::class);
+        // fails because theres no NodeSetKey before
+        $result = $this->loader->parse(' :: keyvalue');
     }
 
     /**

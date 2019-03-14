@@ -57,7 +57,7 @@ class YamlTest extends TestCase
     public function testParseException(): void
     {
         $this->expectException(\Exception::class);
-        $this->yaml::parse('');
+        $this->yaml::parse('::');
     }
 
     /**
