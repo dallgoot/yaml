@@ -11,7 +11,7 @@ use Dallgoot\Yaml\Regex;
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
- * @link https://github.com/john-doe/my-awesome-project
+ * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
  * @covers \Dallgoot\Yaml\Regex

@@ -2,11 +2,11 @@
 namespace Dallgoot\Yaml;
 
 /**
- * TODO
+ * A collection of Nodes
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  */
 class NodeList extends \SplDoublyLinkedList
 {
@@ -138,6 +138,12 @@ class NodeList extends \SplDoublyLinkedList
         return trim($output);
     }
 
+    /**
+     * Remove NodeComment and returns a new one
+     *
+     * @return   NodeList  a new NodeList without NodeComment in it
+     * @todo     double check that NodeComment are built
+     */
     public function filterComment():NodeList
     {
         $this->rewind();

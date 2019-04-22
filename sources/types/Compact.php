@@ -3,10 +3,11 @@
 namespace Dallgoot\Yaml;
 
 /**
+ * This a type that encapsulates a mapping or sequence that are declared as compact/hosrt notation
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  */
 class Compact extends \ArrayIterator implements \JsonSerializable
 {
@@ -18,7 +19,8 @@ class Compact extends \ArrayIterator implements \JsonSerializable
     public function __construct($candidate = null)
     {
         $candidate = $candidate ?? [];
-        parent::__construct($candidate, \ArrayIterator::STD_PROP_LIST|\ArrayIterator::ARRAY_AS_PROPS); //1 = Array indices can be accessed as properties in read/write.
+        //ArrayIterator options --> Array indices can be accessed as properties in read/write.
+        parent::__construct($candidate, \ArrayIterator::STD_PROP_LIST|\ArrayIterator::ARRAY_AS_PROPS);
     }
 
     /**

@@ -22,7 +22,7 @@ use Dallgoot\Yaml\NodeSetKey;
  *
  * @author Stephane Rebai <stephane.rebai@gmail.com>.
  * @license https://opensource.org/licenses/MIT The MIT license.
- * @link https://github.com/john-doe/my-awesome-project
+ * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
  * @covers \Dallgoot\Yaml\Builder
@@ -137,28 +137,24 @@ class BuilderTest extends TestCase
      */
     public function testBuildDocumentDebug(): void
     {
-        // ob_start();
-        // ob_end_clean();
-        $output = <<<'EOF'
-Document #0
-Dallgoot\Yaml\NodeRoot Object
-(
-    [line->indent] =>  -> -1
-    [value] => Dallgoot\Yaml\NodeList Object
-        (
-            [type] => 
-            [flags:SplDoublyLinkedList:private] => 0
-            [dllist:SplDoublyLinkedList:private] => Array
-                (
-                )
-
-        )
-
-    [raw] => 
-    [parent] => NO PARENT!!!
-)
-
-EOF;
+        $output =
+                "Document #0\n".
+                "Dallgoot\Yaml\NodeRoot Object\n".
+                "(\n".
+                "    [line->indent] =>  -> -1\n".
+                "    [value] => Dallgoot\Yaml\NodeList Object\n".
+                "        (\n".
+                "            [type] => \n".
+                "            [flags:SplDoublyLinkedList:private] => 0\n".
+                "            [dllist:SplDoublyLinkedList:private] => Array\n".
+                "                (\n".
+                "                )\n".
+                "\n".
+                "        )\n".
+                "\n".
+                "    [raw] => \n".
+                "    [parent] => NO PARENT!!!\n".
+                ")\n";
         $debug = new \ReflectionProperty(Builder::class, '_debug');
         $debug->setAccessible(true);
         $debug->setValue(3);
@@ -174,9 +170,6 @@ EOF;
     public function testBuildDocumentException(): void
     {
         $this->expectException(\ParseError::class);
-        // $nodekey = new NodeDocStart('', 1);
-        // $nodekey = new \StdClass;
-        // $list = new NodeList($nodekey);
         $list = new NodeList();
         $list->push(new \StdClass);
         $yamlObject = $this->builder->buildDocument($list, 0);

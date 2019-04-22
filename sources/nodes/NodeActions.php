@@ -3,10 +3,12 @@
 namespace Dallgoot\Yaml;
 
 /**
+ * Common parent to NodeAnchor, NodeTag
+ * Extract identifier (tag or anchor) and attach its value (another Node)
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  */
 class NodeActions extends Node
 {

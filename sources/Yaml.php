@@ -3,16 +3,24 @@
 namespace Dallgoot;
 
 /**
- * TODO
+ * Library that :
+ * - reads YAML as PHP types
+ * - writes PHP types as YAML content
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
+ *
+ * @see YamlObject
+ * @see Compact
+ * @see Tag
  */
 final class Yaml
 {
     /**
-     * Parse the given Yaml string to a PHP type
+     * Parse the given Yaml string to either :
+     * - a YamlObject
+     * - an array of YamlObject
      *
      * @param string   $someYaml Some yaml
      * @param int|null $options  from Loader class, bitwise combination of
@@ -23,9 +31,11 @@ final class Yaml
      * @param int|null $debug    define the level of debugging (true = default)
      *
      * @return YamlObject|array|null a Yaml document as YamlObject OR multiple documents as an array of YamlObject,
-     *                               NULL if Error
+     *                               NULL if Error and option Loader::NO_PARSING_EXCEPTIONS is set.
      * @throws \Exception coming from Dallgoot\Yaml\Loader
      * @see    Dallgoot\Yaml\Loader
+     *
+     * @todo transpose Loader::NO_PARSING_EXCEPTIONS in this class
      */
     public static function parse(string $someYaml, $options = null, $debug = null)
     {
@@ -37,7 +47,9 @@ final class Yaml
     }
 
     /**
-     * Load the given file and parse its content (assumed YAML) to a PHP type
+     * Load the given file and parse its content (assumed YAML) to either :
+     * - a YamlObject
+     * - an array of YamlObject
      *
      * @param string   $fileName Some file path name
      * @param int|null $options  from Loader class, bitwise combination of
@@ -103,6 +115,15 @@ final class Yaml
         }
     }
 
+    /**
+     * Determines if $subject is one of the NodeTypes provided (as strings) in $comparison array
+     * A node type is one of the class found in "nodes" folder.
+     *
+     * @param      object   $subject     The subject
+     * @param      array    $comparison  A list of string whre each is a Node type e.g. 'NodeKey', 'NodeBlank', etc.
+     *
+     * @return     boolean  True if $subject is one of $comparison, False otherwise.
+     */
     public static function isOneOf($subject, array $comparison):bool
     {
         foreach ($comparison as $className) {

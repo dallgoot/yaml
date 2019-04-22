@@ -6,7 +6,7 @@ use Dallgoot\Yaml;
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  * @todo    handle tags like  <tag:clarkevans.com,2002:invoice>
  */
 class NodeTag extends NodeActions

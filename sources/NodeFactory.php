@@ -3,11 +3,14 @@
 namespace Dallgoot\Yaml;
 
 /**
- * TODO
+ * Analyzes $nodeString
+ * determines the appropriate NodeType
+ * constructs it
+ * and returns it
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  */
 final class NodeFactory
 {
@@ -121,6 +124,7 @@ final class NodeFactory
      * @param string $nodeString The node value
      * @param int    $line       The line
      *
+     *@todo replace $action[0] with $first if applicable
      */
     final private static function onNodeAction(string $first, string $nodeString, int $line):Node
     {

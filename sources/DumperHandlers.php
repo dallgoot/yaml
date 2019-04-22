@@ -10,7 +10,7 @@ use \SplDoublyLinkedList as DLL;
  * @license Apache 2.0
  * @link    https://github.com/dallgoot/yaml
  */
-class Dumper
+class DumperHandlers
 {
     private const INDENT = 2;
     private const WIDTH  = 120;

@@ -3,10 +3,14 @@
 namespace Dallgoot\Yaml;
 
 /**
+ * An abstract type for all Nodes that defines generic behaviour
+ * Node deriving from this MUST implement the "build" method
+ *
+ * Note: custom var_dump output is defined by method "__debugInfo"
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  */
 abstract class Node
 {

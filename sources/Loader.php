@@ -4,11 +4,14 @@ declare(strict_types=1);
 namespace Dallgoot\Yaml;
 
 /**
- * TODO
+ * Process reading a Yaml Content (loading file if required)
+ * and for each line affects appropriate NodeType
+ * and attach to proper parent Node
+ * ie. constructs a tree of Nodes with a NodeRoot as first Node
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  */
 final class Loader
 {
@@ -88,6 +91,7 @@ final class Loader
      *
      * @throws \Exception if self::content is empty or splitting on linefeed has failed
      * @return \Generator  The source iterator.
+     * @todo make sure linefeed replacing only happens on end of the lines
      */
     private function getSourceGenerator($strContent = null):\Generator
     {
@@ -96,7 +100,7 @@ final class Loader
         }
         if (!is_null($this->content)) {
             $source = $this->content;
-        } else { //TODO : be more permissive on $strContent values
+        } else {
             $simplerLineFeeds = preg_replace('/(\r\n|\r)/', "\n", $strContent);
             $source = preg_split("/\n/m", $simplerLineFeeds, 0, PREG_SPLIT_DELIM_CAPTURE);
         }
@@ -127,7 +131,7 @@ final class Loader
                 $node = NodeFactory::get($lineString, $lineNb);
                 if ($this->_debug === 1) echo get_class($node)."\n";
                 if ($this->needsSpecialProcess($node, $previous)) continue;
-                $this->attachBlankLines($previous);
+                $this->_attachBlankLines($previous);
                 switch ($node->indent <=> $previous->indent) {
                     case -1: $target = $previous->getTargetOnLessIndent($node);
                         break;
@@ -137,7 +141,7 @@ final class Loader
                 }
                 $previous = $target->add($node);
             }
-            $this->attachBlankLines($previous);
+            $this->_attachBlankLines($previous);
             if ($this->_debug === 1){
                 return;
             }
@@ -149,14 +153,14 @@ final class Loader
 
 
     /**
-     * Attach blank(empty) Nodes savec in $blankBuffer to their parent (it means they are needed)
+     * Attach blank (empty) Nodes saved in $_blankBuffer to their parent (it means they are meaningful content)
      *
      * @param array $emptyLines The empty lines
-     * @param Node  $previous   The previous
+     * @param Node  $previous   The previous Node
      *
      * @return null
      */
-    public function attachBlankLines(Node &$previous)
+    private function _attachBlankLines(Node &$previous)
     {
         foreach ($this->_blankBuffer as $blankNode) {
             if ($blankNode !== $previous) {
@@ -175,7 +179,7 @@ final class Loader
      * @return boolean  if True self::parse skips changing previous and adding to parent
      * @see self::parse
      */
-    public function needsSpecialProcess(Node $current, Node &$previous):bool
+    private function needsSpecialProcess(Node $current, Node &$previous):bool
     {
         $deepest = $previous->getDeepestNode();
         if ($deepest instanceof NodePartial) {
@@ -186,7 +190,7 @@ final class Loader
         return false;
     }
 
-    public function onError(object $e, \Generator $generator)
+    private function onError(object $e, \Generator $generator)
     {
         $file = $this->filePath ? realpath($this->filePath) : '#YAML STRING#';
         $message = $e->getMessage()."\n ".$e->getFile().":".$e->getLine();

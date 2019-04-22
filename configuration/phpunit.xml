@@ -46,8 +46,9 @@
       </whitelist>
    </filter>
    <logging>
-      <log type="coverage-html" target="../documentation/codecoverage" lowUpperBound="40" highLowerBound="70"/>
+      <log type="coverage-html" target="../documentation/codecoverage/php-code-coverage" lowUpperBound="40" highLowerBound="80"/>
       <!-- <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/> -->
-      <log type="coverage-clover" target="../documentation/coverage-clover.xml"/>
+      <log type="coverage-clover" target="../documentation/codecoverage/coverage-clover.xml"/>
+      <log type="coverage-xml" target="../documentation/codecoverage/phpunit" />
    </logging>
 </phpunit>

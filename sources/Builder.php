@@ -3,15 +3,15 @@
 namespace Dallgoot\Yaml;
 
 /**
- * Constructs the result (YamlObject or array) according to every Node and respecting value
+ * Constructs the result (YamlObject or array) according to every Nodes and their values
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  */
 final class Builder
 {
-    /** @var bool */
+    /** @var boolean */
     public static $dateAsObject = false;
 
     private static $_debug;
@@ -21,10 +21,10 @@ final class Builder
     /**
      * Builds a file.  check multiple documents & split if more than one documents
      *
-     * @param NodeRoot $root  The root node : Node with Node->type === YAML::ROOT
-     * @param int  $_debug the level of debugging requested
+     * @param NodeRoot $root  The NodeRoot node
+     * @param int  $_debug    the level of debugging requested
      *
-     * @return array|YamlObject      list of documents or just one.
+     * @return array|YamlObject   list of documents or just one.
      */
     public static function buildContent(NodeRoot $root, int $_debug = 0)
     {
@@ -53,7 +53,7 @@ final class Builder
     }
 
     /**
-     *  Builds the tree of Node for this document (as NodeList)
+     *  Builds the tree of Node (NodeList) for this document
      *
      * @param NodeList $list   the list of nodes that constitutes the current document
      * @param int      $docNum the index (starts @ 0) of this document in the whole YAML content provided to self::buildContent
@@ -85,7 +85,8 @@ final class Builder
      * @param string $v a string value
      *
      * @return mixed The value with appropriate PHP type
-     * @throws \Exception if happens in Regex::isDate or Regex::isNumber
+     * @throws \Exception if it happens in Regex::isDate or Regex::isNumber
+     * @todo implement date as DateTime Object
      */
     public static function getScalar(string $v, bool $onlyScalar = false)
     {
@@ -109,7 +110,6 @@ final class Builder
      * @param string $v a string value
      *
      * @return int|float   The scalar value with appropriate PHP type
-     * @todo make sure there 's only ONE dot before cosndering a float
      */
     private static function getNumber(string $v)
     {

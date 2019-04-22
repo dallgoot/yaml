@@ -16,9 +16,9 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - recover from some parsing errors
 - tolerance to tabulations
 - DEFINE debug levels :
-  - 1 : print each line Node Type class
-  - 2 : print Loader global map structure
-  - 3 : print each document NodeList
+  - 1 : print each line Node Type class and exit
+  - 2 : print Loader global map structure and exit
+  - 3 : print each document NodeList and exit
 
 ## Support:
 
@@ -38,32 +38,34 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - complex mapping (Note: keys are JSON encoded strings)
 - real reference behaviour : changing reference value modify other reference calls
 
-## Todo
+## Before releasing
 
 - DUMPER:
   - implement/verify Dumper::Options
   - finish implementation
   - quote strings that are not valid values in YAML syntax
   - set up tests
-- Code coverage : Units tests for each classes methods
-- implement specific unit test for each YAML spec. invalid cases (what must not happen)
-- define levels for Exceptions
-- verify YAML DEFINITIONS files before launching tests
-- double check references/anchors changes in YamlObject
-- Documentation : (doxygen ?)
-  - build classes docs
-  - Examples of each function of the API
-- docker-compose for easy testing
-- Benchmarks against other libs
-- verify LICENSE nature and set up in docblocks accordingly
-- set up @link to github in docblocks
 - verify TODOS in code
+- Documentation : (doxygen ?)
+"require": {
+  "jimgitsit/documen": "dev-master"
+}
+- refactor namespace/classnames for nodes types : Dallgoot\Yaml\Nodes\Actions
+  - build classes docs
+- Examples
+  - double check references/anchors changes in YamlObject
+  - Examples of each function of the API
 - verify gitattributes
-- create composer metrics command ?
 - composer update + tests before release
-- move example.php + d.php to examples/
-- check LICENSE type (MIT ?)
+- docker-compose for easy testing
+
+## ToDo
+- rationalize levels for Exceptions
+- verify YAML DEFINITIONS files before launching tests
+- implement specific unit test for each YAML spec. invalid cases (what must not happen)
+- Code coverage : target 100%
 - keep ./runtests ???
+- Benchmarks against other libs
 
 ## Improvements
 
@@ -73,6 +75,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - OPTION: Force renaming key names that are not valid PHP property name
 - directives : currently ignored, should handle tag determination : local tag associated with global URI tag directive
 - TAG : function for 'php/object' that provides the correct namespace to build
+- NEON support
 
 ## Performances
 

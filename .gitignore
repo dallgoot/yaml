@@ -2,16 +2,9 @@
 .vscode/
 vendor/
 dependencies/
-diagram*
-output_image*
-apigen.yml
-/*.php
-**/coherence.md
-phpinfo
 phpmetrics_report/
 runtests
-example.php
 .phpunit.result.cache
 configuration/daux.json
 emptyFile.test
-documentation/codecoverage
+documentation/*

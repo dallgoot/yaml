@@ -3,15 +3,15 @@
 namespace Dallgoot\Yaml;
 
 /**
- * TODO
+ * Provides the methods available to interact with a Yaml Object : a Yaml Document
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
  */
 class API
 {
-    /** @var null|bool */
+    /** @var null|boolean */
     private $_hasDocStart; // null = no docstart, true = docstart before document comments, false = docstart after document comments
     /** @var null|YamlObject */
     private $_obj;
@@ -25,7 +25,7 @@ class API
     /** @var null|string */
     public $value;
 
-    const UNKNOWN_REFERENCE = "no reference named: '%s' known are : (%s)";
+    const UNKNOWN_REFERENCE = "no reference named: '%s', known are : (%s)";
     const UNAMED_REFERENCE  = "reference MUST have a name";
 
     /**
@@ -86,7 +86,7 @@ class API
     /**
      * Adds a comment.
      *
-     * @param int    $lineNumber The line number at which thecomment should appear
+     * @param int    $lineNumber The line number at which the comment should appear
      * @param string $value      The comment
      *
      * @return null
@@ -112,7 +112,7 @@ class API
     }
 
     /**
-     * Sets the text when the content is *only* a litteral
+     * Sets the text when the content is *only* a literal
      *
      * @param string $value The value
      *

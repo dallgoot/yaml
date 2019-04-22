@@ -3,44 +3,28 @@ namespace Dallgoot\Yaml;
 
 use \ReflectionMethod as RM;
 /**
- * TODO
+ * Provides mechanisms to handle tags
+ * - registering tags and their handler methods
+ * - returning transformed values according to Node type or NodeList
+ *
+ * Note: currently supports ONLY local tags
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
- * @link    TODO : url to specific online doc
+ * @link    https://github.com/dallgoot/yaml
+ *
+ * @todo move legacy tags handlers in a specific class : checking affecting methods to tags mechanisms when theres a global tag
  */
-class TagFactory
+class TagNamespaceLocal implements TagNamespaceInterface
 {
-    private const UNKNOWN_TAG = 'Error: tag "%s" is unknown (have you registered an handler for it? see TagFactory)';
-    private const NO_NAME = '%s Error: a tag MUST have a name';
-    private const WRONG_VALUE = "Error : cannot transform tag '%s' for type '%s'";
-    private const LEGACY_TAGS_HANDLERS = ['!!str'       => 'strHandler',
+    public const LEGACY_TAGS_HANDLERS = ['!!str'       => 'strHandler',
                                           '!!binary'    => 'binaryHandler',
                                           '!set'        => 'setHandler',
-                                          '!!omap'       => 'omapHandler',
+                                          '!!omap'      => 'omapHandler',
                                           '!php/object' => 'symfonyPHPobjectHandler',
                                           '!inline'     => 'inlineHandler',
                                       ];
 
-    public static $registeredHandlers = [];
-
-    /**
-     * Add Handlers for legacy Yaml tags
-     *
-     * @see self::LEGACY_TAGS_HANDLERS
-     */
-    private static function registerLegacyTags()
-    {
-        $reflectAPI = new \ReflectionClass(self::class);
-        $methodsList = [];
-        $list = $reflectAPI->getMethods(RM::IS_FINAL | RM::IS_STATIC & RM::IS_PRIVATE);
-        foreach ($list as $method) {
-            $methodsList[$method->name] = $method->getClosure();
-        }
-        foreach (self::LEGACY_TAGS_HANDLERS as $tagName => $methodName) {
-            self::$registeredHandlers[$tagName] = $methodsList[$methodName];
-        }
-    }
 
     /**
      * Specific Handler for Symfony custom tag : 'php/object'
@@ -51,7 +35,7 @@ class TagFactory
      * @throws Exception if unserialize fails OR if its a NodeList (no support of multiple values for this tag)
      * @return object    the unserialized object according to Node value
      */
-    private final static function symfonyPHPobjectHandler(object $node, &$parent = null)
+    public final static function symfonyPHPobjectHandler(object $node, &$parent = null)
     {
         if ($node instanceof NodeScalar) {
             $phpObject = unserialize($node->raw);
@@ -73,7 +57,7 @@ class TagFactory
      *
      * @todo implements
      */
-    private final static function inlineHandler(object $node, object &$parent = null)
+    public final static function inlineHandler(object $node, object &$parent = null)
     {
         return self::strHandler($node, $parent);
     }
@@ -86,7 +70,7 @@ class TagFactory
      *
      * @return string the value of Node converted to string if needed
      */
-    private final static function strHandler(object $node, object &$parent = null)
+    public final static function strHandler(object $node, object &$parent = null)
     {
         if ($node instanceof Node) {
             // if ($node instanceof NodeKey) {
@@ -116,7 +100,7 @@ class TagFactory
      *
      * @return string  The value considered as 'binary' Note: the difference with strHandler is that multiline have not separation
      */
-    private final static function binaryHandler($node, Node &$parent = null)
+    public final static function binaryHandler($node, Node &$parent = null)
     {
         return self::strHandler($node, $parent);
     }
@@ -130,7 +114,7 @@ class TagFactory
      * @throws     \Exception  if theres a set but no children (set keys or set values)
      * @return     YamlObject|object  process the Set, ie. an object construction with properties as serialized JSON values
      */
-    private final static function setHandler(object $node, Node &$parent = null)
+    public final static function setHandler(object $node, Node &$parent = null)
     {
         if (!($node instanceof NodeList)) {
             throw new \Exception("tag '!!set' can NOT be a single Node");
@@ -148,7 +132,7 @@ class TagFactory
      * @throws \Exception  if theres an omap but no map items
      * @return YamlObject|array process the omap
      */
-    private final static function omapHandler(object $node, Node &$parent = null)
+    public final static function omapHandler(object $node, Node &$parent = null)
     {
         if ($node instanceof Node) {
             if ($node instanceof NodeItem) {
@@ -168,60 +152,4 @@ class TagFactory
         }
     }
 
-    public static function transform(string $identifier, $value)
-    {
-        if (self::isKnown($identifier)) {
-            if (!($value instanceof Node) && !($value instanceof NodeList) ) {
-                throw new \Exception(sprintf(self::WRONG_VALUE, $identifier, gettype($value)));
-            }
-            return self::$registeredHandlers[$identifier]($value);
-        } else {
-            throw new \Exception(sprintf(self::UNKNOWN_TAG, $identifier), 1);
-        }
-    }
-
-    /**
-     * Determines if current is known : either YAML legacy or user added
-     *
-     * @return     boolean  True if known, False otherwise.
-     */
-    public static function isKnown(string $identifier):bool
-    {
-        if (count(self::$registeredHandlers) === 0) {
-            self::registerLegacyTags();
-        }
-        return in_array($identifier, array_keys(self::$registeredHandlers));
-    }
-
-    /**
-     * Allow the user to add a custome tag handler.
-     * Note: That allows to replace handlers for legacy tags also.
-     *
-     * @param      string      $name   The name
-     * @param      Closure     $func   The function
-     *
-     * @throws     \Exception  Can NOT add handler without a name for the tag
-     */
-    public static function addTagHandler(string $name, \Closure $func)
-    {
-        if (empty($name)) {
-            throw new \Exception(sprintf(self::NO_NAME, __METHOD__));
-        }
-        self::$registeredHandlers[$name] = $func;
-    }
-
-    /**
-     * Should verify if the tag is correct
-     *
-     * @param string $providedName The provided name
-     * @todo  is this required ???
-     */
-    // private function checkNameValidity(string $providedName)
-    // {
-        /* TODO  implement and throw Exception if invalid (setName method ???)
-         *The suffix must not contain any “!” character. This would cause the tag shorthand to be interpreted as having a named tag handle. In addition, the suffix must not contain the “[”, “]”, “{”, “}” and “,” characters. These characters would cause ambiguity with flow collection structures. If the suffix needs to specify any of the above restricted characters, they must be escaped using the “%” character. This behavior is consistent with the URI character escaping rules (specifically, section 2.3 of RFC2396).
-
-         regex (([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?
-        */
-    // }
 }
