@@ -13,7 +13,7 @@ use \SplDoublyLinkedList as DLL;
 class Dumper
 {
     private const INDENT = 2;
-    private const WIDTH  = 120;
+    // private const WIDTH  = 120; /// forget this feature for the moment
     private const OPTIONS = 00000;
     private const DATE_FORMAT = 'Y-m-d';
 
@@ -23,6 +23,7 @@ class Dumper
     //options
     public const EXPAND_SHORT = 00001;
     public const SERIALIZE_CUSTOM_OBJECTS = 00010;
+    /** @var int */
     public static $floatPrecision = 4;
 
     // public function __construct(int $options = null)
@@ -42,19 +43,13 @@ class Dumper
      */
     public static function toString($dataType, int $options = null):string
     {
-        if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml");
+        if (empty($dataType)) throw new \Exception(self::class.": No content to convert to Yaml");
         self::$options = is_int($options) ? $options : self::OPTIONS;
-        self::$result = new DLL;
-        if ($dataType instanceof YamlObject) {
-            self::dumpYamlObject($dataType);
-        } elseif (is_array($dataType) && $dataType[0] instanceof YamlObject) {
-            array_map([self::class, 'dumpYamlObject'], $dataType);
-        } else {
-            self::dump($dataType, 0);
+        if (is_scalar($dataType)) {
+            // TODO: what to woth comments ???
+            return "--- ".DumperHandlers::dumpScalar($dataType, 0). self::LINEFEED ;
         }
-        $out = implode("\n", iterator_to_array(self::$result));
-        self::$result = null;
-        return $out;
+        return DumperHandlers::dump($dataType, $options);
     }
 
     /**
@@ -133,27 +128,6 @@ class Dumper
     }
 
     /**
-     * Dumps an array as a YAML sequence
-     *
-     * @param array   $array  The array
-     * @param integer $indent The indent
-     */
-    private static function dumpArray(array $array, int $indent)
-    {
-        $refKeys = range(0, count($array));
-        foreach ($array as $key => $item) {
-            $lineStart = current($refKeys) === $key ? "- " : "- $key: ";
-            if (is_scalar($item)) {
-                self::add($lineStart.self::dump($item,0), $indent);
-            } else {
-                self::add(rtrim($lineStart), $indent);
-                self::dump($item, $indent + self::INDENT);
-            }
-            next($refKeys);
-        }
-    }
-
-    /**
      * Insert comments from YamlObject at specific lines OR add to the value currently at the line
      *
      * @param array $commentsArray  The comments array
@@ -164,71 +138,3 @@ class Dumper
             self::$result->add($lineNb, $comment);
         }
     }
-
-    /**
-     * Dumps an object as a YAML mapping.
-     *
-     * @param      object   $obj     The object
-     * @param      integer  $indent  The indent
-     *
-     */
-    private static function dumpObject(object $obj, int $indent)
-    {
-        if ($obj instanceof Tag) {
-            if (is_scalar($obj->value)) {
-                self::add("!".$obj->tagName.' '.$obj->value, $indent);
-            } else {
-                self::add("!".$obj->tagName, $indent);
-                self::add(self::dump($obj->value, $indent + self::INDENT), $indent + self::INDENT);
-            }
-        }
-        if ($obj instanceof Compact) return self::dumpCompact($obj, $indent);
-        //TODO:  consider dumping datetime as date strings according to a format provided by user or default
-        if ($obj instanceof \DateTime) return $obj->format(self::DATE_FORMAT);
-        $propList = get_object_vars($obj);
-        foreach ($propList as $property => $value) {
-            if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime) {
-                self::add("$property: ".self::dump($value, $indent), $indent);
-            } else {
-                self::add("$property:", $indent);
-                self::dump($value, $indent + self::INDENT);
-            }
-        }
-    }
-
-    /**
-     * Dumps a Compact|mixed (representing an array or object) as the single-line format representation.
-     * All values inside are assumed single-line as well.
-     * Note: can NOT use JSON_encode because of possible reference calls or definitions as : '&abc 123', '*fre'
-     * which would be quoted by json_encode
-     *
-     * @param mixed   $subject The subject
-     * @param integer $indent  The indent
-     *
-     * @return string the string representation (JSON like) of the value
-     */
-    public static function dumpCompact($subject, int $indent)
-    {
-        $pairs = [];
-        if (is_array($subject) || $subject instanceof \ArrayIterator) {
-            $max = count($subject);
-            $objectAsArray = is_array($subject) ? $subject : $subject->getArrayCopy();
-            if(array_keys($objectAsArray) !== range(0, $max-1)) {
-                $pairs = $objectAsArray;
-            } else {
-                $valuesList = [];
-                foreach ($objectAsArray as $value) {
-                    $valuesList[] = is_scalar($value) ? self::dump($value, $indent) : self::dumpCompact($value, $indent);
-                }
-                return '['.implode(', ', $valuesList).']';
-            }
-        } else {
-            $pairs = get_object_vars($subject);
-        }
-        $content = [];
-        foreach ($pairs as $key => $value) {
-            $content[] = "$key: ".(is_scalar($value) ? self::dump($value, $indent) : self::dumpCompact($value, $indent));
-        }
-        return '{'.implode(', ', $content).'}';
-    }
-}

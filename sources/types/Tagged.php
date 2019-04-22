@@ -14,7 +14,7 @@ use \ReflectionMethod as RM;
  * @link    https://github.com/dallgoot/yaml
  * @see     TagFactory
  */
-class Tag
+final class Tagged
 {
     /** @var string */
     public $tagName;

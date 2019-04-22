@@ -11,7 +11,7 @@
     ],
       "autoload": {
         "classmap": [
-          "sources",
+          "sources"
         ]
     },
       "autoload-dev": {

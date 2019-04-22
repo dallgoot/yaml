@@ -13,7 +13,6 @@ use \SplDoublyLinkedList as DLL;
 class DumperHandlers
 {
     private const INDENT = 2;
-    private const WIDTH  = 120;
     private const OPTIONS = 00000;
     private const DATE_FORMAT = 'Y-m-d';
 
@@ -30,48 +29,6 @@ class DumperHandlers
     //     if (is_int($options)) self::$options = $options;
     // }
 
-    /**
-     * Returns (as a string) the YAML representation of the $dataType provided
-     *
-     * @param mixed    $dataType The data type
-     * @param int|null $options  The options
-     *
-     * @throws \Exception datatype cannot be null
-     *
-     * @return string The Yaml string content
-     */
-    public static function toString($dataType, int $options = null):string
-    {
-        if (is_null($dataType)) throw new \Exception(self::class.": No content to convert to Yaml");
-        self::$options = is_int($options) ? $options : self::OPTIONS;
-        self::$result = new DLL;
-        if ($dataType instanceof YamlObject) {
-            self::dumpYamlObject($dataType);
-        } elseif (is_array($dataType) && $dataType[0] instanceof YamlObject) {
-            array_map([self::class, 'dumpYamlObject'], $dataType);
-        } else {
-            self::dump($dataType, 0);
-        }
-        $out = implode("\n", iterator_to_array(self::$result));
-        self::$result = null;
-        return $out;
-    }
-
-    /**
-     * Calls and saves the result of Dumper::toString to the file $filePath provided
-     *
-     * @param string   $filePath The file path
-     * @param mixed    $dataType The data type
-     * @param int|null $options  The options
-     *
-     * @throws \Exception datatype cannot be null
-     *
-     * @return bool true = if the file has been correctly saved  ( return value from 'file_put_contents')
-     */
-    public static function toFile(string $filePath, $dataType, int $options = null):bool
-    {
-        return !is_bool(file_put_contents($filePath, self::toString($dataType, $options)));
-    }
 
     /**
      * Dump (determine) the string value according to type
@@ -81,25 +38,48 @@ class DumperHandlers
      *
      * @return string The YAML representation of $dataType
      */
-    private static function dump($dataType, int $indent)
+    public static function dump($dataType, int $indent):string
     {
-        if (is_scalar($dataType)) {
-            if ($dataType === \INF) return '.inf';
-            if ($dataType === -\INF) return '-.inf';
-            switch (gettype($dataType)) {
-                case 'boolean': return $dataType ? 'true' : 'false';
-                case 'float': //fall through
-                case 'double': return is_nan((double) $dataType) ? '.nan' : sprintf('%.'.self::$floatPrecision.'F', $dataType);
-                default:
-                    return $dataType;
-            }
-        } elseif (is_object($dataType)) {
-            return self::dumpObject($dataType, $indent);
-        } elseif (is_array($dataType)) {
-            return self::dumpArray($dataType, $indent);
+        if(is_null($dataType)) {
+            return '';
+        } elseif(is_resource($dataType)) {
+            return get_resource_type($dataType);
+        } elseif (is_scalar($dataType)) {
+            return self::dumpScalar($dataType, $indent);
+        } else {
+            return self::dumpCompound($dataType, $indent);
         }
     }
 
+    public function dumpScalar($dataType, $indent)
+    {
+        if ($dataType === \INF) return '.inf';
+        if ($dataType === -\INF) return '-.inf';
+        switch (gettype($dataType)) {
+            case 'boolean': return $dataType ? 'true' : 'false';
+            case 'float': //fall through
+            case 'double': return is_nan((double) $dataType) ? '.nan' : sprintf('%.'.self::$floatPrecision.'F', $dataType);
+            default:
+                return $dataType;
+        }
+        return self::dumpString($dataType, $indent);
+    }
+
+    private function dumpCompound($dataType, $indent)
+    {
+        $iterator = null;
+        if (is_callable($dataType)) {
+            throw new \Exception("Dumping Callable|Closure is not currently supported", 1);
+        } elseif (is_iterable($dataType)) {
+            $iterator = $dataType;
+        } elseif (is_object($dataType)) {
+            if ($obj instanceof Tag) {
+            if ($obj instanceof Compact
+            if ($obj instanceof \DateTime)
+            return self::dumpArray($dataType, $indent);
+            $iterator = new ArrayIterator();
+        }
+    }
     /**
      * Dumps an YamlObject (YAML document) as a YAML string
      *
@@ -107,8 +87,10 @@ class DumperHandlers
      */
     private static function dumpYamlObject(YamlObject $obj)
     {
-        if ($obj->hasDocStart() && self::$result instanceof DLL) self::$result->push("---");
-        // self::dump($obj, 0);
+        if ($this->multipleDocs || $obj->hasDocStart() || $obj->isTagged() || $obj->isScalar()) {
+           $this->multipleDocs = true;
+          // && self::$result instanceof DLL) self::$result->push("---");
+        }
         if (count($obj) > 0) {
             self::dumpArray($obj->getArrayCopy(), 0);
         } else {
@@ -150,18 +132,6 @@ class DumperHandlers
                 self::dump($item, $indent + self::INDENT);
             }
             next($refKeys);
-        }
-    }
-
-    /**
-     * Insert comments from YamlObject at specific lines OR add to the value currently at the line
-     *
-     * @param array $commentsArray  The comments array
-     */
-    private static function insertComments(array $commentsArray)
-    {
-        foreach ($commentsArray as $lineNb => $comment) {
-            self::$result->add($lineNb, $comment);
         }
     }
 
@@ -230,5 +200,18 @@ class DumperHandlers
             $content[] = "$key: ".(is_scalar($value) ? self::dump($value, $indent) : self::dumpCompact($value, $indent));
         }
         return '{'.implode(', ', $content).'}';
+    }
+
+    /**
+     * Dumps a string. Protects it if needed
+     *
+     * @param      string  $str    The string
+     *
+     * @return     string  ( description_of_the_return_value )
+     * @todo   implements checking and protection function
+     */
+    public static function dumpString(string $str):string
+    {
+        return $str;
     }
 }
