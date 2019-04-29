@@ -2,6 +2,12 @@
 
 namespace Dallgoot\Yaml;
 
+use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\Nodes\Root;
+use Dallgoot\Yaml\Nodes\DocEnd;
+use Dallgoot\Yaml\Nodes\DocStart;
+
 /**
  * Constructs the result (YamlObject or array) according to every Nodes and their values
  *
@@ -21,25 +27,25 @@ final class Builder
     /**
      * Builds a file.  check multiple documents & split if more than one documents
      *
-     * @param NodeRoot $root  The NodeRoot node
+     * @param Root $root  The NodeRoot node
      * @param int  $_debug    the level of debugging requested
      *
-     * @return array|YamlObject   list of documents or just one.
+     * @return array|YamlObject|null   list of documents or just one.
      */
-    public static function buildContent(NodeRoot $root, int $_debug = 0)
+    public static function buildContent(Root $root, int $_debug = 0)
     {
         if ($_debug === 2) {
             print_r($root);
-            return;
+            return null;
         }
         self::$_debug = $_debug;
         $documents = [];
         $buffer = new NodeList();
         try {
             foreach ($root->value as $child) {
-                if ($child instanceof NodeDocEnd && $child !== $root->value->top()) {
+                if ($child instanceof DocEnd && $child !== $root->value->top()) {
                     self::pushAndSave($child, $buffer, $documents);
-                } elseif ($child instanceof NodeDocStart && $buffer->count() > 0 && $buffer->hasContent()) {
+                } elseif ($child instanceof DocStart && $buffer->count() > 0 && $buffer->hasContent()) {
                     self::saveAndPush($child, $buffer, $documents);
                 } else {
                     $buffer->push($child);
@@ -63,7 +69,7 @@ final class Builder
     public static function buildDocument(NodeList &$list, int $docNum):YamlObject
     {
         $yamlObject = new YamlObject;
-        $rootNode   = new NodeRoot();
+        $rootNode   = new Root();
         $list->setIteratorMode(NodeList::IT_MODE_DELETE);
         try {
             foreach ($list as $child) {
@@ -141,14 +147,14 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
         return is_bool(strpos($v, '.')) || substr_count($v, '.') > 1 ? intval($v) : floatval($v);
     }
 
-    public static function pushAndSave(Node $child, NodeList &$buffer, array &$documents)
+    public static function pushAndSave(NodeGeneric $child, NodeList &$buffer, array &$documents)
     {
         $buffer->push($child);
         $documents[] = self::buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList();
     }
 
-    public static function saveAndPush(Node $child, NodeList &$buffer, array &$documents)
+    public static function saveAndPush(NodeGeneric $child, NodeList &$buffer, array &$documents)
     {
         $documents[] = self::buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList($child);

@@ -1,7 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
 
-use \ReflectionMethod as RM;
+// use \ReflectionMethod as RM;
 
 /**
  * The Yaml\Tag class is an object type that encapsulates current
@@ -23,14 +23,6 @@ final class Tagged
 
     private const NO_NAME = '%s Error: a tag MUST have a name';
 
-    /**
-     * Tag constructor.
-     *
-     * @param string $tagName the name of the tag like '!!str'
-     * @param mixed  $raw     any PHP variable type
-     *
-     * @throws \Exception if $tagName is an invalid string or absent
-     */
     public function __construct(string $tagName, $value)
     {
         if (empty($tagName)) {

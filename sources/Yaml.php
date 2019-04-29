@@ -30,7 +30,7 @@ final class Yaml
      *                           Loader::NO_OBJECT_FOR_DATE
      * @param int|null $debug    define the level of debugging (true = default)
      *
-     * @return YamlObject|array|null a Yaml document as YamlObject OR multiple documents as an array of YamlObject,
+     * @return Yaml\YamlObject|array|null a Yaml document as YamlObject OR multiple documents as an array of YamlObject,
      *                               NULL if Error and option Loader::NO_PARSING_EXCEPTIONS is set.
      * @throws \Exception coming from Dallgoot\Yaml\Loader
      * @see    Dallgoot\Yaml\Loader
@@ -59,7 +59,7 @@ final class Yaml
      *                           Loader::NO_OBJECT_FOR_DATE
      * @param int|null $debug    define the level of debugging (true = default)
      *
-     * @return YamlObject|array|null a Yaml document as YamlObject OR multiple documents as an array of YamlObject,
+     * @return Yaml\YamlObject|array|null a Yaml document as YamlObject OR multiple documents as an array of YamlObject,
      *                               NULL if Error
      * @throws \Exception coming from Dallgoot\Yaml\Loader
      * @see    Dallgoot\Yaml\Loader
@@ -113,23 +113,5 @@ final class Yaml
         } catch (\Exception|\Error|\ParseError $e) {
             throw new \Exception(__CLASS__." Error during dumping '$fileName'", 1, $e);
         }
-    }
-
-    /**
-     * Determines if $subject is one of the NodeTypes provided (as strings) in $comparison array
-     * A node type is one of the class found in "nodes" folder.
-     *
-     * @param      object   $subject     The subject
-     * @param      array    $comparison  A list of string whre each is a Node type e.g. 'NodeKey', 'NodeBlank', etc.
-     *
-     * @return     boolean  True if $subject is one of $comparison, False otherwise.
-     */
-    public static function isOneOf($subject, array $comparison):bool
-    {
-        foreach ($comparison as $className) {
-            $fqn = __NAMESPACE__."\\Yaml\\$className";
-            if ($subject instanceof $fqn) return true;
-        }
-        return false;
     }
 }

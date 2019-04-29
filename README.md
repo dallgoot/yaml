@@ -46,10 +46,6 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
   - quote strings that are not valid values in YAML syntax
   - set up tests
 - verify TODOS in code
-- Documentation : (doxygen ?)
-"require": {
-  "jimgitsit/documen": "dev-master"
-}
 - refactor namespace/classnames for nodes types : Dallgoot\Yaml\Nodes\Actions
   - build classes docs
 - Examples
@@ -75,7 +71,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - OPTION: Force renaming key names that are not valid PHP property name
 - directives : currently ignored, should handle tag determination : local tag associated with global URI tag directive
 - TAG : function for 'php/object' that provides the correct namespace to build
-- NEON support
+- NEON compatibility
 
 ## Performances
 

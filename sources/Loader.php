@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Dallgoot\Yaml;
 
+use Dallgoot\Yaml\Nodes;
+
 /**
  * Process reading a Yaml Content (loading file if required)
  * and for each line affects appropriate NodeType
@@ -101,7 +103,7 @@ final class Loader
         if (!is_null($this->content)) {
             $source = $this->content;
         } else {
-            $simplerLineFeeds = preg_replace('/(\r\n|\r)/', "\n", $strContent);
+            $simplerLineFeeds = preg_replace('/(\r\n|\r)/', "\n", (string) $strContent);
             $source = preg_split("/\n/m", $simplerLineFeeds, 0, PREG_SPLIT_DELIM_CAPTURE);
         }
         if (!is_array($source) || !count($source)) {
@@ -125,7 +127,7 @@ final class Loader
     public function parse($strContent = null)
     {
         $generator = $this->getSourceGenerator($strContent);
-        $previous = $root = new NodeRoot();
+        $previous = $root = new Nodes\Root();
         try {
             foreach ($generator as $lineNb => $lineString) {
                 $node = NodeFactory::get($lineString, $lineNb);
@@ -143,7 +145,7 @@ final class Loader
             }
             $this->_attachBlankLines($previous);
             if ($this->_debug === 1){
-                return;
+                return null;
             }
             return Builder::buildContent($root, $this->_debug);
         } catch (\Error|\Exception|\ParseError $e) {
@@ -155,12 +157,11 @@ final class Loader
     /**
      * Attach blank (empty) Nodes saved in $_blankBuffer to their parent (it means they are meaningful content)
      *
-     * @param array $emptyLines The empty lines
-     * @param Node  $previous   The previous Node
+     * @param nodes\NodeGeneric  $previous   The previous Node
      *
      * @return null
      */
-    private function _attachBlankLines(Node &$previous)
+    private function _attachBlankLines(Nodes\NodeGeneric $previous)
     {
         foreach ($this->_blankBuffer as $blankNode) {
             if ($blankNode !== $previous) {
@@ -173,24 +174,23 @@ final class Loader
     /**
      * For certain (special) Nodes types some actions are required BEFORE parent assignment
      *
-     * @param Node   $previous   The previous Node
-     * @param array  $emptyLines The empty lines
+     * @param Nodes\NodeGeneric   $previous   The previous Node
      *
      * @return boolean  if True self::parse skips changing previous and adding to parent
      * @see self::parse
      */
-    private function needsSpecialProcess(Node $current, Node &$previous):bool
+    private function needsSpecialProcess(Nodes\NodeGeneric $current, Nodes\NodeGeneric $previous):bool
     {
         $deepest = $previous->getDeepestNode();
-        if ($deepest instanceof NodePartial) {
+        if ($deepest instanceof Nodes\Partial) {
             return $deepest->specialProcess($current,  $this->_blankBuffer);
-        } elseif(!($current instanceof NodePartial)) {
+        } elseif(!($current instanceof Nodes\Partial)) {
             return $current->specialProcess($previous, $this->_blankBuffer);
         }
         return false;
     }
 
-    private function onError(object $e, \Generator $generator)
+    private function onError(\Throwable $e, \Generator $generator)
     {
         $file = $this->filePath ? realpath($this->filePath) : '#YAML STRING#';
         $message = $e->getMessage()."\n ".$e->getFile().":".$e->getLine();

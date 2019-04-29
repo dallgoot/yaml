@@ -4,9 +4,10 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
 use Dallgoot\Yaml;
 use Dallgoot\Yaml\YamlObject;
-use Dallgoot\Yaml\NodeRoot;
+use Dallgoot\Yaml\Nodes\Root;
 
 /**
  * Class YamlTest.
@@ -32,14 +33,6 @@ class YamlTest extends TestCase
     {
         /** @todo Maybe add some arguments to this constructor */
         $this->yaml = new Yaml();
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml::isOneOf
-     */
-    public function testIsOneOf(): void
-    {
-        $this->assertTrue($this->yaml::isOneOf(new NodeRoot, ['NodeRoot']));
     }
 
     /**

@@ -1,7 +1,8 @@
 <?php
 namespace Dallgoot\Yaml;
 
-use \ReflectionMethod as RM;
+use Dallgoot\Yaml\Nodes\NodeGeneric;
+
 /**
  * Provides mechanisms to handle tags
  * - registering tags and their handler methods
@@ -17,7 +18,7 @@ use \ReflectionMethod as RM;
  */
 class TagFactory
 {
-    private const UNKNOWN_TAG = 'Error: tag "%s" is unknown (have you registered an handler for it? see TagFactory)';
+    private const UNKNOWN_TAG = 'Error: tag "%s" is unknown (have you registered a handler for it? see TagFactory)';
     private const NO_NAME     = '%s Error: a tag MUST have a name';
     private const WRONG_VALUE = "Error : cannot transform tag '%s' for type '%s'";
 
@@ -50,17 +51,17 @@ Named Handles
      * @see self::LEGACY_TAGS_HANDLERS
      * @todo remove dependency to ReflectionClass using 'get_class_methods'
      */
-    private static function registerLegacyTags()
+    private static function registerLegacyNamespace()
     {
-        $reflectAPI = new \ReflectionClass(self::class);
-        $methodsList = [];
-        $list = $reflectAPI->getMethods(RM::IS_FINAL | RM::IS_STATIC & RM::IS_PRIVATE);
-        foreach ($list as $method) {
-            $methodsList[$method->name] = $method->getClosure();
-        }
-        foreach (self::LEGACY_TAGS_HANDLERS as $tagName => $methodName) {
-            self::$registeredHandlers[$tagName] = $methodsList[$methodName];
-        }
+        // $reflectAPI = new \ReflectionClass(self::class);
+        // $methodsList = [];
+        // $list = $reflectAPI->getMethods(RM::IS_FINAL | RM::IS_STATIC & RM::IS_PRIVATE);
+        // foreach ($list as $method) {
+        //     $methodsList[$method->name] = $method->getClosure();
+        // }
+        // foreach (self::LEGACY_TAGS_HANDLERS as $tagName => $methodName) {
+        //     self::$tagsNamespaces[$tagName] = $methodsList[$methodName];
+        // }
     }
 
     /**
@@ -77,10 +78,10 @@ Named Handles
     public static function transform(string $identifier, $value)
     {
         if (self::isKnown($identifier)) {
-            if (!($value instanceof Node) && !($value instanceof NodeList) ) {
+            if (!($value instanceof NodeGeneric) && !($value instanceof NodeList) ) {
                 throw new \Exception(sprintf(self::WRONG_VALUE, $identifier, gettype($value)));
             }
-            return self::$registeredHandlers[$identifier]($value);
+            // return self::$tagsNamespaces[$identifier]($value);
         } else {
             throw new \Exception(sprintf(self::UNKNOWN_TAG, $identifier), 1);
         }
@@ -93,14 +94,14 @@ Named Handles
      */
     public static function isKnown(string $identifier):bool
     {
-        if (count(self::$registeredHandlers) === 0) {
-            self::registerLegacyTags();
+        if (count(self::$tagsNamespaces) === 0) {
+            self::registerLegacyNamespace();
         }
-        return in_array($identifier, array_keys(self::$registeredHandlers));
+        return in_array($identifier, array_keys(self::$tagsNamespaces));
     }
 
     /**
-     * Allow the user to add a custome tag handler.
+     * Allow the user to add a custom tag handler.
      * Note: That allows to replace handlers for legacy tags also.
      *
      * @param      string      $name   The name
@@ -110,10 +111,10 @@ Named Handles
      */
     public static function addTagHandler(string $name, \Closure $func)
     {
-        if (empty($name)) {
+        if (empty(trim($name))) {
             throw new \Exception(sprintf(self::NO_NAME, __METHOD__));
         }
-        self::$registeredHandlers[$name] = $func;
+        self::$tagsNamespaces[trim($name)] = $func;
     }
 
 }

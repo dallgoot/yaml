@@ -4,15 +4,16 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Loader;
+
 use Generator;
+use Dallgoot\Yaml\Loader;
 use Dallgoot\Yaml\YamlObject;
-use Dallgoot\Yaml\Node;
-use Dallgoot\Yaml\NodeRoot;
-use Dallgoot\Yaml\NodeKey;
-use Dallgoot\Yaml\NodeBlank;
-use Dallgoot\Yaml\NodePartial;
-use Dallgoot\Yaml\NodeScalar;
+use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Blank;
+use Dallgoot\Yaml\Nodes\Key;
+use Dallgoot\Yaml\Nodes\Partial;
+use Dallgoot\Yaml\Nodes\Root;
+use Dallgoot\Yaml\Nodes\Scalar;
 
 /**
  * Class LoaderTest.
@@ -118,12 +119,12 @@ class LoaderTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Loader::attachBlankLines
+     * @covers \Dallgoot\Yaml\Loader::_attachBlankLines
      */
     public function testAttachBlankLines(): void
     {
-        $rootNode = new NodeRoot();
-        $blankNode = new NodeBlank('', 1);
+        $rootNode = new Root();
+        $blankNode = new Blank('', 1);
         // NodeBlank get private method
         $reflectorBlank = new \ReflectionClass($blankNode);
         $method = $reflectorBlank->getMethod('setParent');
@@ -139,12 +140,15 @@ class LoaderTest extends TestCase
         // set _blankbuffer : ie. add blankNode
         $blankBufferProp->setValue($this->loader, [$blankNode]);
         $this->assertTrue(count($blankBufferProp->getValue($this->loader)) === 1, 'blankBuffer has NO content');
-        $this->assertTrue($blankBufferProp->getValue($this->loader)[0] instanceof NodeBlank, 'blankBuffer has NO nodeBlank');
+        $this->assertTrue($blankBufferProp->getValue($this->loader)[0] instanceof Blank, 'blankBuffer has NO nodeBlank');
         //attach to parents => add child to parent
-        $this->loader->attachBlankLines($rootNode);
+        // $this->loader->attachBlankLines($rootNode);
+        $attachBlankLinesMethod = new \ReflectionMethod($this->loader, '_attachBlankLines');
+        $attachBlankLinesMethod->setAccessible(true);
+        $attachBlankLinesMethod->invoke($this->loader, $rootNode);
         $this->assertTrue(count($blankBufferProp->getValue($this->loader)) === 0, '_blankbuffer is NOT empty');
         $this->assertTrue($rootNode->value->count() === 1, 'rootnode has NO child');
-        $this->assertTrue($rootNode->value->offsetGet(0) instanceof NodeBlank, 'rootnode child is NOT a blanknode');
+        $this->assertTrue($rootNode->value->offsetGet(0) instanceof Blank, 'rootnode child is NOT a blanknode');
     }
 
     /**
@@ -153,17 +157,23 @@ class LoaderTest extends TestCase
      */
     public function testNeedsSpecialProcess(): void
     {
-        $current  = new NodeScalar('some text', 1);
-        $previous = new NodeRoot();
-        $this->assertFalse($this->loader->needsSpecialProcess($current, $previous));
-        $current  = new NodeBlank('', 1);
-        $previous = new NodeRoot();
-        $this->assertTrue($this->loader->needsSpecialProcess($current, $previous));
-        $previous = new NodeKey('key: "partial value', 1);
-        $current  = new NodeScalar(' end of partial value"',2);
-        $this->assertTrue($this->loader->needsSpecialProcess($current, $previous));
-        $current = new NodePartial(' " oddly quoted');
-        $this->assertFalse($this->loader->needsSpecialProcess($current, $previous));
+        $needsSpecialProcessMethod = new \ReflectionMethod($this->loader, 'needsSpecialProcess');
+        $needsSpecialProcessMethod->setAccessible(true);
+        $current  = new Scalar('some text', 1);
+        $previous = new Root();
+        // $this->assertFalse($this->loader->needsSpecialProcess($current, $previous));
+        $this->assertFalse($needsSpecialProcessMethod->invoke($this->loader, $current, $previous));
+        $current  = new Blank('', 1);
+        $previous = new Root();
+        // $this->assertTrue($this->loader->needsSpecialProcess($current, $previous));
+        $this->assertTrue($needsSpecialProcessMethod->invoke($this->loader, $current, $previous));
+        $previous = new Key('key: "partial value', 1);
+        $current  = new Scalar(' end of partial value"',2);
+        // $this->assertTrue($this->loader->needsSpecialProcess($current, $previous));
+        $this->assertTrue($needsSpecialProcessMethod->invoke($this->loader, $current, $previous));
+        $current = new Partial(' " oddly quoted');
+        // $this->assertFalse($this->loader->needsSpecialProcess($current, $previous));
+        $this->assertFalse($needsSpecialProcessMethod->invoke($this->loader, $current, $previous));
     }
 
     /**
@@ -176,7 +186,10 @@ class LoaderTest extends TestCase
             yield 1 => 'this is the first line';
             yield 2 => 'this is the second line';
         };
-        $this->loader->onError(new \Exception, $generator());
+        // $this->loader->onError(new \Exception, $generator());
+        $onErrorMethod = new \ReflectionMethod($this->loader, 'onError');
+        $onErrorMethod->setAccessible(true);
+        $onErrorMethod->invoke(new \Exception, $generator());
     }
 
     /**
@@ -189,6 +202,8 @@ class LoaderTest extends TestCase
             yield 1 => 'this is the first line';
             yield 2 => 'this is the second line';
         };
-        $this->assertEquals(null, $this->loader->onError(new \Exception, $generator()));
+        $onErrorMethod = new \ReflectionMethod($this->loader, 'onError');
+        $onErrorMethod->setAccessible(true);
+        $this->assertEquals(null, $onErrorMethod->invoke($this->loader, new \Exception, $generator()));
     }
 }

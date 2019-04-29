@@ -1,5 +1,18 @@
 <?php
+
 namespace Dallgoot\Yaml;
+
+use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Blank;
+use Dallgoot\Yaml\Nodes\Comment;
+use Dallgoot\Yaml\Nodes\Directive;
+use Dallgoot\Yaml\Nodes\Docstart;
+use Dallgoot\Yaml\Nodes\Item;
+use Dallgoot\Yaml\Nodes\Key;
+use Dallgoot\Yaml\Nodes\SetKey;
+use Dallgoot\Yaml\Nodes\SetValue;
+use Dallgoot\Yaml\Nodes\Scalar;
+
 
 /**
  * A collection of Nodes
@@ -20,9 +33,9 @@ class NodeList extends \SplDoublyLinkedList
     /**
      * NodeList constructor
      *
-     * @param Node|null $node (optional) a node that will be pushed as first element
+     * @param NodeGeneric|null $node (optional) a node that will be pushed as first element
      */
-    public function __construct(Node $node = null)
+    public function __construct(NodeGeneric $node = null)
     {
         // parent::__construct();
         // $this->setIteratorMode(self::IT_MODE_KEEP);
@@ -35,7 +48,7 @@ class NodeList extends \SplDoublyLinkedList
     {
         $tmp = clone $this;
         $tmp->rewind();
-        $fqn = __NAMESPACE__."\\$nodeType";
+        $fqn = __NAMESPACE__."\\Nodes\\$nodeType";
         foreach ($tmp as $child) {
             if ($child instanceof $fqn) return true;
         }
@@ -47,10 +60,10 @@ class NodeList extends \SplDoublyLinkedList
         $tmp = clone $this;
         $tmp->rewind();
         foreach ($tmp as $child) {
-            if (!($child instanceof NodeComment)
-                && !($child instanceof NodeDirective)
-                && !($child instanceof NodeBlank)
-                && !($child instanceof NodeDocstart
+            if (!($child instanceof Comment)
+                && !($child instanceof Directive)
+                && !($child instanceof Blank)
+                && !($child instanceof Docstart
                 && is_null($child->value)) ) return true;
         }
         return false;
@@ -59,12 +72,12 @@ class NodeList extends \SplDoublyLinkedList
     public function push($node)
     {
         $type = null;
-        if     ($node instanceof NodeItem )    $type = self::SEQUENCE;
-        elseif ($node instanceof NodeKey)      $type = self::MAPPING;
-        elseif ($node instanceof NodeSetKey
-             || $node instanceof NodeSetValue) {
+        if     ($node instanceof Item )    $type = self::SEQUENCE;
+        elseif ($node instanceof Key)      $type = self::MAPPING;
+        elseif ($node instanceof SetKey
+             || $node instanceof SetValue) {
             $type = self::SET;
-        } elseif ($node instanceof NodeScalar ){
+        } elseif ($node instanceof Scalar ){
             $type = self::MULTILINE;
         }
         if (!is_null($type) && $this->checkTypeCoherence($type)) {
@@ -125,10 +138,10 @@ class NodeList extends \SplDoublyLinkedList
             $first = $list->shift();
             $output = trim($first->raw);
             foreach ($list as $child) {
-                if ($child instanceof NodeScalar) {
+                if ($child instanceof Scalar) {
                     $separator = isset($output[-1])  && $output[-1] === "\n" ? '' : ' ';
                     $output .= $separator.trim($child->raw);
-                } elseif ($child instanceof NodeBlank) {
+                } elseif ($child instanceof Blank) {
                     $output .= "\n";
                 } else {
                     $child->build();
@@ -149,10 +162,10 @@ class NodeList extends \SplDoublyLinkedList
         $this->rewind();
         $out = new NodeList;
         foreach ($this as $index => $child) {
-            if ($child instanceof NodeComment) {
+            if ($child instanceof Comment) {
                 // $child->build();
             } else {
-                if($child->value instanceof NodeComment) {
+                if($child->value instanceof Comment) {
                     // $child->value->build();
                     // $child->value = null;
                 } elseif($child->value instanceof NodeList) {

@@ -4,9 +4,10 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\TagFactory;
-use Dallgoot\Yaml\Node;
+
 use Closure;
+use Dallgoot\Yaml\TagFactory;
+use Dallgoot\Yaml\Nodes\NodeGeneric;
 
 /**
  * Class TagFactoryTest.

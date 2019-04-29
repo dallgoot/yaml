@@ -1,7 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
 
-require_once __DIR__ . '/../../dependencies/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Dallgoot;
 

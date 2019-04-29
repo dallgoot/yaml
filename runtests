@@ -2,6 +2,6 @@
 export XDEBUG_CONFIG="idekey=VSCODE"
 
 # --coverage-clover clover.xml \
-./dependencies/bin/phpunit --color=always \
+./vendor/bin/phpunit --color=always \
 --configuration ./configuration/phpunit.xml \
 --testsuite $1 \

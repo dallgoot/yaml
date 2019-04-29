@@ -11,7 +11,7 @@ return [
     // If this is set to null,
     // then Phan assumes the PHP version which is closest to the minor version
     // of the php executable used to execute phan.
-    "target_php_version" => '7.2',
+    "target_php_version" => '7.3',
 
     // A list of directories that should be parsed for class and
     // method information. After excluding the directories
@@ -21,8 +21,12 @@ return [
     // Thus, both first-party and third-party code being used by
     // your application should be included in this list.
     'directory_list' => [
-        './sources'//,
-        // 'tests',
+        // 'vendor/phpunit/phpunit/',
+        'sources'//,
+        // "tests/CasesTest.php",
+        // "tests/DumpingTest.php",
+        // "tests/SymfonyYamlTest.php",
+        // "tests/units",
         // 'vendor/symfony/console',
     ],
 
@@ -38,7 +42,8 @@ return [
     //       should be added to the `directory_list` as
     //       to `exclude_analysis_directory_list`.
     "exclude_analysis_directory_list" => [
-        './dependencies/'
+        // 'vendor/',
+        'vendor/phpunit/'
     ],
 
     // A list of plugin files to execute.

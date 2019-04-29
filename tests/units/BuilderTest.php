@@ -4,18 +4,19 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
 use Dallgoot\Yaml\Builder;
 use Dallgoot\Yaml\YamlObject;
 use Dallgoot\Yaml\NodeList;
-use Dallgoot\Yaml\Node;
-use Dallgoot\Yaml\NodeBlank;
-use Dallgoot\Yaml\NodeDocStart;
-use Dallgoot\Yaml\NodeDocEnd;
-use Dallgoot\Yaml\NodeItem;
-use Dallgoot\Yaml\NodeKey;
-use Dallgoot\Yaml\NodeRoot;
-use Dallgoot\Yaml\NodeScalar;
-use Dallgoot\Yaml\NodeSetKey;
+use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Blank;
+use Dallgoot\Yaml\Nodes\DocStart;
+use Dallgoot\Yaml\Nodes\DocEnd;
+use Dallgoot\Yaml\Nodes\Item;
+use Dallgoot\Yaml\Nodes\Key;
+use Dallgoot\Yaml\Nodes\Root;
+use Dallgoot\Yaml\Nodes\Scalar;
+use Dallgoot\Yaml\Nodes\SetKey;
 
 /**
  * Class BuilderTest.
@@ -46,29 +47,29 @@ class BuilderTest extends TestCase
     private function buildSimpleMapping()
     {
         // create a yaml mapping
-        $root = new NodeRoot;
-        $root->add(new NodeKey('key: value', 1));
+        $root = new Root;
+        $root->add(new Key('key: value', 1));
         return $this->builder::buildContent($root);
     }
 
     private function buildSimpleSequence()
     {
         // create a yaml sequence
-        $root = new NodeRoot;
-        $root->add(new NodeItem('- itemvalue', 1));
+        $root = new Root;
+        $root->add(new Item('- itemvalue', 1));
         return $this->builder::buildContent($root);
     }
 
     private function buildMultiDoc()
     {
-        $root = new NodeRoot;
-        $root->add(new NodeDocStart('---', 1));
-        $root->add(new NodeKey('key: value', 2));
-        $root->add(new NodeDocEnd('...', 3));
-        $root->add(new NodeDocStart('---', 4));
-        $root->add(new NodeKey('key: value', 5));
-        $root->add(new NodeDocStart('---', 6));
-        $root->add(new NodeKey('key: value', 7));
+        $root = new Root;
+        $root->add(new DocStart('---', 1));
+        $root->add(new Key('key: value', 2));
+        $root->add(new DocEnd('...', 3));
+        $root->add(new DocStart('---', 4));
+        $root->add(new Key('key: value', 5));
+        $root->add(new DocStart('---', 6));
+        $root->add(new Key('key: value', 7));
         return $this->builder::buildContent($root);
     }
 
@@ -82,7 +83,7 @@ class BuilderTest extends TestCase
     public function testBuildContent(): void
     {
         ob_start();
-        $this->assertEquals($this->builder::buildContent(new NodeRoot, 2), null);
+        $this->assertEquals($this->builder::buildContent(new Root, 2), null);
         ob_end_clean();
         //test simple mapping
         $yamlMapping = $this->buildSimpleMapping();
@@ -116,7 +117,7 @@ class BuilderTest extends TestCase
     public function testBuildContentException(): void
     {
         $this->expectException(\Exception::class);
-        $root = new NodeRoot;
+        $root = new Root;
         $root->value = null;
         $this->builder::buildContent($root);
     }
@@ -126,7 +127,7 @@ class BuilderTest extends TestCase
      */
     public function testBuildDocument(): void
     {
-        $nodekey = new NodeKey('key: keyvalue', 1);
+        $nodekey = new Key('key: keyvalue', 1);
         $list = new NodeList($nodekey);
         $yamlObject = $this->builder->buildDocument($list, 0);
         $this->assertTrue($yamlObject instanceof YamlObject);
@@ -139,7 +140,7 @@ class BuilderTest extends TestCase
     {
         $output =
                 "Document #0\n".
-                "Dallgoot\Yaml\NodeRoot Object\n".
+                "Dallgoot\Yaml\Nodes\Root Object\n".
                 "(\n".
                 "    [line->indent] =>  -> -1\n".
                 "    [value] => Dallgoot\Yaml\NodeList Object\n".
@@ -212,7 +213,7 @@ class BuilderTest extends TestCase
         $reflector = new \ReflectionClass($this->builder);
         $method = $reflector->getMethod('pushAndSave');
         $method->setAccessible(true);
-        $child = new NodeBlank('', 1);
+        $child = new Blank('', 1);
         $buffer = new NodeList;
         $documents = [];
         $this->assertTrue($buffer->count() === 0);
@@ -229,14 +230,14 @@ class BuilderTest extends TestCase
         $reflector = new \ReflectionClass($this->builder);
         $method = $reflector->getMethod('saveAndPush');
         $method->setAccessible(true);
-        $itemNode = new NodeItem('- item', 1);
+        $itemNode = new Item('- item', 1);
         $buffer = new NodeList($itemNode);
-        $child = new NodeBlank('', 1);
+        $child = new Blank('', 1);
         $documents = [];
         $this->assertTrue($buffer->count() === 1);
         $method->invokeArgs(null, [$child, &$buffer, &$documents]);
         $this->assertTrue($buffer->count() === 1);
         $this->assertTrue(count($documents) === 1);
-        $this->assertTrue($buffer->offsetGet(0) instanceof NodeBlank);
+        $this->assertTrue($buffer->offsetGet(0) instanceof Blank);
     }
 }

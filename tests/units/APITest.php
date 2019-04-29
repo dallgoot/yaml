@@ -5,6 +5,7 @@ namespace Test\Dallgoot\Yaml;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Assert;
+
 use Dallgoot\Yaml\API;
 use Dallgoot\Yaml\YamlObject;
 
