@@ -77,7 +77,7 @@ Verbatim Tags
         self::registerHandle("!!", $coreSchema::SCHEMA_URI);
     }
 
-    public function registerSchema($URI, Tag\SchemaInterface $schemaObject)
+    public static function registerSchema($URI, Tag\SchemaInterface $schemaObject)
     {
         self::$schemas[$URI] = $schemaObject;
     }
