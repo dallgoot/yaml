@@ -3,6 +3,7 @@
 namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml\Nodes;
+use Dallgoot\Yaml\Regex;
 use Dallgoot\Yaml\Nodes\NodeGeneric;
 
 /**
@@ -53,8 +54,16 @@ final class NodeFactory
      */
     final private static function onSpecial(string $first, string $nodeString, int $line):NodeGeneric
     {
-        return $first === "#" ? new Nodes\Comment(ltrim($nodeString), $line)
-                              : new Nodes\Directive(ltrim($nodeString), $line);
+        if ($first === "#") {
+            return new Nodes\Comment(ltrim($nodeString), $line);
+        } else {
+            if (preg_match(Regex::DIRECTIVE_TAG, $nodeString)
+                || preg_match(Regex::DIRECTIVE_VERSION, $nodeString)) {
+                return new Nodes\Directive(ltrim($nodeString), $line);
+            } else {
+                throw new \ParseError("Invalid/Unknown Directive", 1);
+            }
+        }
     }
 
     /**

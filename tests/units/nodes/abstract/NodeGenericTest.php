@@ -12,7 +12,8 @@ use Dallgoot\Yaml\Nodes\NodeGeneric;
 use Dallgoot\Yaml\Nodes\Blank;
 use Dallgoot\Yaml\Nodes\Item;
 use Dallgoot\Yaml\Nodes\Key;
-use Dallgoot\Yaml\Nodes\Lit;
+use Dallgoot\Yaml\Nodes\Literal;
+use Dallgoot\Yaml\Nodes\LiteralFolded;
 use Dallgoot\Yaml\Nodes\Root;
 
 /**
@@ -158,7 +159,7 @@ class NodeGenericTest extends TestCase
     public function testGetDeepestNode(): void
     {
         $child = NodeFactory::get('    key: &anchor |', 1);
-        $this->node->add($child);
+        $this->node->add($child);//var_dump($child->getDeepestNode());
         $this->assertTrue($child->getDeepestNode() instanceof Literal);
         $this->assertTrue($this->node->getDeepestNode() instanceof Literal);
     }
@@ -227,9 +228,9 @@ class NodeGenericTest extends TestCase
     public function testIsOneOf(): void
     {
         $rootNode = new Root;
-        $this->assertTrue($rootNode->isOneOf(['Root']));
-        $this->assertFalse($rootNode->isOneOf(['Key']));
-        $this->assertFalse($rootNode->isOneOf(['Blank']));
+        $this->assertTrue($rootNode->isOneOf('Root'));
+        $this->assertFalse($rootNode->isOneOf('Key'));
+        $this->assertFalse($rootNode->isOneOf('Blank'));
     }
 
     /**

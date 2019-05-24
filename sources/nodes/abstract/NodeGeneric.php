@@ -166,7 +166,7 @@ abstract class NodeGeneric
         if ($node instanceof Item && $supposedParent instanceof Root) {
             if ($supposedParent->value->has('Key')) {
                 // $lastKey = null;
-                foreach ($supposedParent->value as $key => $child) {
+                foreach ($supposedParent->value as $child) {
                     if ($child instanceof Key) {
                         $lastKey = $child;
                     }
@@ -218,13 +218,13 @@ abstract class NodeGeneric
      * Determines if $subject is one of the Node types provided (as strings) in $comparison array
      * A node type is one of the class found in "nodes" folder.
      *
-     * @param      array    $comparison  A list of string whre each is a Node type e.g. 'Key', 'Blank', etc.
+     * @param  string    ...$classNameList  A list of string whre each is a Node type e.g. 'Key', 'Blank', etc.
      *
      * @return     boolean  True if $subject is one of $comparison, False otherwise.
      */
-    public function isOneOf(array $comparison):bool
+    public function isOneOf(...$classNameList):bool
     {
-        foreach ($comparison as $className) {
+        foreach ($classNameList as $className) {
             $fqn = __NAMESPACE__."\\$className";
             if ($this instanceof $fqn) return true;
         }

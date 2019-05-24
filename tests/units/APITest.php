@@ -116,7 +116,7 @@ class APITest extends TestCase
     public function testAddTag(): void
     {
         $this->assertFalse($this->api->isTagged());
-        $this->api->addTag('!tagName');
+        $this->api->addTag('!', 'tag:clarkevans.com,2002');
         $this->assertTrue($this->api->isTagged());
     }
 
@@ -154,7 +154,7 @@ class APITest extends TestCase
     public function testIsTagged(): void
     {
         $this->assertFalse($this->api->isTagged());
-        $this->api->addTag('!tagName');
+        $this->api->addTag('!', 'tag:clarkevans.com,2002');
         $this->assertTrue($this->api->isTagged());
     }
 }

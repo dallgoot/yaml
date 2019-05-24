@@ -17,6 +17,7 @@ namespace Dallgoot;
  */
 final class Yaml
 {
+    const VERSION_SUPPORT = "1.2";
     /**
      * Parse the given Yaml string to either :
      * - a YamlObject

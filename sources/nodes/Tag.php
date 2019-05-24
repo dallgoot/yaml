@@ -5,6 +5,7 @@ namespace Dallgoot\Yaml\Nodes;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\TagFactory;
 use Dallgoot\Yaml\Tagged;
+use Dallgoot\Yaml\Regex;
 
 /**
  *
@@ -40,24 +41,36 @@ class Tag extends Actions
     public function build(&$parent = null)
     {
         if (is_null($this->value) && $this->getParent() instanceof Root) {
-            $this->getRoot()->getYamlObject()->addTag($this->tag);
+            if (!preg_match(Regex::TAG_PARTS, $this->tag, $matches)) {
+                throw new \UnexpectedValueException("Tag '$this->tag' is invalid", 1);
+            }
+                    // var_dump($matches['handle'], $matches['tagname']);
+            $handle = $matches['handle'];
+            $tagname = $matches['tagname'];
+            $this->getRoot()->getYamlObject()->addTag($handle, $tagname);
             return;
         }
         $value = $this->value;
-        if (is_null($parent) && $value->isOneOf(['Item', 'Key'])) {
+        if (is_null($parent) && $value->isOneOf('Item', 'Key')) {
             $value = new NodeList(/** @scrutinizer ignore-type */ $value);
         }
-        if (TagFactory::isKnown((string) $this->tag)) {
+        // if (TagFactory::isKnown((string) $this->tag)) {
+        try {
             if ($value instanceof Literals) {
                 $value = $value->value;
             }
-            $built = TagFactory::transform((string) $this->tag, $value);
-            if ($built instanceof NodeGeneric || $built instanceof NodeList) {
-                return $built->build($parent);
+            $transformed = TagFactory::transform((string) $this->tag, $value);
+            if ($transformed instanceof NodeGeneric || $transformed instanceof NodeList) {
+                return $transformed->build($parent);
             }
-            return $built;
-        } else {
-            return new Tagged($this->tag, is_null($value) ? null : $value->build($parent));
+            return $transformed;
+        // } else {
+        } catch (\Throwable $e) {
+            if ($e instanceof \InvalidValueException) {
+                return new Tagged($this->tag, is_null($value) ? null : $value->build($parent));
+            }
+            throw new \Exception("Can NOT build Tag", 1, $e);
         }
+
     }
 }

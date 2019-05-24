@@ -12,11 +12,16 @@ namespace Dallgoot\Yaml\Tag;
  * @license Apache 2.0
  * @link    https://github.com/dallgoot/yaml
  *
- * @todo move legacy tags handlers in a specific class : checking affecting methods to tags mechanisms when theres a global tag
  */
-interface NamespaceInterface
+interface SchemaInterface
 {
     /** @var string */
-    const NS_ROOT_NAME = 'tag:yaml.org,2002:';
+    // const SCHEMA_URI = null;
+    // /** @var string */
+    // const BUILDING_NAMESPACE = null;
 
+    /**
+     * When the tag is not a method on the SchemaClass provide the logic to handle it
+     */
+    public function __call($name, $arguments);
 }

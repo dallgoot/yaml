@@ -104,7 +104,7 @@ class DumperHandlers
     private function iteratorToString(iterable $iterator, string $mask, int $indent, bool $isCompact=false):string
     {
         $pairs = [];
-        foreach ($iterator as $key => $value) {
+        foreach (new \ArrayIterator($iterator) as $key => $value) {
             $separator = "\n";
             $valueIndent = $indent + self::INDENT;
             if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime) {
@@ -112,7 +112,7 @@ class DumperHandlers
                 $valueIndent = 0;
             }
             $pairs[] = sprintf($mask, $key).$separator.$this->dump($value, $valueIndent);
-        }
+        } var_dump($iterator);
         return implode("\n", $pairs);
     }
 

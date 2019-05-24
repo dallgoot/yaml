@@ -61,7 +61,7 @@ class Key extends NodeGeneric
 
     public function add(NodeGeneric $child):NodeGeneric
     {
-        if ($this->value instanceof NodeGeneric && $this->value->isOneOf(['Literal','LiteralFolded', 'Anchor'])) {
+        if ($this->value instanceof NodeGeneric && $this->value->isOneOf('Literal','LiteralFolded', 'Anchor')) {
             return $this->value->add($child);
         } else {
             return parent::add($child);
@@ -97,7 +97,7 @@ class Key extends NodeGeneric
             return true;
         }
         if($current instanceof Scalar) {
-            return $node->isOneOf(['Scalar', 'Blank']);
+            return $node->isOneOf('Scalar', 'Blank');
         }
         if ($current instanceof Item) {
             return $node instanceof Item;

@@ -1,0 +1,43 @@
+TAGS NOTES:
+
+
+3.2.1.2. Tags : |
+
+  YAML represents type information of native data structures with a simple
+  identifier,   called a tag. Global tags are URIs and hence globally unique
+  across all applications. The “tag:” URI scheme is recommended for all
+  global YAML tags. In contrast, local tags are specific to a single
+  application. Local tags start with “!”, are not URIs and are not expected
+  to be globally unique. YAML provides a “TAG” directive to make tag
+  notation less verbose; it also offers easy migration from local to
+  global tags. To ensure this, local tags are restricted to the
+  URI character set and use URI character escaping.
+
+  YAML does not mandate any special relationship between different tags
+  that begin with the same substring. Tags ending with URI fragments
+  (containing “#”) are no exception; tags that share the same base URI
+  but differ in their fragment part are considered to be different,
+  independent tags. By convention, fragments are used to identify
+  different “variants” of a tag, while “/” is used to define nested
+  tag “namespace” hierarchies. However, this is merely a convention,
+  and each tag may employ its own rules.
+  For example, Perl tags may use “::” to express namespace hierarchies,
+  Java tags may use “.”, etc.
+
+  YAML tags are used to associate meta information with each node.
+  In particular, each tag must specify the expected node kind
+  (scalar, sequence, or mapping). Scalar tags must also provide a
+  mechanism for converting formatted content to a canonical form for
+  supporting equality testing. Furthermore, a tag may provide additional
+  information such as the set of allowed content values for validation,
+  a mechanism for tag resolution, or any other data that is applicable
+  to all of the tag’s nodes.
+
+
+
+TODO:
+- failsafeSchema
+- JSONSchema
+- CoreSchema
+
+Core > JSON > failsafe

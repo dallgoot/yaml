@@ -34,7 +34,7 @@ abstract class Literals extends NodeGeneric
     {
         if (is_null($this->value)) $this->value = new NodeList();
         $candidate = $child;
-        if (!$child->isOneOf( ['Scalar', 'Blank', 'Comment', 'Quoted'])) {
+        if (!$child->isOneOf('Scalar', 'Blank', 'Comment', 'Quoted')) {
             $candidate = new Scalar((string) $child->raw, $child->line);
         }
         return parent::add($candidate);

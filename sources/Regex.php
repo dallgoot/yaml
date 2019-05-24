@@ -45,6 +45,17 @@ class Regex
 
     const NODE_ACTIONS = "/(?(DEFINE)".Regex::RC.Regex::RD.Regex::TAG.")(?'action'(?&rc)|(?&rd)|(?&tag))( +(?'content'.*))?$/";
 
+    // %TAG ! tag:example.com,2000:app/
+    // %TAG !! tag:example.com,2000:app/
+    // %TAG !e! tag:example.com,2000:app/
+    // %TAG !m! !my-
+    // !<!bar> baz
+    // !<tag:clarkevans.com,2002:invoice>
+    const TAG_URI = "(?'url'tag:\\w+\\.\\w{2,},\\d{4}:\\w+)";
+    const TAG_PARTS = "/(?'handle'!(?:[\\w\\d\\-_]!|!)*)(?'tagname'(?:<!?)?[\\w\\d\\-:.,_]+>?)?/";
+    const DIRECTIVE_TAG = "/(?(DEFINE)".Regex::TAG_URI.")%TAG +(?'handle'!|!!|![\\w\\d\-_]+!) +(?'uri'(?&url)|(?'prefix'![\\w\\d\-_]+))/";
+    const DIRECTIVE_VERSION = "/%YAML +(?'version'1\\.\\d)/";
+
 
     /**
      * Determines if a valid Date format

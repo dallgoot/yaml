@@ -1,6 +1,7 @@
 <?php
+require_once __DIR__.'/../../../vendor/autoload.php';
 
-namespace Dallgoot\Yaml;
+use Dallgoot\Yaml\YamlObject;
 
 $yaml = new YamlObject();
 

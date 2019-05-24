@@ -27,6 +27,7 @@ class API
 
     const UNKNOWN_REFERENCE = "no reference named: '%s', known are : (%s)";
     const UNAMED_REFERENCE  = "reference MUST have a name";
+    const TAGHANDLE_DUPLICATE = "Tag handle '%s' already declared before, handle must be unique";
 
     /**
      * Creates API object to be used for the document provided as argument
@@ -128,13 +129,18 @@ class API
      * TODO:  what to do with these tags ???
      * Adds a tag.
      *
-     * @param string $value The value
+     * @param string $handle The handle declared for the tag
+     * @param string $prefix The prefix/namespace/schema that defines the tag
      *
      * @return null
      */
-    public function addTag(string $value)
+    public function addTag(string $handle, string $prefix)
     {
-        $this->_tags[] = $value;
+        //  It is an error to specify more than one “TAG” directive for the same handle in the same document, even if both occurrences give the same prefix.
+        if (array_key_exists($handle, $this->_tags)) {
+            throw new \Exception(sprintf(self::TAGHANDLE_DUPLICATE, $handle), 1);
+        }
+        $this->_tags[$handle] = $prefix;
     }
 
     /**

@@ -2,6 +2,7 @@
 namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Tag\CoreSchema;
 
 /**
  * Provides mechanisms to handle tags
@@ -18,17 +19,20 @@ use Dallgoot\Yaml\Nodes\NodeGeneric;
  */
 class TagFactory
 {
-    private const UNKNOWN_TAG = 'Error: tag "%s" is unknown (have you registered a handler for it? see TagFactory)';
+    private const UNKNOWN_TAG = 'Error: tag "%s" is unknown (have you registered a handler for it? see Dallgoot\Yaml\Tag\SchemaInterface)';
     private const NO_NAME     = '%s Error: a tag MUST have a name';
     private const WRONG_VALUE = "Error : cannot transform tag '%s' for type '%s'";
+    private const ERROR_HANDLE_EXISTS = "This tag handle is already registered, did you use a named handle like '!name!' ?";
 
-    public static $tagsNamespaces = [];
-/**
- * The primary tag handle is a single “!” character.
- * # Global
+    public static $schemas = [];
+    public static $schemaHandles = [];
+    /**
+ The primary tag handle is a single “!” character.
+ # Global
 %TAG ! tag:example.com,2000:app/
 ---
 !foo "bar"
+
  The secondary tag handle is written as “!!”. This allows using a compact notation for a single “secondary” name space. By default, the prefix associated with this handle is “tag:yaml.org,2002:”. This prefix is used by the YAML tag repository.
  %TAG !! tag:example.com,2000:app/
 ---
@@ -41,27 +45,49 @@ Named Handles
 
     The name of the handle is a presentation detail and must not be used to convey content information. In particular, the YAML processor need not preserve the handle name once parsing is completed.
 
+
+
+Verbatim Tags
+    A tag may be written verbatim by surrounding it with the “<” and “>” characters. In this case, the YAML processor must deliver the verbatim tag as-is to the application. In particular, verbatim tags are not subject to tag resolution. A verbatim tag must either begin with a “!” (a local tag) or be a valid URI (a global tag).
+
+
+  !<!bar> baz
+
+
 %TAG !e! tag:example.com,2000:app/
 ---
 !e!foo "bar"
- */
+
+%TAG ! tag:example.com,2000:app/
+%TAG !! tag:example.com,2000:app/
+%TAG !e! tag:example.com,2000:app/
+!<tag:yaml.org,2002:str> foo :
+
+     */
     /**
      * Add Handlers for legacy Yaml tags
      *
      * @see self::LEGACY_TAGS_HANDLERS
      * @todo remove dependency to ReflectionClass using 'get_class_methods'
      */
-    private static function registerLegacyNamespace()
+    private static function createCoreSchema()
     {
-        // $reflectAPI = new \ReflectionClass(self::class);
-        // $methodsList = [];
-        // $list = $reflectAPI->getMethods(RM::IS_FINAL | RM::IS_STATIC & RM::IS_PRIVATE);
-        // foreach ($list as $method) {
-        //     $methodsList[$method->name] = $method->getClosure();
-        // }
-        // foreach (self::LEGACY_TAGS_HANDLERS as $tagName => $methodName) {
-        //     self::$tagsNamespaces[$tagName] = $methodsList[$methodName];
-        // }
+        $coreSchema = new CoreSchema;
+        self::registerSchema($coreSchema::SCHEMA_URI, $coreSchema);
+        self::registerHandle("!!", $coreSchema::SCHEMA_URI);
+    }
+
+    public function registerSchema($URI, Tag\SchemaInterface $schemaObject)
+    {
+        self::$schemas[$URI] = $schemaObject;
+    }
+
+    public static function registerHandle(string $handle, string $prefixOrURI)
+    {
+        if (array_key_exists($handle, self::$schemaHandles)) {
+            throw new \Exception(self::ERROR_HANDLE_EXISTS, 1);
+        }
+        self::$schemaHandles[$handle] = $prefixOrURI;
     }
 
     /**
@@ -75,46 +101,79 @@ Named Handles
      * @return     mixed      If $value can be preserved as Node type :the same Node type,
      *                        otherwise any type that the tag transformation returns
      */
-    public static function transform(string $identifier, $value)
+    public static function transform(string $identifier, $value, &$parent = null)
     {
-        if (self::isKnown($identifier)) {
-            if (!($value instanceof NodeGeneric) && !($value instanceof NodeList) ) {
+        if (count(self::$schemas) === 0) {
+            self::createCoreSchema();
+        }
+        if (!($value instanceof NodeGeneric) && !($value instanceof NodeList) ) {
                 throw new \Exception(sprintf(self::WRONG_VALUE, $identifier, gettype($value)));
+            } else {
+                try {
+                    if (!preg_match(Regex::TAG_PARTS, $identifier, $matches)) {
+                        throw new \UnexpectedValueException("Tag '$identifier' is invalid", 1);
+                    }
+                    // var_dump($matches['handle'], $matches['tagname']);
+                    $handle = $matches['handle'];
+                    $tagname = $matches['tagname'];
+                    // return;
+                    if (is_string($handle) && array_key_exists($handle, self::$schemaHandles)) {
+                        $schemaName   = self::$schemaHandles[$handle];
+                        if (is_string($schemaName) && array_key_exists($schemaName, self::$schemas)) {
+                            $schemaObject = self::$schemas[$schemaName];
+                            if (is_object($schemaObject) && is_string($tagname)) {
+                                return $schemaObject->{$matches['tagname']}($value, $parent);
+                            }
+                        }
+                    }
+                    throw new \Exception("Error Processing tag '$identifier' : $handle-$tagname", 1);
+                } catch (\UnexpectedValueException $e) {
+                    return new Tagged($identifier, is_null($value) ? null : $value->build($parent));
+                } catch (\Throwable $e) {
+                    throw new \Exception("Tagged value could not be transformed for tag '$identifier'", 1, $e);;
+                }
             }
             // return self::$tagsNamespaces[$identifier]($value);
-        } else {
-            throw new \Exception(sprintf(self::UNKNOWN_TAG, $identifier), 1);
-        }
+        // } else {
+        //     throw new \Exception(sprintf(self::UNKNOWN_TAG, $identifier), 1);
+        // }
     }
+
+    // public function getSchemaObject($handle):object
+    // {
+    //     // $schemaClass = self::$schemas[self::$schemaHandles[$handle]];
+    //     // var_dump($handle, self::$schemaHandles, self::$schemas);
+    //     return self::$schemas[self::$schemaHandles[$handle]];
+    // }
 
     /**
      * Determines if current is known : either YAML legacy or user added
      *
      * @return     boolean  True if known, False otherwise.
      */
-    public static function isKnown(string $identifier):bool
-    {
-        if (count(self::$tagsNamespaces) === 0) {
-            self::registerLegacyNamespace();
-        }
-        return in_array($identifier, array_keys(self::$tagsNamespaces));
-    }
+    // public static function isKnown(string $identifier):bool
+    // {
+    //     if (count(self::$schemas) === 0) {
+    //         self::createCoreSchema();
+    //     }
+    //     return in_array($identifier, array_keys(self::$tagsNamespaces));
+    // }
 
     /**
      * Allow the user to add a custom tag handler.
      * Note: That allows to replace handlers for legacy tags also.
      *
      * @param      string      $name   The name
-     * @param      Closure     $func   The function
+     * @param      \Closure     $func   The function
      *
      * @throws     \Exception  Can NOT add handler without a name for the tag
      */
-    public static function addTagHandler(string $name, \Closure $func)
-    {
-        if (empty(trim($name))) {
-            throw new \Exception(sprintf(self::NO_NAME, __METHOD__));
-        }
-        self::$tagsNamespaces[trim($name)] = $func;
-    }
+    // public static function addTagHandler(string $name, \Closure $func)
+    // {
+    //     if (empty(trim($name))) {
+    //         throw new \Exception(sprintf(self::NO_NAME, __METHOD__));
+    //     }
+    //     self::$tagsNamespaces[trim($name)] = $func;
+    // }
 
 }

@@ -32,7 +32,7 @@ class ActionsTest extends TestCase
     protected function setUp(): void
     {
         // $this->nodeActions = new Actions("   !!str    sometext", 42);
-        $this->node = $this->getMockBuilder(Actions::class)
+        $this->nodeActions = $this->getMockBuilder(Actions::class)
                             ->setConstructorArgs(["   !!str    sometext", 42])
                             ->getMockForAbstractClass();
     }
