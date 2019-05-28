@@ -79,8 +79,8 @@ Verbatim Tags
 
     public static function registerSchema($URI, Tag\SchemaInterface $schemaObject)
     {
-        self::$schemas[$URI] = $schemaObject;
-    }
+        self::$schemas[$URI] = $schemaObject
+;    }
 
     public static function registerHandle(string $handle, string $prefixOrURI)
     {

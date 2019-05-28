@@ -26,6 +26,7 @@
       <testsuite name="all">
          <directory>../tests/units/</directory>
          <file>../tests/cases/CasesTest.php</file>
+         <file>../tests/cases/DumperTest.php</file>
       </testsuite>
       <testsuite name="units">
          <directory>../tests/units/</directory>

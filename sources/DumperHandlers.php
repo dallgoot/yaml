@@ -59,26 +59,36 @@ class DumperHandlers
 
     private function dumpCompound($compound, int $indent):string
     {
+        //var_dump(__METHOD__);
         $iterator = null;
-        $mask = '';
+        $mask = '%s:';
         if (is_callable($compound)) {
             throw new \Exception("Dumping Callable|Closure is not currently supported", 1);
-        } elseif (is_iterable($compound)) {
-            $iterator = $compound;
-            $mask = '%s:';
-            if (is_array($compound)) {
-                $refKeys = range(0, count($compound));
-                if (array_keys($compound) === $refKeys) {
-                    $mask = '-';
-                }
+        } elseif ($compound instanceof YamlObject) {
+            //var_dump("YAMLOBJECT");
+            return $this->dumpYamlObject($compound);
+        } elseif ($compound instanceof Compact) {
+             return $this->dumpCompact($compound, $indent);
+        } elseif (is_array($compound)) {
+            //var_dump("ARRAY");
+            $iterator = new \ArrayIterator($compound);
+            $mask = '-';
+            $refKeys = range(0, count($compound)-1);
+            // var_dump("newarray",array_keys($compound), $refKeys);
+            if (array_keys($compound) !== $refKeys) {
+                $mask = '%s:';
             }
+        } elseif (is_iterable($compound)) {
+            //var_dump("ITERABLE");
+            $iterator = $compound;
+            // $mask = '%s:';
         } elseif (is_object($compound)) {
-            if ($compound instanceof YamlObject) return $this->dumpYamlObject($compound);
+            //var_dump("SPECIAL");
             if ($compound instanceof Tagged)     return $this->dumpTagged($compound, $indent);
-            if ($compound instanceof Compact)    return $this->dumpCompact($compound, $indent);
             //TODO:  consider dumping datetime as date strings according to a format provided by user
             if ($compound instanceof \DateTime)  return $compound->format(self::DATE_FORMAT);
-            $iterator = new \ArrayIterator($compound);
+            // $iterator = new \ArrayIterator($compound);
+            $iterator = new \ArrayIterator(get_object_vars($compound));
         }
         return $this->iteratorToString($iterator, $mask, $indent);
     }
@@ -86,33 +96,35 @@ class DumperHandlers
 
     private function dumpYamlObject(YamlObject $obj):string
     {
-        if ($this->multipleDocs || $obj->hasDocStart() || $obj->isTagged() || $obj->isScalar()) {
+        if ($this->multipleDocs || $obj->hasDocStart() || $obj->isTagged()) {
            $this->multipleDocs = true;
           // && $this->$result instanceof DLL) $this->$result->push("---");
         }
         if (count($obj) > 0) {
+            //var_dump("indices");
             return $this->iteratorToString($obj, '-', 0);
-        } else {
-            return $this->iteratorToString($obj, '%s:', 0);
         }
+        //var_dump("no indices");
+        return $this->iteratorToString(new \ArrayIterator(get_object_vars($obj)), '%s:', 0);
         // $this->insertComments($obj->getComment());
         //TODO: $references = $obj->getAllReferences();
-
     }
 
 
-    private function iteratorToString(iterable $iterator, string $mask, int $indent, bool $isCompact=false):string
+    private function iteratorToString(\Iterator $iterable, string $keyMask, int $indent, bool $isCompact=false):string
     {
         $pairs = [];
-        foreach (new \ArrayIterator($iterator) as $key => $value) {
+        foreach ($iterable as $key => $value) {
             $separator = "\n";
             $valueIndent = $indent + self::INDENT;
-            if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime) {
+            if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime ) {
                 $separator   = ' ';
                 $valueIndent = 0;
             }
-            $pairs[] = sprintf($mask, $key).$separator.$this->dump($value, $valueIndent);
-        } var_dump($iterator);
+            $pairs[] = str_repeat(' ', $indent).sprintf($keyMask, $key).$separator.$this->dump($value, $valueIndent);
+            //var_dump(str_repeat(' ', $indent)."key($keyMask):$key");
+        }
+        //var_dump($pairs);
         return implode("\n", $pairs);
     }
 

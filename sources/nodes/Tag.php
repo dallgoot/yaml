@@ -66,7 +66,7 @@ class Tag extends Actions
             return $transformed;
         // } else {
         } catch (\Throwable $e) {
-            if ($e instanceof \InvalidValueException) {
+            if ($e instanceof \UnexpectedValueException) {
                 return new Tagged($this->tag, is_null($value) ? null : $value->build($parent));
             }
             throw new \Exception("Can NOT build Tag", 1, $e);

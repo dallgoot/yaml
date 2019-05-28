@@ -3,10 +3,10 @@ array: |-
   - b
   - c
 array_with_alphakey: |-
-  - alphakey: alphakey_value
-  - 0: a
-  - 1: b
-  - 2: c
+  alphakey: alphakey_value
+  0: a
+  1: b
+  2: c
 compact_array_in_object: |-
   key1: {array: [1, 2, 3]}
 compact_array: |-

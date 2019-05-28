@@ -14,7 +14,8 @@ use Dallgoot\Yaml;
 // $yaml = (new Loader('./dummy.yml', null, 0))->parse();
 // var_dump($yaml);
 $testName = 'yamlObject_properties';
-$text = Yaml::dump((include PROJECT_ROOT . "tests/cases/dumping/$testName.php"), 0);
+$yamlObject = (include PROJECT_ROOT . "tests/cases/dumping/$testName.php");
+$text = Yaml::dump($yamlObject, 0);
 
 $nameResultPair = get_object_vars(Yaml::parseFile(PROJECT_ROOT . 'tests/definitions/dumping_tests.yml'));
 
@@ -23,4 +24,4 @@ $nameResultPair = get_object_vars(Yaml::parseFile(PROJECT_ROOT . 'tests/definiti
 if ($nameResultPair[$testName] !== $text) {
     var_dump('EXPECTED', $nameResultPair[$testName]);
     var_dump('RECEIVED', $text);
-} else echo 'OK';
+} else echo 'WRITE OK !!!';

@@ -8,3 +8,4 @@ runtests
 configuration/daux.json
 emptyFile.test
 documentation/*
+.tool-versions

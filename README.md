@@ -42,11 +42,8 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 - DUMPER:
   - implement/verify Dumper::Options
-  - finish implementation
   - quote strings that are not valid values in YAML syntax
-  - set up tests
 - verify TODOS in code
-- refactor namespace/classnames for nodes types : Dallgoot\Yaml\Nodes\Actions
   - build classes docs
 - Examples
   - double check references/anchors changes in YamlObject
