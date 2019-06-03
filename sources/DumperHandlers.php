@@ -59,14 +59,8 @@ class DumperHandlers
 
     private function dumpCompound($compound, int $indent):string
     {
-        $iterator = null;
-        $mask = '%s:';
         if (is_callable($compound)) {
             throw new \Exception("Dumping Callable|Closure is not currently supported", 1);
-        } elseif ($compound instanceof YamlObject) {
-            return $this->dumpYamlObject($compound);
-        } elseif ($compound instanceof Compact) {
-             return $this->dumpCompact($compound, $indent);
         } elseif (is_array($compound)) {
             $iterator = new \ArrayIterator($compound);
             $mask = '-';
@@ -74,15 +68,28 @@ class DumperHandlers
             if (array_keys($compound) !== $refKeys) {
                 $mask = '%s:';
             }
-        } elseif (is_iterable($compound)) {
-            $iterator = $compound;
+            return $this->iteratorToString($iterator, $mask, $indent);
         } elseif (is_object($compound)) {
-            if ($compound instanceof Tagged)     return $this->dumpTagged($compound, $indent);
-            //TODO:  consider dumping datetime as date strings according to a format provided by user
-            if ($compound instanceof \DateTime)  return $compound->format(self::DATE_FORMAT);
-            $iterator = new \ArrayIterator(get_object_vars($compound));
+            return $this->dumpObject($compound, $indent);
         }
-        return $this->iteratorToString($iterator, $mask, $indent);
+    }
+
+    private function dumpObject(object $object, int $indent):string
+    {
+        if ($object instanceof YamlObject) {
+            return $this->dumpYamlObject($object);
+        } elseif ($object instanceof Compact) {
+            return $this->dumpCompact($object, $indent);
+        } elseif ($object instanceof Tagged) {
+            return $this->dumpTagged($object, $indent);
+        } elseif ($object instanceof \DateTime) {
+            return $object->format(self::DATE_FORMAT);
+        } elseif (is_iterable($object)) {
+            $iterator = $object;
+        } else {
+            $iterator = new \ArrayIterator(get_object_vars($object));
+        }
+        return $this->iteratorToString($iterator, '%s:', $indent);
     }
 
 
@@ -112,9 +119,7 @@ class DumperHandlers
                 $valueIndent = 0;
             }
             $pairs[] = str_repeat(' ', $indent).sprintf($keyMask, $key).$separator.$this->dump($value, $valueIndent);
-            //var_dump(str_repeat(' ', $indent)."key($keyMask):$key");
         }
-        //var_dump($pairs);
         return implode("\n", $pairs);
     }
 
