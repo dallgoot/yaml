@@ -47,7 +47,8 @@ class DirectiveTest extends TestCase
         $this->nodeDirective = new Directive('%TAG ! tag:clarkevans.com,2002:');
         $rootNode = new Root;
         $rootNode->add($this->nodeDirective);
-        $rootNode->build(new YamlObject);
+        $yamlObject = new YamlObject;
+        $rootNode->build($yamlObject);
         $this->assertEquals('tag:clarkevans.com,2002:', TagFactory::$schemaHandles['!']);
     }
 
@@ -58,7 +59,8 @@ class DirectiveTest extends TestCase
         $directive2 = new Directive('%TAG ! tag:clarkevans.com,2002:');
         $rootNode = new Root;
         $rootNode->add($this->nodeDirective);
-        $rootNode->build(new YamlObject);
+        $yamlObject = new YamlObject;
+        $rootNode->build($yamlObject);
     }
     /**
      * @covers \Dallgoot\Yaml\Nodes\Directive::add

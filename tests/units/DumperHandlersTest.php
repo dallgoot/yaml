@@ -85,7 +85,7 @@ class DumperHandlersTest extends TestCase
         $this->expectException(\Exception::class);
         $dumpCompound = new \ReflectionMethod($this->dumperHandler, 'dumpCompound');
         $dumpCompound->setAccessible(true);
-        $dumpCompound->invoke($this->dumperHandlerk, $callable, 0);
+        $dumpCompound->invoke($this->dumperHandler, $callable, 0);
     }
     /**
      * @covers \Dallgoot\Yaml\DumperHandlers::dumpCompound
