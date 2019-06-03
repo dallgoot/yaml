@@ -39,8 +39,8 @@ class DumperTest extends TestCase
      */
     public function testToString(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $this->assertEquals("- 1\n- 2\n- 3", $this->dumper::toString([1,2,3]));
+        $this->assertEquals("--- some text\n", $this->dumper::toString('some text'));
     }
 
     /**
@@ -48,8 +48,11 @@ class DumperTest extends TestCase
      */
     public function testToFile(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
+        $filename = 'dumperTest.yml';
+        $result = $this->dumper::toFile($filename, [1,2,3]);
+        $this->assertTrue($result);
+        $this->assertEquals("- 1\n- 2\n- 3", file_get_contents($filename));
+        unlink($filename);
     }
 
 }

@@ -15,7 +15,7 @@ namespace Dallgoot\Yaml;
  * @method void addComment($index, $value)
  * @method string|array getComment($lineNumber)
  * @method void setText(string $value)
- * @method void addTag(string $value)
+ * @method void addTag(string $handle, string $prefix)
  * @method bool hasDocStart()
  */
 class YamlObject extends \ArrayIterator implements \JsonSerializable

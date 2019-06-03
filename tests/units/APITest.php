@@ -42,9 +42,9 @@ class APITest extends TestCase
      */
     public function testConstruct(): void
     {
-        /** @todo Complete this unit test method. */
-        $this->markTestIncomplete();
-        //should test that property '_obj' is null BEFORE construct ???
+        $_obj = new \ReflectionProperty($this->api, '_obj');
+        $_obj->setAccessible(true);
+        $this->assertTrue($_obj->getValue($this->api) instanceof YamlObject);
     }
 
     /**

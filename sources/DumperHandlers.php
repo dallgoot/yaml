@@ -37,13 +37,13 @@ class DumperHandlers
         } elseif(is_resource($dataType)) {
             return get_resource_type($dataType);
         } elseif (is_scalar($dataType)) {
-            return $this->dumpScalar($dataType, $indent);
+            return $this->dumpScalar($dataType);
         } else {
             return $this->dumpCompound($dataType, $indent);
         }
     }
 
-    public function dumpScalar($dataType, $indent):string
+    public function dumpScalar($dataType):string
     {
         if ($dataType === \INF) return '.inf';
         if ($dataType === -\INF) return '-.inf';
@@ -59,35 +59,27 @@ class DumperHandlers
 
     private function dumpCompound($compound, int $indent):string
     {
-        //var_dump(__METHOD__);
         $iterator = null;
         $mask = '%s:';
         if (is_callable($compound)) {
             throw new \Exception("Dumping Callable|Closure is not currently supported", 1);
         } elseif ($compound instanceof YamlObject) {
-            //var_dump("YAMLOBJECT");
             return $this->dumpYamlObject($compound);
         } elseif ($compound instanceof Compact) {
              return $this->dumpCompact($compound, $indent);
         } elseif (is_array($compound)) {
-            //var_dump("ARRAY");
             $iterator = new \ArrayIterator($compound);
             $mask = '-';
             $refKeys = range(0, count($compound)-1);
-            // var_dump("newarray",array_keys($compound), $refKeys);
             if (array_keys($compound) !== $refKeys) {
                 $mask = '%s:';
             }
         } elseif (is_iterable($compound)) {
-            //var_dump("ITERABLE");
             $iterator = $compound;
-            // $mask = '%s:';
         } elseif (is_object($compound)) {
-            //var_dump("SPECIAL");
             if ($compound instanceof Tagged)     return $this->dumpTagged($compound, $indent);
             //TODO:  consider dumping datetime as date strings according to a format provided by user
             if ($compound instanceof \DateTime)  return $compound->format(self::DATE_FORMAT);
-            // $iterator = new \ArrayIterator($compound);
             $iterator = new \ArrayIterator(get_object_vars($compound));
         }
         return $this->iteratorToString($iterator, $mask, $indent);
@@ -101,17 +93,15 @@ class DumperHandlers
           // && $this->$result instanceof DLL) $this->$result->push("---");
         }
         if (count($obj) > 0) {
-            //var_dump("indices");
             return $this->iteratorToString($obj, '-', 0);
         }
-        //var_dump("no indices");
         return $this->iteratorToString(new \ArrayIterator(get_object_vars($obj)), '%s:', 0);
         // $this->insertComments($obj->getComment());
         //TODO: $references = $obj->getAllReferences();
     }
 
 
-    private function iteratorToString(\Iterator $iterable, string $keyMask, int $indent, bool $isCompact=false):string
+    private function iteratorToString(\Iterator $iterable, string $keyMask, int $indent):string
     {
         $pairs = [];
         foreach ($iterable as $key => $value) {
@@ -174,17 +164,17 @@ class DumperHandlers
      */
     public function dumpString(string $str):string
     {
-        return $str;
+        return ltrim($str);
     }
 
     public function dumpTagged(Tagged $obj, int $indent):string
     {
         $separator   = ' ';
         $valueIndent = 0;
-        if (is_scalar($obj->value)) {
+        if (!is_scalar($obj->value)) {
             $separator = "\n";
             $valueIndent = $indent + self::INDENT;
         }
-        return "!".$obj->tagName.$separator.$this->dump($obj->value, $valueIndent);
+        return $obj->tagName.$separator.$this->dump($obj->value, $valueIndent);
     }
 }

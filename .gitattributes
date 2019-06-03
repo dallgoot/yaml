@@ -1,4 +1,4 @@
 configuration/  export-ignore
-dependencies/   export-ignore
+vendor/   export-ignore
 /.*             export-ignore
 runtests        export-ignore

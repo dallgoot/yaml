@@ -75,9 +75,8 @@ class YamlTest extends TestCase
      */
     public function testDump(): void
     {
-        $this->markTestIncomplete();
-        // $phpVar = [1,2,3];
-        // $this->assertEquals("- 1\n- 2\n- 3\n", $this->yaml::dump($phpVar));
+        $this->assertEquals("- 1\n- 2\n- 3", $this->yaml::dump([1,2,3]));
+        $this->assertEquals("--- some text\n", $this->yaml::dump('some text'));
     }
 
     /**
@@ -85,11 +84,10 @@ class YamlTest extends TestCase
      */
     public function testDumpFile(): void
     {
-        $this->markTestIncomplete();
-        // $phpVar = [1,2,3];
-        // $fileName = 'dumpfile_test.yml';
-        // $this->assertTrue($this->yaml::dumpFile($fileName, $phpVar));
-        // $this->assertEquals("- 1\n- 2\n- 3\n", file_get_contents($fileName));
-        // unlink($fileName);
+        $filename = 'dumperTest.yml';
+        $result = $this->yaml::dumpFile($filename, [1,2,3]);
+        $this->assertTrue($result);
+        $this->assertEquals("- 1\n- 2\n- 3", file_get_contents($filename));
+        unlink($filename);
     }
 }

@@ -49,7 +49,7 @@ class Dumper
         $dumpHandler = new DumperHandlers($options);
         if (is_scalar($dataType)) {
             // TODO: what to woth comments ???
-            return "--- ".$dumpHandler->dumpScalar($dataType, 0). self::LINEFEED ;
+            return "--- ".$dumpHandler->dumpScalar($dataType). self::LINEFEED ;
         }
         return $dumpHandler->dump($dataType, 0);
     }

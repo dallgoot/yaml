@@ -44,7 +44,6 @@ class Tag extends Actions
             if (!preg_match(Regex::TAG_PARTS, $this->tag, $matches)) {
                 throw new \UnexpectedValueException("Tag '$this->tag' is invalid", 1);
             }
-                    // var_dump($matches['handle'], $matches['tagname']);
             $handle = $matches['handle'];
             $tagname = $matches['tagname'];
             $this->getRoot()->getYamlObject()->addTag($handle, $tagname);
@@ -54,23 +53,13 @@ class Tag extends Actions
         if (is_null($parent) && $value->isOneOf('Item', 'Key')) {
             $value = new NodeList(/** @scrutinizer ignore-type */ $value);
         }
-        // if (TagFactory::isKnown((string) $this->tag)) {
-        try {
-            if ($value instanceof Literals) {
-                $value = $value->value;
-            }
-            $transformed = TagFactory::transform((string) $this->tag, $value);
-            if ($transformed instanceof NodeGeneric || $transformed instanceof NodeList) {
-                return $transformed->build($parent);
-            }
-            return $transformed;
-        // } else {
-        } catch (\Throwable $e) {
-            if ($e instanceof \UnexpectedValueException) {
-                return new Tagged($this->tag, is_null($value) ? null : $value->build($parent));
-            }
-            throw new \Exception("Can NOT build Tag", 1, $e);
+        if ($value instanceof Literals) {
+            $value = $value->value;
         }
-
+        $transformed = TagFactory::transform((string) $this->tag, $value);
+        if ($transformed instanceof NodeGeneric || $transformed instanceof NodeList) {
+            return $transformed->build($parent);
+        }
+        return $transformed;
     }
 }

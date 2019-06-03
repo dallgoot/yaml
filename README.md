@@ -6,15 +6,16 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 ## Features:
 
-- define *appropriate* PHP datatypes for values :
-    - YamlObject for each Yaml Document
+- define *appropriate* PHP datatypes :
     - object for mappings
     - array for sequences
-    - Compact syntax
-    - tagged values as Tag Object
+    - common scalars : string, integer, float, INF, NAN
+    - YamlObject for each Yaml Document
+    - Compact for compact/short YAML syntax
+    - tagged values as Tagged Object when tag is not determinable
     - JSON, DateTime, etc.
 - recover from some parsing errors
-- tolerance to tabulations
+- tolerant to tabulations
 - DEFINE debug levels :
   - 1 : print each line Node Type class and exit
   - 2 : print Loader global map structure and exit
@@ -28,7 +29,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - compact syntax for mapping and sequences
 - multi-line values (simple|double quoted or not, compact mapping|sequence or JSON)
 - references (option : enabled by default)
-- tags with behaviour customization (overriding for common, or specifying for custom) via Closures settings.
+- tags with behaviour customization (overriding for common(CoreSchema), or specifying for custom) via implementing tag/SchemaInterface.
 
 ## What's different from other PHP Yaml libraries ?
 
@@ -57,16 +58,14 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - verify YAML DEFINITIONS files before launching tests
 - implement specific unit test for each YAML spec. invalid cases (what must not happen)
 - Code coverage : target 100%
-- keep ./runtests ???
 - Benchmarks against other libs
 
 ## Improvements
 
 - better/more precise errors identification (Yaml validation) with explanation in YAML content
 - Unicode checking (???)
-- OPTION : parse dates as DateTime
+- OPTION : parse dates as PHP DateTime object
 - OPTION: Force renaming key names that are not valid PHP property name
-- directives : currently ignored, should handle tag determination : local tag associated with global URI tag directive
 - TAG : function for 'php/object' that provides the correct namespace to build
 - NEON compatibility
 

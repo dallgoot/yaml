@@ -51,9 +51,9 @@ class Regex
     // %TAG !m! !my-
     // !<!bar> baz
     // !<tag:clarkevans.com,2002:invoice>
-    const TAG_URI = "(?'url'tag:\\w+\\.\\w{2,},\\d{4}:\\w+)";
+    const TAG_URI = "(?'url'tag:\\w+\\.\\w{2,},\\d{4}:\\w*)";
     const TAG_PARTS = "/(?'handle'!(?:[\\w\\d\\-_]!|!)*)(?'tagname'(?:<!?)?[\\w\\d\\-:.,_]+>?)?/";
-    const DIRECTIVE_TAG = "/(?(DEFINE)".Regex::TAG_URI.")%TAG +(?'handle'!|!!|![\\w\\d\-_]+!) +(?'uri'(?&url)|(?'prefix'![\\w\\d\-_]+))/";
+    const DIRECTIVE_TAG = "/(?(DEFINE)".Regex::TAG_URI.")%TAG +(?'handle'![\\w\\d\-_]+!|!!|!) +(?'uri'(?&url)|(?'prefix'![\\w\\d\-_]+))/";
     const DIRECTIVE_VERSION = "/%YAML +(?'version'1\\.\\d)/";
 
 

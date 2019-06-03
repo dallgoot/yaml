@@ -6,8 +6,11 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 use Dallgoot\Yaml\Nodes\NodeGeneric;
-use Dallgoot\Yaml\Nodes\Directive;
 use Dallgoot\Yaml\Nodes\Blank;
+use Dallgoot\Yaml\Nodes\Directive;
+use Dallgoot\Yaml\Nodes\Root;
+use Dallgoot\Yaml\TagFactory;
+use Dallgoot\Yaml\YamlObject;
 
 /**
  * Class DirectiveTest.
@@ -41,8 +44,22 @@ class DirectiveTest extends TestCase
     public function testBuild(): void
     {
         $this->assertTrue(is_null($this->nodeDirective->build()));
+        $this->nodeDirective = new Directive('%TAG ! tag:clarkevans.com,2002:');
+        $rootNode = new Root;
+        $rootNode->add($this->nodeDirective);
+        $rootNode->build(new YamlObject);
+        $this->assertEquals('tag:clarkevans.com,2002:', TagFactory::$schemaHandles['!']);
     }
 
+    public function testBuildError(): void
+    {
+        $this->expectException(\ParseError::class);
+        $this->nodeDirective = new Directive('%TAG ! tag:clarkevans.com,2002:');
+        $directive2 = new Directive('%TAG ! tag:clarkevans.com,2002:');
+        $rootNode = new Root;
+        $rootNode->add($this->nodeDirective);
+        $rootNode->build(new YamlObject);
+    }
     /**
      * @covers \Dallgoot\Yaml\Nodes\Directive::add
      */

@@ -33,8 +33,8 @@ class Directive extends NodeGeneric
             try {
                 $yamlObject = $this->getRoot()->getYamlObject();
                 //Try registering the handle in TagFactory
-                TagFactory::registerHandle($matches['handle'], $matches['prefix']);
-                $yamlObject->addTag($matches['handle'], $matches['prefix']);
+                TagFactory::registerHandle($matches['handle'], $matches['uri']);
+                $yamlObject->addTag($matches['handle'], $matches['uri']);
             } catch (\Throwable $e) {
                 throw new \ParseError(self::ERROR_BUILDING, 1, $e);
             }

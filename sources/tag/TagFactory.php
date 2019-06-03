@@ -108,72 +108,35 @@ Verbatim Tags
         }
         if (!($value instanceof NodeGeneric) && !($value instanceof NodeList) ) {
                 throw new \Exception(sprintf(self::WRONG_VALUE, $identifier, gettype($value)));
-            } else {
-                try {
-                    if (!preg_match(Regex::TAG_PARTS, $identifier, $matches)) {
-                        throw new \UnexpectedValueException("Tag '$identifier' is invalid", 1);
-                    }
-                    // var_dump($matches['handle'], $matches['tagname']);
-                    $handle = $matches['handle'];
-                    $tagname = $matches['tagname'];
-                    // return;
-                    if (is_string($handle) && array_key_exists($handle, self::$schemaHandles)) {
-                        $schemaName   = self::$schemaHandles[$handle];
-                        if (is_string($schemaName) && array_key_exists($schemaName, self::$schemas)) {
-                            $schemaObject = self::$schemas[$schemaName];
-                            if (is_object($schemaObject) && is_string($tagname)) {
-                                return $schemaObject->{$matches['tagname']}($value, $parent);
-                            }
-                        }
-                    }
-                    throw new \Exception("Error Processing tag '$identifier' : $handle-$tagname", 1);
-                } catch (\UnexpectedValueException $e) {
-                    return new Tagged($identifier, is_null($value) ? null : $value->build($parent));
-                } catch (\Throwable $e) {
-                    throw new \Exception("Tagged value could not be transformed for tag '$identifier'", 1, $e);;
+        } else {
+            try {
+                if (!preg_match(Regex::TAG_PARTS, $identifier, $matches)) {
+                    throw new \UnexpectedValueException("Tag '$identifier' is invalid", 1);
                 }
+                return self::runHandler($matches['handle'],
+                                          $matches['tagname'],
+                                          $value,
+                                          $parent);
+            } catch (\UnexpectedValueException $e) {
+                return new Tagged($identifier, is_null($value) ? null : $value->build($parent));
+            } catch (\Throwable $e) {
+                throw new \Exception("Tagged value could not be transformed for tag '$identifier'", 1, $e);;
             }
-            // return self::$tagsNamespaces[$identifier]($value);
-        // } else {
-        //     throw new \Exception(sprintf(self::UNKNOWN_TAG, $identifier), 1);
-        // }
+        }
     }
 
-    // public function getSchemaObject($handle):object
-    // {
-    //     // $schemaClass = self::$schemas[self::$schemaHandles[$handle]];
-    //     // var_dump($handle, self::$schemaHandles, self::$schemas);
-    //     return self::$schemas[self::$schemaHandles[$handle]];
-    // }
-
-    /**
-     * Determines if current is known : either YAML legacy or user added
-     *
-     * @return     boolean  True if known, False otherwise.
-     */
-    // public static function isKnown(string $identifier):bool
-    // {
-    //     if (count(self::$schemas) === 0) {
-    //         self::createCoreSchema();
-    //     }
-    //     return in_array($identifier, array_keys(self::$tagsNamespaces));
-    // }
-
-    /**
-     * Allow the user to add a custom tag handler.
-     * Note: That allows to replace handlers for legacy tags also.
-     *
-     * @param      string      $name   The name
-     * @param      \Closure     $func   The function
-     *
-     * @throws     \Exception  Can NOT add handler without a name for the tag
-     */
-    // public static function addTagHandler(string $name, \Closure $func)
-    // {
-    //     if (empty(trim($name))) {
-    //         throw new \Exception(sprintf(self::NO_NAME, __METHOD__));
-    //     }
-    //     self::$tagsNamespaces[trim($name)] = $func;
-    // }
+    public static function runHandler($handle, $tagname, $value, &$parent = null)
+    {
+        if (array_key_exists($handle, self::$schemaHandles)) {
+            $schemaName = self::$schemaHandles[$handle];
+            if (array_key_exists($schemaName, self::$schemas)) {
+                $schemaObject = self::$schemas[$schemaName];
+                if (is_object($schemaObject) && is_string($tagname)) {
+                    return $schemaObject->{$tagname}($value, $parent);
+                }
+            }
+        }
+        throw new \Exception("Error Processing tag '$tagname' : in $handle", 1);
+    }
 
 }
