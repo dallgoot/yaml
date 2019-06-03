@@ -59,9 +59,7 @@ class DumperHandlers
 
     private function dumpCompound($compound, int $indent):string
     {
-        if (is_callable($compound)) {
-            throw new \Exception("Dumping Callable|Closure is not currently supported", 1);
-        } elseif (is_array($compound)) {
+        if (is_array($compound)) {
             $iterator = new \ArrayIterator($compound);
             $mask = '-';
             $refKeys = range(0, count($compound)-1);
@@ -69,9 +67,10 @@ class DumperHandlers
                 $mask = '%s:';
             }
             return $this->iteratorToString($iterator, $mask, $indent);
-        } elseif (is_object($compound)) {
+        } elseif (is_object($compound) && !is_callable($compound)) {
             return $this->dumpObject($compound, $indent);
         }
+        throw new \Exception("Dumping Callable|Resource is not currently supported", 1);
     }
 
     private function dumpObject(object $object, int $indent):string
@@ -136,27 +135,24 @@ class DumperHandlers
      */
     public function dumpCompact($subject, int $indent):string
     {
-        $pairs = [];
-        if (is_array($subject) || $subject instanceof \ArrayIterator) {
+        $structureFormat = '{%s}';
+        $keyFormat = "%s: ";
+        if (!is_array($subject) && !($subject instanceof \ArrayIterator)) {
+            $source = get_object_vars($subject);
+        } else {
             $max = count($subject);
             $objectAsArray = is_array($subject) ? $subject : $subject->getArrayCopy();
-            if(array_keys($objectAsArray) !== range(0, $max-1)) {
-                $pairs = $objectAsArray;
-            } else {
-                $valuesList = [];
-                foreach ($objectAsArray as $value) {
-                    $valuesList[] = is_scalar($value) ? $this->dump($value, $indent) : $this->dumpCompact($value, $indent);
-                }
-                return '['.implode(', ', $valuesList).']';
+            $source = $objectAsArray;
+            if(array_keys($objectAsArray) === range(0, $max-1)) {
+                $structureFormat = '[%s]';
+                $keyFormat = '';
             }
-        } else {
-            $pairs = get_object_vars($subject);
         }
         $content = [];
-        foreach ($pairs as $key => $value) {
-            $content[] = "$key: ".(is_scalar($value) ? $this->dump($value, $indent) : $this->dumpCompact($value, $indent));
+        foreach ($source as $key => $value) {
+            $content[] = sprintf($keyFormat, $key).(is_scalar($value) ? $this->dump($value, $indent) : $this->dumpCompact($value, $indent));
         }
-        return '{'.implode(', ', $content).'}';
+        return sprintf($structureFormat, implode(', ', $content));
     }
 
     /**
