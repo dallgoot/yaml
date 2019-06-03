@@ -32,9 +32,9 @@ class DumperHandlers
 
     public function dump($dataType, int $indent):string
     {
-        if(is_null($dataType)) {
+        if (is_null($dataType)) {
             return '';
-        } elseif(is_resource($dataType)) {
+        } elseif (is_resource($dataType)) {
             return get_resource_type($dataType);
         } elseif (is_scalar($dataType)) {
             return $this->dumpScalar($dataType);
@@ -62,7 +62,7 @@ class DumperHandlers
         if (is_array($compound)) {
             $iterator = new \ArrayIterator($compound);
             $mask = '-';
-            $refKeys = range(0, count($compound)-1);
+            $refKeys = range(0, count($compound) - 1);
             if (array_keys($compound) !== $refKeys) {
                 $mask = '%s:';
             }
@@ -113,7 +113,7 @@ class DumperHandlers
         foreach ($iterable as $key => $value) {
             $separator = "\n";
             $valueIndent = $indent + self::INDENT;
-            if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime ) {
+            if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime) {
                 $separator   = ' ';
                 $valueIndent = 0;
             }
@@ -143,7 +143,7 @@ class DumperHandlers
             $max = count($subject);
             $objectAsArray = is_array($subject) ? $subject : $subject->getArrayCopy();
             $source = $objectAsArray;
-            if(array_keys($objectAsArray) === range(0, $max-1)) {
+            if (array_keys($objectAsArray) === range(0, $max - 1)) {
                 $structureFormat = '[%s]';
                 $keyFormat = '';
             }
