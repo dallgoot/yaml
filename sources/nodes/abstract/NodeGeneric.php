@@ -169,11 +169,11 @@ abstract class NodeGeneric
         $supposedParent = $this->getParent($node->indent);
         if ($node instanceof Item && $supposedParent instanceof Root) {
             if ($supposedParent->value->has('Key')) {
-                $supposedParent->value->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO);
+                $supposedParent->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_LIFO);
                 foreach ($supposedParent->value as $child) {
                     if ($child instanceof Key) {
-                        $supposedParent->value->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO);
-                        $supposedParent->rewind();
+                        $supposedParent->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_LIFO);
+                        $supposedParent->value->rewind();
                         return $child;
                     }
                 }

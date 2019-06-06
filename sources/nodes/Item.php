@@ -66,8 +66,8 @@ class Item extends NodeGeneric
      */
     public function build(&$parent = null)
     {
-        if (!is_null($parent) && !is_array($parent) && !($parent instanceof \ArrayIterator)) {
-            throw new \Exception("parent must be an ArrayIterator not ".
+        if (!is_null($parent) && !is_array($parent) && !($parent instanceof YamlObject)) {
+            throw new \Exception("parent must be an array or YamlObject not ".
                 (is_object($parent) ? get_class($parent) : gettype($parent)));
         }
         $value = $this->value ? $this->value->build() : null;

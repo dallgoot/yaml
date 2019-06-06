@@ -50,7 +50,7 @@ class Tag extends Actions
             return;
         }
         $value = $this->value;
-        if (is_null($parent) && is_object($value) && $value->isOneOf('Item', 'Key')) {
+        if (is_null($parent) && $value instanceof NodeGeneric && $value->isOneOf('Item', 'Key')) {
             $value = new NodeList(/** @scrutinizer ignore-type */ $value);
         }
         if ($value instanceof Literals) {

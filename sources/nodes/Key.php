@@ -39,7 +39,12 @@ class Key extends NodeGeneric
         } else {
             $node = NodeFactory::get($keyString);
             if ($node->isOneOf('Tag', 'Quoted')) {
-                $this->identifier = $node->build();
+                $built = $node->build();
+                if (is_object($built)) {
+                    $this->identifier = $built->value;
+                } else {
+                    $this->identifier = (string) $node->build();
+                }
             } elseif ($node instanceof Scalar) {
                 $this->identifier = trim($node->raw);
             }
