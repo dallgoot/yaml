@@ -37,25 +37,12 @@ class Key extends NodeGeneric
         if ($keyString === '') {
            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $this->line));
         } else {
-            $keyNode = NodeFactory::get($keyString);
-            if ($keyNode instanceof Tag || $keyNode instanceof Quoted) {
-                $this->identifier = $keyNode->build();
-            } elseif ($keyNode instanceof Scalar) {
-                $this->identifier = trim($keyNode->raw);
+            $node = NodeFactory::get($keyString);
+            if ($node->isOneOf('Tag', 'Quoted')) {
+                $this->identifier = $node->build();
+            } elseif ($node instanceof Scalar) {
+                $this->identifier = trim($node->raw);
             }
-            // if (!is_null($keyNode->anchor)) {
-            //     $this->anchor = $keyNode->anchor;
-            //     $anchor = $keyNode->anchor;
-            //     $pos = strlen($keyNode->anchor);
-            //     $this->identifier = $keyNode->value->raw;
-            // } elseif (!is_null($keyNode->tag)) {
-            //     $this->tag = $keyNode->tag;
-            //     $raw = $keyNode->raw;
-            //     $pos = strlen($keyNode->tag);
-            //     $this->identifier = trim(substr($raw, $pos));
-            // } elseif ($keyNode instanceof NodeScalar) {
-            //     $this->identifier = ltrim($keyNode->raw);
-            // }
         }
     }
 

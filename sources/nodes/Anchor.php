@@ -17,7 +17,7 @@ class Anchor extends Actions
         if ($this->anchor[0] === "*") {
             return $yamlObject->getReference($name);
         } else {
-            $built = $this->value->build($parent);
+            $built = is_null($this->value) ? null : $this->value->build($parent);
             $yamlObject->addReference($name, $built);
             return $built;
         }

@@ -4,6 +4,7 @@ namespace Dallgoot\Yaml\Nodes;
 
 use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\YamlObject;
 
 /**
  *
@@ -58,7 +59,7 @@ class Item extends NodeGeneric
     /**
      * Builds an item. Adds the item value to the parent array|Iterator
      *
-     * @param array|\Iterator|null $parent The parent
+     * @param array|YamlObject|null $parent The parent
      *
      * @throws \Exception  if parent is another type than array or object Iterator
      * @return null|array

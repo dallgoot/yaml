@@ -20,7 +20,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
     {
         $candidate = $candidate ?? [];
         //ArrayIterator options --> Array indices can be accessed as properties in read/write.
-        parent::__construct($candidate, \ArrayIterator::STD_PROP_LIST|\ArrayIterator::ARRAY_AS_PROPS);
+        parent::__construct(/** @scrutinizer ignore-type */ $candidate, \ArrayIterator::STD_PROP_LIST|\ArrayIterator::ARRAY_AS_PROPS);
     }
 
     /**

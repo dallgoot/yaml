@@ -26,7 +26,7 @@ class SymfonySchema implements SchemaInterface
      * @throws Exception if unserialize fails OR if its a NodeList (no support of multiple values for this tag)
      * @return object    the unserialized object according to Node value
      */
-    public final static function PHPobjectHandler(object $node, &$parent = null)
+    public final static function PHPobjectHandler(object $node)
     {
         if ($node instanceof Nodes\Scalar) {
             $phpObject = unserialize($node->raw);

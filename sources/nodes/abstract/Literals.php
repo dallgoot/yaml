@@ -4,6 +4,7 @@ namespace Dallgoot\Yaml\Nodes;
 
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\TagFactory;
+use Dallgoot\Yaml\Tagged;
 
 /**
  *
@@ -71,7 +72,8 @@ abstract class Literals extends NodeGeneric
     {
         $result = '';
         if (!is_null($this->tag)) {
-            return TagFactory::transform($this->tag, $this->value)->build($parent);
+            $output = TagFactory::transform($this->tag, $this->value);
+            return $output instanceof Tagged ? $output : $output->build($parent);
         }
         if (!is_null($this->value)) {
             $tmp = $this->getFinalString($this->value->filterComment());

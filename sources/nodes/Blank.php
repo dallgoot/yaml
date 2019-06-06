@@ -22,9 +22,6 @@ class Blank extends NodeGeneric
     public function specialProcess(NodeGeneric &$previous, array &$emptyLines):bool
     {
         $deepest = $previous->getDeepestNode();
-        //what first character to determine if escaped sequence are allowed
-        //if this is empty $separator depends on previous last character (escape slash)
-        $separator = ' ';
         if ($previous instanceof Scalar) {
             $emptyLines[] = $this->setParent($previous->getParent());
         } elseif ($deepest instanceof Literals) {

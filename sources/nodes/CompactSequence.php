@@ -38,6 +38,7 @@ class CompactSequence extends NodeGeneric
             $this->value = new NodeList($this->value);
             $this->value->type = NodeList::SEQUENCE;
         }
-        return new Compact($this->value->build());
+        $arr = (array) $this->value->build();
+        return new Compact($arr);
     }
 }

@@ -36,6 +36,7 @@ class CompactMapping extends NodeGeneric
             $this->value = new NodeList($this->value);
             $this->value->type = NodeList::MAPPING;
         }
-        return new Compact($this->value->build());
+        $obj = (object) $this->value->build();
+        return new Compact($obj);
     }
 }

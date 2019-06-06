@@ -96,18 +96,22 @@ abstract class NodeGeneric
      *
      * @throws     \Exception  (description)
      *
-     * @return     Root   The root.
+     * @return     Root   The root node.
      */
     protected function getRoot():Root
     {
         if (is_null($this->_parent)) {
             throw new \Exception(__METHOD__.": can only be used when Node has a parent set", 1);
         }
-        $cursor = $this;
-        while (!($cursor instanceof Root) && $cursor->_parent instanceof NodeGeneric) {
-            $cursor = $cursor->_parent;
-        }
-        return $cursor;
+        $pointer = $this;
+        do {
+            if ($pointer->_parent instanceof NodeGeneric) {
+                $pointer = $pointer->_parent;
+            } else {
+                throw new \Exception("Node has no _parent set : ".get_class($pointer), 1);
+            }
+        } while (!($pointer instanceof Root));
+        return $pointer;
     }
 
     /**
@@ -148,7 +152,7 @@ abstract class NodeGeneric
         return $cursor;
     }
 
-    public function specialProcess(NodeGeneric &$previous, array &$emptyLines):bool
+    public function specialProcess(/** @scrutinizer ignore-unused */ NodeGeneric &$previous, /** @scrutinizer ignore-unused */ array &$emptyLines):bool
     {
         return false;
     }
@@ -165,13 +169,14 @@ abstract class NodeGeneric
         $supposedParent = $this->getParent($node->indent);
         if ($node instanceof Item && $supposedParent instanceof Root) {
             if ($supposedParent->value->has('Key')) {
-                // $lastKey = null;
+                $supposedParent->value->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO);
                 foreach ($supposedParent->value as $child) {
                     if ($child instanceof Key) {
-                        $lastKey = $child;
+                        $supposedParent->value->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO);
+                        $supposedParent->rewind();
+                        return $child;
                     }
                 }
-                return $lastKey;
             }
         }
         return $supposedParent;
@@ -212,7 +217,7 @@ abstract class NodeGeneric
      *
      * @return mixed  whatever the build process returns
      */
-    abstract function build(&$parent = null);
+    public abstract function build(&$parent = null);
 
     /**
      * Determines if $subject is one of the Node types provided (as strings) in $comparison array

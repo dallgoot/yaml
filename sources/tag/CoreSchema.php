@@ -3,6 +3,7 @@ namespace Dallgoot\Yaml\Tag;
 
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Nodes;
+use Dallgoot\Yaml\YamlObject;
 
 /**
  * Provides mechanisms to handle tags
@@ -67,7 +68,8 @@ class CoreSchema implements SchemaInterface
             foreach ($node as $key => $child) {
                 $list[] = $this->str($child);
             }
-            return new Nodes\Scalar(implode('',$list), 0);
+            // return new Nodes\Scalar(implode('',$list), 0);
+            return implode('',$list);
         }
     }
 
@@ -79,7 +81,7 @@ class CoreSchema implements SchemaInterface
      *
      * @return string  The value considered as 'binary' Note: the difference with strHandler is that multiline have not separation
      */
-    public function binary($node, NodeGeneric &$parent = null)
+    public function binary($node, Nodes\NodeGeneric &$parent = null)
     {
         return $this->str($node, $parent);
     }
@@ -93,7 +95,7 @@ class CoreSchema implements SchemaInterface
      * @throws     \Exception  if theres a set but no children (set keys or set values)
      * @return     YamlObject|object  process the Set, ie. an object construction with properties as serialized JSON values
      */
-    public function set(object $node, NodeGeneric &$parent = null)
+    public function set(object $node, Nodes\NodeGeneric &$parent = null)
     {
         if (!($node instanceof NodeList)) {
             throw new \LogicException(self::ERROR_SET);
@@ -103,19 +105,19 @@ class CoreSchema implements SchemaInterface
     }
 
     /**
-     * Specifi Handler for the 'omap' tag
+     * Specific Handler for the 'omap' tag
      *
      * @param object $node   The node
      * @param object|array|null  $parent The parent
      *
      * @throws \Exception  if theres an omap but no map items
-     * @return YamlObject|array process the omap
+     * @return mixed process the omap
      */
-    public function omap(object $node, NodeGeneric &$parent = null)
+    public function omap(object $node, Nodes\NodeGeneric &$parent = null)
     {
         if ($node instanceof Nodes\NodeGeneric) {
             if ($node instanceof Nodes\Item) {
-                return $this->omap($node->value);
+                return is_null($node->value) ? null : $this->omap($node->value);
             } elseif ($node instanceof Nodes\Key) {
                 return $node;
             } else {

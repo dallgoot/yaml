@@ -17,6 +17,7 @@ namespace Dallgoot\Yaml;
  * @method void setText(string $value)
  * @method void addTag(string $handle, string $prefix)
  * @method bool hasDocStart()
+ * @method bool isTagged()
  */
 class YamlObject extends \ArrayIterator implements \JsonSerializable
 {
