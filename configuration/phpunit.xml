@@ -23,22 +23,22 @@
          colors="true"
          verbose="true">
    <testsuites>
-      <testsuite name="all">
+      <testsuite name="All">
          <directory>../tests/units/</directory>
-         <file>../tests/cases/CasesTest.php</file>
-         <file>../tests/cases/DumperTest.php</file>
+         <file>../tests/CasesTest.php</file>
+         <file>../tests/DumpingTest.php</file>
       </testsuite>
       <testsuite name="units">
          <directory>../tests/units/</directory>
       </testsuite>
       <testsuite name="cases">
-         <file>../tests/cases/CasesTest.php</file>
+         <file>../tests/CasesTest.php</file>
       </testsuite>
       <testsuite name="dumper">
-         <file>../tests/cases/DumperTest.php</file>
+         <file>../tests/DumpingTest.php</file>
       </testsuite>
       <testsuite name="symfony">
-         <file>../tests/cases/SymfonyYamlTest.php</file>
+         <file>../tests/SymfonyYamlTest.php</file>
       </testsuite>
    </testsuites>
    <filter>

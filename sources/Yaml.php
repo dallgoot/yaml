@@ -42,7 +42,7 @@ final class Yaml
     {
         try {
             return (new Yaml\Loader(null, $options, $debug))->parse($someYaml);
-        } catch (\Exception|\Error|\ParseError $e) {
+        } catch (\Throwable $e) {
             throw new \Exception(__CLASS__." Error while parsing YAML string", 1, $e);
         }
     }
@@ -69,7 +69,7 @@ final class Yaml
     {
         try {
             return (new Yaml\Loader($fileName, $options, (int) $debug))->parse();
-        } catch (\Exception|\Error|\ParseError $e) {
+        } catch (\Throwable $e) {
             throw new \Exception(__CLASS__." Error during parsing '$fileName'", 1, $e);
         }
 
@@ -89,7 +89,7 @@ final class Yaml
     {
         try {
             return Yaml\Dumper::toString($somePhpVar, $options);
-        } catch (\Exception|\Error|\ParseError $e) {
+        } catch (\Throwable $e) {
             throw new \Exception(__CLASS__." Error dumping", 1, $e);
         }
     }
@@ -111,7 +111,7 @@ final class Yaml
     {
         try {
             return Yaml\Dumper::toFile($fileName, $somePhpVar, $options);
-        } catch (\Exception|\Error|\ParseError $e) {
+        } catch (\Throwable $e) {
             throw new \Exception(__CLASS__." Error during dumping '$fileName'", 1, $e);
         }
     }

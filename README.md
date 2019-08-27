@@ -7,13 +7,13 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 ## Features:
 
 - define *appropriate* PHP datatypes :
-    - object for mappings
-    - array for sequences
-    - common scalars : string, integer, float, INF, NAN
-    - YamlObject for each Yaml Document
-    - Compact for compact/short YAML syntax
-    - tagged values as Tagged Object when tag is not determinable
-    - JSON, DateTime, etc.
+  - object for mappings
+  - array for sequences
+  - common scalars : string, integer, float, INF, NAN
+  - YamlObject for each Yaml Document
+  - Compact for compact/short YAML syntax
+  - tagged values as Tagged Object when tag is not determinable
+  - JSON, DateTime, etc.
 - recover from some parsing errors
 - tolerant to tabulations
 - DEFINE debug levels :
@@ -26,34 +26,57 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - YAML specifications [version 1.2](http://yaml.org/spec/1.2/spec.html)
 - multiple documents in a content (file or string)
 - comments (option : enabled by default)
-- compact syntax for mapping and sequences
+- compact syntax for mappings and sequences
 - multi-line values (simple|double quoted or not, compact mapping|sequence or JSON)
 - references (option : enabled by default)
 - tags with behaviour customization (overriding for common(CoreSchema), or specifying for custom) via implementing tag/SchemaInterface.
 
 ## What's different from other PHP Yaml libraries ?
 
+|                                                                      | YAML version supported | coherent data types | multiple documents | JSON format validation | complex mapping | real reference behaviour | custom tags handling |
+| -------------------------------------------------------------------- |:----------------------:|:-------------------:|:------------------:|:----------------------:|:---------------:|:------------------------:|:--------------------:|
+| [Symfony Yaml](https://symfony.com/doc/current/components/yaml.html) | 1.2                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
+| [php-yaml](https://pecl.php.net/package/yaml)                        | 1.1                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
+| [syck](http://pecl.php.net/package/syck)                             | 1.0                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
+| [spyc](https://github.com/mustangostang/spyc)                        | 1.?                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
+| **Dallgoot/Yaml**                                                    | 1.2                    | ✔️                  | ✔️                 | ✔️                     | ✔️              | ✔️                       | ✔️                   |
+
 - coherent data types (see [coherence.md](./documentation/coherence.md) for explanations)
+
 - support multiple documents in one YAML content (string or file)
+
 - JSON format validation (if valid as per PHP function *json_encode*)
+
 - complex mapping (Note: keys are JSON encoded strings)
+
 - real reference behaviour : changing reference value modify other reference calls
 
-## Before releasing
+  
+
+  ## Before releasing
 
 - DUMPER:
+
   - implement/verify Dumper::Options
   - quote strings that are not valid values in YAML syntax
+
 - verify TODOS in code
+
   - build classes docs
+
 - Examples
+
   - double check references/anchors changes in YamlObject
   - Examples of each function of the API
+
 - verify gitattributes
+
 - composer update + tests before release
+
 - docker-compose for easy testing
 
 ## ToDo
+
 - rationalize levels for Exceptions
 - verify YAML DEFINITIONS files before launching tests
 - implement specific unit test for each YAML spec. invalid cases (what must not happen)
@@ -75,4 +98,4 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 ## Thanks
 
-https://www.json2yaml.com/convert-yaml-to-json
+(https://www.json2yaml.com/convert-yaml-to-json)

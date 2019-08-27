@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
 use \Dallgoot\Yaml;
 
@@ -13,8 +13,7 @@ $debug = (int) (isset($argv[1]) ? $argv[1] : null);
 /* USE CASE 1
 * load and parse if file exists
 */
-// $content = file_get_contents('./tests/cases/parsing/multidoc_mapping.yml');//var_dump($content);
-$content = file_get_contents('./tests/definitions/examples_tests.yml');//var_dump($content);
+$content = file_get_contents('./tests/cases/examples/Example_2_25.yml');//var_dump($content);
 $yaml = Yaml::parse($content, 0, $debug);
 // var_dump($yaml);
 var_dump(json_encode($yaml, JSON_OPTIONS));

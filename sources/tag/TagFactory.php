@@ -107,9 +107,9 @@ Verbatim Tags
             self::createCoreSchema();
         }
         if (!($value instanceof NodeGeneric) && !($value instanceof NodeList) ) {
-                throw new \Exception(sprintf(self::WRONG_VALUE, $identifier, gettype($value)));
+              throw new \Exception(sprintf(self::WRONG_VALUE, $identifier, gettype($value)));
         } else {
-            try {
+            // try {
                 if (!preg_match(Regex::TAG_PARTS, $identifier, $matches)) {
                     throw new \UnexpectedValueException("Tag '$identifier' is invalid", 1);
                 }
@@ -117,11 +117,11 @@ Verbatim Tags
                                           $matches['tagname'],
                                           $value,
                                           $parent);
-            } catch (\UnexpectedValueException $e) {
-                return new Tagged($identifier, is_null($value) ? null : $value->build($parent));
-            } catch (\Throwable $e) {
-                throw new \Exception("Tagged value could not be transformed for tag '$identifier'", 1, $e);;
-            }
+            // } catch (\UnexpectedValueException $e) {
+            //     return new Tagged($identifier, is_null($value) ? null : $value->build($parent));
+            // } catch (\Throwable $e) {
+            //     throw new \Exception("Tagged value could not be transformed for tag '$identifier'", 1, $e);;
+            // }
         }
     }
 
@@ -136,7 +136,7 @@ Verbatim Tags
                 }
             }
         }
-        throw new \Exception("Error Processing tag '$tagname' : in $handle", 1);
+        throw new \UnexpectedValueException("Error Processing tag '$tagname' : in $handle", 1);
     }
 
 }

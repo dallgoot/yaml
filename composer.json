@@ -1,6 +1,6 @@
 {
     "name": "dallgoot/yaml",
-    "description": "Provides loader, dumper and an API for YAML files. Loader builds to equivalent data types in PHP 7.3",
+    "description": "Provides loader, dumper and an API for YAML content. Loader builds to equivalent data types in PHP 7.3",
     "type": "library",
     "license": "Apache-2.0",
     "authors": [
@@ -42,7 +42,7 @@
         "phpmetrics/phpmetrics": "^2.4"
     },
     "scripts" : {
-        "test"    : "phpunit --configuration ./configuration/phpunit.xml --testsuite all",
+        "test"    : "phpunit --configuration ./configuration/phpunit.xml --testsuite All",
         "metrics" : "phpmetrics --report-html=documentation/phpmetrics_report ./sources",
         "phploc"  : "phploc sources/ --count-tests --log-xml=./documentation/codecoverage/phploc.xml",
         "docs"    : "phpdox -f configuration/phpdox.xml",

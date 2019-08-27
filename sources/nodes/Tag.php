@@ -24,7 +24,7 @@ class Tag extends Actions
 
     public function getTargetOnEqualIndent(NodeGeneric &$node):NodeGeneric
     {
-        if (is_null($this->value)) {
+        if (is_null($this->value) && $this->indent > 0) {
             return $this;
         } else {
             return $this->getParent();
@@ -53,13 +53,13 @@ class Tag extends Actions
         if (is_null($parent) && $value instanceof NodeGeneric && $value->isOneOf('Item', 'Key')) {
             $value = new NodeList(/** @scrutinizer ignore-type */ $value);
         }
-        if ($value instanceof Literals) {
-            $value = $value->value;
+        try {
+            $transformed = TagFactory::transform((string) $this->tag, $value, $parent);
+            return $transformed;
+        } catch (\UnexpectedValueException $e) {
+            return new Tagged($this->tag, is_null($value) ? null : $this->value->build($parent));
+        } catch (\Throwable $e) {
+            throw new \Exception("Tagged value could not be transformed for tag '$this->tag'", 1, $e);;
         }
-        $transformed = TagFactory::transform((string) $this->tag, $value);
-        if ($transformed instanceof NodeGeneric || $transformed instanceof NodeList) {
-            return $transformed->build($parent);
-        }
-        return $transformed;
     }
 }

@@ -40,12 +40,12 @@ class CoreSchema implements SchemaInterface
      * @param object $node
      * @param object|array|null  $parent The parent
      *
-     * @todo implements
+     * @todo REMOVE ME : no traces found on yaml.org reference
      */
-    public function inline(object $node, &$parent = null)
-    {
-        return $this->str($node, $parent);
-    }
+    // public function inline(object $node, &$parent = null)
+    // {
+    //     return $this->str($node, $parent);
+    // }
 
     /**
      * Specific Handler for 'str' tag
@@ -57,6 +57,9 @@ class CoreSchema implements SchemaInterface
      */
     public function str(object $node, &$parent = null)
     {
+        if($node instanceof Nodes\Literals){
+            $node = $node->value;
+        }
         if ($node instanceof Nodes\NodeGeneric) {
             $value = trim($node->raw);
             if ($node instanceof Nodes\Quoted) {
@@ -95,12 +98,20 @@ class CoreSchema implements SchemaInterface
      * @throws     \Exception  if theres a set but no children (set keys or set values)
      * @return     YamlObject|object  process the Set, ie. an object construction with properties as serialized JSON values
      */
-    public function set(object $node, Nodes\NodeGeneric &$parent = null)
+    public function set(object $node, &$parent = null)
     {
         if (!($node instanceof NodeList)) {
             throw new \LogicException(self::ERROR_SET);
         } else {
-            //TODO: implement tag:set ?? no actions needed for now
+            $list = $parent ?? new StdClass;
+            $node->rewind();
+            foreach ($node as $key => $item) {
+                $this->omap($item, $list);
+                $list->{$item->value->build()} = null;
+            }
+            if (!$parent) {
+                return $list;
+            }
         }
     }
 
@@ -113,23 +124,31 @@ class CoreSchema implements SchemaInterface
      * @throws \Exception  if theres an omap but no map items
      * @return mixed process the omap
      */
-    public function omap(object $node, Nodes\NodeGeneric &$parent = null)
+    public function omap(object $node, &$parent = null)
     {
         if ($node instanceof Nodes\NodeGeneric) {
-            if ($node instanceof Nodes\Item) {
-                return is_null($node->value) ? null : $this->omap($node->value);
-            } elseif ($node instanceof Nodes\Key) {
-                return $node;
+            if ($node instanceof Nodes\Item && $node->value instanceof Nodes\Key) {
+                $key = $node->value;
+                $keyName = $key->identifier;
+                $keyValue = $key->value->build();
+                if (is_null($parent)) {
+                    return [$keyName => $keyValue];
+                } else{
+                    $parent[$keyName] = $keyValue;
+                }
             } else {
                 throw new \UnexpectedValueException(self::ERROR_OMAP);
             }
         } elseif ($node instanceof NodeList) {
             //verify that each child is an item with a key as child
-            $list = new NodeList();
+            $list = $parent ?? [];
+            $node->rewind();
             foreach ($node as $key => $item) {
-                $list->push($this->omap($item));
+                $this->omap($item, $list);
             }
-            return $list;
+            if (!$parent) {
+                return $list;
+            }
         }
     }
 

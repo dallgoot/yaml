@@ -54,7 +54,7 @@ class Regex
     const TAG_URI = "(?'url'tag:\\w+\\.\\w{2,},\\d{4}:\\w*)";
     const TAG_PARTS = "/(?'handle'!(?:[\\w\\d\\-_]!|!)*)(?'tagname'(?:<!?)?[\\w\\d\\-:.,_]+>?)?/";
     const DIRECTIVE_TAG = "/(?(DEFINE)".Regex::TAG_URI.")%TAG +(?'handle'![\\w\\d\-_]+!|!!|!) +(?'uri'(?&url)|(?'prefix'![\\w\\d\-_]+))/";
-    const DIRECTIVE_VERSION = "/%YAML +(?'version'1\\.\\d)/";
+    const DIRECTIVE_VERSION = "/%YAML *:? *(?'version'1\\.\\d)/";
 
 
     /**
@@ -87,7 +87,7 @@ class Regex
      * @param string $var A string value
      *
      * @return boolean  True if number, False otherwise.
-     * @todo   replace regex expression with class constants, use is_numeric ?
+     * @todo   replace regex expression with class constants, use is_numeric ? can be binary too ?
      */
     public static function isNumber(string $var):bool
     {

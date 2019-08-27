@@ -17,7 +17,7 @@ use Dallgoot\Yaml\NodeList;
 abstract class NodeGeneric
 {
     /** @var null|string|boolean */
-    protected $identifier;
+    public $identifier;
     /** @var null|NodeGeneric */
     protected $_parent;
 
@@ -172,8 +172,8 @@ abstract class NodeGeneric
                 $supposedParent->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_LIFO);
                 foreach ($supposedParent->value as $child) {
                     if ($child instanceof Key) {
-                        $supposedParent->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_LIFO);
-                        $supposedParent->value->rewind();
+                        $supposedParent->value->setIteratorMode(\SplDoublyLinkedList::IT_MODE_FIFO);
+                        // $supposedParent->value->rewind();
                         return $child;
                     }
                 }

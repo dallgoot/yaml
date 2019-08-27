@@ -103,7 +103,7 @@ tags_in_compact: |-
 tags_in_item_with_sequence: |-
   [{"tagName":"!foo","value":["yaml"]},{"tagName":"!quz","value":["bar"]}]
 tags_inline_long: |-
-  {"foo":"bar","quz":{"tagName":"!long","value":"this is a long text\n"}}
+  {"foo":{"tagName":"!inline","value":"bar"},"quz":{"tagName":"!long","value":"this is a long text\n"}}
 tags_in_litteral: |-
   {"data":"SGVsbG8gd29ybGQ="}
 tags_in_mapping: |-
@@ -111,6 +111,6 @@ tags_in_mapping: |-
 tags_with_quotes: |-
   {"data":"SGVsbG8gd29ybGQ=","enclosed with single quotes":"SGVsbG8gd29ybGQ=","containing spaces":"SGVs bG8gd 29ybGQ="}
 tag_symfony_phpobject: |-
-  {"foo":{"__PHP_Incomplete_Class_Name":"Symfony\\Component\\Yaml\\Tests\\B","b":"foo"},"bar":1}
+  {"foo":{"tagName":"!php/object","value":"O:30:\"Symfony\\Component\\Yaml\\Tests\\B\":1:{s:1:\"b\";s:3:\"foo\";}"},"bar":1}
 yaml_in_literal_folded: |-
   {"yamlObject_indices":"-\n  - 1\n  - 2\n  - 3\n-\n  memberOfO: some really really really really really really really really really very long text as a simple string\n"}

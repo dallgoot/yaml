@@ -28,15 +28,15 @@ final class NodeFactory
         elseif ((bool) preg_match(Regex::KEY, $trimmed, $matches)) return new Nodes\Key($nodeString, $line, $matches);
         else {
             $first = $trimmed[0];
-            $stringGroups = ["-" ,'>|' ,'"\'',"#%" ,"{[" ,":?" ,'*&!'];
+            $stringGroups = ['-',         '>|' ,   '"\'',    "#%" ,    "{[" ,       ":?" ,       '*&!'];
             $methodGroups = ['Hyphen','Literal','Quoted','Special','Compact','SetElement','NodeAction'];
             foreach ($stringGroups as $groupIndex => $stringRef) {
                 if (is_int(strpos($stringRef, $first))) {
                     $methodName = 'on'.$methodGroups[$groupIndex];
                     try {
                         return self::$methodName($first, $nodeString, $line);
-                    } catch (\Exception|\Error|\ParseError $e) {
-                        throw new \Exception(" could not create a Node, ", 1, $e);
+                    } catch (\Throwable $e) {
+                        throw new \Exception(" could not create a Node ($methodName) for '$nodeString'", 1, $e);
                     }
                 }
             }
@@ -143,8 +143,8 @@ final class NodeFactory
         if (!((bool) preg_match(Regex::NODE_ACTIONS, trim($nodeString), $matches))) {
             return new Nodes\Scalar($nodeString, $line);
         }
-        $action = trim($matches['action']);//var_dump($matches);
-        switch ($action[0]) {
+        // $action = trim($matches['action']);//var_dump($matches);
+        switch ($first) {
             case '!': return new Nodes\Tag   ($nodeString, $line);
             default :
                 return new Nodes\Anchor($nodeString, $line);
