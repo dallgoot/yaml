@@ -96,14 +96,14 @@ class CoreSchema implements SchemaInterface
      * @param object|array|null  $parent The parent
      *
      * @throws     \Exception  if theres a set but no children (set keys or set values)
-     * @return     YamlObject|object  process the Set, ie. an object construction with properties as serialized JSON values
+     * @return     mixed  process the Set, ie. an object construction with properties as serialized JSON values
      */
     public function set(object $node, &$parent = null)
     {
         if (!($node instanceof NodeList)) {
             throw new \LogicException(self::ERROR_SET);
         } else {
-            $list = $parent ?? new StdClass;
+            $list = $parent ?? new \StdClass;
             $node->rewind();
             foreach ($node as $key => $item) {
                 $this->omap($item, $list);

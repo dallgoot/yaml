@@ -6,7 +6,7 @@ use Symfony\Component\Yaml\Yaml;
 
 final class SymfonyYamlCases extends TestCase
 {
-    private $testFolder = __DIR__."/../cases/";
+    private $testFolder = __DIR__."/cases/";
     private const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR;
 
     // Batch tests
@@ -23,20 +23,20 @@ final class SymfonyYamlCases extends TestCase
 
     public function examplestestSymfonyProvider()
     {
-        $nameResultPair = Yaml::parseFile(__DIR__.'/../definitions/examples_tests.yml');
+        $nameResultPair = Yaml::parseFile(__DIR__.'/definitions/examples_tests.yml');
         $this->assertArrayHasKey('Example_2_01', $nameResultPair, 'ERROR during Yaml::parseFile for ../definitions/examples_tests.yml');
         return $this->getGenerator($nameResultPair);
     }
 
     public function parsingtestSymfonyProvider()
     {
-        $nameResultPair = Yaml::parseFile(__DIR__.'/../definitions/parsing_tests.yml');
+        $nameResultPair = Yaml::parseFile(__DIR__.'/definitions/parsing_tests.yml');
         return $this->getGenerator($nameResultPair);
     }
 
     public function failingtestSymfonyProvider()
     {
-        $nameResultPair = Yaml::parseFile(__DIR__.'/../definitions/failing_tests.yml');
+        $nameResultPair = Yaml::parseFile(__DIR__.'/definitions/failing_tests.yml');
         return $this->getGenerator($nameResultPair);
     }
 

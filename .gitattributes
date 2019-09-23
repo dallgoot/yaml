@@ -1,4 +1,4 @@
-configuration/  export-ignore
-vendor/   export-ignore
+configuration/**  export-ignore
+vendor/**  export-ignore
 /.*             export-ignore
 runtests        export-ignore

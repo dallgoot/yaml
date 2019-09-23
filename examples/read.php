@@ -10,11 +10,14 @@ const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | 
 
 $debug = (int) (isset($argv[1]) ? $argv[1] : null);
 
+echo memory_get_usage() . "\n";
 /* USE CASE 1
 * load and parse if file exists
 */
 $content = file_get_contents('./tests/cases/examples/Example_2_25.yml');//var_dump($content);
 $yaml = Yaml::parse($content, 0, $debug);
+
+echo memory_get_usage() . "\n";
 // var_dump($yaml);
 var_dump(json_encode($yaml, JSON_OPTIONS));
 exit(0);

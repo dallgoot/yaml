@@ -43,3 +43,5 @@ yamlObject_properties: |-
     - 3
   propB:
     memberOfO: some really really really really really really really really really very long text as a simple string
+unicodeString: |-
+  str: \u263a

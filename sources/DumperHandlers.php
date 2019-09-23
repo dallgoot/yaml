@@ -91,7 +91,14 @@ class DumperHandlers
         return $this->iteratorToString($iterator, '%s:', $indent);
     }
 
-
+    /**
+     * Dumps an yaml object to a YAML string
+     *
+     * @param      YamlObject  $obj    The object
+     *
+     * @return     string      YAML formatted string
+     * @todo  export comment from YamlObject
+     */
     private function dumpYamlObject(YamlObject $obj):string
     {
         if ($this->multipleDocs || $obj->hasDocStart() || $obj->isTagged()) {
@@ -103,7 +110,6 @@ class DumperHandlers
         }
         return $this->iteratorToString(new \ArrayIterator(get_object_vars($obj)), '%s:', 0);
         // $this->insertComments($obj->getComment());
-        //TODO: $references = $obj->getAllReferences();
     }
 
 
@@ -165,7 +171,26 @@ class DumperHandlers
      */
     public function dumpString(string $str):string
     {
-        return ltrim($str);
+        //those characters must be escaped : - : ? { } [ ] # , & * ! > | ' " %
+        // The “@” (#x40, at) and “`” (#x60, grave accent) are reserved for future use.
+        // 5.4. Line Break Characters
+        // Line breaks inside scalar content must be normalized by the YAML processor. Each such line break must be parsed into a single line feed character.
+        // The original line break format is a presentation detail and must not be used to convey content information.
+        // Example 5.13. Escaped Characters
+        // "Fun with \\
+        // \" \a \b \e \f \↓
+        // \n \r \t \v \0 \↓
+        // \  \_ \N \L \P \↓
+        // \x41 \u0041 \U00000041"
+
+        // ---
+        // "Fun with \x5C
+        // \x22 \x07 \x08 \x1B \x0C
+        // \x0A \x0D \x09 \x0B \x00
+        // \x20 \xA0 \x85 \u2028 \u2029
+        // A A A"
+        $str = json_encode(ltrim($str));
+        return strspn(substr($str,1,-1), "-:?{}[]#,&*!>|'\"%") > 0 ? $str : trim($str, '"');
     }
 
     public function dumpTagged(Tagged $obj, int $indent):string

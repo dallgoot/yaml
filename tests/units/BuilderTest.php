@@ -175,35 +175,7 @@ class BuilderTest extends TestCase
         $list->push(new \StdClass);
         $yamlObject = $this->builder->buildDocument($list, 0);
     }
-    /**
-     * @covers \Dallgoot\Yaml\Builder::getScalar
-     */
-    public function testGetScalar(): void
-    {
-        $this->assertEquals($this->builder->getScalar('yes')  , true);
-        $this->assertEquals($this->builder->getScalar('no')   , false);
-        $this->assertEquals($this->builder->getScalar('true') , true);
-        $this->assertEquals($this->builder->getScalar('false'), false);
-        $this->assertEquals($this->builder->getScalar('null') , null);
-        $this->assertEquals($this->builder->getScalar('.inf') , \INF);
-        $this->assertEquals($this->builder->getScalar('-.inf'), -\INF);
-        $this->assertTrue(is_nan($this->builder->getScalar('.nan')));
-    }
 
-    /**
-     * @covers \Dallgoot\Yaml\Builder::getNumber
-     */
-    public function testGetNumber(): void
-    {
-        $reflector = new \ReflectionClass($this->builder);
-        $method = $reflector->getMethod('getNumber');
-        $method->setAccessible(true);
-        $this->assertTrue(is_numeric($method->invoke(null, '132')));
-        $this->assertTrue(is_numeric($method->invoke(null, '0x27')));
-        $this->assertTrue(is_numeric($method->invoke(null, '0xaf')));
-        $this->assertTrue(is_float($method->invoke(null, '132.123')));
-        $this->assertFalse(is_float($method->invoke(null, '132.12.3')));
-    }
 
     /**
      * @covers \Dallgoot\Yaml\Builder::pushAndSave

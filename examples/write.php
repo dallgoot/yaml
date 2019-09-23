@@ -15,8 +15,11 @@ use Dallgoot\Yaml;
 // var_dump($yaml);
 $testName = 'yamlObject_properties';
 $yamlObject = (include PROJECT_ROOT . "tests/cases/dumping/$testName.php");
+echo memory_get_usage() . "\n";
+
 $text = Yaml::dump($yamlObject, 0);
 
+echo memory_get_usage() . "\n";
 $nameResultPair = get_object_vars(/** @scrutinizer ignore-type */ Yaml::parseFile(PROJECT_ROOT . 'tests/definitions/dumping_tests.yml'));
 
 // var_dump($nameResultPair);

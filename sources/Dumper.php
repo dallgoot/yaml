@@ -14,14 +14,14 @@ class Dumper
 {
     private const LINEFEED = "\n";
     private const INDENT = 2;
-    // private const WIDTH  = 120; /// forget this feature for the moment
+    // private const WIDTH  = 120; //TODO forget this feature for the moment
     private const OPTIONS = 00000;
     private const DATE_FORMAT = 'Y-m-d';
 
     private static $options;
     //options
-    public const EXPAND_SHORT = 00001;
-    public const SERIALIZE_CUSTOM_OBJECTS = 00010;
+    public const EXPAND_SHORT = 0b00001;
+    public const SERIALIZE_CUSTOM_OBJECTS = 0b00010;
     /** @var int */
     public static $floatPrecision = 4;
 
@@ -41,7 +41,6 @@ class Dumper
         self::$options = is_int($options) ? $options : self::OPTIONS;
         $dumpHandler = new DumperHandlers($options);
         if (is_scalar($dataType)) {
-            // TODO: what to woth comments ???
             return "--- ".$dumpHandler->dumpScalar($dataType). self::LINEFEED ;
         }
         return $dumpHandler->dump($dataType, 0);

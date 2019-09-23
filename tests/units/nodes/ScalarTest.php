@@ -105,4 +105,34 @@ class ScalarTest extends TestCase
         $parent->add($this->nodeScalar);
         $this->assertEquals($parent, $this->nodeScalar->getTargetOnMoreIndent($parent));
     }
+
+        /**
+     * @covers \Dallgoot\Yaml\Nodes\Scalar::getScalar
+     */
+    public function testGetScalar(): void
+    {
+        $this->assertEquals($this->nodeScalar->getScalar('yes')  , true);
+        $this->assertEquals($this->nodeScalar->getScalar('no')   , false);
+        $this->assertEquals($this->nodeScalar->getScalar('true') , true);
+        $this->assertEquals($this->nodeScalar->getScalar('false'), false);
+        $this->assertEquals($this->nodeScalar->getScalar('null') , null);
+        $this->assertEquals($this->nodeScalar->getScalar('.inf') , \INF);
+        $this->assertEquals($this->nodeScalar->getScalar('-.inf'), -\INF);
+        $this->assertTrue(is_nan($this->nodeScalar->getScalar('.nan')));
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Nodes\Scalar::getNumber
+     */
+    public function testGetNumber(): void
+    {
+        $reflector = new \ReflectionClass($this->nodeScalar);
+        $method = $reflector->getMethod('getNumber');
+        $method->setAccessible(true);
+        $this->assertTrue(is_numeric($method->invoke(null, '132')));
+        $this->assertTrue(is_numeric($method->invoke(null, '0x27')));
+        $this->assertTrue(is_numeric($method->invoke(null, '0xaf')));
+        $this->assertTrue(is_float($method->invoke(null, '132.123')));
+        $this->assertFalse(is_float($method->invoke(null, '132.12.3')));
+    }
 }

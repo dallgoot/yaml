@@ -93,7 +93,6 @@ final class Loader
      *
      * @throws \Exception if self::content is empty or splitting on linefeed has failed
      * @return \Generator  The source iterator.
-     * @todo make sure linefeed replacing only happens on end of the lines
      */
     private function getSourceGenerator($strContent = null):\Generator
     {
@@ -103,8 +102,8 @@ final class Loader
         if (!is_null($this->content)) {
             $source = $this->content;
         } else {
-            $simplerLineFeeds = preg_replace('/(\r\n|\r)/', "\n", (string) $strContent);
-            $source = preg_split("/\n/m", $simplerLineFeeds, 0, PREG_SPLIT_DELIM_CAPTURE);
+            $simplerLineFeeds = preg_replace('/(\r\n|\r)$/', "\n", (string) $strContent);
+            $source = preg_split("/\n/m", $simplerLineFeeds, 0, \PREG_SPLIT_DELIM_CAPTURE);
         }
         if (!is_array($source) || !count($source)) {
             throw new \Exception(self::EXCEPTION_LINE_SPLIT);
@@ -129,8 +128,8 @@ final class Loader
         $generator = $this->getSourceGenerator($strContent);
         $previous = $root = new Nodes\Root();
         try {
-            foreach ($generator as $lineNb => $lineString) {
-                $node = NodeFactory::get($lineString, $lineNb);
+            foreach ($generator as $lineNB => $lineString) {
+                $node = NodeFactory::get($lineString, $lineNB);
                 if ($this->_debug === 1) echo get_class($node)."\n";
                 if ($this->needsSpecialProcess($node, $previous)) continue;
                 $this->_attachBlankLines($previous);
@@ -148,8 +147,8 @@ final class Loader
                 return null;
             }
             return Builder::buildContent($root, $this->_debug);
-        } catch (\Error|\Exception|\ParseError $e) {
-            $this->onError($e, $generator);
+        } catch (\Throwable $e) {
+            $this->onError($e, $lineNB);
         }
     }
 
@@ -190,7 +189,8 @@ final class Loader
         return false;
     }
 
-    private function onError(\Throwable $e, \Generator $generator)
+    // private function onError(\Throwable $e, \Generator $generator)
+    private function onError(\Throwable $e, int $lineNB)
     {
         $file = $this->filePath ? realpath($this->filePath) : '#YAML STRING#';
         $message = $e->getMessage()."\n ".$e->getFile().":".$e->getLine();
@@ -198,7 +198,6 @@ final class Loader
             self::$error = $message;
             return null;
         }
-        $line = $generator->key() ?? 'X';
-        throw new \Exception($message." for $file:".$line, 1, $e);
+        throw new \Exception($message." for $file:".$lineNB, 1, $e);
     }
 }

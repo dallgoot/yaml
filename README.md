@@ -1,4 +1,4 @@
-# YAML Library for PHP - WORK IN PROGRESS !!!
+# Dallgoot : YAML Library for PHP - Beta !!!
 
 [![Build Status](https://travis-ci.org/dallgoot/yaml.svg?branch=master)](https://travis-ci.org/dallgoot/yaml) [![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master)
 
@@ -10,10 +10,11 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
   - object for mappings
   - array for sequences
   - common scalars : string, integer, float, INF, NAN
-  - YamlObject for each Yaml Document
-  - Compact for compact/short YAML syntax
-  - tagged values as Tagged Object when tag is not determinable
   - JSON, DateTime, etc.
+- define specific types (objects)
+  - YamlObject for each Yaml content (inherits from PHP class ArrayIterator)
+  - Compact for compact/short YAML syntax (inherits from PHP class ArrayIterator)
+  - Tagged Object when tag is not determinable
 - recover from some parsing errors
 - tolerant to tabulations
 - DEFINE debug levels :
@@ -42,55 +43,44 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 | **Dallgoot/Yaml**                                                    | 1.2                    | ✔️                  | ✔️                 | ✔️                     | ✔️              | ✔️                       | ✔️                   |
 
 - coherent data types (see [coherence.md](./documentation/coherence.md) for explanations)
-
 - support multiple documents in one YAML content (string or file)
-
 - JSON format validation (if valid as per PHP function *json_encode*)
-
-- complex mapping (Note: keys are JSON encoded strings)
-
+- complex mapping (Note: keys are JSON formatted strings)
 - real reference behaviour : changing reference value modify other reference calls
 
-  
-
-  ## Before releasing
-
-- DUMPER:
-
-  - implement/verify Dumper::Options
-  - quote strings that are not valid values in YAML syntax
-
-- verify TODOS in code
-
-  - build classes docs
+## Before releasing
 
 - Examples
-
   - double check references/anchors changes in YamlObject
-  - Examples of each function of the API
 
+- build classes docs
 - verify gitattributes
+- composer update + tests before release to Packagist
 
-- composer update + tests before release
+## Installation
 
-- docker-compose for easy testing
+```bash
+composer require dallgoot/yaml
+```
 
 ## ToDo
-
-- rationalize levels for Exceptions
-- verify YAML DEFINITIONS files before launching tests
-- implement specific unit test for each YAML spec. invalid cases (what must not happen)
 - Code coverage : target 100%
 - Benchmarks against other libs
 
-## Improvements
 
+## Improvements
+- Examples of each function of the API
+- implement specific unit test for each YAML spec. invalid cases (what must not happen)
+- DUMPER:
+  - implement/verify Dumper::Options
 - better/more precise errors identification (Yaml validation) with explanation in YAML content
 - Unicode checking (???)
 - OPTION : parse dates as PHP DateTime object
 - OPTION: Force renaming key names that are not valid PHP property name
+- docker-compose for easy testing
 - TAG : function for 'php/object' that provides the correct namespace to build
-- NEON compatibility
+- NEON compatibility???
+
 
 ## Performances
 
@@ -98,4 +88,6 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 ## Thanks
 
+(https://yaml.org)
 (https://www.json2yaml.com/convert-yaml-to-json)
+[Symfony Yaml](https://symfony.com/doc/current/components/yaml.html)

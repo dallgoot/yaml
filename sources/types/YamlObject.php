@@ -24,7 +24,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     /** @var API */
     private $__yaml__object__api;
 
-    private const UNDEFINED_METHOD = self::class.": undefined method '%s', valid methods are (%s)";
+    private const UNDEFINED_METHOD = self::class.": undefined method '%s', valid methods are (addReference,getReference,getAllReferences,addComment,getComment,setText,addTag,hasDocStart,isTagged)";
 
     /**
      * Construct the YamlObject making sure the indices can be accessed directly
@@ -45,17 +45,19 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      *
      * @throws \BadMethodCallException if method isn't part of the public API
      * @return mixed                    the return value of the API::method called
-     * @todo remove dependency to ReflectionClass calling $funcName directly in a try/catch block
      */
     public function __call($funcName, $arguments)
     {
-        $reflectAPI = new \ReflectionClass(get_class($this->__yaml__object__api));
-        $getName    = function ($o) { return $o->name; };
-        $publicApi  = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PUBLIC));
-        if (!in_array($funcName, $publicApi) ) {
-            throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName, implode(",", $publicApi)));
+        // $reflectAPI = new \ReflectionClass(get_class($this->__yaml__object__api));
+        // $getName    = function ($o) { return $o->name; };
+        // $publicApi  = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PUBLIC));
+        // if (!in_array($funcName, $publicApi) ) {
+        // }
+        try {
+            return call_user_func_array([$this->__yaml__object__api, $funcName], $arguments);
+        } catch (\Throwable $e) {
+            throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName));
         }
-        return call_user_func_array([$this->__yaml__object__api, $funcName], $arguments);
     }
 
     /**

@@ -35,7 +35,6 @@ class RegexTest extends TestCase
 
     /**
      * @covers \Dallgoot\Yaml\Regex::isDate
-     * @todo : support other date formats ???
      */
     public function testIsDate(): void
     {

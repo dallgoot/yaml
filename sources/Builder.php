@@ -85,68 +85,6 @@ final class Builder
         }
     }
 
-    /**
-     * Returns the correct PHP type according to the string value
-     *
-     * @param string $v a string value
-     *
-     * @return mixed The value with appropriate PHP type
-     * @throws \Exception if it happens in Regex::isDate or Regex::isNumber
-     * @todo implement date as DateTime Object
-     */
-    public static function getScalar(string $v, bool $onlyScalar = false)
-    {
-        /*
-         10.3.2. Tag Resolution
-
-The core schema tag resolution is an extension of the JSON schema tag resolution.
-
-All nodes with the “!” non-specific tag are resolved, by the standard convention, to “tag:yaml.org,2002:seq”, “tag:yaml.org,2002:map”, or “tag:yaml.org,2002:str”, according to their kind.
-
-Collections with the “?” non-specific tag (that is, untagged collections) are resolved to “tag:yaml.org,2002:seq” or “tag:yaml.org,2002:map” according to their kind.
-
-Scalars with the “?” non-specific tag (that is, plain scalars) are matched with an extended list of regular expressions. However, in this case, if none of the regular expressions matches, the scalar is resolved to tag:yaml.org,2002:str (that is, considered to be a string).
- Regular expression       Resolved to tag
- null | Null | NULL | ~      tag:yaml.org,2002:null
- Empty      tag:yaml.org,2002:null
- true | True | TRUE | false | False | FALSE      tag:yaml.org,2002:bool
- [-+]? [0-9]+    tag:yaml.org,2002:int (Base 10)
- 0o [0-7]+   tag:yaml.org,2002:int (Base 8)
- 0x [0-9a-fA-F]+     tag:yaml.org,2002:int (Base 16)
- [-+]? ( \. [0-9]+ | [0-9]+ ( \. [0-9]* )? ) ( [eE] [-+]? [0-9]+ )?      tag:yaml.org,2002:float (Number)
- [-+]? ( \.inf | \.Inf | \.INF )     tag:yaml.org,2002:float (Infinity)
- \.nan | \.NaN | \.NAN   tag:yaml.org,2002:float (Not a number)
- *   tag:yaml.org,2002:str (Default)
- */
-        if (Regex::isDate($v))   return self::$dateAsObject && !$onlyScalar ? date_create($v) : $v;
-        if (Regex::isNumber($v)) return self::getNumber($v);
-        $types = ['yes'   => true,
-                  'no'    => false,
-                  'true'  => true,
-                  'false' => false,
-                  'null'  => null,
-                  '.inf'  => \INF,
-                  '-.inf' => -\INF,
-                  '.nan'  => \NAN
-        ];
-        return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $v;
-    }
-
-    /**
-     * Returns the correct PHP type according to the string value
-     *
-     * @param string $v a string value
-     *
-     * @return int|float   The scalar value with appropriate PHP type
-     * @todo or scientific notation matching the regular expression -? [1-9] ( \. [0-9]* [1-9] )? ( e [-+] [1-9] [0-9]* )?
-     */
-    private static function getNumber(string $v)
-    {
-        if ((bool) preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
-        if ((bool) preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
-        return is_bool(strpos($v, '.')) || substr_count($v, '.') > 1 ? intval($v) : floatval($v);
-    }
-
     public static function pushAndSave(NodeGeneric $child, NodeList &$buffer, array &$documents)
     {
         $buffer->push($child);

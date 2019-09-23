@@ -204,6 +204,6 @@ class LoaderTest extends TestCase
         };
         $onErrorMethod = new \ReflectionMethod($this->loader, 'onError');
         $onErrorMethod->setAccessible(true);
-        $this->assertEquals(null, $onErrorMethod->invoke($this->loader, new \Exception, $generator()));
+        $this->assertEquals(null, $onErrorMethod->invoke($this->loader, new \Exception, $generator()->key()));
     }
 }

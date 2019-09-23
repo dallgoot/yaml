@@ -12,8 +12,9 @@ namespace Dallgoot\Yaml;
  */
 class Regex
 {
-    const OCTAL_NUM = "/^(0o\d+)$/i";
-    const HEX_NUM   = "/^(0x[\da-f]+)$/i";
+    const OCTAL_NUM = "/^0o\d+$/i";
+    const HEX_NUM   = "/^0x[\da-f]+$/i";
+    const BIN_NUM   = "/^0b[01]+$/i";
 
     const QUOTED = "(?'quot'(?'q'['\"]).*?(?<![\\\\])(?&q))";
     const NUM    = "(?'num'[-+]?(?:\\d+\\.?(?:\\d*(e[+-]?\\d+)?)|(\\.(inf|nan)))\z)";
@@ -41,6 +42,7 @@ class Regex
     const SEQUENCE_VALUES = "/".Regex::ALLDEF."(?'item'(?&all)) *,? */i";
 
     const KEY  = '/^([\w\'"~!][\w\'" \-.\/~!]*[ \t]*)(?::([ \t]+[^\n]+)|:[ \t]*)$/i';
+    # const KEY  = '/^([^:#]+)[ \t]*:([ \t]+.+)*$/iu';
     const ITEM = '/^-([ \t]+(.*))?$/';
 
     const NODE_ACTIONS = "/(?(DEFINE)".Regex::RC.Regex::RD.Regex::TAG.")(?'action'(?&rc)|(?&rd)|(?&tag))( +(?'content'.*))?$/";
@@ -52,9 +54,9 @@ class Regex
     // !<!bar> baz
     // !<tag:clarkevans.com,2002:invoice>
     const TAG_URI = "(?'url'tag:\\w+\\.\\w{2,},\\d{4}:\\w*)";
-    const TAG_PARTS = "/(?'handle'!(?:[\\w\\d\\-_]!|!)*)(?'tagname'(?:<!?)?[\\w\\d\\-:.,_]+>?)?/";
-    const DIRECTIVE_TAG = "/(?(DEFINE)".Regex::TAG_URI.")%TAG +(?'handle'![\\w\\d\-_]+!|!!|!) +(?'uri'(?&url)|(?'prefix'![\\w\\d\-_]+))/";
-    const DIRECTIVE_VERSION = "/%YAML *:? *(?'version'1\\.\\d)/";
+    const TAG_PARTS = "/(?'handle'!(?:[\\w\\d\\-_]!|!)*)(?'tagname'(?:<!?)?[\\w\\d\\-:.,_]+>?)?/i";
+    const DIRECTIVE_TAG = "/(?(DEFINE)".Regex::TAG_URI.")%TAG +(?'handle'![\\w\\d\-_]+!|!!|!) +(?'uri'(?&url)|(?'prefix'![\\w\\d\-_]+))/i";
+    const DIRECTIVE_VERSION = "/%YAML *:? *(?'version'1\\.\\d)/i";
 
 
     /**
@@ -62,6 +64,7 @@ class Regex
      * @param string $v a string value
      * @return bool
      * @throws \Exception if any preg_match has invalid regex
+     * @todo : support other date formats ???
      */
     public static function isDate(string $v):bool
     {
@@ -87,12 +90,14 @@ class Regex
      * @param string $var A string value
      *
      * @return boolean  True if number, False otherwise.
-     * @todo   replace regex expression with class constants, use is_numeric ? can be binary too ?
      */
     public static function isNumber(string $var):bool
     {
-        //TODO: https://secure.php.net/manual/en/function.is-numeric.php
-        return (bool) preg_match("/^((0o\d+)|(0x[\da-f]+)|([\d.]+e[-+]\d{1,2})|([-+]?(\d*\.?\d+)))$/i", $var);
+        // && (bool) preg_match("/^((0o\d+)|(0x[\da-f]+)|([\d.]+e[-+]\d{1,2})|([-+]?(\d*\.?\d+)))$/i", $var);
+        return is_numeric($var)
+                || (bool) preg_match(Regex::OCTAL_NUM, $var)
+                || (bool) preg_match(Regex::HEX_NUM, $var)
+                || (bool) preg_match(Regex::BIN_NUM, $var);
     }
 
     /**
