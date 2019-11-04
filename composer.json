@@ -34,14 +34,14 @@
     },
     "require-dev": {
         "ext-Reflection": "*",
-        "phpunit/phpunit": "^8.1",
         "phan/phan": "^1.3",
-        "theseer/phpdox": "^0.12.0",
         "roave/better-reflection": "dev-master#c87d856",
         "composer/xdebug-handler": "^1.3",
         "phploc/phploc": "^4.0",
         "paulthebaud/phpunit-generator": "^2.1",
-        "phpmetrics/phpmetrics": "^2.4"
+        "phpmetrics/phpmetrics": "^2.4",
+        "phpunit/phpunit": "^8.4",
+        "theseer/phpdox": "^0.12.0"
     },
     "scripts" : {
         "test"    : "phpunit --configuration ./configuration/phpunit.xml --testsuite All",

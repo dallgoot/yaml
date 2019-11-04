@@ -143,10 +143,7 @@ final class Loader
                 $previous = $target->add($node);
             }
             $this->_attachBlankLines($previous);
-            if ($this->_debug === 1){
-                return null;
-            }
-            return Builder::buildContent($root, $this->_debug);
+            return $this->_debug === 1 ? null : Builder::buildContent($root, $this->_debug);
         } catch (\Throwable $e) {
             $this->onError($e, $lineNB);
         }

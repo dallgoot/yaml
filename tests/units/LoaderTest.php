@@ -64,7 +64,7 @@ class LoaderTest extends TestCase
     public function testLoadNoRights(): void
     {
         $this->expectException(\Exception::class);
-        $this->loader->load('/etc/shadow');
+        $this->loader->load('/root/non_existent_file');
     }
 
     /**

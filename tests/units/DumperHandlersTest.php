@@ -6,6 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 use Dallgoot\Yaml\DumperHandlers;
+use Dallgoot\Yaml\Dumper;
 use Dallgoot\Yaml\YamlObject;
 use Dallgoot\Yaml\Compact;
 use Dallgoot\Yaml\Tagged;
@@ -33,7 +34,7 @@ class DumperHandlersTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->dumperHandler = new DumperHandlers();
+        $this->dumperHandler = new DumperHandlers(new Dumper);
     }
 
     /**
@@ -41,26 +42,14 @@ class DumperHandlersTest extends TestCase
      */
     public function test__construct()
     {
-        $this->dumperHandler->__construct(1);
+        $this->dumperHandler->__construct(new Dumper);
         $reflector = new \ReflectionClass($this->dumperHandler);
-        $optionsProp = $reflector->getProperty('options');
+        $optionsProp = $reflector->getProperty('dumper');
         $optionsProp->setAccessible(true);
-        $this->assertEquals(1, $optionsProp->getValue($this->dumperHandler));
+        $this->assertTrue($optionsProp->getValue($this->dumperHandler) instanceof Dumper);
     }
 
-    /**
-     * @covers \Dallgoot\Yaml\DumperHandlers::dump
-     */
-    public function testDump()
-    {
-        $this->assertEquals('', $this->dumperHandler->dump(null, 0));
-        $this->assertEquals('stream', $this->dumperHandler->dump(fopen(__FILE__, 'r'), 0));
-        $this->assertEquals('str', $this->dumperHandler->dump('str', 0));
-        $this->assertEquals('- 1', $this->dumperHandler->dump([1], 0));
-        $o = new \Stdclass;
-        $o->prop = 1;
-        $this->assertEquals('prop: 1', $this->dumperHandler->dump($o, 0));
-    }
+
 
     /**
      * @covers \Dallgoot\Yaml\DumperHandlers::dumpScalar
@@ -109,34 +98,6 @@ class DumperHandlersTest extends TestCase
         $this->assertEquals("- 1\n- 2\n- 3", $dumpCompound->invoke($this->dumperHandler, [1,2,3], 0));
         $tagged = new Tagged('!!str', 'somestring');
         $this->assertEquals("!!str somestring", $dumpCompound->invoke($this->dumperHandler, $tagged, 0));
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\DumperHandlers::dumpYamlObject
-     */
-    public function testDumpYamlObject()
-    {
-        $dumpYamlObject = new \ReflectionMethod($this->dumperHandler, 'dumpYamlObject');
-        $dumpYamlObject->setAccessible(true);
-        $yamlObject = new YamlObject;
-        $yamlObject->a = 1;
-        $this->assertEquals('a: 1', $dumpYamlObject->invoke($this->dumperHandler, $yamlObject, 0));
-        unset($yamlObject->a);
-        $yamlObject[0] = 'a';
-        $this->assertEquals('- a', $dumpYamlObject->invoke($this->dumperHandler, $yamlObject, 0));
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\DumperHandlers::IteratorToString
-     */
-    public function testIteratorToString()
-    {
-        $iteratorToString = new \ReflectionMethod($this->dumperHandler, 'iteratorToString');
-        $iteratorToString->setAccessible(true);
-        $yamlObject = new YamlObject;
-        $yamlObject[0] = 'a';
-        $yamlObject[1] = 'b';
-        $this->assertEquals("- a\n- b", $iteratorToString->invoke($this->dumperHandler, $yamlObject, '-', 0));
     }
 
     /**

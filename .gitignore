@@ -9,3 +9,5 @@ configuration/daux.json
 emptyFile.test
 documentation/*
 .tool-versions
+devto_post.md
+todo.md

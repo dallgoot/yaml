@@ -48,14 +48,6 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - complex mapping (Note: keys are JSON formatted strings)
 - real reference behaviour : changing reference value modify other reference calls
 
-## Before releasing
-
-- Examples
-  - double check references/anchors changes in YamlObject
-
-- build classes docs
-- verify gitattributes
-- composer update + tests before release to Packagist
 
 ## Installation
 
@@ -77,7 +69,6 @@ composer require dallgoot/yaml
 - Unicode checking (???)
 - OPTION : parse dates as PHP DateTime object
 - OPTION: Force renaming key names that are not valid PHP property name
-- docker-compose for easy testing
 - TAG : function for 'php/object' that provides the correct namespace to build
 - NEON compatibility???
 
@@ -87,7 +78,6 @@ composer require dallgoot/yaml
     TBD
 
 ## Thanks
-
-(https://yaml.org)
-(https://www.json2yaml.com/convert-yaml-to-json)
-[Symfony Yaml](https://symfony.com/doc/current/components/yaml.html)
+- (https://yaml.org)
+- (https://www.json2yaml.com/convert-yaml-to-json)
+- [Symfony Yaml](https://symfony.com/doc/current/components/yaml.html)

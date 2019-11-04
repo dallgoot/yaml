@@ -88,7 +88,7 @@ final class Yaml
     public static function dump($somePhpVar, $options = null):string
     {
         try {
-            return Yaml\Dumper::toString($somePhpVar, $options);
+            return (new Yaml\Dumper($options))->toString($somePhpVar);
         } catch (\Throwable $e) {
             throw new \Exception(__CLASS__." Error dumping", 1, $e);
         }
@@ -110,7 +110,7 @@ final class Yaml
     public static function dumpFile(string $fileName, $somePhpVar, $options = null):bool
     {
         try {
-            return Yaml\Dumper::toFile($fileName, $somePhpVar, $options);
+            return (new Yaml\Dumper($options))->toFile($fileName, $somePhpVar);
         } catch (\Throwable $e) {
             throw new \Exception(__CLASS__." Error during dumping '$fileName'", 1, $e);
         }

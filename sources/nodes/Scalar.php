@@ -110,7 +110,7 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
         return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : self::replaceSequences($v);
     }
 
-    public function replaceSequences($value='')
+    public static function replaceSequences($value='')
     {
       $replaceUnicodeSeq = function ($matches) {
             return json_decode('"'.$matches[1].'"');

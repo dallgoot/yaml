@@ -1,7 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
 
-// use \SplDoublyLinkedList as DLL;
+use Dallgoot\Yaml\Dumper;
 
 /**
  *  Convert PHP datatypes to a YAML string syntax
@@ -12,42 +12,19 @@ namespace Dallgoot\Yaml;
  */
 class DumperHandlers
 {
-    private const INDENT = 2;
-    private const OPTIONS = 00000;
-    private const DATE_FORMAT = 'Y-m-d';
+    private $dumper;
 
-    private $options;
-    private $multipleDocs = false;
-    //options
-    public const EXPAND_SHORT = 00001;
-    public const SERIALIZE_CUSTOM_OBJECTS = 00010;
-    public $floatPrecision = 4;
-
-    public function __construct(int $options = null)
+    public function __construct(Dumper $dumper)
     {
-        if (is_int($options)) $this->options = $options;
+        $this->dumper = $dumper;
     }
 
-
-
-    public function dump($dataType, int $indent):string
-    {
-        if (is_null($dataType)) {
-            return '';
-        } elseif (is_resource($dataType)) {
-            return get_resource_type($dataType);
-        } elseif (is_scalar($dataType)) {
-            return $this->dumpScalar($dataType);
-        } else {
-            return $this->dumpCompound($dataType, $indent);
-        }
-    }
 
     public function dumpScalar($dataType):string
     {
         if ($dataType === \INF) return '.inf';
         if ($dataType === -\INF) return '-.inf';
-        $precision = "%.".$this->floatPrecision."F";
+        $precision = "%.".$this->dumper->floatPrecision."F";
         switch (gettype($dataType)) {
             case 'boolean': return $dataType ? 'true' : 'false';
             case 'float': //fall through
@@ -57,18 +34,22 @@ class DumperHandlers
     }
 
 
-    private function dumpCompound($compound, int $indent):string
+    public function dumpCompound($compound, int $indent):string
     {
-        if (is_array($compound)) {
-            $iterator = new \ArrayIterator($compound);
-            $mask = '-';
-            $refKeys = range(0, count($compound) - 1);
-            if (array_keys($compound) !== $refKeys) {
-                $mask = '%s:';
+        if ($this->dumper->_compactMode) {
+            return $this->dumpCompact($compound, $indent);
+        } else {
+            if (is_array($compound)) {
+                $iterator = new \ArrayIterator($compound);
+                $keyMask = '-';
+                $refKeys = range(0, count($compound) - 1);
+                if (array_keys($compound) !== $refKeys) {
+                    $keyMask = '%s:';
+                }
+                    return $this->dumper->iteratorToString($iterator, $keyMask, "\n", $indent);
+            } elseif (is_object($compound) && !is_callable($compound)) {
+                return $this->dumpObject($compound, $indent);
             }
-            return $this->iteratorToString($iterator, $mask, $indent);
-        } elseif (is_object($compound) && !is_callable($compound)) {
-            return $this->dumpObject($compound, $indent);
         }
         throw new \Exception("Dumping Callable|Resource is not currently supported", 1);
     }
@@ -76,57 +57,22 @@ class DumperHandlers
     private function dumpObject(object $object, int $indent):string
     {
         if ($object instanceof YamlObject) {
-            return $this->dumpYamlObject($object);
+            return $this->dumper->dumpYamlObject($object);
         } elseif ($object instanceof Compact) {
             return $this->dumpCompact($object, $indent);
         } elseif ($object instanceof Tagged) {
             return $this->dumpTagged($object, $indent);
         } elseif ($object instanceof \DateTime) {
-            return $object->format(self::DATE_FORMAT);
+            return $object->format($this->dumper::DATE_FORMAT);
         } elseif (is_iterable($object)) {
             $iterator = $object;
         } else {
             $iterator = new \ArrayIterator(get_object_vars($object));
         }
-        return $this->iteratorToString($iterator, '%s:', $indent);
-    }
-
-    /**
-     * Dumps an yaml object to a YAML string
-     *
-     * @param      YamlObject  $obj    The object
-     *
-     * @return     string      YAML formatted string
-     * @todo  export comment from YamlObject
-     */
-    private function dumpYamlObject(YamlObject $obj):string
-    {
-        if ($this->multipleDocs || $obj->hasDocStart() || $obj->isTagged()) {
-           $this->multipleDocs = true;
-          // && $this->$result instanceof DLL) $this->$result->push("---");
-        }
-        if (count($obj) > 0) {
-            return $this->iteratorToString($obj, '-', 0);
-        }
-        return $this->iteratorToString(new \ArrayIterator(get_object_vars($obj)), '%s:', 0);
-        // $this->insertComments($obj->getComment());
+        return $this->dumper->iteratorToString($iterator, '%s:', "\n", $indent);
     }
 
 
-    private function iteratorToString(\Iterator $iterable, string $keyMask, int $indent):string
-    {
-        $pairs = [];
-        foreach ($iterable as $key => $value) {
-            $separator = "\n";
-            $valueIndent = $indent + self::INDENT;
-            if (is_scalar($value) || $value instanceof Compact || $value instanceof \DateTime) {
-                $separator   = ' ';
-                $valueIndent = 0;
-            }
-            $pairs[] = str_repeat(' ', $indent).sprintf($keyMask, $key).$separator.$this->dump($value, $valueIndent);
-        }
-        return implode("\n", $pairs);
-    }
 
     /**
      * Dumps a Compact|mixed (representing an array or object) as the single-line format representation.
@@ -142,7 +88,7 @@ class DumperHandlers
     public function dumpCompact($subject, int $indent):string
     {
         $structureFormat = '{%s}';
-        $keyFormat = "%s: ";
+        $keyMask = "%s: ";
         if (!is_array($subject) && !($subject instanceof \ArrayIterator)) {
             $source = get_object_vars($subject);
         } else {
@@ -151,14 +97,14 @@ class DumperHandlers
             $source = $objectAsArray;
             if (array_keys($objectAsArray) === range(0, $max - 1)) {
                 $structureFormat = '[%s]';
-                $keyFormat = '';
+                $keyMask = '';
             }
         }
-        $content = [];
-        foreach ($source as $key => $value) {
-            $content[] = sprintf($keyFormat, $key).(is_scalar($value) ? $this->dump($value, $indent) : $this->dumpCompact($value, $indent));
-        }
-        return sprintf($structureFormat, implode(', ', $content));
+        $previousCompactMode = $this->dumper->_compactMode;
+        $this->dumper->_compactMode =  true;
+        $result = $this->dumper->iteratorToString(new \ArrayIterator($source), $keyMask, ', ', $indent);
+        $this->dumper->_compactMode = $previousCompactMode;
+        return sprintf($structureFormat, $result);
     }
 
     /**
@@ -174,21 +120,8 @@ class DumperHandlers
         //those characters must be escaped : - : ? { } [ ] # , & * ! > | ' " %
         // The “@” (#x40, at) and “`” (#x60, grave accent) are reserved for future use.
         // 5.4. Line Break Characters
-        // Line breaks inside scalar content must be normalized by the YAML processor. Each such line break must be parsed into a single line feed character.
-        // The original line break format is a presentation detail and must not be used to convey content information.
         // Example 5.13. Escaped Characters
-        // "Fun with \\
-        // \" \a \b \e \f \↓
-        // \n \r \t \v \0 \↓
-        // \  \_ \N \L \P \↓
-        // \x41 \u0041 \U00000041"
 
-        // ---
-        // "Fun with \x5C
-        // \x22 \x07 \x08 \x1B \x0C
-        // \x0A \x0D \x09 \x0B \x00
-        // \x20 \xA0 \x85 \u2028 \u2029
-        // A A A"
         $str = json_encode(ltrim($str));
         return strspn(substr($str,1,-1), "-:?{}[]#,&*!>|'\"%") > 0 ? $str : trim($str, '"');
     }
@@ -197,10 +130,10 @@ class DumperHandlers
     {
         $separator   = ' ';
         $valueIndent = 0;
-        if (!is_scalar($obj->value)) {
+        if (!is_scalar($obj->value) && !$this->dumper->_compactMode) {
             $separator = "\n";
-            $valueIndent = $indent + self::INDENT;
+            $valueIndent = $indent + $this->dumper::INDENT;
         }
-        return $obj->tagName.$separator.$this->dump($obj->value, $valueIndent);
+        return $obj->tagName.$separator.$this->dumper->dump($obj->value, $valueIndent);
     }
 }

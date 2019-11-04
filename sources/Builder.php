@@ -25,12 +25,12 @@ final class Builder
     const INVALID_DOCUMENT = "DOCUMENT %d is invalid,";
 
     /**
-     * Builds a file.  check multiple documents & split if more than one documents
+     * Builds a YAM content.  check multiple documents & split if more than one documents
      *
      * @param Root $root  The NodeRoot node
      * @param int  $_debug    the level of debugging requested
      *
-     * @return array|YamlObject|null   list of documents or just one.
+     * @return array|YamlObject|null   list of documents or just one, null if appropriate debug lvl
      */
     public static function buildContent(Root $root, int $_debug = 0)
     {
@@ -52,7 +52,7 @@ final class Builder
                 }
             }
             $documents[] = self::buildDocument($buffer, count($documents) +1);
-        } catch (\Exception|\Error|\ParseError $e) {
+        } catch (\Throwable $e) {
             throw new \Exception($e->getMessage(), 1, $e);
         }
         return count($documents) === 1 ? $documents[0] : $documents;
@@ -80,7 +80,7 @@ final class Builder
                 print_r($rootNode);
             }
             return $rootNode->build($yamlObject);
-        } catch (\Exception|\Error|\ParseError $e) {
+        } catch (\Throwable $e) {
             throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum).':'.$e->getMessage(), 2, $e);
         }
     }

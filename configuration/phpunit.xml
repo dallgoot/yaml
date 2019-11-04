@@ -21,7 +21,7 @@
          timeoutForMediumTests="10"
          timeoutForLargeTests="60"
          colors="true"
-         verbose="true">
+         verbose="false">
    <testsuites>
       <testsuite name="All">
          <directory>../tests/units/</directory>
