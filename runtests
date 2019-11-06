@@ -1,7 +1,0 @@
-#!/bin/bash
-export XDEBUG_CONFIG="idekey=VSCODE"
-
-# --coverage-clover clover.xml \
-./vendor/bin/phpunit --color=always \
---configuration ./configuration/phpunit.xml \
---testsuite $1 \

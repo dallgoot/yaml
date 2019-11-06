@@ -1,6 +1,9 @@
 # Dallgoot : YAML Library for PHP - Beta !!!
 
-[![Build Status](https://travis-ci.org/dallgoot/yaml.svg?branch=master)](https://travis-ci.org/dallgoot/yaml) [![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master)
+[![Build Status](https://travis-ci.org/dallgoot/yaml.svg?branch=master)](https://travis-ci.org/dallgoot/yaml) [![PHP from Packagist](https://img.shields.io/packagist/php-v/dallgoot/yaml)](https://packagist.org/packages/dallgoot/yaml) [![Packagist](https://img.shields.io/packagist/dt/dallgoot/yaml)](https://packagist.org/packages/dallgoot/yaml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master) 
+[![Code Coverage](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master)
+
 
 PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
@@ -17,7 +20,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
   - Tagged Object when tag is not determinable
 - recover from some parsing errors
 - tolerant to tabulations
-- DEFINE debug levels :
+- debug levels :
   - 1 : print each line Node Type class and exit
   - 2 : print Loader global map structure and exit
   - 3 : print each document NodeList and exit
@@ -48,19 +51,22 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 - complex mapping (Note: keys are JSON formatted strings)
 - real reference behaviour : changing reference value modify other reference calls
 
-
 ## Installation
 
+  Current version is not considered stable so you need to precise "dev-master" to Composer
+  Dependencies are only useful for building documentation or for code contribution, so the "--update-no-dev" prevent from downloading and managing packages that you probably won't use.
+
 ```bash
-composer require dallgoot/yaml
+composer require --update-no-dev dallgoot/yaml dev-master
 ```
 
 ## ToDo
+
 - Code coverage : target 100%
 - Benchmarks against other libs
 
-
 ## Improvements
+
 - Examples of each function of the API
 - implement specific unit test for each YAML spec. invalid cases (what must not happen)
 - DUMPER:
@@ -72,12 +78,12 @@ composer require dallgoot/yaml
 - TAG : function for 'php/object' that provides the correct namespace to build
 - NEON compatibility???
 
-
 ## Performances
 
     TBD
 
 ## Thanks
+
 - (https://yaml.org)
 - (https://www.json2yaml.com/convert-yaml-to-json)
 - [Symfony Yaml](https://symfony.com/doc/current/components/yaml.html)
