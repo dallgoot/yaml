@@ -56,7 +56,7 @@ class CommentTest extends TestCase
      */
     public function testBuild(): void
     {
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject(0);
         $rootNode = new Root;
         $reflector = new \ReflectionClass($rootNode);
         $method = $reflector->getMethod('buildFinal');

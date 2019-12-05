@@ -76,6 +76,18 @@ class RootTest extends TestCase
     }
 
     /**
+     * @covers \Dallgoot\Yaml\Nodes\Root::buildFinal
+     */
+    public function testBuildFinal(): void
+    {
+        $buildFinal = new \ReflectionMethod($this->nodeRoot, 'buildFinal');
+        $buildFinal->setAccessible(true);
+        $yamlObject = new YamlObject(0);
+        $result = $buildFinal->invoke($this->nodeRoot, $yamlObject);
+        $this->assertEquals($yamlObject, $result);
+    }
+
+    /**
      * @covers \Dallgoot\Yaml\Nodes\Root::getYamlObject
      * @depends testBuildFinal
      */
@@ -83,7 +95,7 @@ class RootTest extends TestCase
     {
         $buildFinal = new \ReflectionMethod($this->nodeRoot, 'buildFinal');
         $buildFinal->setAccessible(true);
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject(0);
         $result = $buildFinal->invoke($this->nodeRoot, $yamlObject);
 
         $this->assertEquals($yamlObject, $result);
@@ -95,19 +107,8 @@ class RootTest extends TestCase
      */
     public function testBuild(): void
     {
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject(0);
         $this->assertTrue($this->nodeRoot->build($yamlObject) instanceof YamlObject);
     }
 
-    /**
-     * @covers \Dallgoot\Yaml\Nodes\Root::buildFinal
-     */
-    public function testBuildFinal(): void
-    {
-        $buildFinal = new \ReflectionMethod($this->nodeRoot, 'buildFinal');
-        $buildFinal->setAccessible(true);
-        $yamlObject = new YamlObject;
-        $result = $buildFinal->invoke($this->nodeRoot, $yamlObject);
-        $this->assertEquals($yamlObject, $result);
-    }
 }

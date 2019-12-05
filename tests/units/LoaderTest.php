@@ -61,10 +61,20 @@ class LoaderTest extends TestCase
     /**
      * @covers \Dallgoot\Yaml\Loader::load
      */
-    public function testLoadNoRights(): void
+    public function testLoadNoFile(): void
     {
         $this->expectException(\Exception::class);
         $this->loader->load('/root/non_existent_file');
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Loader::load
+     * @todo : make sure this tests covers the last Exception in method
+     */
+    public function testLoadNoRights(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->loader->load('~/notreadable');
     }
 
     /**
@@ -86,6 +96,21 @@ class LoaderTest extends TestCase
         $this->expectException(\Exception::class);
         $method = new \ReflectionMethod($this->loader, 'getSourceGenerator');
         $method->setAccessible(true);
+        $generator = $method->invoke($this->loader, null);
+        $generator->next();
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\Loader::getSourceGenerator
+     */
+    public function testGetSourceGeneratorExceptionOnNoSource(): void
+    {
+        $this->expectException(\Exception::class);
+        $method = new \ReflectionMethod($this->loader, 'getSourceGenerator');
+        $method->setAccessible(true);
+        $property = new \ReflectionProperty($this->loader, 'content');
+        $property->setAccessible(true);
+        $property->setValue($this->loader, []);
         $generator = $method->invoke($this->loader, null);
         $generator->next();
     }

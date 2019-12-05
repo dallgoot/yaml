@@ -64,8 +64,14 @@ class DocStart extends NodeGeneric
 
     public function getTargetOnEqualIndent(NodeGeneric &$node):NodeGeneric
     {
-        if ($this->value instanceof NodeGeneric && $this->value->isAwaitingChild($node)) {
-            return $this->value;
+        if ($this->value instanceof NodeGeneric) {
+            if ($this->value instanceof Tag) {
+                if (!preg_match("/".Regex::TAG_URI."/", $this->value->raw)) {
+                    return $this->value;
+                }
+            } elseif ($this->value->isAwaitingChild($node)) {
+                return $this->value;
+            }
         }
         return $this->getParent();
     }

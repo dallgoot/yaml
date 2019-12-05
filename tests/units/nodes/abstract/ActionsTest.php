@@ -59,11 +59,4 @@ class ActionsTest extends TestCase
         $this->assertEquals("sometext", $tagNode->value->raw);
     }
 
-    // /**
-    //  * @covers \Dallgoot\Yaml\Nodes\Actions::build
-    //  */
-    // public function testBuild(): void
-    // {
-    //     $this->assertEquals(null, $this->nodeActions->build() );
-    // }
 }

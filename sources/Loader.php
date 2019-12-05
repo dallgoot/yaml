@@ -20,10 +20,10 @@ final class Loader
     //public
     /* @var null|string */
     public static $error;
-    public const IGNORE_DIRECTIVES     = 1;//DONT include_directive
-    public const IGNORE_COMMENTS       = 2;//DONT include_comments
-    public const NO_PARSING_EXCEPTIONS = 4;//DONT throw Exception on parsing errors
-    public const NO_OBJECT_FOR_DATE    = 8;//DONT import date strings as dateTime Object
+    public const IGNORE_DIRECTIVES     = 0b0001;//DONT include_directive
+    public const IGNORE_COMMENTS       = 0b0010;//DONT include_comments
+    public const NO_PARSING_EXCEPTIONS = 0b0100;//DONT throw Exception on parsing errors
+    public const NO_OBJECT_FOR_DATE    = 0b1000;//DONT import date strings as dateTime Object
 
     //private
     /* @var null|array */
@@ -74,11 +74,10 @@ final class Loader
             throw new \Exception(sprintf(self::EXCEPTION_NO_FILE, $absolutePath));
         }
         $this->filePath = $absolutePath;
-        $adle = "auto_detect_line_endings";
-        $prevADLE = ini_get($adle);
-        !$prevADLE && ini_set($adle, "true");
+        $adle_setting = "auto_detect_line_endings";
+        ini_set($adle_setting, "true");
         $content = @file($absolutePath, FILE_IGNORE_NEW_LINES);
-        !$prevADLE && ini_set($adle, "false");
+        ini_restore($adle_setting);
         if (is_bool($content)) {
             throw new \Exception(sprintf(self::EXCEPTION_READ_ERROR, $absolutePath));
         }
@@ -130,7 +129,7 @@ final class Loader
         try {
             foreach ($generator as $lineNB => $lineString) {
                 $node = NodeFactory::get($lineString, $lineNB);
-                if ($this->_debug === 1) echo get_class($node)."\n";
+                if ($this->_debug === 1) echo $lineNB.":".get_class($node)."\n";
                 if ($this->needsSpecialProcess($node, $previous)) continue;
                 $this->_attachBlankLines($previous);
                 switch ($node->indent <=> $previous->indent) {
@@ -143,7 +142,7 @@ final class Loader
                 $previous = $target->add($node);
             }
             $this->_attachBlankLines($previous);
-            return $this->_debug === 1 ? null : Builder::buildContent($root, $this->_debug);
+            return $this->_debug === 1 ? null : (new Builder($this->_options, $this->_debug))->buildContent($root);
         } catch (\Throwable $e) {
             $this->onError($e, $lineNB);
         }

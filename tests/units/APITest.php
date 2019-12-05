@@ -34,7 +34,7 @@ class APITest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->api = new API(new YamlObject);
+        $this->api = new API(new YamlObject(0), 0);
     }
 
     /**

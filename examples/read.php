@@ -14,7 +14,7 @@ echo memory_get_usage() . "\n";
 /* USE CASE 1
 * load and parse if file exists
 */
-$content = file_get_contents('./tests/cases/examples/Example_2_25.yml');//var_dump($content);
+$content = file_get_contents('./examples/dummy.yml');//var_dump($content);
 $yaml = Yaml::parse($content, 0, $debug);
 
 echo memory_get_usage() . "\n";

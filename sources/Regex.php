@@ -17,16 +17,20 @@ class Regex
     const BIN_NUM   = "/^0b[01]+$/i";
 
     const QUOTED = "(?'quot'(?'q'['\"]).*?(?<![\\\\])(?&q))";
-    const NUM    = "(?'num'[-+]?(?:\\d+\\.?(?:\\d*(e[+-]?\\d+)?)|(\\.(inf|nan)))\z)";
-    const WORD   = "(?'word'[^,]+)";
+    const NUM    = "(?'num'[\\-+]?(?:\\d+\\.?(?:\\d*(e[+\\-]?\\d+)?)|(\\.(inf|nan))))";
+    const WORD   = "(?'word'[[:alnum:] _\\-\\.]+)";
     const RC     = "(?'rc'\\*\\w+)"; //reference call
+    // const RC     = "(?'rc'\\*[^ *&]+)"; //reference call
     const RD     = "(?'rd'&\\w+)"; //reference definition
-    const TAG    = "(?'tag'!!?[\\w\\/\\-]+!?)";
-    const ALL    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&num)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
+    // const RD     = "(?'rd'&[^ &*]+)"; //reference definition
+    // const TAG    = "(?'tag'!!?[\\w\\/\\-]+!?)";
+    const TAG    = "(?'tag'!!?[^! ]+!?)";
+    const ALL    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&rc)|(?&word)|(?&map)|(?&seq)))";
     const MAP    = "(?'map'\\{ *?(?'pair'((?:(?&quot)|[^:]+) *?: *(?&all)) *,? *)* *?\\})";
-    const SEQ    = "(?'seq'\\[ *(?:(?'i'(?&all)) *,? *)* *\\])";
+    // const MAP    = "(?'map'\\{ *((?:(?&quot)|(?&word)) *: *(?&all) *(?:, *(?:(?&quot)|(?&word)) *: *(?&all)))*\\})";
+    // const SEQ    = "(?'seq'\\[ *(?:(?'i'(?&all)) *,? *)* *\\])";
+    const SEQ    = "(?'seq'\\[ *((?&all) *(?:, *(?&all))*)* *\\])";
     const ALLDEF = "(?(DEFINE)".Regex::QUOTED.
-                                Regex::NUM.
                                 Regex::RC.
                                 Regex::WORD.
                                 Regex::TAG.
@@ -35,13 +39,13 @@ class Regex
                                 Regex::MAP.
                                 Regex::SEQ.")";
 
-    const MAPPING  = "/".Regex::ALLDEF."^(?&map)$/";
+    const MAPPING  = "/".Regex::ALLDEF."^(?&map)$/i";
     const MAPPING_VALUES = "/".Regex::ALLDEF."(?'k'(?&quot)|[^:]+) *: *(?'v'(?&all)) *,? */i";
 
-    const SEQUENCE = "/".Regex::ALLDEF."^(?&seq)/";
+    const SEQUENCE = "/".Regex::ALLDEF."^(?&seq)$/i";
     const SEQUENCE_VALUES = "/".Regex::ALLDEF."(?'item'(?&all)) *,? */i";
 
-    const KEY  = '/^([\w\'"~!][\w\'" \-.\/~!]*[ \t]*)(?::([ \t]+[^\n]+)|:[ \t]*)$/i';
+    const KEY  = "/^([\\w'\"~!][\\w'\" \\-.\\/~!]*[ \\t]*)(?::([ \\t]+[^\\n]+)|:[ \\t]*)$/i";
     # const KEY  = '/^([^:#]+)[ \t]*:([ \t]+.+)*$/iu';
     const ITEM = '/^-([ \t]+(.*))?$/';
 

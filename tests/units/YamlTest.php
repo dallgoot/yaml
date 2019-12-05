@@ -80,6 +80,15 @@ class YamlTest extends TestCase
     }
 
     /**
+     * @covers \Dallgoot\Yaml::dump
+     */
+    public function testDumpException(): void
+    {
+        $this->expectException(\Throwable::class);
+        $this->yaml::dump(null);
+    }
+
+    /**
      * @covers \Dallgoot\Yaml::dumpFile
      */
     public function testDumpFile(): void
@@ -89,5 +98,14 @@ class YamlTest extends TestCase
         $this->assertTrue($result);
         $this->assertEquals("- 1\n- 2\n- 3", file_get_contents($filename));
         unlink($filename);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml::dumpFile
+     */
+    public function testDumpFileException(): void
+    {
+        $this->expectException(\Throwable::class);
+        $this->yaml::dumpFile('someFileName', null);
     }
 }

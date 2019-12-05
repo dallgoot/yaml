@@ -132,6 +132,7 @@ class NodeGenericTest extends TestCase
         $method->setAccessible(true);
         $method->invoke($this->node, null);
     }
+
     /**
      * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::add
      */

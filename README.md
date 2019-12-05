@@ -1,23 +1,37 @@
 # Dallgoot : YAML Library for PHP - Beta !!!
 
 [![Build Status](https://travis-ci.org/dallgoot/yaml.svg?branch=master)](https://travis-ci.org/dallgoot/yaml) [![PHP from Packagist](https://img.shields.io/packagist/php-v/dallgoot/yaml)](https://packagist.org/packages/dallgoot/yaml) [![Packagist](https://img.shields.io/packagist/dt/dallgoot/yaml)](https://packagist.org/packages/dallgoot/yaml)
-[![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master) 
+[![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master)
-
 
 PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
+## Installation
+
+- Current version is not considered stable so you need to precise "dev-master" to Composer
+- Dependencies are only useful for building documentation or for code contribution, so the "--update-no-dev" prevent from downloading and managing packages that you probably won't use.
+
+You first need [Composer](https://getcomposer.org/) and PHP ^7
+
+```bash
+composer require --update-no-dev dallgoot/yaml dev-master
+```
+
+## Usage
+
+See examples files in [examples folder](./examples)
+
 ## Features:
 
-- define *appropriate* PHP datatypes :
+- *consistent* PHP datatypes :
   - object for mappings
   - array for sequences
   - common scalars : string, integer, float, INF, NAN
-  - JSON, DateTime, etc.
-- define specific types (objects)
-  - YamlObject for each Yaml content (inherits from PHP class ArrayIterator)
-  - Compact for compact/short YAML syntax (inherits from PHP class ArrayIterator)
-  - Tagged Object when tag is not determinable
+  - JSON, DateTime(option), etc.
+- specific types (objects)
+  - **YamlObject** for each Yaml content (inherits from PHP class ArrayIterator)
+  - **Compact** for compact/short YAML syntax (inherits from PHP class ArrayIterator)
+  - **Tagged** object when tag is not determinable
 - recover from some parsing errors
 - tolerant to tabulations
 - debug levels :
@@ -28,12 +42,12 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 ## Support:
 
 - YAML specifications [version 1.2](http://yaml.org/spec/1.2/spec.html)
-- multiple documents in a content (file or string)
-- comments (option : enabled by default)
-- compact syntax for mappings and sequences
 - multi-line values (simple|double quoted or not, compact mapping|sequence or JSON)
+- multiple documents in a content (file or string)
+- compact syntax for mappings and sequences
+- comments (option : enabled by default)
 - references (option : enabled by default)
-- tags with behaviour customization (overriding for common(CoreSchema), or specifying for custom) via implementing tag/SchemaInterface.
+- tags with behaviour customization (overriding for common(CoreSchema), or specifying for custom) via implementing Tag/SchemaInterface.
 
 ## What's different from other PHP Yaml libraries ?
 
@@ -46,19 +60,14 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 | **Dallgoot/Yaml**                                                    | 1.2                    | ✔️                  | ✔️                 | ✔️                     | ✔️              | ✔️                       | ✔️                   |
 
 - coherent data types (see [coherence.md](./documentation/coherence.md) for explanations)
-- support multiple documents in one YAML content (string or file)
-- JSON format validation (if valid as per PHP function *json_encode*)
+- JSON format validation (Option, Note: if valid as per PHP function *json_encode*)
 - complex mapping (Note: keys are JSON formatted strings)
 - real reference behaviour : changing reference value modify other reference calls
 
-## Installation
+## Contributing
 
-  Current version is not considered stable so you need to precise "dev-master" to Composer
-  Dependencies are only useful for building documentation or for code contribution, so the "--update-no-dev" prevent from downloading and managing packages that you probably won't use.
-
-```bash
-composer require --update-no-dev dallgoot/yaml dev-master
-```
+  Only contributions concerning bug fixes will be review ATM.
+  Requests for features will be dealt with after reading/writing YAML is considered bug free (and al current Options are implemented)
 
 ## ToDo
 

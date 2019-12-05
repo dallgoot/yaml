@@ -8,7 +8,7 @@ function displayTitle {
 function version_gt() {
     test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1";
 }
-echo checking docker running
+echo Checking Docker is running...
 docker version
 docker_status=$?
 if test $docker_status -gt 0
@@ -32,7 +32,7 @@ COMPOSER_CURRENT=$(composer show 'phpunit/phpunit' | grep -Eow "[0-9\.]+" -m 1 )
 # fi
 declare -A versions
 # 7.key.value
-versions[0]=33
+# versions[0]=33
 versions[1]=33
 versions[2]=24
 versions[3]=11
@@ -41,7 +41,8 @@ onlyMinor=1
 
 command="vendor/bin/phpunit \
                             --configuration ./configuration/phpunit.xml \
-                            --testsuite All --no-coverage --columns 160 --disallow-test-output --no-logging"
+                            --testsuite All --no-coverage --columns 160 --disallow-test-output"
+                            # --testsuite units --no-coverage --columns 160 --disallow-test-output --no-logging"
 
 for minor in "${!versions[@]}"
 do

@@ -18,12 +18,18 @@ use Dallgoot\Yaml\Nodes\DocStart;
 final class Builder
 {
     /** @var boolean */
-    public static $dateAsObject = false;
+    public $dateAsObject = false;
 
-    private static $_debug;
+    private $_options;
+    private $_debug = 0;
 
     const INVALID_DOCUMENT = "DOCUMENT %d is invalid,";
 
+    public function __construct($options, $debug)
+    {
+        $this->_options = $options;
+        $this->_debug = $debug;
+    }
     /**
      * Builds a YAM content.  check multiple documents & split if more than one documents
      *
@@ -32,26 +38,25 @@ final class Builder
      *
      * @return array|YamlObject|null   list of documents or just one, null if appropriate debug lvl
      */
-    public static function buildContent(Root $root, int $_debug = 0)
+    public function buildContent(Root $root)
     {
-        if ($_debug === 2) {
+        if ($this->_debug === 2) {
             print_r($root);
             return null;
         }
-        self::$_debug = $_debug;
         $documents = [];
         $buffer = new NodeList();
         try {
             foreach ($root->value as $child) {
                 if ($child instanceof DocEnd && $child !== $root->value->top()) {
-                    self::pushAndSave($child, $buffer, $documents);
+                    $this->pushAndSave($child, $buffer, $documents);
                 } elseif ($child instanceof DocStart && $buffer->count() > 0 && $buffer->hasContent()) {
-                    self::saveAndPush($child, $buffer, $documents);
+                    $this->saveAndPush($child, $buffer, $documents);
                 } else {
                     $buffer->push($child);
                 }
             }
-            $documents[] = self::buildDocument($buffer, count($documents) +1);
+            $documents[] = $this->buildDocument($buffer, count($documents) +1);
         } catch (\Throwable $e) {
             throw new \Exception($e->getMessage(), 1, $e);
         }
@@ -62,20 +67,20 @@ final class Builder
      *  Builds the tree of Node (NodeList) for this document
      *
      * @param NodeList $list   the list of nodes that constitutes the current document
-     * @param int      $docNum the index (starts @ 0) of this document in the whole YAML content provided to self::buildContent
+     * @param int      $docNum the index (starts @ 0) of this document in the whole YAML content provided to $this->buildContent
      *
      * @return YamlObject the YAML document as an object
      */
-    public static function buildDocument(NodeList &$list, int $docNum):YamlObject
+    public function buildDocument(NodeList &$list, int $docNum):YamlObject
     {
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject($this->_options);
         $rootNode   = new Root();
         $list->setIteratorMode(NodeList::IT_MODE_DELETE);
         try {
             foreach ($list as $child) {
                 $rootNode->add($child);
             }
-            if (self::$_debug === 3) {
+            if ($this->_debug === 3) {
                 echo "Document #$docNum\n";
                 print_r($rootNode);
             }
@@ -85,16 +90,16 @@ final class Builder
         }
     }
 
-    public static function pushAndSave(NodeGeneric $child, NodeList &$buffer, array &$documents)
+    public function pushAndSave(NodeGeneric $child, NodeList &$buffer, array &$documents)
     {
         $buffer->push($child);
-        $documents[] = self::buildDocument($buffer, count($documents) + 1);
+        $documents[] = $this->buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList();
     }
 
-    public static function saveAndPush(NodeGeneric $child, NodeList &$buffer, array &$documents)
+    public function saveAndPush(NodeGeneric $child, NodeList &$buffer, array &$documents)
     {
-        $documents[] = self::buildDocument($buffer, count($documents) + 1);
+        $documents[] = $this->buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList($child);
     }
 

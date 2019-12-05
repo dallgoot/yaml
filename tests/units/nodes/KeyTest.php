@@ -198,7 +198,7 @@ class KeyTest extends TestCase
         $this->assertTrue(property_exists($parent, 'key'));
         $this->assertEquals('value', $parent->key);
         //
-        $parent = new YamlObject;
+        $parent = new YamlObject(0);
         $built = $this->nodeKey->build($parent);
         $this->assertTrue(property_exists($parent, 'key'));
         $this->assertEquals('value', $parent->key);

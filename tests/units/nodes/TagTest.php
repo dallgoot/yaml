@@ -75,7 +75,7 @@ class TagTest extends TestCase
         $rootNode = new Root();
         $rootNode->add($this->nodeTag);
         $this->nodeTag->value = null;
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject(0);
         $this->assertFalse($yamlObject->isTagged());
         // add yamlObject to NodeRoot
         $rootNode->build($yamlObject);// this triggers this->nodeTag->build

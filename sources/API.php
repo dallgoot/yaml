@@ -21,7 +21,8 @@ class API
     private $_comments = [];
     /** @var array */
     private $_tags     = [];
-
+    /** @var int*/
+    private $_options;
     /** @var null|string */
     public $value;
 
@@ -34,11 +35,16 @@ class API
      *
      * @param YamlObject $obj the YamlObject as the target for all methods call that needs it
      */
-    public function __construct(YamlObject $obj)
+    public function __construct(YamlObject $obj, int $buildingOptions)
     {
         $this->_obj = $obj;
+        $this->_options = $buildingOptions;
     }
 
+    public function getOptions()
+    {
+        return $this->_options;
+    }
     /**
      * Adds a reference.
      *
@@ -53,6 +59,7 @@ class API
         if (empty($name)) {
             throw new \UnexpectedValueException(self::UNAMED_REFERENCE);
         }
+        // var_dump("DEBUG: '$name' added as reference");
         $this->_anchors[$name] = $value;
     }
 

@@ -1,7 +1,7 @@
 <?php
 namespace Dallgoot\Yaml;
 
-$yaml = new YamlObject();
+$yaml = new YamlObject(0);
 
 $o = new \StdClass;
 

@@ -96,7 +96,7 @@ abstract class Literals extends NodeGeneric
      * @return     string  The child value.
      * @todo       double check behaviour for KEY and ITEM
      */
-    protected function getChildValue(object $child, $refIndent=0):string
+    protected function getChildValue($child, $refIndent=0):string
     {
         $value = $child->value;
         $start = '';

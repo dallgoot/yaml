@@ -2,7 +2,7 @@
 
 namespace Dallgoot\Yaml;
 
-$yaml = new YamlObject;
+$yaml = new YamlObject(0);
 
 $yaml->positiveFloat = 0.5353;
 $yaml->negativeFloat = -2.65;

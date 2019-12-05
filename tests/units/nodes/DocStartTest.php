@@ -81,7 +81,7 @@ class DocStartTest extends TestCase
      */
     public function testBuild(): void
     {
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject(0);
         $this->assertTrue(is_null($this->nodeDocStart->build($yamlObject)));
         $this->nodeDocStart->add(new Tag('!<tag:clarkevans.com,2002:invoice>', 2));
         $this->nodeDocStart->build($yamlObject);

@@ -24,6 +24,7 @@ class Key extends NodeGeneric
             }
         }
         $this->setIdentifier($matches[1]);
+
         $value = isset($matches[2]) ? trim($matches[2]) : null;
         if (!empty($value)) {
             $child = NodeFactory::get($value, $line);
@@ -116,9 +117,7 @@ class Key extends NodeGeneric
      */
     public function build(&$parent = null)
     {
-        // if (!is_null($this->tag)) {
-        //     return TagFactory::transform($this->tag, $this)->build($parent);
-        // }
+        // var_dump("DEBUG KEY:".$this->identifier);
         $result = is_null($this->value) ? null : $this->value->build();
         if (is_null($parent)) {
             $parent = new \StdClass;

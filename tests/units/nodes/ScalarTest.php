@@ -129,10 +129,10 @@ class ScalarTest extends TestCase
         $reflector = new \ReflectionClass($this->nodeScalar);
         $method = $reflector->getMethod('getNumber');
         $method->setAccessible(true);
-        $this->assertTrue(is_numeric($method->invoke(null, '132')));
-        $this->assertTrue(is_numeric($method->invoke(null, '0x27')));
-        $this->assertTrue(is_numeric($method->invoke(null, '0xaf')));
-        $this->assertTrue(is_float($method->invoke(null, '132.123')));
-        $this->assertFalse(is_float($method->invoke(null, '132.12.3')));
+        $this->assertTrue(is_numeric($method->invoke($this->nodeScalar, '132')));
+        $this->assertTrue(is_numeric($method->invoke($this->nodeScalar, '0x27')));
+        $this->assertTrue(is_numeric($method->invoke($this->nodeScalar, '0xaf')));
+        $this->assertTrue(is_float($method->invoke($this->nodeScalar, '132.123')));
+        $this->assertFalse(is_float($method->invoke($this->nodeScalar, '132.12.3')));
     }
 }

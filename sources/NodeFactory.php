@@ -105,12 +105,26 @@ final class NodeFactory
     final private static function onCompact(string $first, string $nodeString, int $line):NodeGeneric
     {
         json_decode($nodeString, false, 512, self::JSON_OPTIONS);
-        if (json_last_error() === \JSON_ERROR_NONE)             return new Nodes\JSON($nodeString, $line);
-        elseif ((bool) preg_match(Regex::MAPPING, trim($nodeString)))  return new Nodes\CompactMapping($nodeString, $line);
-        elseif ((bool) preg_match(Regex::SEQUENCE, trim($nodeString))) return new Nodes\CompactSequence($nodeString, $line);
-        else {
-            return new Nodes\Partial($nodeString, $line);
+        if (json_last_error() === \JSON_ERROR_NONE) {
+            return new Nodes\JSON($nodeString, $line);
+        } else {
+            $backtrack_setting = "pcre.backtrack_limit";
+            ini_set($backtrack_setting, "-1");
+            $isMapping  = preg_match(Regex::MAPPING, trim($nodeString));
+            $isSequence = preg_match(Regex::SEQUENCE, trim($nodeString));
+            ini_restore($backtrack_setting);
+
+            if (is_bool($isMapping) || is_bool($isSequence)) {
+                throw new \Exception("Regex Error for ".(is_bool($isMapping) ? 'mapping:' :'sequence:').preg_last_error());
+            }
+            if ($isMapping) {
+                // var_dump(Regex::MAPPING, trim($nodeString));
+                return new Nodes\CompactMapping($nodeString, $line);
+            } elseif ($isSequence) {
+                return new Nodes\CompactSequence($nodeString, $line);
+            }
         }
+        return new Nodes\Partial($nodeString, $line);
     }
 
     /**
@@ -141,17 +155,13 @@ final class NodeFactory
     final private static function onNodeAction(string $first, string $nodeString, int $line):NodeGeneric
     {
         if (!((bool) preg_match(Regex::NODE_ACTIONS, trim($nodeString), $matches))) {
+            // var_dump("ACTION is scalar: '$nodeString'");
             return new Nodes\Scalar($nodeString, $line);
         }
-        // $action = trim($matches['action']);//var_dump($matches);
-        switch ($first) {
-            case '!': return new Nodes\Tag   ($nodeString, $line);
-            default :
-                return new Nodes\Anchor($nodeString, $line);
-            // case '&': return new NodeAnchor($nodeString, $line);
-            // case '*': return new NodeAnchor($nodeString, $line);
-            // default:
-            //     throw new \ParseError("Not a action node !! '$action[0]' on line:$line".gettype($first));
+        if ($first === "!") {
+            return new Nodes\Tag($nodeString, $line);
+        } else {
+            return new Nodes\Anchor($nodeString, $line);
         }
     }
 

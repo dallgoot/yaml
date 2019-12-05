@@ -7,6 +7,7 @@ use Dallgoot\Yaml\TagFactory;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Builder;
 use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\Loader;
 
 /**
  *
@@ -44,7 +45,7 @@ class Scalar extends NodeGeneric
             }
             return $tagged;
         }
-        return is_null($this->value) ? self::getScalar(trim($this->raw)) : $this->value->build();
+        return is_null($this->value) ? $this->getScalar(trim($this->raw)) : $this->value->build();
     }
 
     public function getTargetOnLessIndent(NodeGeneric &$node):NodeGeneric
@@ -72,7 +73,7 @@ class Scalar extends NodeGeneric
      * @throws \Exception if it happens in Regex::isDate or Regex::isNumber
      * @todo implement date as DateTime Object
      */
-    public static function getScalar(string $v, bool $onlyScalar = false)
+    public function getScalar(string $v, bool $onlyScalar = false)
     {
         /*
          10.3.2. Tag Resolution
@@ -96,8 +97,8 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
  \.nan | \.NaN | \.NAN   tag:yaml.org,2002:float (Not a number)
  *   tag:yaml.org,2002:str (Default)
  */
-        if (Regex::isDate($v))   return Builder::$dateAsObject && !$onlyScalar ? date_create($v) : $v;
-        if (Regex::isNumber($v)) return self::getNumber($v);
+        if (Regex::isDate($v))   return ($this->getRoot()->getYamlObject()->getOptions() & Loader::NO_OBJECT_FOR_DATE) && !$onlyScalar ? date_create($v) : $v;
+        if (Regex::isNumber($v)) return $this->getNumber($v);
         $types = ['yes'   => true,
                   'no'    => false,
                   'true'  => true,
@@ -107,10 +108,10 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
                   '-.inf' => -\INF,
                   '.nan'  => \NAN
         ];
-        return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : self::replaceSequences($v);
+        return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $this->replaceSequences($v);
     }
 
-    public static function replaceSequences($value='')
+    public function replaceSequences($value='')
     {
       $replaceUnicodeSeq = function ($matches) {
             return json_decode('"'.$matches[1].'"');
@@ -139,7 +140,7 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
      * @return int|float   The scalar value with appropriate PHP type
      * @todo or scientific notation matching the regular expression -? [1-9] ( \. [0-9]* [1-9] )? ( e [-+] [1-9] [0-9]* )?
      */
-    private static function getNumber(string $v)
+    private function getNumber(string $v)
     {
         if ((bool) preg_match(Regex::OCTAL_NUM, $v)) return intval(base_convert($v, 8, 10));
         if ((bool) preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));

@@ -3,7 +3,7 @@ require_once __DIR__.'/../../../vendor/autoload.php';
 
 use Dallgoot\Yaml\YamlObject;
 
-$yaml = new YamlObject();
+$yaml = new YamlObject(0);
 
 $o = new \StdClass;
 

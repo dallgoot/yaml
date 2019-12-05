@@ -86,7 +86,7 @@ class DumperTest extends TestCase
     {
         $dumpYamlObject = new \ReflectionMethod($this->dumper, 'dumpYamlObject');
         $dumpYamlObject->setAccessible(true);
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject(0);
         $yamlObject->a = 1;
         $this->assertEquals('a: 1', $dumpYamlObject->invoke($this->dumper, $yamlObject, 0));
         unset($yamlObject->a);
@@ -101,7 +101,7 @@ class DumperTest extends TestCase
     {
         $iteratorToString = new \ReflectionMethod($this->dumper, 'iteratorToString');
         $iteratorToString->setAccessible(true);
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject(0);
         $yamlObject[0] = 'a';
         $yamlObject[1] = 'b';
         $this->assertEquals("- a\n- b", $iteratorToString->invoke($this->dumper, $yamlObject, '-', "\n", 0));

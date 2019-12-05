@@ -54,7 +54,7 @@ class DumperHandlers
         throw new \Exception("Dumping Callable|Resource is not currently supported", 1);
     }
 
-    private function dumpObject(object $object, int $indent):string
+    private function dumpObject($object, int $indent):string
     {
         if ($object instanceof YamlObject) {
             return $this->dumper->dumpYamlObject($object);

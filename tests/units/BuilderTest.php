@@ -41,7 +41,7 @@ class BuilderTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->builder = new Builder();
+        $this->builder = new Builder(0,0);
     }
 
     private function buildSimpleMapping()
@@ -49,7 +49,7 @@ class BuilderTest extends TestCase
         // create a yaml mapping
         $root = new Root;
         $root->add(new Key('key: value', 1));
-        return $this->builder::buildContent($root);
+        return $this->builder->buildContent($root);
     }
 
     private function buildSimpleSequence()
@@ -57,7 +57,7 @@ class BuilderTest extends TestCase
         // create a yaml sequence
         $root = new Root;
         $root->add(new Item('- itemvalue', 1));
-        return $this->builder::buildContent($root);
+        return $this->builder->buildContent($root);
     }
 
     private function buildMultiDoc()
@@ -70,7 +70,7 @@ class BuilderTest extends TestCase
         $root->add(new Key('key: value', 5));
         $root->add(new DocStart('---', 6));
         $root->add(new Key('key: value', 7));
-        return $this->builder::buildContent($root);
+        return $this->builder->buildContent($root);
     }
 
     /**
@@ -78,23 +78,44 @@ class BuilderTest extends TestCase
      * @todo   test :
      *  simple literal
      *  only JSON content
-     *  multidocument
      */
     public function testBuildContent(): void
     {
+        $debug_property = new \ReflectionProperty($this->builder, '_debug');
+        $debug_property->setAccessible(true);
+        $debug_property->setValue($this->builder, 2);
         ob_start();
-        $this->assertEquals($this->builder::buildContent(new Root, 2), null);
+        $this->assertEquals($this->builder->buildContent(new Root), null);
         ob_end_clean();
+    }
+     /**
+     * @covers \Dallgoot\Yaml\Builder::buildContent
+    */
+    public function testBuildContentMAPPING(): void
+    {
         //test simple mapping
         $yamlMapping = $this->buildSimpleMapping();
         $this->assertTrue($yamlMapping instanceof YamlObject);
         $this->assertTrue(property_exists($yamlMapping, 'key'));
         $this->assertEquals($yamlMapping->key, 'value');
-        //test simple sequence
+     }
+
+    /**
+     * @covers \Dallgoot\Yaml\Builder::buildContent
+    */
+    public function testBuildContentSEQUENCE(): void
+    {   //test simple sequence
         $yamlSequence = $this->buildSimpleSequence();
         $this->assertTrue($yamlSequence instanceof YamlObject);
         $this->assertArrayHasKey(0, $yamlSequence);
         $this->assertEquals($yamlSequence[0], 'itemvalue');
+    }
+
+     /**
+     * @covers \Dallgoot\Yaml\Builder::buildContent
+    */
+    public function testBuildContentMULTIDOC(): void
+    {
         // test multi document
         $multiDoc = $this->buildMultiDoc();
         $this->assertTrue(is_array($multiDoc));
@@ -119,7 +140,7 @@ class BuilderTest extends TestCase
         $this->expectException(\Exception::class);
         $root = new Root;
         $root->value = null;
-        $this->builder::buildContent($root);
+        $this->builder->buildContent($root);
     }
 
     /**
@@ -158,11 +179,11 @@ class BuilderTest extends TestCase
                 ")\n";
         $debug = new \ReflectionProperty(Builder::class, '_debug');
         $debug->setAccessible(true);
-        $debug->setValue(3);
+        $debug->setValue($this->builder,3);
         $list = new NodeList;
-        $this->builder::buildDocument($list, 0);
+        $this->builder->buildDocument($list, 0);
         $this->expectOutputString($output);
-        $debug->setValue(0);
+        $debug->setValue($this->builder,0);
     }
 
     /**
@@ -189,7 +210,7 @@ class BuilderTest extends TestCase
         $buffer = new NodeList;
         $documents = [];
         $this->assertTrue($buffer->count() === 0);
-        $method->invokeArgs(null, [$child, &$buffer, &$documents]);
+        $method->invokeArgs($this->builder, [$child, &$buffer, &$documents]);
         $this->assertTrue($buffer->count() === 0);
         $this->assertTrue(count($documents) === 1);
     }
@@ -207,7 +228,7 @@ class BuilderTest extends TestCase
         $child = new Blank('', 1);
         $documents = [];
         $this->assertTrue($buffer->count() === 1);
-        $method->invokeArgs(null, [$child, &$buffer, &$documents]);
+        $method->invokeArgs($this->builder, [$child, &$buffer, &$documents]);
         $this->assertTrue($buffer->count() === 1);
         $this->assertTrue(count($documents) === 1);
         $this->assertTrue($buffer->offsetGet(0) instanceof Blank);

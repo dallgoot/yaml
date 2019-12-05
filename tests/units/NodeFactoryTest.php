@@ -65,6 +65,15 @@ class NodeFactoryTest extends TestCase
     }
 
     /**
+     * @covers \Dallgoot\Yaml\NodeFactory::get
+     */
+    public function testGetException(): void
+    {
+        $this->expectException(\Exception::class);
+        $this->nodeFactory::get('%INVALID_DIRECTIVE  xxx', 1);
+    }
+
+    /**
      * @covers \Dallgoot\Yaml\NodeFactory::onSpecial
      */
     public function testOnSpecial(): void
@@ -76,6 +85,19 @@ class NodeFactoryTest extends TestCase
         $this->assertTrue($method->invoke(null,$nodeString[0], $nodeString, 1) instanceof Comment, 'Not a NodeComment');
         $nodeString = '%YAML 1.2';
         $this->assertTrue($method->invoke(null,$nodeString[0], $nodeString, 1) instanceof Directive, 'Not a NodeDirective');
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\NodeFactory::onSpecial
+     */
+    public function testOnSpecialParseError(): void
+    {
+        $this->expectException(\ParseError::class);
+        $reflector = new \ReflectionClass($this->nodeFactory);
+        $method = $reflector->getMethod('onSpecial');
+        $method->setAccessible(true);
+        $nodeString = '%INVALID_DIRECTIVE  xxx';
+        $method->invoke(null,$nodeString[0], $nodeString, 1);
     }
 
     /**
@@ -119,27 +141,67 @@ class NodeFactoryTest extends TestCase
     /**
      * @covers \Dallgoot\Yaml\NodeFactory::onCompact
      */
-    public function testOnCompact(): void
+    public function testOnCompactJSON(): void
     {
         $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
         $method->setAccessible(true);
         $nodeString = '["a","b","c"]';
         $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof JSON,
                 'Not a NodeJSON');
+    }
+    /**
+     * @covers \Dallgoot\Yaml\NodeFactory::onCompact
+     */
+    public function testOnCompactJSONMAPPING(): void
+    {
+        $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
+        $method->setAccessible(true);
         $nodeString = '{"key":"value","key1":"value1"}';
-        $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof JSON,
-                'Not a NodeJSON');
+        $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof JSON, 'Not a NodeJSON');
+    }
+    /**
+     * @covers \Dallgoot\Yaml\NodeFactory::onCompact
+     */
+    public function testOnCompactMAPPING(): void
+    {
+        $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
+        $method->setAccessible(true);
         $nodeString = '{  key :  value ,  key1  : value1  }';
-        $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof CompactMapping,
-                'Not a NodeCompactMapping');
+        $output = $method->invoke(null, '', $nodeString, 1);
+        $this->assertTrue($output instanceof CompactMapping, get_class($output).' instead of a NodeCompactMapping');
+    }
+    /**
+     * @covers \Dallgoot\Yaml\NodeFactory::onCompact
+     */
+    public function testOnCompactSEQUENCE(): void
+    {
+        $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
+        $method->setAccessible(true);
         $nodeString = '[a,b,c]';
-        $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof CompactSequence,
-                'Not a NodeCompactSequence');
+        $output = $method->invoke(null, '', $nodeString, 1);
+        $this->assertTrue($output instanceof CompactSequence, get_class($output).' instead of a NodeCompactSequence');
+    }
+    /**
+     * @covers \Dallgoot\Yaml\NodeFactory::onCompact
+     */
+    public function testOnCompactPartialMapping(): void
+    {
+        $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
+        $method->setAccessible(true);
         $nodeString = ' { a: b, ';
-        $result = $method->invoke(null, '', $nodeString, 1);
-        $this->assertTrue($result instanceof Partial,
-                'Not a NodeScalar');
-
+        $output = $method->invoke(null, '', $nodeString, 1);
+        $this->assertTrue($output instanceof Partial, get_class($output).' instead of a Partial');
+    }
+    /**
+     * @covers \Dallgoot\Yaml\NodeFactory::onCompact
+     */
+    public function testOnCompactPartialSequence(): void
+    {
+        $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
+        $method->setAccessible(true);
+        $nodeString = ' [ a, b, ';
+        $output = $method->invoke(null, '', $nodeString, 1);
+        $this->assertTrue($output instanceof Partial, get_class($output).' instead of a Partial');
     }
 
     /**

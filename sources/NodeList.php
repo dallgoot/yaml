@@ -116,7 +116,8 @@ class NodeList extends \SplDoublyLinkedList
                 return $this->buildList($collect);
             default:
                 $this->filterComment();
-                return Nodes\Scalar::getScalar($this->buildMultiline());
+                // return Nodes\Scalar::getScalar($this->buildMultiline());
+                return (new Nodes\Scalar('', 0))->getScalar($this->buildMultiline(), true);
         }
     }
 

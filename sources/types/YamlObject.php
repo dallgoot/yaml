@@ -18,6 +18,7 @@ namespace Dallgoot\Yaml;
  * @method void addTag(string $handle, string $prefix)
  * @method bool hasDocStart()
  * @method bool isTagged()
+ * @method int getOptions()
  */
 class YamlObject extends \ArrayIterator implements \JsonSerializable
 {
@@ -31,10 +32,10 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      * and creates the API object with a reference to this YamlObject.
      * @todo check indices access outside of foreach loop
      */
-    public function __construct()
+    public function __construct($buildingOptions)
     {
         parent::__construct([], 1); //1 = Array indices can be accessed as properties in read/write.
-        $this->__yaml__object__api = new API($this);
+        $this->__yaml__object__api = new API($this, $buildingOptions);
     }
 
     /**
@@ -56,7 +57,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         try {
             return call_user_func_array([$this->__yaml__object__api, $funcName], $arguments);
         } catch (\Throwable $e) {
-            throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName));
+            throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName), 1,$e);
         }
     }
 

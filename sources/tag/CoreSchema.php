@@ -50,12 +50,12 @@ class CoreSchema implements SchemaInterface
     /**
      * Specific Handler for 'str' tag
      *
-     * @param object $node    The Node or NodeList
+     * @param Nodes\NodeGeneric|NodeList $node    The Node or NodeList
      * @param object|array|null  $parent The parent
      *
      * @return string the value of Node converted to string if needed
      */
-    public function str(object $node, &$parent = null)
+    public function str($node, &$parent = null)
     {
         if($node instanceof Nodes\Literals){
             $node = $node->value;
@@ -98,7 +98,7 @@ class CoreSchema implements SchemaInterface
      * @throws     \Exception  if theres a set but no children (set keys or set values)
      * @return     mixed  process the Set, ie. an object construction with properties as serialized JSON values
      */
-    public function set(object $node, &$parent = null)
+    public function set($node, &$parent = null)
     {
         if (!($node instanceof NodeList)) {
             throw new \LogicException(self::ERROR_SET);
@@ -124,7 +124,7 @@ class CoreSchema implements SchemaInterface
      * @throws \Exception  if theres an omap but no map items
      * @return mixed process the omap
      */
-    public function omap(object $node, &$parent = null)
+    public function omap($node, &$parent = null)
     {
         if ($node instanceof Nodes\NodeGeneric) {
             if ($node instanceof Nodes\Item && $node->value instanceof Nodes\Key) {

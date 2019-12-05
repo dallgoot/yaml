@@ -83,7 +83,7 @@ class DumperHandlersTest extends TestCase
     {
         $dumpCompound = new \ReflectionMethod($this->dumperHandler, 'dumpCompound');
         $dumpCompound->setAccessible(true);
-        $yamlObject = new YamlObject;
+        $yamlObject = new YamlObject(0);
         $yamlObject->a = 1;
         $this->assertEquals('a: 1', $dumpCompound->invoke($this->dumperHandler, $yamlObject, 0));
         unset($yamlObject->a);

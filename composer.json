@@ -26,7 +26,7 @@
         ]
     },
     "require": {
-        "php": ">=7.3.2",
+        "php": ">=7.1.10",
         "ext-json": "*",
         "ext-pcre": "*",
         "ext-SPL": "*",
@@ -40,11 +40,10 @@
         "phploc/phploc": "^4.0",
         "paulthebaud/phpunit-generator": "^2.1",
         "phpmetrics/phpmetrics": "^2.4",
-        "phpunit/phpunit": "^8.4",
-        "theseer/phpdox": "^0.12.0"
+        "phpunit/phpunit": "^7"
     },
     "scripts" : {
-        "test"    : "phpunit --configuration ./configuration/phpunit.xml --testsuite All",
+        "test"    : "phpunit --verbose --configuration ./configuration/phpunit.xml --testsuite All",
         "metrics" : "phpmetrics --report-html=documentation/phpmetrics_report ./sources",
         "phploc"  : "phploc sources/ --count-tests --log-xml=./documentation/codecoverage/phploc.xml",
         "docs"    : "phpdox -f configuration/phpdox.xml",

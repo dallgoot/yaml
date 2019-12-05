@@ -42,7 +42,7 @@ class AnchorTest extends TestCase
      */
     public function testBuild(): void
     {
-        $yamlObject = new YamlObject();
+        $yamlObject = new YamlObject(0);
         $rootNode   = new Root();
         $rootNode->add($this->nodeAnchor);
         $reflector  = new \ReflectionClass($rootNode);
@@ -52,7 +52,7 @@ class AnchorTest extends TestCase
         $this->assertEquals('sometext', $this->nodeAnchor->build());
         // test exsting reference
         $anchorValue = '12345';
-        $yamlObject = new YamlObject();
+        $yamlObject = new YamlObject(0);
         $rootNode   = new Root();
         $this->nodeAnchor = new Anchor('*aaa', 1);
 

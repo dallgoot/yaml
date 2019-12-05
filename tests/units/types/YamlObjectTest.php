@@ -30,7 +30,7 @@ class YamlObjectTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->yamlObject = new YamlObject();
+        $this->yamlObject = new YamlObject(0);
     }
 
     /**
@@ -41,7 +41,7 @@ class YamlObjectTest extends TestCase
         $reflector = new \ReflectionClass($this->yamlObject);
         $__yaml__object__api = $reflector->getProperty('__yaml__object__api');
         $__yaml__object__api->setAccessible(true);
-        $this->yamlObject->__construct();
+        $this->yamlObject->__construct(0);
         $this->assertTrue($__yaml__object__api->getValue($this->yamlObject) instanceof API);
     }
 

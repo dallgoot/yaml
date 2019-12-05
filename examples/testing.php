@@ -1,0 +1,22 @@
+<?php
+require_once __DIR__.'/../vendor/autoload.php';
+
+use \Dallgoot\Yaml;
+
+/**
+ * Testing/Debugging Loader
+ */
+const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR;
+
+$debug = (int) (isset($argv[1]) ? $argv[1] : null);
+$file = (string) (isset($argv[2]) ? $argv[2] : null);
+echo memory_get_usage() . "\n";
+/* USE CASE 1
+* load and parse if file exists
+*/
+$content = file_get_contents($file);//var_dump($content);
+$yaml = Yaml::parse($content, 0, $debug);
+
+echo memory_get_usage() . "\n";
+// var_dump($yaml);
+var_dump(json_encode($yaml, JSON_OPTIONS));

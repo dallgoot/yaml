@@ -127,7 +127,7 @@ class ItemTest extends TestCase
         $parent = [];
         $this->assertEquals(null, $this->nodeItem->build($parent));
         $this->assertEquals([0 => null], $parent);
-        $parent = new YamlObject;
+        $parent = new YamlObject(0);
         $this->assertEquals(null, $this->nodeItem->build($parent));
         $this->assertArrayHasKey(0, $parent);
     }

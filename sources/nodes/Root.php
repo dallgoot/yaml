@@ -53,6 +53,7 @@ class Root extends NodeGeneric
     {
         $this->_yamlObject = $yamlObject;
         $this->value->setIteratorMode(NodeList::IT_MODE_DELETE);
+        // $this->value->rewind();
         foreach ($this->value as $key => $child) {
             $child->build($yamlObject);
         }
