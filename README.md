@@ -8,13 +8,12 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 ## Installation
 
-- Current version is not considered stable so you need to precise "dev-master" to Composer
 - Dependencies are only useful for building documentation or for code contribution, so the "--update-no-dev" prevent from downloading and managing packages that you probably won't use.
 
-You first need [Composer](https://getcomposer.org/) and PHP ^7
+You first need [Composer](https://getcomposer.org/) and PHP ^7.1.10
 
 ```bash
-composer require --update-no-dev dallgoot/yaml dev-master
+composer require --update-no-dev dallgoot/yaml
 ```
 
 ## Usage
