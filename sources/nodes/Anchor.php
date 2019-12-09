@@ -10,7 +10,7 @@ namespace Dallgoot\Yaml\Nodes;
  */
 class Anchor extends Actions
 {
-    public function build(&$parent = null)
+    public function &build(&$parent = null)
     {
         $name = substr($this->anchor, 1);
         $yamlObject = $this->getRoot()->getYamlObject();

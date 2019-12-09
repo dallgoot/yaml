@@ -55,7 +55,7 @@ See examples files in [examples folder](./examples)
 | [Symfony Yaml](https://symfony.com/doc/current/components/yaml.html) | 1.2                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
 | [php-yaml](https://pecl.php.net/package/yaml)                        | 1.1                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
 | [syck](http://pecl.php.net/package/syck)                             | 1.0                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
-| [spyc](https://github.com/mustangostang/spyc)                        | 1.?                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
+| [spyc](https://github.com/mustangostang/spyc)                        | 1.0                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
 | **Dallgoot/Yaml**                                                    | 1.2                    | ✔️                  | ✔️                 | ✔️                     | ✔️              | ✔️                       | ✔️                   |
 
 - coherent data types (see [coherence.md](./documentation/coherence.md) for explanations)

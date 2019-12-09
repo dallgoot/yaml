@@ -3,42 +3,24 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 use \Dallgoot\Yaml;
 
-/**
- * Display some use cases for Yaml library
- */
-const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR;
+$debug = 0;
 
-$debug = (int) (isset($argv[1]) ? $argv[1] : null);
-
-echo memory_get_usage() . "\n";
 /* USE CASE 1
 * load and parse if file exists
 */
-$content = file_get_contents('./examples/dummy.yml');//var_dump($content);
-$yaml = Yaml::parse($content, 0, $debug);
+$yaml = Yaml::parseFile('./examples/dummy.yml', 0, $debug);
 
-echo memory_get_usage() . "\n";
-// var_dump($yaml);
-var_dump(json_encode($yaml, JSON_OPTIONS));
-exit(0);
+var_dump($yaml->object->array[0]);
 
-// USE CASE 2
-$a = <<<EOF
-sequence:
-    - string_key: 1
+$yamlContent = <<<EOF
+--- some document we don't care about
+# below the document we want
+---
+- ignore_me
+- mapping:
+    somekey:
+        array:
+            - OK
 EOF;
-$b = <<<EOF
-#2
-mapping:
-    string_key: 1
-EOF;
-var_dump(Yaml::parse($a, 0, $debug));
-var_dump(Yaml::parse($b, 0, $debug));
 
-// USE CASE 3
-// $yamlObjList = [];
-// $yloader = new Loader(null, 0, $debug);
-// foreach(['file1', 'file2', 'file3'] as $key => $fileName)
-// {
-//     $yamlObjList[] =  $yloader->load($fileName)->parse();
-// }
+var_dump(Yaml::parse($yamlContent)[1][1]->mapping->somekey->array[0]);

@@ -52,8 +52,8 @@ class RegexTest extends TestCase
      */
     public function testIsDateWithNoString(): void
     {
-        $this->expectException(\Exception::class);
-        $this->regex::isDate('');
+        // $this->expectException(\Exception::class);
+        $this->assertFalse($this->regex::isDate(''));
     }
 
     /**

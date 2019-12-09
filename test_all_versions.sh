@@ -34,8 +34,9 @@ declare -A versions
 # 7.key.value
 # versions[0]=33
 versions[1]=33
-versions[2]=24
-versions[3]=11
+versions[2]=25
+versions[3]=12
+versions[4]=0
 
 onlyMinor=1
 

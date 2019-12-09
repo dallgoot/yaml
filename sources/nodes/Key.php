@@ -118,13 +118,17 @@ class Key extends NodeGeneric
     public function build(&$parent = null)
     {
         // var_dump("DEBUG KEY:".$this->identifier);
-        $result = is_null($this->value) ? null : $this->value->build();
+        if ($this->value instanceof Anchor) {
+            $result = &$this->value->build();
+        } else {
+            $result = is_null($this->value) ? null : $this->value->build();
+        }
         if (is_null($parent)) {
             $parent = new \StdClass;
-            $parent->{$this->identifier} = $result;
+            $parent->{$this->identifier} = &$result;
             return $parent;
         } else {
-            $parent->{$this->identifier} = $result;
+            $parent->{$this->identifier} = &$result;
         }
     }
 }
