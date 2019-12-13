@@ -49,13 +49,13 @@ final class Builder
             foreach ($root->value as $child) {
                 if ($child instanceof DocEnd && $child !== $root->value->top()) {
                     $this->pushAndSave($child, $buffer, $documents);
-                } elseif ($child instanceof DocStart && $buffer->count() > 0 && $buffer->hasContent()) {
+                } elseif ($child instanceof DocStart) {
                     $this->saveAndPush($child, $buffer, $documents);
                 } else {
                     $buffer->push($child);
                 }
             }
-            $documents[] = $this->buildDocument($buffer, count($documents) +1);
+            $documents[] = $this->buildDocument($buffer, count($documents) + 1);
         } catch (\Throwable $e) {
             throw new \Exception($e->getMessage(), 1, $e);
         }
@@ -89,17 +89,21 @@ final class Builder
         }
     }
 
-    public function pushAndSave(NodeGeneric $child, NodeList &$buffer, array &$documents)
+    public function pushAndSave(DocEnd $child, NodeList &$buffer, array &$documents)
     {
         $buffer->push($child);
         $documents[] = $this->buildDocument($buffer, count($documents) + 1);
         $buffer = new NodeList();
     }
 
-    public function saveAndPush(NodeGeneric $child, NodeList &$buffer, array &$documents)
+    public function saveAndPush(DocStart $child, NodeList &$buffer, array &$documents)
     {
-        $documents[] = $this->buildDocument($buffer, count($documents) + 1);
-        $buffer = new NodeList($child);
+        if ($buffer->count() > 0 && $buffer->hasContent()) {
+            $documents[] = $this->buildDocument($buffer, count($documents) + 1);
+            $buffer = new NodeList($child);
+        } else {
+            $buffer->push($child);
+        }
     }
 
 

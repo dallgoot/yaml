@@ -191,7 +191,7 @@ class BuilderTest extends TestCase
      */
     public function testBuildDocumentException(): void
     {
-        $this->expectException(\ParseError::class);
+        $this->expectException(\Error::class);
         $list = new NodeList();
         $list->push(new \StdClass);
         $yamlObject = $this->builder->buildDocument($list, 0);
@@ -206,7 +206,7 @@ class BuilderTest extends TestCase
         $reflector = new \ReflectionClass($this->builder);
         $method = $reflector->getMethod('pushAndSave');
         $method->setAccessible(true);
-        $child = new Blank('', 1);
+        $child = new DocEnd('', 1);
         $buffer = new NodeList;
         $documents = [];
         $this->assertTrue($buffer->count() === 0);
@@ -225,12 +225,12 @@ class BuilderTest extends TestCase
         $method->setAccessible(true);
         $itemNode = new Item('- item', 1);
         $buffer = new NodeList($itemNode);
-        $child = new Blank('', 1);
+        $child = new DocStart('', 1);
         $documents = [];
         $this->assertTrue($buffer->count() === 1);
         $method->invokeArgs($this->builder, [$child, &$buffer, &$documents]);
         $this->assertTrue($buffer->count() === 1);
         $this->assertTrue(count($documents) === 1);
-        $this->assertTrue($buffer->offsetGet(0) instanceof Blank);
+        $this->assertTrue($buffer->offsetGet(0) instanceof DocStart);
     }
 }

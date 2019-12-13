@@ -74,10 +74,11 @@ class Item extends NodeGeneric
         if (is_null($parent)) {
             return [$value];
         } else {
-            $ref = is_array($parent) ? $parent : iterator_to_array($parent);
-            $numKeys = array_keys($ref);
-            $key = count($numKeys) > 0 ? max($numKeys) + 1 : 0;
-            $parent[$key] = $value;
+            // $ref = is_array($parent) ? $parent : iterator_to_array($parent);
+            // $numKeys = array_keys($ref);
+            // $key = count($numKeys) > 0 ? max($numKeys) + 1 : 0;
+            // $parent[$key] = $value;
+            $parent[] = $value;
         }
     }
 

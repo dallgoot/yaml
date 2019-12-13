@@ -25,8 +25,8 @@ abstract class NodeGeneric
     public $indent = -1;
     /** @var int */
     public $line;
-    /** @var null|string */
-    public $raw;
+    /** @var string */
+    public $raw = '';
     /** @var null|NodeGeneric|NodeList */
     public $value;
     /** @var string|null */

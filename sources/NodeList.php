@@ -72,12 +72,13 @@ class NodeList extends \SplDoublyLinkedList
     public function push($node)
     {
         $type = null;
-        if     ($node instanceof Item )    $type = self::SEQUENCE;
-        elseif ($node instanceof Key)      $type = self::MAPPING;
-        elseif ($node instanceof SetKey
-             || $node instanceof SetValue) {
+        if ($node instanceof Item ) {
+            $type = self::SEQUENCE;
+        } elseif ($node instanceof Key) {
+            $type = self::MAPPING;
+        } elseif ($node->isOneOf('SetKey','SetValue')) {
             $type = self::SET;
-        } elseif ($node instanceof Scalar ){
+        } elseif ($node instanceof Scalar){
             $type = self::MULTILINE;
         }
         if (!is_null($type) && $this->checkTypeCoherence($type)) {

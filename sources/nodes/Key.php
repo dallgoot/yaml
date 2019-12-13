@@ -84,19 +84,20 @@ class Key extends NodeGeneric
     {
         if (is_null($this->value) || $node instanceof Comment) {
             return true;
+        } elseif($this->value instanceof NodeGeneric) {
+            $current = $this->value;
+        } else {
+            $current = $this->value->current();
         }
-        $current = $this->value instanceof NodeGeneric ? $this->value : $this->value->current();
         if ($current instanceof Comment) {
             return true;
         }
-        if($current instanceof Scalar) {
+        if ($current instanceof Scalar) {
             return $node->isOneOf('Scalar', 'Blank');
         }
-        if ($current instanceof Item) {
-            return $node instanceof Item;
-        }
-        if ($current instanceof Key) {
-            return $node instanceof Key;
+        if ($current->isOneOf('Key', 'Item')) {
+            $cClass = get_class($current);
+            return $node instanceof $cClass;
         }
         if ($current instanceof Literals) {
             return $node->indent > $this->indent;

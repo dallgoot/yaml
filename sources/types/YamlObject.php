@@ -10,7 +10,7 @@ namespace Dallgoot\Yaml;
  */
 class YamlObject extends \ArrayIterator implements \JsonSerializable
 {
-    /** @var API */
+    /** @var YamlProperties */
     private $__yaml__object__api;
 
     const UNDEFINED_METHOD = self::class.": undefined method '%s', valid methods are (addReference,getReference,getAllReferences,addComment,getComment,setText,addTag,hasDocStart,isTagged)";
@@ -51,7 +51,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      * @param mixed  $value The reference value
      *
      * @throws \UnexpectedValueException  (description)
-     * @return null
+     * @return mixed
      */
     public function &addReference(string $name, $value)
     {
