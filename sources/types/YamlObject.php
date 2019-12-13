@@ -3,29 +3,20 @@ namespace Dallgoot\Yaml;
 
 /**
  *  The returned object representing a YAML document
- *  Methods are provided by encapsulated Yaml\API object.
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
  * @license Apache 2.0
  * @link    https://github.com/dallgoot/yaml
- *
- * @method void addReference(string $name, $value)
- * @method mixed getReference(string $name)
- * @method array getAllReferences()
- * @method void addComment($index, $value)
- * @method string|array getComment($lineNumber)
- * @method void setText(string $value)
- * @method void addTag(string $handle, string $prefix)
- * @method bool hasDocStart()
- * @method bool isTagged()
- * @method int getOptions()
  */
 class YamlObject extends \ArrayIterator implements \JsonSerializable
 {
     /** @var API */
     private $__yaml__object__api;
 
-    private const UNDEFINED_METHOD = self::class.": undefined method '%s', valid methods are (addReference,getReference,getAllReferences,addComment,getComment,setText,addTag,hasDocStart,isTagged)";
+    const UNDEFINED_METHOD = self::class.": undefined method '%s', valid methods are (addReference,getReference,getAllReferences,addComment,getComment,setText,addTag,hasDocStart,isTagged)";
+    const UNKNOWN_REFERENCE = "no reference named: '%s', known are : (%s)";
+    const UNAMED_REFERENCE  = "reference MUST have a name";
+    const TAGHANDLE_DUPLICATE = "Tag handle '%s' already declared before, handle must be unique";
 
     /**
      * Construct the YamlObject making sure the indices can be accessed directly
@@ -35,30 +26,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     public function __construct($buildingOptions)
     {
         parent::__construct([], 1); //1 = Array indices can be accessed as properties in read/write.
-        $this->__yaml__object__api = new API($this, $buildingOptions);
-    }
-
-    /**
-     * Transfer method calls to Yaml::API object
-     *
-     * @param string $funcName  The function name
-     * @param mixed  $arguments The arguments
-     *
-     * @throws \BadMethodCallException if method isn't part of the public API
-     * @return mixed                    the return value of the API::method called
-     */
-    public function __call($funcName, $arguments)
-    {
-        // $reflectAPI = new \ReflectionClass(get_class($this->__yaml__object__api));
-        // $getName    = function ($o) { return $o->name; };
-        // $publicApi  = array_map($getName, $reflectAPI->getMethods(\ReflectionMethod::IS_PUBLIC));
-        // if (!in_array($funcName, $publicApi) ) {
-        // }
-        try {
-            return call_user_func_array([$this->__yaml__object__api, $funcName], $arguments);
-        } catch (\Throwable $e) {
-            throw new \BadMethodCallException(sprintf(self::UNDEFINED_METHOD, $funcName), 1,$e);
-        }
+        $this->__yaml__object__api = new YamlProperties($buildingOptions);
     }
 
     /**
@@ -70,6 +38,148 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     public function __toString():string
     {
         return $this->__yaml__object__api->value ?? serialize($this);
+    }
+
+    public function getOptions()
+    {
+        return $this->__yaml__object__api->_options;
+    }
+    /**
+     * Adds a reference.
+     *
+     * @param string $name  The reference name
+     * @param mixed  $value The reference value
+     *
+     * @throws \UnexpectedValueException  (description)
+     * @return null
+     */
+    public function &addReference(string $name, $value)
+    {
+        if (empty($name)) {
+            throw new \UnexpectedValueException(self::UNAMED_REFERENCE);
+        }
+        // var_dump("DEBUG: '$name' added as reference");
+        $this->__yaml__object__api->_anchors[$name] = $value;
+        return $this->__yaml__object__api->_anchors[$name];
+    }
+
+    /**
+     * Return the reference saved by $name
+     *
+     * @param string $name Name of the reference
+     *
+     * @return mixed Value of the reference
+     * @throws \UnexpectedValueException    if there's no reference by that $name
+     */
+    public function &getReference($name)
+    {
+        if (array_key_exists($name, $this->__yaml__object__api->_anchors)) {
+            return $this->__yaml__object__api->_anchors[$name];
+        }
+        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE,
+                                                    $name, implode(',',array_keys($this->__yaml__object__api->_anchors)))
+                                                );
+    }
+
+    /**
+     * Return array with all references as Keys and their values, declared for this YamlObject
+     *
+     * @return array
+     */
+    public function getAllReferences():array
+    {
+        return $this->__yaml__object__api->_anchors;
+    }
+
+    /**
+     * Adds a comment.
+     *
+     * @param int    $lineNumber The line number at which the comment should appear
+     * @param string $value      The comment
+     *
+     * @return null
+     */
+    public function addComment(int $lineNumber, string $value)
+    {
+        $this->__yaml__object__api->_comments[$lineNumber] = $value;
+    }
+
+    /**
+     * Gets the comment at $lineNumber
+     *
+     * @param int|null $lineNumber The line number
+     *
+     * @return string|array The comment at $lineNumber OR all comments.
+     */
+    public function getComment(int $lineNumber = null)
+    {
+        if (array_key_exists((int) $lineNumber, $this->__yaml__object__api->_comments)) {
+            return $this->__yaml__object__api->_comments[$lineNumber];
+        }
+        return $this->__yaml__object__api->_comments;
+    }
+
+    /**
+     * Sets the text when the content is *only* a literal
+     *
+     * @param string $value The value
+     *
+     * @return YamlObject
+     */
+    public function setText(string $value):YamlObject
+    {
+        $this->__yaml__object__api->value .= ltrim($value);
+        return $this;
+    }
+
+    /**
+     * TODO:  what to do with these tags ???
+     * Adds a tag.
+     *
+     * @param string $handle The handle declared for the tag
+     * @param string $prefix The prefix/namespace/schema that defines the tag
+     *
+     * @return null
+     */
+    public function addTag(string $handle, string $prefix)
+    {
+        //  It is an error to specify more than one “TAG” directive for the same handle in the same document, even if both occurrences give the same prefix.
+        if (array_key_exists($handle, $this->__yaml__object__api->_tags)) {
+            throw new \Exception(sprintf(self::TAGHANDLE_DUPLICATE, $handle), 1);
+        }
+        $this->__yaml__object__api->_tags[$handle] = $prefix;
+    }
+
+    /**
+     * Determines if it has YAML document start string => '---'.
+     *
+     * @return boolean  True if document has start, False otherwise.
+     */
+    public function hasDocStart():bool
+    {
+        return is_bool($this->__yaml__object__api->_hasDocStart);
+    }
+
+    /**
+     * Sets the document start.
+     *
+     * @param null|bool $value The value : null = no docstart, true = docstart before document comments, false = docstart after document comments
+     *
+     * @return null
+     */
+    public function setDocStart($value)
+    {
+        $this->__yaml__object__api->_hasDocStart = $value;
+    }
+
+    /**
+     * Is the whole YAML document (YamlObject) tagged ?
+     *
+     * @return bool
+     */
+    public function isTagged()
+    {
+        return !empty($this->__yaml__object__api->_tags);
     }
 
     /**

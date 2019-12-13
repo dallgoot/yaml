@@ -5,7 +5,6 @@ namespace Dallgoot\Yaml\Nodes;
 use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\TagFactory;
 use Dallgoot\Yaml\NodeList;
-use Dallgoot\Yaml\Builder;
 use Dallgoot\Yaml\Regex;
 use Dallgoot\Yaml\Loader;
 

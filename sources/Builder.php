@@ -34,7 +34,6 @@ final class Builder
      * Builds a YAM content.  check multiple documents & split if more than one documents
      *
      * @param Root $root  The NodeRoot node
-     * @param int  $_debug    the level of debugging requested
      *
      * @return array|YamlObject|null   list of documents or just one, null if appropriate debug lvl
      */

@@ -5,7 +5,8 @@ namespace Test\Dallgoot\Yaml;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\YamlObject;
-use Dallgoot\Yaml\API;
+use Dallgoot\Yaml\YamlProperties;
+use ReflectionProperty;
 
 /**
  * Class YamlObjectTest.
@@ -24,6 +25,8 @@ class YamlObjectTest extends TestCase
      */
     private $yamlObject;
 
+    private $refValue = 123;
+    private $commentValue = '# this a full line comment';
     /**
      * {@inheritdoc}
      */
@@ -42,26 +45,7 @@ class YamlObjectTest extends TestCase
         $__yaml__object__api = $reflector->getProperty('__yaml__object__api');
         $__yaml__object__api->setAccessible(true);
         $this->yamlObject->__construct(0);
-        $this->assertTrue($__yaml__object__api->getValue($this->yamlObject) instanceof API);
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\YamlObject::__call
-     * @todo : test ALL API public methods ???
-     */
-    public function testCall(): void
-    {
-        $this->assertTrue(is_bool($this->yamlObject->hasDocStart()));
-        $this->assertTrue(is_array($this->yamlObject->getComment()));
-        $this->assertTrue(is_array($this->yamlObject->getAllReferences()));
-    }
-/**
-     * @covers \Dallgoot\Yaml\YamlObject::__call
-     */
-    public function testCallWrongName(): void
-    {
-        $this->expectException(\Exception::class);
-        $this->yamlObject->unknownMethodName();
+        $this->assertTrue($__yaml__object__api->getValue($this->yamlObject) instanceof YamlProperties);
     }
 
     /**
@@ -79,5 +63,118 @@ class YamlObjectTest extends TestCase
     public function testJsonSerialize(): void
     {
         $this->assertEquals("_Empty YamlObject_", $this->yamlObject->jsonSerialize());
+    }
+
+        /**
+     * @covers \Dallgoot\Yaml\YamlObject::addReference
+     */
+    public function testAddReference(): void
+    {
+        $this->assertEquals($this->yamlObject->getAllReferences(), []);
+        $this->yamlObject->addReference('referenceName', $this->refValue);
+        $this->assertEquals($this->yamlObject->getReference('referenceName'), $this->refValue);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::getReference
+     */
+    public function testGetReference(): void
+    {
+        $this->assertEquals($this->yamlObject->getAllReferences(), []);
+        $this->yamlObject->addReference('referenceName', $this->refValue);
+        $this->assertEquals($this->yamlObject->getReference('referenceName'), $this->refValue);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::getAllReferences
+     */
+    public function testGetAllReferences(): void
+    {
+        $this->assertEquals($this->yamlObject->getAllReferences(), []);
+        $this->yamlObject->addReference('referenceName', $this->refValue);
+        $this->assertEquals($this->yamlObject->getAllReferences(), ['referenceName' => $this->refValue]);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::addComment
+     */
+    public function testAddComment(): void
+    {
+        $this->assertEquals($this->yamlObject->getComment(), []);
+        $this->yamlObject->addComment(20, $this->commentValue);
+        $this->assertEquals($this->yamlObject->getComment(20), $this->commentValue);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::getComment
+     * @depends testAddComment
+     */
+    public function testGetComment(): void
+    {
+        $this->assertEquals($this->yamlObject->getComment(), []);
+        $this->yamlObject->addComment(20, $this->commentValue);
+        $this->assertEquals($this->yamlObject->getComment(20), $this->commentValue);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::setText
+     */
+    public function testSetText(): void
+    {
+        $container = new ReflectionProperty($this->yamlObject, '__yaml__object__api');
+        $container->setAccessible(true);
+        $this->assertTrue(is_null($container->getValue($this->yamlObject)->value));
+        $txt = '      a  text with leading spaces';
+        $yamlObject = $this->yamlObject->setText($txt);
+        $this->assertTrue($container->getValue($this->yamlObject)->value === ltrim($txt));
+        $this->assertTrue($yamlObject instanceof YamlObject);
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::addTag
+     */
+    public function testAddTag(): void
+    {
+        $this->assertFalse($this->yamlObject->isTagged());
+        $this->yamlObject->addTag('!', 'tag:clarkevans.com,2002');
+        $this->assertTrue($this->yamlObject->isTagged());
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::hasDocStart
+     */
+    public function testHasDocStart(): void
+    {
+        $this->assertFalse($this->yamlObject->hasDocStart());
+        $this->yamlObject->setDocStart(false);
+        $this->assertTrue($this->yamlObject->hasDocStart());
+        $this->yamlObject->setDocStart(true);
+        $this->assertTrue($this->yamlObject->hasDocStart());
+        $this->yamlObject->setDocStart(null);
+        $this->assertFalse($this->yamlObject->hasDocStart());
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::setDocStart
+     */
+    public function testSetDocStart(): void
+    {
+        $this->assertFalse($this->yamlObject->hasDocStart());
+        $this->yamlObject->setDocStart(false);
+        $this->assertTrue($this->yamlObject->hasDocStart());
+        $this->yamlObject->setDocStart(true);
+        $this->assertTrue($this->yamlObject->hasDocStart());
+        $this->yamlObject->setDocStart(null);
+        $this->assertFalse($this->yamlObject->hasDocStart());
+    }
+
+    /**
+     * @covers \Dallgoot\Yaml\YamlObject::isTagged
+     */
+    public function testIsTagged(): void
+    {
+        $this->assertFalse($this->yamlObject->isTagged());
+        $this->yamlObject->addTag('!', 'tag:clarkevans.com,2002');
+        $this->assertTrue($this->yamlObject->isTagged());
     }
 }

@@ -1,4 +1,4 @@
-# Dallgoot : YAML Library for PHP - Beta !!!
+# Dallgoot : YAML library for PHP - Beta !!!
 
 [![Build Status](https://travis-ci.org/dallgoot/yaml.svg?branch=master)](https://travis-ci.org/dallgoot/yaml) [![PHP from Packagist](https://img.shields.io/packagist/php-v/dallgoot/yaml)](https://packagist.org/packages/dallgoot/yaml) [![Packagist](https://img.shields.io/packagist/dt/dallgoot/yaml)](https://packagist.org/packages/dallgoot/yaml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master)
