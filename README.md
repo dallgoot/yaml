@@ -6,6 +6,8 @@
 
 PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
+![Dallgoot/Yaml Library](dallgoot_yaml.png)
+
 ## Installation
 
 - Dependencies are only useful for building documentation or for code contribution, so the "--update-no-dev" prevent from downloading and managing packages that you probably won't use.
