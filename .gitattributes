@@ -2,3 +2,4 @@ configuration/**  export-ignore
 vendor/**  export-ignore
 /.*             export-ignore
 runtests        export-ignore
+dallgoot_yaml.png export-ignore
