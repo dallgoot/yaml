@@ -40,13 +40,16 @@ class DumperHandlers
             return $this->dumpCompact($compound, $indent);
         } else {
             if (is_array($compound)) {
+                if ($compound[0] instanceof YamlObject) {
+                    return $this->dumper->dumpMultiDoc($compound);
+                }
                 $iterator = new \ArrayIterator($compound);
                 $keyMask = '-';
                 $refKeys = range(0, count($compound) - 1);
                 if (array_keys($compound) !== $refKeys) {
                     $keyMask = '%s:';
                 }
-                    return $this->dumper->iteratorToString($iterator, $keyMask, "\n", $indent);
+                return $this->dumper->iteratorToString($iterator, $keyMask, "\n", $indent);
             } elseif (is_object($compound) && !is_callable($compound)) {
                 return $this->dumpObject($compound, $indent);
             }

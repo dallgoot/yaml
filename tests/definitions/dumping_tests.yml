@@ -45,3 +45,13 @@ yamlObject_properties: |-
     memberOfO: some really really really really really really really really really very long text as a simple string
 unicodeString: |-
   str: \u263a
+multidoc_yamlObject: |
+  ---
+  -
+    - 1
+    - 2
+    - 3
+  ---
+  a: 1
+  ---
+  b: 2

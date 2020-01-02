@@ -89,9 +89,11 @@ class Dumper
 
     public function dumpMultiDoc($arrayOfYamlObject)
     {
+        $output = '';
         foreach ($arrayOfYamlObject as $key => $yamlObject) {
-
+            $output .= "---\n".$this->dumpYamlObject($yamlObject)."\n";
         }
+        return $output;
     }
 
     /**
