@@ -1,19 +1,11 @@
 <?php
-namespace Dallgoot\Yaml;
+require_once __DIR__.'/../vendor/autoload.php';
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+use Dallgoot\Yaml;
 
-use Dallgoot;
-
-$fileName = __DIR__ . '/../dummy.yml';
-
-$yamlObject = Yaml::parseFile($fileName, $options = null, $debug = null);
-
-// var_dump($yamlObject);
-// var_dump($yamlObject->object->array['integer']);
-$yamlObject->object->array['integer'] = '"2"';
-
-// var_dump($yamlObject);
-
-$yaml = Yaml::dump($yamlObject, 0);
-var_dump($yaml);
+//loading YAML as YamlObject
+$yamlObject = Yaml::parseFile('./examples/dummy.yml', $options = null, $debug = null);
+//modifying some part
+$yamlObject->object->array[3]->integer = '123456789';
+//dumping the corresponding YAML
+var_dump(Yaml::dump($yamlObject, 0));

@@ -1,21 +1,20 @@
 <?php
-define('PROJECT_ROOT', __DIR__."/../");
-
-require_once PROJECT_ROOT . 'vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
 use Dallgoot\Yaml;
 
-
+//Getting some document as PHP variable $YamlObject
+//the document here is a PHP file used for tests
 $testName = 'yamlObject_properties';
-$yamlObject = (include PROJECT_ROOT . "tests/cases/dumping/$testName.php");
+$yamlObject = (include "tests/cases/dumping/$testName.php");
 
-
+//transform $yamlObject to YAML
 $text = Yaml::dump($yamlObject, 0);
 
+//getting the tests results
+$nameResultPair = get_object_vars(Yaml::parseFile('tests/definitions/dumping_tests.yml'));
 
-$nameResultPair = get_object_vars(/** @scrutinizer ignore-type */ Yaml::parseFile(PROJECT_ROOT . 'tests/definitions/dumping_tests.yml'));
-
-
+//verify that the text(yaml) we got is the same as we expected for this test
 if ($nameResultPair[$testName] === $text) {
     echo 'WRITE OK !!!';
 } else {

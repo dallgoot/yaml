@@ -5,6 +5,8 @@ use \Dallgoot\Yaml;
 
 /**
  * Testing/Debugging Loader
+ *
+ * use as follows : "php examples/testing.php DEBUG_LEVEL YAML_FILENAME"
  */
 const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR;
 

@@ -22,5 +22,5 @@ $yamlContent = <<<EOF
         array:
             - OK
 EOF;
-
-var_dump(Yaml::parse($yamlContent)[1][1]->mapping->somekey->array[0]);
+$second_document = Yaml::parse($yamlContent)[1];
+var_dump($second_document[1]->mapping->somekey->array[0]);
