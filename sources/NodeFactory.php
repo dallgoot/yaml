@@ -52,7 +52,7 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    final private static function onSpecial(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onSpecial(string $first, string $nodeString, int $line):NodeGeneric
     {
         if ($first === "#") {
             return new Nodes\Comment(ltrim($nodeString), $line);
@@ -74,7 +74,7 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    final private static function onQuoted(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onQuoted(string $first, string $nodeString, int $line):NodeGeneric
     {
         return Regex::isProperlyQuoted(trim($nodeString)) ? new Nodes\Quoted($nodeString, $line)
                                                           : new Nodes\Partial($nodeString, $line);
@@ -88,7 +88,7 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    final private static function onSetElement(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onSetElement(string $first, string $nodeString, int $line):NodeGeneric
     {
         return $first === '?' ? new Nodes\SetKey($nodeString, $line)
                               : new Nodes\SetValue($nodeString, $line);
@@ -102,7 +102,7 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    final private static function onCompact(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onCompact(string $first, string $nodeString, int $line):NodeGeneric
     {
         json_decode($nodeString, false, 512, self::JSON_OPTIONS);
         if (json_last_error() === \JSON_ERROR_NONE) {
@@ -135,7 +135,7 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    final private static function onHyphen(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onHyphen(string $first, string $nodeString, int $line):NodeGeneric
     {
         if (substr($nodeString, 0, 3) === '---')              return new Nodes\DocStart($nodeString, $line);
         elseif ((bool) preg_match(Regex::ITEM, ltrim($nodeString)))  return new Nodes\Item($nodeString, $line);
@@ -152,7 +152,7 @@ final class NodeFactory
      *
      *@todo replace $action[0] with $first if applicable
      */
-    final private static function onNodeAction(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onNodeAction(string $first, string $nodeString, int $line):NodeGeneric
     {
         if (!((bool) preg_match(Regex::NODE_ACTIONS, trim($nodeString), $matches))) {
             // var_dump("ACTION is scalar: '$nodeString'");
@@ -165,7 +165,7 @@ final class NodeFactory
         }
     }
 
-    final private static function onLiteral(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onLiteral(string $first, string $nodeString, int $line):NodeGeneric
     {
         switch ($first) {
             case '>': return new Nodes\LiteralFolded($nodeString, $line);
