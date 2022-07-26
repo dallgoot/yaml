@@ -187,7 +187,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      *
      * @return mixed Array (of object properties or keys) OR string if YAML object only contains LITTERAL (in self::value)
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         $prop = get_object_vars($this);
         unset($prop["__yaml__object__api"]);
