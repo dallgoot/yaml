@@ -69,7 +69,7 @@ class NodeList extends \SplDoublyLinkedList
         return false;
     }
 
-    public function push($node)
+    public function push($node): void
     {
         $type = null;
         if ($node instanceof Item ) {
