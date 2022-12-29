@@ -1,7 +1,7 @@
 <?php
+
 namespace Dallgoot\Yaml\Tag;
 
-use Dallgoot\Yaml\Nodes\NodeGeneric;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Nodes;
 
@@ -40,8 +40,9 @@ class SymfonySchema implements SchemaInterface
         }
     }
 
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         //TODO : handle 'php/object'
-        throw new \Exception("no handler for tag '$name' in ".self::class, 1);
+        throw new \Exception("no handler for tag '$name' in " . self::class, 1);
     }
 }

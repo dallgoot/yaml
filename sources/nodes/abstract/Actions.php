@@ -1,6 +1,6 @@
 <?php
 
-namespace Dallgoot\Yaml\Nodes;
+namespace Dallgoot\Yaml\Nodes\Generic;
 
 use Dallgoot\Yaml\NodeFactory;
 

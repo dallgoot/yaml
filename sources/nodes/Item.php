@@ -2,6 +2,7 @@
 
 namespace Dallgoot\Yaml\Nodes;
 
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\Regex;
 use Dallgoot\Yaml\YamlObject;
@@ -26,23 +27,23 @@ class Item extends NodeGeneric
         }
     }
 
-    public function add(NodeGeneric $child):NodeGeneric
+    public function add(NodeGeneric $child): NodeGeneric
     {
         $value = $this->value;
         if ($value instanceof Key && $child instanceof Key) {
             if ($value->indent === $child->indent) {
                 return parent::add($child);
-            } elseif ($value->isAwaitingChild($child)){
+            } elseif ($value->isAwaitingChild($child)) {
                 return $value->add($child);
             } else {
                 // throw new \ParseError('key ('.$value->identifier.')@'.$value->line.' has already a value', 1);
-                throw new \ParseError('key @'.$value->line.' has already a value', 1);
+                throw new \ParseError('key @' . $value->line . ' has already a value', 1);
             }
         }
         return parent::add($child);
     }
 
-    public function getTargetOnEqualIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnEqualIndent(NodeGeneric &$node): NodeGeneric
     {
         $supposedParent = $this->getParent();
         if ($node->indent === $supposedParent->indent) {
@@ -51,7 +52,7 @@ class Item extends NodeGeneric
         return $supposedParent;
     }
 
-    public function getTargetOnMoreIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnMoreIndent(NodeGeneric &$node): NodeGeneric
     {
         return $this->value instanceof NodeGeneric && $this->value->isAwaitingChild($node) ? $this->value : $this;
     }
@@ -67,7 +68,7 @@ class Item extends NodeGeneric
     public function build(&$parent = null)
     {
         if (!is_null($parent) && !is_array($parent) && !($parent instanceof YamlObject)) {
-            throw new \Exception("parent must be an array or YamlObject not ".
+            throw new \Exception("parent must be an array or YamlObject not " .
                 (is_object($parent) ? get_class($parent) : gettype($parent)));
         }
         $value = $this->value ? $this->value->build() : null;
@@ -82,7 +83,7 @@ class Item extends NodeGeneric
         }
     }
 
-    public function isAwaitingChild(NodeGeneric $node):bool
+    public function isAwaitingChild(NodeGeneric $node): bool
     {
         if (is_null($this->value)) {
             return true;

@@ -2,6 +2,8 @@
 
 namespace Dallgoot\Yaml\Nodes;
 
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
+
 /**
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
@@ -10,16 +12,16 @@ namespace Dallgoot\Yaml\Nodes;
  */
 class Blank extends NodeGeneric
 {
-    public function add(NodeGeneric $child):NodeGeneric
+    public function add(NodeGeneric $child): NodeGeneric
     {
-        if($this->_parent instanceof NodeGeneric) {
+        if ($this->_parent instanceof NodeGeneric) {
             return $this->_parent->add($child);
         } else {
-            throw new \ParseError(__METHOD__." no parent to add to", 1);
+            throw new \ParseError(__METHOD__ . " no parent to add to", 1);
         }
     }
 
-    public function specialProcess(NodeGeneric &$previous, array &$emptyLines):bool
+    public function specialProcess(NodeGeneric &$previous, array &$emptyLines): bool
     {
         $deepest = $previous->getDeepestNode();
         if ($previous instanceof Scalar) {
@@ -35,12 +37,12 @@ class Blank extends NodeGeneric
         return "\n";
     }
 
-    public function getTargetOnEqualIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnEqualIndent(NodeGeneric &$node): NodeGeneric
     {
         return $this->getParent($node->indent);
     }
 
-    public function getTargetOnMoreIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnMoreIndent(NodeGeneric &$node): NodeGeneric
     {
         return $this->getParent($node->indent);
     }

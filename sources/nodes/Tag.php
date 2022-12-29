@@ -6,6 +6,8 @@ use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\TagFactory;
 use Dallgoot\Yaml\Tagged;
 use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Generic\Actions;
 
 /**
  *
@@ -17,12 +19,12 @@ use Dallgoot\Yaml\Regex;
 class Tag extends Actions
 {
 
-    public function isAwaitingChild(NodeGeneric $node):bool
+    public function isAwaitingChild(NodeGeneric $node): bool
     {
         return is_null($this->value);
     }
 
-    public function getTargetOnEqualIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnEqualIndent(NodeGeneric &$node): NodeGeneric
     {
         if (is_null($this->value) && $this->indent > 0) {
             return $this;
@@ -51,7 +53,9 @@ class Tag extends Actions
         }
         $value = $this->value;
         if (is_null($parent) && $value instanceof NodeGeneric && $value->isOneOf('Item', 'Key')) {
-            $value = new NodeList(/** @scrutinizer ignore-type */ $value);
+            $value = new NodeList(
+            /** @scrutinizer ignore-type */
+            $value);
         }
         try {
             $transformed = TagFactory::transform((string) $this->tag, $value, $parent);

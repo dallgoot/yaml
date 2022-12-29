@@ -6,6 +6,7 @@ use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Compact;
 use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  *
@@ -18,7 +19,7 @@ class CompactSequence extends NodeGeneric
     public function __construct(string $nodeString, int $line)
     {
         parent::__construct($nodeString, $line);
-        preg_match_all(Regex::SEQUENCE_VALUES, trim(substr(trim($nodeString), 1,-1)), $matches);
+        preg_match_all(Regex::SEQUENCE_VALUES, trim(substr(trim($nodeString), 1, -1)), $matches);
         foreach ($matches['item'] as $key => $item) {
             $i = new Item('', $line);
             $i->indent = null;

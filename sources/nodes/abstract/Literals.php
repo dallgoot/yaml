@@ -1,6 +1,6 @@
 <?php
 
-namespace Dallgoot\Yaml\Nodes;
+namespace Dallgoot\Yaml\Nodes\Generic;
 
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\TagFactory;
@@ -21,7 +21,7 @@ abstract class Literals extends NodeGeneric
     public $tag;
     protected $_parent;
 
-    abstract protected function getFinalString(NodeList $list, int $refIndent = null):string;
+    abstract protected function getFinalString(NodeList $list, int $refIndent = null): string;
 
     public function __construct(string $nodeString, int $line)
     {
@@ -31,7 +31,7 @@ abstract class Literals extends NodeGeneric
         }
     }
 
-    public function add(NodeGeneric $child):NodeGeneric
+    public function add(NodeGeneric $child): NodeGeneric
     {
         if (is_null($this->value)) $this->value = new NodeList();
         $candidate = $child;
@@ -44,7 +44,7 @@ abstract class Literals extends NodeGeneric
     protected static function litteralStripLeading(NodeList &$list)
     {
         $list->rewind();
-        while (!$list->isEmpty() && $list->bottom() instanceof Blank) {//remove leading blank
+        while (!$list->isEmpty() && $list->bottom() instanceof Blank) { //remove leading blank
             $list->shift();
         }
         $list->rewind();
@@ -53,7 +53,7 @@ abstract class Literals extends NodeGeneric
     protected static function litteralStripTrailing(NodeList &$list)
     {
         $list->rewind();
-        while (!$list->isEmpty() && $list->top() instanceof Blank) {//remove trailing blank
+        while (!$list->isEmpty() && $list->top() instanceof Blank) { //remove trailing blank
             $list->pop();
         }
         $list->rewind();
@@ -77,7 +77,7 @@ abstract class Literals extends NodeGeneric
         }
         if (!is_null($this->value)) {
             $tmp = $this->getFinalString($this->value->filterComment());
-            $result = $this->identifier === '-' ? $tmp : $tmp."\n";
+            $result = $this->identifier === '-' ? $tmp : $tmp . "\n";
         }
         if ($this->_parent instanceof Root) {
             $this->_parent->getYamlObject()->setText($result);
@@ -96,7 +96,7 @@ abstract class Literals extends NodeGeneric
      * @return     string  The child value.
      * @todo       double check behaviour for KEY and ITEM
      */
-    protected function getChildValue($child, $refIndent=0):string
+    protected function getChildValue($child, $refIndent = 0): string
     {
         $value = $child->value;
         $start = '';
@@ -110,14 +110,13 @@ abstract class Literals extends NodeGeneric
             }
         } elseif ($value instanceof Scalar) {
             $value = new NodeList($value);
-
         } elseif ($value instanceof NodeList && !($child instanceof Scalar)) {
-            $start = ltrim($child->raw)."\n";
+            $start = ltrim($child->raw) . "\n";
         }
-        return $start.$this->getFinalString($value, $refIndent);
+        return $start . $this->getFinalString($value, $refIndent);
     }
 
-    public function isAwaitingChild(NodeGeneric $node):bool
+    public function isAwaitingChild(NodeGeneric $node): bool
     {
         return true;
     }

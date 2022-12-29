@@ -7,6 +7,7 @@ use Dallgoot\Yaml\TagFactory;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Regex;
 use Dallgoot\Yaml\Loader;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  *
@@ -23,14 +24,14 @@ class Scalar extends NodeGeneric
         if ($value !== '') {
             $hasComment = strpos($value, ' #');
             if (!is_bool($hasComment)) {
-                    $realValue    = trim(substr($value, 0, $hasComment));
-                    $commentValue = trim(substr($value, $hasComment));
-                    $realNode = NodeFactory::get($realValue, $line);
-                    $realNode->indent = null;
-                    $commentNode = NodeFactory::get($commentValue, $line);
-                    $commentNode->indent = null;
-                    $this->add($realNode);
-                    $this->add($commentNode);
+                $realValue    = trim(substr($value, 0, $hasComment));
+                $commentValue = trim(substr($value, $hasComment));
+                $realNode = NodeFactory::get($realValue, $line);
+                $realNode->indent = null;
+                $commentNode = NodeFactory::get($commentValue, $line);
+                $commentNode->indent = null;
+                $this->add($realNode);
+                $this->add($commentNode);
             }
         }
     }
@@ -47,16 +48,16 @@ class Scalar extends NodeGeneric
         return is_null($this->value) ? $this->getScalar(trim($this->raw)) : $this->value->build();
     }
 
-    public function getTargetOnLessIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnLessIndent(NodeGeneric &$node): NodeGeneric
     {
-        if ($node instanceof Scalar || $node instanceof Blank ) {
+        if ($node instanceof Scalar || $node instanceof Blank) {
             return $this->getParent();
         } else {
             return $this->getParent($node->indent);
         }
     }
 
-    public function getTargetOnMoreIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnMoreIndent(NodeGeneric &$node): NodeGeneric
     {
         return $this->getParent();
     }
@@ -98,36 +99,37 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
  */
         if (Regex::isDate($v))   return ($this->getRoot()->getYamlObject()->getOptions() & Loader::NO_OBJECT_FOR_DATE) && !$onlyScalar ? date_create($v) : $v;
         if (Regex::isNumber($v)) return $this->getNumber($v);
-        $types = ['yes'   => true,
-                  'no'    => false,
-                  'true'  => true,
-                  'false' => false,
-                  'null'  => null,
-                  '.inf'  => \INF,
-                  '-.inf' => -\INF,
-                  '.nan'  => \NAN
+        $types = [
+            'yes'   => true,
+            'no'    => false,
+            'true'  => true,
+            'false' => false,
+            'null'  => null,
+            '.inf'  => \INF,
+            '-.inf' => -\INF,
+            '.nan'  => \NAN
         ];
         return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $this->replaceSequences($v);
     }
 
-    public function replaceSequences($value='')
+    public function replaceSequences($value = '')
     {
-      $replaceUnicodeSeq = function ($matches) {
-            return json_decode('"'.$matches[1].'"');
-      };
-      $replaceNonPrintable = function ($matches) {
+        $replaceUnicodeSeq = function ($matches) {
+            return json_decode('"' . $matches[1] . '"');
+        };
+        $replaceNonPrintable = function ($matches) {
             // var_dump($matches[1]);
-        return $matches[1]."";
-      };
-// preg_match( "/[^\x{06F0}-\x{06F9}\x]+/u" , '۱۲۳۴۵۶۷۸۹۰' );
-      return preg_replace_callback_array(
-          [
-              '/((?<![\\\\])\\\\x[0-9a-f]{2})/i' => $replaceUnicodeSeq,
-              '/((?<![\\\\])\\\\u[0-9a-f]{4,})/i' => $replaceUnicodeSeq,
-              '/(\\\\b|\\\\n|\\\\t|\\\\r)/' => $replaceNonPrintable
-          ],
-          $value
-      );
+            return $matches[1] . "";
+        };
+        // preg_match( "/[^\x{06F0}-\x{06F9}\x]+/u" , '۱۲۳۴۵۶۷۸۹۰' );
+        return preg_replace_callback_array(
+            [
+                '/((?<![\\\\])\\\\x[0-9a-f]{2})/i' => $replaceUnicodeSeq,
+                '/((?<![\\\\])\\\\u[0-9a-f]{4,})/i' => $replaceUnicodeSeq,
+                '/(\\\\b|\\\\n|\\\\t|\\\\r)/' => $replaceNonPrintable
+            ],
+            $value
+        );
     }
 
 
@@ -145,5 +147,4 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
         if ((bool) preg_match(Regex::HEX_NUM, $v))   return intval(base_convert($v, 16, 10));
         return is_bool(strpos($v, '.')) || substr_count($v, '.') > 1 ? intval($v) : floatval($v);
     }
-
 }

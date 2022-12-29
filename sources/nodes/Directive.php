@@ -4,7 +4,8 @@ namespace Dallgoot\Yaml\Nodes;
 
 use Dallgoot\Yaml;
 use Dallgoot\Yaml\Regex;
-use Dallgoot\Yaml\TagFactory;
+use Dallgoot\Yaml\Tag\TagFactory;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  *
@@ -15,8 +16,8 @@ use Dallgoot\Yaml\TagFactory;
 class Directive extends NodeGeneric
 {
     private const ERROR_BUILDING = "Error : can not build Directive";
-    private const WARNING_LOWER_VERSION  = "The declared version '%s' is obsolete, there may be features that are deprecated and therefore not handled, minimum supported is: ".Yaml::VERSION_SUPPORT;
-    private const WARNING_HIGHER_VERSION = "The declared version '%s' is not yet supported, minimum supported is: ".Yaml::VERSION_SUPPORT;
+    private const WARNING_LOWER_VERSION  = "The declared version '%s' is obsolete, there may be features that are deprecated and therefore not handled, minimum supported is: " . Yaml::VERSION_SUPPORT;
+    private const WARNING_HIGHER_VERSION = "The declared version '%s' is not yet supported, minimum supported is: " . Yaml::VERSION_SUPPORT;
 
     /**
      * Builds a Directive : update YamlObject if applicable.
@@ -52,7 +53,7 @@ class Directive extends NodeGeneric
         return null;
     }
 
-    public function add(NodeGeneric $child):NodeGeneric
+    public function add(NodeGeneric $child): NodeGeneric
     {
         return $child;
     }

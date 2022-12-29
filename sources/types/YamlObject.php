@@ -1,5 +1,6 @@
 <?php
-namespace Dallgoot\Yaml;
+
+namespace Dallgoot\Yaml\Types;
 
 /**
  *  The returned object representing a YAML document
@@ -13,7 +14,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
     /** @var YamlProperties */
     private $__yaml__object__api;
 
-    const UNDEFINED_METHOD = self::class.": undefined method '%s', valid methods are (addReference,getReference,getAllReferences,addComment,getComment,setText,addTag,hasDocStart,isTagged)";
+    const UNDEFINED_METHOD = self::class . ": undefined method '%s', valid methods are (addReference,getReference,getAllReferences,addComment,getComment,setText,addTag,hasDocStart,isTagged)";
     const UNKNOWN_REFERENCE = "no reference named: '%s', known are : (%s)";
     const UNAMED_REFERENCE  = "reference MUST have a name";
     const TAGHANDLE_DUPLICATE = "Tag handle '%s' already declared before, handle must be unique";
@@ -35,7 +36,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      *
      * @return string String representation of the object.
      */
-    public function __toString():string
+    public function __toString(): string
     {
         return $this->__yaml__object__api->value ?? serialize($this);
     }
@@ -76,9 +77,13 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         if (array_key_exists($name, $this->__yaml__object__api->_anchors)) {
             return $this->__yaml__object__api->_anchors[$name];
         }
-        throw new \UnexpectedValueException(sprintf(self::UNKNOWN_REFERENCE,
-                                                    $name, implode(',',array_keys($this->__yaml__object__api->_anchors)))
-                                                );
+        throw new \UnexpectedValueException(
+            sprintf(
+                self::UNKNOWN_REFERENCE,
+                $name,
+                implode(',', array_keys($this->__yaml__object__api->_anchors))
+            )
+        );
     }
 
     /**
@@ -86,7 +91,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      *
      * @return array
      */
-    public function getAllReferences():array
+    public function getAllReferences(): array
     {
         return $this->__yaml__object__api->_anchors;
     }
@@ -126,7 +131,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      *
      * @return YamlObject
      */
-    public function setText(string $value):YamlObject
+    public function setText(string $value): YamlObject
     {
         $this->__yaml__object__api->value .= ltrim($value);
         return $this;
@@ -155,7 +160,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      *
      * @return boolean  True if document has start, False otherwise.
      */
-    public function hasDocStart():bool
+    public function hasDocStart(): bool
     {
         return is_bool($this->__yaml__object__api->_hasDocStart);
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Dallgoot\Yaml;
+namespace Dallgoot\Yaml\Types;
 
 /**
  * This a type that encapsulates a mapping or sequence that are declared as compact/hosrt notation
@@ -20,7 +20,9 @@ class Compact extends \ArrayIterator implements \JsonSerializable
     {
         $candidate = $candidate ?? [];
         //ArrayIterator options --> Array indices can be accessed as properties in read/write.
-        parent::__construct(/** @scrutinizer ignore-type */ $candidate, \ArrayIterator::STD_PROP_LIST|\ArrayIterator::ARRAY_AS_PROPS);
+        parent::__construct(
+        /** @scrutinizer ignore-type */
+        $candidate, \ArrayIterator::STD_PROP_LIST | \ArrayIterator::ARRAY_AS_PROPS);
     }
 
     /**
@@ -28,7 +30,7 @@ class Compact extends \ArrayIterator implements \JsonSerializable
      *
      * @return array
      */
-    public function jsonSerialize():array
+    public function jsonSerialize(): array
     {
         $prop = get_object_vars($this);
         return count($prop) > 0 ? $prop : iterator_to_array($this);

@@ -2,6 +2,7 @@
 
 namespace Dallgoot\Yaml\Nodes;
 
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\Regex;
 
@@ -13,7 +14,7 @@ use Dallgoot\Yaml\Regex;
  */
 class Key extends NodeGeneric
 {
-    const ERROR_NO_KEYNAME = self::class.": key has NO IDENTIFIER on line %d";
+    const ERROR_NO_KEYNAME = self::class . ": key has NO IDENTIFIER on line %d";
 
     public function __construct(string $nodeString, int $line, array $matches = null)
     {
@@ -36,7 +37,7 @@ class Key extends NodeGeneric
     public function setIdentifier(string $keyString)
     {
         if ($keyString === '') {
-           throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $this->line));
+            throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $this->line));
         } else {
             $node = NodeFactory::get($keyString);
             if ($node->isOneOf('Tag', 'Quoted')) {
@@ -52,16 +53,16 @@ class Key extends NodeGeneric
         }
     }
 
-    public function add(NodeGeneric $child):NodeGeneric
+    public function add(NodeGeneric $child): NodeGeneric
     {
-        if ($this->value instanceof NodeGeneric && $this->value->isOneOf('Literal','LiteralFolded', 'Anchor')) {
+        if ($this->value instanceof NodeGeneric && $this->value->isOneOf('Literal', 'LiteralFolded', 'Anchor')) {
             return $this->value->add($child);
         } else {
             return parent::add($child);
         }
     }
 
-    public function getTargetOnEqualIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnEqualIndent(NodeGeneric &$node): NodeGeneric
     {
         if ($node instanceof Item) {
             return $this;
@@ -69,7 +70,7 @@ class Key extends NodeGeneric
         return $this->getParent();
     }
 
-    public function getTargetOnMoreIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnMoreIndent(NodeGeneric &$node): NodeGeneric
     {
         if (!is_null($this->value)) {
             if ($this->getDeepestNode()->isAwaitingChild($node)) {
@@ -80,11 +81,11 @@ class Key extends NodeGeneric
     }
 
 
-    public function isAwaitingChild(NodeGeneric $node):bool
+    public function isAwaitingChild(NodeGeneric $node): bool
     {
         if (is_null($this->value) || $node instanceof Comment) {
             return true;
-        } elseif($this->value instanceof NodeGeneric) {
+        } elseif ($this->value instanceof NodeGeneric) {
             $current = $this->value;
         } else {
             $current = $this->value->current();

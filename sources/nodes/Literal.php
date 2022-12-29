@@ -3,6 +3,7 @@
 namespace Dallgoot\Yaml\Nodes;
 
 use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\Nodes\Generic\Literals;
 
 /**
  *
@@ -12,12 +13,12 @@ use Dallgoot\Yaml\NodeList;
  */
 class Literal extends Literals
 {
-    public function getFinalString(NodeList $list, int $refIndent = null):string
+    public function getFinalString(NodeList $list, int $refIndent = null): string
     {
         $result = '';
         $list = $list->filterComment();
         if ($this->identifier !== '+') {
-             self::litteralStripTrailing($list);
+            self::litteralStripTrailing($list);
         }
         if ($list->count()) {
             $list->setIteratorMode(NodeList::IT_MODE_DELETE);
@@ -28,7 +29,7 @@ class Literal extends Literals
                 $value = "\n";
                 if (!($child instanceof Blank)) {
                     $newIndent = $indent > 0 ? $child->indent - $indent : 0;
-                    $value .= str_repeat(' ', $newIndent).$this->getChildValue($child, $indent);
+                    $value .= str_repeat(' ', $newIndent) . $this->getChildValue($child, $indent);
                 }
                 $result .= $value;
             }

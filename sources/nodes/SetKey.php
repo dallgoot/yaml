@@ -4,6 +4,7 @@ namespace Dallgoot\Yaml\Nodes;
 
 use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  *
@@ -32,14 +33,14 @@ class SetKey extends NodeGeneric
     public function build(&$parent = null)
     {
         $built = is_null($this->value) ? null : $this->value->build();
-        $stringKey = is_string($built) && Regex::isProperlyQuoted($built) ? trim($built, '\'" '): $built;
-        $key = json_encode($stringKey, JSON_PARTIAL_OUTPUT_ON_ERROR|JSON_UNESCAPED_SLASHES);
-        if (empty($key)) throw new \Exception("Cant serialize complex key: ".var_export($this->value, true));
+        $stringKey = is_string($built) && Regex::isProperlyQuoted($built) ? trim($built, '\'" ') : $built;
+        $key = json_encode($stringKey, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_SLASHES);
+        if (empty($key)) throw new \Exception("Cant serialize complex key: " . var_export($this->value, true));
         $parent->{trim($key, '\'" ')} = null;
         return null;
     }
 
-    public function isAwaitingChild(NodeGeneric $child):bool
+    public function isAwaitingChild(NodeGeneric $child): bool
     {
         return is_null($this->value);
     }

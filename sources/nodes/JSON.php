@@ -2,6 +2,8 @@
 
 namespace Dallgoot\Yaml\Nodes;
 
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
+
 /**
  *
  * @author  Stéphane Rebai <stephane.rebai@gmail.com>
@@ -10,7 +12,7 @@ namespace Dallgoot\Yaml\Nodes;
  */
 class JSON extends NodeGeneric
 {
-    private const JSON_OPTIONS = \JSON_PARTIAL_OUTPUT_ON_ERROR|\JSON_UNESCAPED_SLASHES;
+    private const JSON_OPTIONS = \JSON_PARTIAL_OUTPUT_ON_ERROR | \JSON_UNESCAPED_SLASHES;
 
     public function build(&$parent = null)
     {

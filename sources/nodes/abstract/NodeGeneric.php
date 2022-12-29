@@ -1,8 +1,11 @@
 <?php
 
-namespace Dallgoot\Yaml\Nodes;
+namespace Dallgoot\Yaml\Nodes\Generic;
 
 use Dallgoot\Yaml\NodeList;
+use Dallgoot\Yaml\Nodes\Root;
+use Dallgoot\Yaml\Nodes\Item;
+use Dallgoot\Yaml\Nodes\Key;
 
 /**
  * An abstract type for all Nodes that defines generic behaviour
@@ -56,7 +59,7 @@ abstract class NodeGeneric
      *
      * @return NodeGeneric The currentNode
      */
-    protected function setParent($node):NodeGeneric
+    protected function setParent($node): NodeGeneric
     {
         $this->_parent = $node;
         return $this;
@@ -69,19 +72,21 @@ abstract class NodeGeneric
      *
      * @return NodeGeneric   The parent.
      */
-    public function getParent(int $indent = null):NodeGeneric
+    public function getParent(int $indent = null): NodeGeneric
     {
-        if (!is_int($indent)){
+        if (!is_int($indent)) {
             if ($this->_parent instanceof NodeGeneric) {
                 return $this->_parent;
             } else {
-                throw new \Exception("Cannnot find a parent for ".get_class($this), 1);
+                throw new \Exception("Cannnot find a parent for " . get_class($this), 1);
             }
         }
         $cursor = $this->getParent();
-        while (!($cursor instanceof Root)
-                && (is_null($cursor->indent)
-                || $cursor->indent >= $indent)) {
+        while (
+            !($cursor instanceof Root)
+            && (is_null($cursor->indent)
+                || $cursor->indent >= $indent)
+        ) {
             if ($cursor->_parent) {
                 $cursor = $cursor->_parent;
             } else {
@@ -98,17 +103,17 @@ abstract class NodeGeneric
      *
      * @return     Root   The root node.
      */
-    protected function getRoot():Root
+    protected function getRoot(): Root
     {
         if (is_null($this->_parent)) {
-            throw new \Exception(__METHOD__.": can only be used when Node has a parent set", 1);
+            throw new \Exception(__METHOD__ . ": can only be used when Node has a parent set", 1);
         }
         $pointer = $this;
         do {
             if ($pointer->_parent instanceof NodeGeneric) {
                 $pointer = $pointer->_parent;
             } else {
-                throw new \Exception("Node has no _parent set : ".get_class($pointer), 1);
+                throw new \Exception("Node has no _parent set : " . get_class($pointer), 1);
             }
         } while (!($pointer instanceof Root));
         return $pointer;
@@ -124,7 +129,7 @@ abstract class NodeGeneric
      *
      * @return NodeGeneric
      */
-    public function add(NodeGeneric $child):NodeGeneric
+    public function add(NodeGeneric $child): NodeGeneric
     {
         $child->setParent($this);
         if (is_null($this->value)) {
@@ -143,7 +148,7 @@ abstract class NodeGeneric
      *
      * @return NodeGeneric  The deepest node.
      */
-    public function getDeepestNode():NodeGeneric
+    public function getDeepestNode(): NodeGeneric
     {
         $cursor = $this;
         while ($cursor->value instanceof NodeGeneric) {
@@ -152,19 +157,23 @@ abstract class NodeGeneric
         return $cursor;
     }
 
-    public function specialProcess(/** @scrutinizer ignore-unused */ NodeGeneric &$previous, /** @scrutinizer ignore-unused */ array &$emptyLines):bool
-    {
+    public function specialProcess(
+        /** @scrutinizer ignore-unused */
+        NodeGeneric &$previous,
+        /** @scrutinizer ignore-unused */
+        array &$emptyLines
+    ): bool {
         return false;
     }
 
-   /**
+    /**
      * Find parent target when current Node indentation is lesser than previous node indentation
      *
      * @param NodeGeneric $node
      *
      * @return NodeGeneric|Key
      */
-    public function getTargetOnLessIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnLessIndent(NodeGeneric &$node): NodeGeneric
     {
         $supposedParent = $this->getParent($node->indent);
         if ($node instanceof Item && $supposedParent instanceof Root) {
@@ -189,24 +198,24 @@ abstract class NodeGeneric
      *
      * @return NodeGeneric
      */
-    public function getTargetOnEqualIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnEqualIndent(NodeGeneric &$node): NodeGeneric
     {
         return $this->getParent();
     }
 
-   /**
+    /**
      * Find parent target when current Node indentation is superior than previous node indentation
      *
      * @param NodeGeneric $node
      *
      * @return NodeGeneric
      */
-    public function getTargetOnMoreIndent(NodeGeneric &$node):NodeGeneric
+    public function getTargetOnMoreIndent(NodeGeneric &$node): NodeGeneric
     {
         return $this->isAwaitingChild($node) ? $this : $this->getParent();
     }
 
-    protected function isAwaitingChild(NodeGeneric $node):bool
+    protected function isAwaitingChild(NodeGeneric $node): bool
     {
         return false;
     }
@@ -227,10 +236,10 @@ abstract class NodeGeneric
      *
      * @return     boolean  True if $subject is one of $comparison, False otherwise.
      */
-    public function isOneOf(...$classNameList):bool
+    public function isOneOf(...$classNameList): bool
     {
         foreach ($classNameList as $className) {
-            $fqn = __NAMESPACE__."\\$className";
+            $fqn = __NAMESPACE__ . "\\$className";
             if ($this instanceof $fqn) return true;
         }
         return false;
@@ -241,7 +250,7 @@ abstract class NodeGeneric
      *
      * @return array  the Node properties and respective values displayed by 'var_dump'
      */
-    public function __debugInfo():array
+    public function __debugInfo(): array
     {
         $props = [];
         $props['line->indent'] = "$this->line -> $this->indent";

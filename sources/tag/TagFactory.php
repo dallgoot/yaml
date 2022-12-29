@@ -1,5 +1,6 @@
 <?php
-namespace Dallgoot\Yaml;
+
+namespace Dallgoot\Yaml\Tag;
 
 use Dallgoot\Yaml\Nodes\NodeGeneric;
 use Dallgoot\Yaml\Tag\CoreSchema;
@@ -79,8 +80,8 @@ Verbatim Tags
 
     public static function registerSchema($URI, Tag\SchemaInterface $schemaObject)
     {
-        self::$schemas[$URI] = $schemaObject
-;    }
+        self::$schemas[$URI] = $schemaObject;
+    }
 
     public static function registerHandle(string $handle, string $prefixOrURI)
     {
@@ -106,17 +107,19 @@ Verbatim Tags
         if (count(self::$schemas) === 0) {
             self::createCoreSchema();
         }
-        if (!($value instanceof NodeGeneric) && !($value instanceof NodeList) ) {
-              throw new \Exception(sprintf(self::WRONG_VALUE, $identifier, gettype($value)));
+        if (!($value instanceof NodeGeneric) && !($value instanceof NodeList)) {
+            throw new \Exception(sprintf(self::WRONG_VALUE, $identifier, gettype($value)));
         } else {
             // try {
-                if (!preg_match(Regex::TAG_PARTS, $identifier, $matches)) {
-                    throw new \UnexpectedValueException("Tag '$identifier' is invalid", 1);
-                }
-                return self::runHandler($matches['handle'],
-                                          $matches['tagname'],
-                                          $value,
-                                          $parent);
+            if (!preg_match(Regex::TAG_PARTS, $identifier, $matches)) {
+                throw new \UnexpectedValueException("Tag '$identifier' is invalid", 1);
+            }
+            return self::runHandler(
+                $matches['handle'],
+                $matches['tagname'],
+                $value,
+                $parent
+            );
             // } catch (\UnexpectedValueException $e) {
             //     return new Tagged($identifier, is_null($value) ? null : $value->build($parent));
             // } catch (\Throwable $e) {
@@ -138,5 +141,4 @@ Verbatim Tags
         }
         throw new \UnexpectedValueException("Error Processing tag '$tagname' : in $handle", 1);
     }
-
 }

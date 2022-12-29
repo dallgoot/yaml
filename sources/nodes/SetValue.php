@@ -3,6 +3,7 @@
 namespace Dallgoot\Yaml\Nodes;
 
 use Dallgoot\Yaml\NodeFactory;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  *
@@ -32,11 +33,11 @@ class SetValue extends NodeGeneric
     {
         $prop = array_keys(get_object_vars($parent));
         $key = end($prop);
-        $parent->{$key} = is_null($this->value) ? null: $this->value->build();
+        $parent->{$key} = is_null($this->value) ? null : $this->value->build();
         return null;
     }
 
-    public function isAwaitingChild(NodeGeneric $node):bool
+    public function isAwaitingChild(NodeGeneric $node): bool
     {
         return is_null($this->value) || $this->getDeepestNode()->isAwaitingChild($node);
     }

@@ -2,8 +2,6 @@
 
 namespace Dallgoot\Yaml;
 
-use Dallgoot\Yaml\Nodes\NodeGeneric;
-use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Nodes\Root;
 use Dallgoot\Yaml\Nodes\DocEnd;
 use Dallgoot\Yaml\Nodes\DocStart;
@@ -15,7 +13,7 @@ use Dallgoot\Yaml\Nodes\DocStart;
  * @license Apache 2.0
  * @link    https://github.com/dallgoot/yaml
  */
-final class Builder
+class Builder
 {
     /** @var boolean */
     public $dateAsObject = false;
@@ -70,7 +68,7 @@ final class Builder
      *
      * @return YamlObject the YAML document as an object
      */
-    public function buildDocument(NodeList &$list, int $docNum):YamlObject
+    public function buildDocument(NodeList &$list, int $docNum): YamlObject
     {
         $yamlObject = new YamlObject($this->_options);
         $rootNode   = new Root();
@@ -85,7 +83,7 @@ final class Builder
             }
             return $rootNode->build($yamlObject);
         } catch (\Throwable $e) {
-            throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum).':'.$e->getMessage(), 2, $e);
+            throw new \ParseError(sprintf(self::INVALID_DOCUMENT, $docNum) . ':' . $e->getMessage(), 2, $e);
         }
     }
 
@@ -105,6 +103,4 @@ final class Builder
             $buffer->push($child);
         }
     }
-
-
 }

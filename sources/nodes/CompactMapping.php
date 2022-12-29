@@ -6,6 +6,7 @@ use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Compact;
 use Dallgoot\Yaml\Regex;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  *
@@ -18,9 +19,9 @@ class CompactMapping extends NodeGeneric
     public function __construct(string $nodeString, int $line)
     {
         parent::__construct($nodeString, $line);
-        preg_match_all(Regex::MAPPING_VALUES, trim(substr(trim($nodeString), 1,-1)), $matches);
+        preg_match_all(Regex::MAPPING_VALUES, trim(substr(trim($nodeString), 1, -1)), $matches);
         foreach ($matches['k'] as $index => $property) {
-            $pair = $property.': '.trim($matches['v'][$index]);
+            $pair = $property . ': ' . trim($matches['v'][$index]);
             $child = NodeFactory::get($pair, $line);
             $child->indent = null;
             $this->add($child);

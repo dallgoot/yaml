@@ -8,7 +8,7 @@ namespace Dallgoot\Yaml\Nodes;
  * @license Apache 2.0
  * @link    https://github.com/dallgoot/yaml
  */
-class Anchor extends Actions
+class Anchor extends Generic\Actions
 {
     public function &build(&$parent = null)
     {
@@ -18,7 +18,7 @@ class Anchor extends Actions
             try {
                 return $yamlObject->getReference($name);
             } catch (\Throwable $e) {
-                throw new \ParseError("Unknown anchor : '$name' this:".$this->anchor,1,$e);
+                throw new \ParseError("Unknown anchor : '$name' this:" . $this->anchor, 1, $e);
             }
         } else {
             $built = is_null($this->value) ? null : $this->value->build($parent);
@@ -26,7 +26,7 @@ class Anchor extends Actions
         }
     }
 
-    public function isAwaitingChild(NodeGeneric $node):bool
+    public function isAwaitingChild(Generic\NodeGeneric $node): bool
     {
         return is_null($this->value);
     }

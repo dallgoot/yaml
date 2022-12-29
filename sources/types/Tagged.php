@@ -1,5 +1,6 @@
 <?php
-namespace Dallgoot\Yaml;
+
+namespace Dallgoot\Yaml\Types;
 
 // use \ReflectionMethod as RM;
 
@@ -40,7 +41,7 @@ final class Tagged
      */
     // private function checkNameValidity(string $providedName)
     // {
-        /* TODO  implement and throw Exception if invalid (setName method ???)
+    /* TODO  implement and throw Exception if invalid (setName method ???)
          *The suffix must not contain any “!” character. This would cause the tag shorthand to be interpreted as having a named tag handle. In addition, the suffix must not contain the “[”, “]”, “{”, “}” and “,” characters. These characters would cause ambiguity with flow collection structures. If the suffix needs to specify any of the above restricted characters, they must be escaped using the “%” character. This behavior is consistent with the URI character escaping rules (specifically, section 2.3 of RFC2396).
 
          regex (([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?

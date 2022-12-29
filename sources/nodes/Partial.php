@@ -3,6 +3,7 @@
 namespace Dallgoot\Yaml\Nodes;
 
 use Dallgoot\Yaml\NodeFactory;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  *
@@ -20,7 +21,7 @@ class Partial extends NodeGeneric
      *
      * @return     boolean  true to skip normal Loader process, false to continue
      */
-    public function specialProcess(NodeGeneric &$current, array &$emptyLines):bool
+    public function specialProcess(NodeGeneric &$current, array &$emptyLines): bool
     {
         $parent = $this->getParent();
         $addValue = ltrim($current->raw);
@@ -32,7 +33,7 @@ class Partial extends NodeGeneric
             $addValue = "\n";
             $separator = '';
         }
-        $node = NodeFactory::get($this->raw.$separator.$addValue, $this->line);
+        $node = NodeFactory::get($this->raw . $separator . $addValue, $this->line);
         $node->indent = null;
         $parent->value = null;
         $parent->add($node);

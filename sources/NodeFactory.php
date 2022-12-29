@@ -4,7 +4,7 @@ namespace Dallgoot\Yaml;
 
 use Dallgoot\Yaml\Nodes;
 use Dallgoot\Yaml\Regex;
-use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  * Analyzes $nodeString
@@ -18,9 +18,9 @@ use Dallgoot\Yaml\Nodes\NodeGeneric;
  */
 final class NodeFactory
 {
-    private const JSON_OPTIONS = \JSON_PARTIAL_OUTPUT_ON_ERROR|\JSON_UNESCAPED_SLASHES;
+    private const JSON_OPTIONS = \JSON_PARTIAL_OUTPUT_ON_ERROR | \JSON_UNESCAPED_SLASHES;
 
-    final public static function get($nodeString = null, $line = 0):NodeGeneric
+    final public static function get($nodeString = null, $line = 0): NodeGeneric
     {
         $trimmed = ltrim($nodeString);
         if ($trimmed === '')                                return new Nodes\Blank($nodeString, $line);
@@ -28,11 +28,11 @@ final class NodeFactory
         elseif ((bool) preg_match(Regex::KEY, $trimmed, $matches)) return new Nodes\Key($nodeString, $line, $matches);
         else {
             $first = $trimmed[0];
-            $stringGroups = ['-',         '>|' ,   '"\'',    "#%" ,    "{[" ,       ":?" ,       '*&!'];
-            $methodGroups = ['Hyphen','Literal','Quoted','Special','Compact','SetElement','NodeAction'];
+            $stringGroups = ['-',         '>|',   '"\'',    "#%",    "{[",       ":?",       '*&!'];
+            $methodGroups = ['Hyphen', 'Literal', 'Quoted', 'Special', 'Compact', 'SetElement', 'NodeAction'];
             foreach ($stringGroups as $groupIndex => $stringRef) {
                 if (is_int(strpos($stringRef, $first))) {
-                    $methodName = 'on'.$methodGroups[$groupIndex];
+                    $methodName = 'on' . $methodGroups[$groupIndex];
                     try {
                         return self::$methodName($first, $nodeString, $line);
                     } catch (\Throwable $e) {
@@ -52,13 +52,15 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    private static function onSpecial(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onSpecial(string $first, string $nodeString, int $line): NodeGeneric
     {
         if ($first === "#") {
             return new Nodes\Comment(ltrim($nodeString), $line);
         } else {
-            if (preg_match(Regex::DIRECTIVE_TAG, $nodeString)
-                || preg_match(Regex::DIRECTIVE_VERSION, $nodeString)) {
+            if (
+                preg_match(Regex::DIRECTIVE_TAG, $nodeString)
+                || preg_match(Regex::DIRECTIVE_VERSION, $nodeString)
+            ) {
                 return new Nodes\Directive(ltrim($nodeString), $line);
             } else {
                 throw new \ParseError("Invalid/Unknown Directive", 1);
@@ -74,10 +76,10 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    private static function onQuoted(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onQuoted(string $first, string $nodeString, int $line): NodeGeneric
     {
         return Regex::isProperlyQuoted(trim($nodeString)) ? new Nodes\Quoted($nodeString, $line)
-                                                          : new Nodes\Partial($nodeString, $line);
+            : new Nodes\Partial($nodeString, $line);
     }
 
     /**
@@ -88,10 +90,10 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    private static function onSetElement(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onSetElement(string $first, string $nodeString, int $line): NodeGeneric
     {
         return $first === '?' ? new Nodes\SetKey($nodeString, $line)
-                              : new Nodes\SetValue($nodeString, $line);
+            : new Nodes\SetValue($nodeString, $line);
     }
 
     /**
@@ -102,7 +104,7 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    private static function onCompact(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onCompact(string $first, string $nodeString, int $line): NodeGeneric
     {
         json_decode($nodeString, false, 512, self::JSON_OPTIONS);
         if (json_last_error() === \JSON_ERROR_NONE) {
@@ -115,7 +117,7 @@ final class NodeFactory
             ini_restore($backtrack_setting);
 
             if (is_bool($isMapping) || is_bool($isSequence)) {
-                throw new \Exception("Regex Error for ".(is_bool($isMapping) ? 'mapping:' :'sequence:').preg_last_error());
+                throw new \Exception("Regex Error for " . (is_bool($isMapping) ? 'mapping:' : 'sequence:') . preg_last_error());
             }
             if ($isMapping) {
                 // var_dump(Regex::MAPPING, trim($nodeString));
@@ -135,7 +137,7 @@ final class NodeFactory
      *
      * @return     NodeGeneric
      */
-    private static function onHyphen(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onHyphen(string $first, string $nodeString, int $line): NodeGeneric
     {
         if (substr($nodeString, 0, 3) === '---')              return new Nodes\DocStart($nodeString, $line);
         elseif ((bool) preg_match(Regex::ITEM, ltrim($nodeString)))  return new Nodes\Item($nodeString, $line);
@@ -152,7 +154,7 @@ final class NodeFactory
      *
      *@todo replace $action[0] with $first if applicable
      */
-    private static function onNodeAction(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onNodeAction(string $first, string $nodeString, int $line): NodeGeneric
     {
         if (!((bool) preg_match(Regex::NODE_ACTIONS, trim($nodeString), $matches))) {
             // var_dump("ACTION is scalar: '$nodeString'");
@@ -165,14 +167,15 @@ final class NodeFactory
         }
     }
 
-    private static function onLiteral(string $first, string $nodeString, int $line):NodeGeneric
+    private static function onLiteral(string $first, string $nodeString, int $line): NodeGeneric
     {
         switch ($first) {
-            case '>': return new Nodes\LiteralFolded($nodeString, $line);
-            case '|': return new Nodes\Literal($nodeString, $line);
+            case '>':
+                return new Nodes\LiteralFolded($nodeString, $line);
+            case '|':
+                return new Nodes\Literal($nodeString, $line);
             default:
                 throw new \ParseError("Not a literal node !! '$first' on line:$line");
         }
     }
-
 }

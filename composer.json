@@ -2,7 +2,10 @@
     "name": "dallgoot/yaml",
     "description": "Provides loader, dumper and an API for YAML content. Loader builds to equivalent data types in PHP 7.x",
     "type": "library",
-    "keywords": ["yaml", "parser"],
+    "keywords": [
+        "yaml",
+        "parser"
+    ],
     "homepage": "https://github.com/dallgoot/yaml",
     "license": "Apache-2.0",
     "authors": [
@@ -11,19 +14,15 @@
             "email": "stephane.rebai@gmail.com"
         }
     ],
-      "autoload": {
-        "classmap": [
-          "sources"
-        ]
+    "autoload": {
+        "psr-4": {
+            "Dallgoot\\Yaml\\": "sources/"
+        }
     },
-      "autoload-dev": {
-        "classmap": [
-          "tests/CasesTest.php",
-          "tests/DumpingTest.php",
-          "tests/SymfonyYamlTest.php",
-          "tests/units",
-          "vendor/phpunit"
-        ]
+    "autoload-dev": {
+        "psr-4": {
+            "Dallgoot\\Yaml\\Tests": "tests/"
+        }
     },
     "require": {
         "php": ">=7.1.10",
@@ -42,11 +41,11 @@
         "phpmetrics/phpmetrics": "^2.4",
         "phpunit/phpunit": "^7"
     },
-    "scripts" : {
-        "test"    : "phpunit --verbose --configuration ./configuration/phpunit.xml --testsuite All",
-        "metrics" : "phpmetrics --report-html=documentation/phpmetrics_report ./sources",
-        "phploc"  : "phploc sources/ --count-tests --log-xml=./documentation/codecoverage/phploc.xml",
-        "docs"    : "phpdox -f configuration/phpdox.xml",
-        "phan"    : "phan -k configuration/phan.php -C -j2 -3sources/tag"
+    "scripts": {
+        "test": "phpunit --verbose --configuration ./configuration/phpunit.xml --testsuite All",
+        "metrics": "phpmetrics --report-html=documentation/phpmetrics_report ./sources",
+        "phploc": "phploc sources/ --count-tests --log-xml=./documentation/codecoverage/phploc.xml",
+        "docs": "phpdox -f configuration/phpdox.xml",
+        "phan": "phan -k configuration/phan.php -C -j2 -3sources/tag"
     }
 }

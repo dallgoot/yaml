@@ -4,6 +4,7 @@ namespace Dallgoot\Yaml\Nodes;
 
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 
 /**
  *
@@ -23,20 +24,20 @@ class Root extends NodeGeneric
         $this->value = new NodeList();
     }
 
-    public function getParent(int $indent = null, $type = 0):NodeGeneric
+    public function getParent(int $indent = null, $type = 0): NodeGeneric
     {
         if ($this->_parent !== null) {
-            throw new \ParseError(__CLASS__." can NOT have a parent, something's wrong", 1);
+            throw new \ParseError(__CLASS__ . " can NOT have a parent, something's wrong", 1);
         }
         return $this;
     }
 
-    public function getRoot():Root
+    public function getRoot(): Root
     {
         return $this;
     }
 
-    public function getYamlObject():YamlObject
+    public function getYamlObject(): YamlObject
     {
         if ($this->_yamlObject) {
             return $this->_yamlObject;
@@ -49,7 +50,7 @@ class Root extends NodeGeneric
         return $this->buildFinal($parent);
     }
 
-    private function buildFinal(YamlObject $yamlObject):YamlObject
+    private function buildFinal(YamlObject $yamlObject): YamlObject
     {
         $this->_yamlObject = $yamlObject;
         $this->value->setIteratorMode(NodeList::IT_MODE_DELETE);
