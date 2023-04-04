@@ -4,7 +4,7 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\Types\YamlObject;
 use Dallgoot\Yaml\YamlProperties;
 use ReflectionProperty;
 
@@ -16,7 +16,7 @@ use ReflectionProperty;
  * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\YamlObject
+ * @covers \Dallgoot\Yaml\Types\YamlObject
  */
 class YamlObjectTest extends TestCase
 {
@@ -37,7 +37,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::__construct
+     * @covers \Dallgoot\Yaml\Types\YamlObject::__construct
      */
     public function testConstruct(): void
     {
@@ -49,7 +49,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::__toString
+     * @covers \Dallgoot\Yaml\Types\YamlObject::__toString
      */
     public function testToString(): void
     {
@@ -58,7 +58,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::jsonSerialize
+     * @covers \Dallgoot\Yaml\Types\YamlObject::jsonSerialize
      */
     public function testJsonSerialize(): void
     {
@@ -66,7 +66,7 @@ class YamlObjectTest extends TestCase
     }
 
         /**
-     * @covers \Dallgoot\Yaml\YamlObject::addReference
+     * @covers \Dallgoot\Yaml\Types\YamlObject::addReference
      */
     public function testAddReference(): void
     {
@@ -76,7 +76,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::getReference
+     * @covers \Dallgoot\Yaml\Types\YamlObject::getReference
      */
     public function testGetReference(): void
     {
@@ -86,7 +86,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::getAllReferences
+     * @covers \Dallgoot\Yaml\Types\YamlObject::getAllReferences
      */
     public function testGetAllReferences(): void
     {
@@ -96,7 +96,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::addComment
+     * @covers \Dallgoot\Yaml\Types\YamlObject::addComment
      */
     public function testAddComment(): void
     {
@@ -106,7 +106,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::getComment
+     * @covers \Dallgoot\Yaml\Types\YamlObject::getComment
      * @depends testAddComment
      */
     public function testGetComment(): void
@@ -117,7 +117,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::setText
+     * @covers \Dallgoot\Yaml\Types\YamlObject::setText
      */
     public function testSetText(): void
     {
@@ -131,7 +131,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::addTag
+     * @covers \Dallgoot\Yaml\Types\YamlObject::addTag
      */
     public function testAddTag(): void
     {
@@ -141,7 +141,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::hasDocStart
+     * @covers \Dallgoot\Yaml\Types\YamlObject::hasDocStart
      */
     public function testHasDocStart(): void
     {
@@ -155,7 +155,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::setDocStart
+     * @covers \Dallgoot\Yaml\Types\YamlObject::setDocStart
      */
     public function testSetDocStart(): void
     {
@@ -169,7 +169,7 @@ class YamlObjectTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\YamlObject::isTagged
+     * @covers \Dallgoot\Yaml\Types\YamlObject::isTagged
      */
     public function testIsTagged(): void
     {

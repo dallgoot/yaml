@@ -11,7 +11,7 @@ return [
     // If this is set to null,
     // then Phan assumes the PHP version which is closest to the minor version
     // of the php executable used to execute phan.
-    "target_php_version" => '7.3',
+    "target_php_version" => null,
 
     // A list of directories that should be parsed for class and
     // method information. After excluding the directories
@@ -22,7 +22,7 @@ return [
     // your application should be included in this list.
     'directory_list' => [
         // 'vendor/phpunit/phpunit/',
-        'sources'//,
+        'src' //,
         // "tests/CasesTest.php",
         // "tests/DumpingTest.php",
         // "tests/SymfonyYamlTest.php",

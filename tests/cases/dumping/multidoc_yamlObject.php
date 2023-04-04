@@ -1,5 +1,5 @@
 <?php
-namespace Dallgoot\Yaml;
+use Dallgoot\Yaml\Types\YamlObject;
 
 $yaml  = new YamlObject(0);
 $yaml1 = new YamlObject(0);

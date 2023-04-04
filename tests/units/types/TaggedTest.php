@@ -4,7 +4,7 @@ namespace Test\Dallgoot\Yaml;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml\Tagged;
+use Dallgoot\Yaml\Types\Tagged;
 
 /**
  * Class TaggedTest.
@@ -14,7 +14,7 @@ use Dallgoot\Yaml\Tagged;
  * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Tagged
+ * @covers \Dallgoot\Yaml\Types\Tagged
  */
 class TaggedTest extends TestCase
 {
@@ -32,7 +32,7 @@ class TaggedTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Tagged::__construct
+     * @covers \Dallgoot\Yaml\Types\Tagged::__construct
      */
     public function testConstruct(): void
     {
@@ -41,7 +41,7 @@ class TaggedTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Tagged::__construct
+     * @covers \Dallgoot\Yaml\Types\Tagged::__construct
      */
     public function testConstructEmptyName(): void
     {

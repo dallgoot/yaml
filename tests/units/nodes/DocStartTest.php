@@ -5,7 +5,7 @@ namespace Test\Dallgoot\Yaml\Nodes;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\Nodes\Anchor;
 use Dallgoot\Yaml\Nodes\Blank;
 use Dallgoot\Yaml\Nodes\Comment;
@@ -16,7 +16,7 @@ use Dallgoot\Yaml\Nodes\Root;
 use Dallgoot\Yaml\Nodes\Scalar;
 use Dallgoot\Yaml\Nodes\Tag;
 
-use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\Types\YamlObject;
 
 /**
  * Class DocStartTest.

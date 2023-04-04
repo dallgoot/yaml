@@ -5,8 +5,8 @@ namespace Test\Dallgoot\Yaml;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use Dallgoot\Yaml\TagFactory;
-use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Tag\TagFactory;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\Nodes\Scalar;
 use Dallgoot\Yaml\Tag\CoreSchema;
 
@@ -19,7 +19,7 @@ use Dallgoot\Yaml\Tag\CoreSchema;
  * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\TagFactory
+ * @covers \Dallgoot\Yaml\Tag\TagFactory
  */
 class TagFactoryTest extends TestCase
 {

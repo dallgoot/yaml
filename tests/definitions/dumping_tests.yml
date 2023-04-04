@@ -29,25 +29,27 @@ floats_double: |-
   notANumber: .nan
 stdObject: |-
   prop: my property
+# symfony_custom_tag: |-
+# !php/object 'O:8:"stdClass":1:{s:5:"foo";s:7:"bar";}'
 yamlObject_indices: |-
-  -
+  - 
     - 1
     - 2
     - 3
-  -
+  - 
     memberOfO: some really really really really really really really really really very long text as a simple string
 yamlObject_properties: |-
-  propA:
+  propA: 
     - 1
     - 2
     - 3
-  propB:
+  propB: 
     memberOfO: some really really really really really really really really really very long text as a simple string
 unicodeString: |-
   str: \u263a
-multidoc_yamlObject: |
+multidoc_yamlObject: |-
   ---
-  -
+  - 
     - 1
     - 2
     - 3
@@ -55,3 +57,12 @@ multidoc_yamlObject: |
   a: 1
   ---
   b: 2
+netplan_example: |-
+  network: 
+    ethernets: 
+      enp0s3: 
+        addresses: [192.168.1.84\/24]
+        gateway4: 192.168.1.1
+        nameservers: 
+          addresses: [192.168.1.1]
+    version: 2

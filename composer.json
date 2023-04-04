@@ -1,10 +1,12 @@
 {
     "name": "dallgoot/yaml",
-    "description": "Provides loader, dumper and an API for YAML content. Loader builds to equivalent data types in PHP 7.x",
+    "description": "Provides loader, dumper and an API for YAML content. Loader builds to equivalent data types in PHP 8.x",
     "type": "library",
     "keywords": [
         "yaml",
-        "parser"
+        "parser",
+        "reader",
+        "writer"
     ],
     "homepage": "https://github.com/dallgoot/yaml",
     "license": "Apache-2.0",
@@ -16,16 +18,16 @@
     ],
     "autoload": {
         "psr-4": {
-            "Dallgoot\\Yaml\\": "sources/"
+            "Dallgoot\\Yaml\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Dallgoot\\Yaml\\Tests": "tests/"
+            "Dallgoot\\Yaml\\Tests\\": "tests/"
         }
     },
     "require": {
-        "php": ">=7.1.10",
+        "php": ">=8.0.0",
         "ext-json": "*",
         "ext-pcre": "*",
         "ext-SPL": "*",
@@ -33,19 +35,15 @@
     },
     "require-dev": {
         "ext-Reflection": "*",
-        "phan/phan": "^1.3",
-        "roave/better-reflection": "dev-master#c87d856",
-        "composer/xdebug-handler": "^1.3",
-        "phploc/phploc": "^4.0",
-        "paulthebaud/phpunit-generator": "^2.1",
-        "phpmetrics/phpmetrics": "^2.4",
-        "phpunit/phpunit": "^7"
+        "phan/phan": "*",
+        "phpmetrics/phpmetrics": "*",
+        "phpunit/phpunit": "*"
     },
     "scripts": {
         "test": "phpunit --verbose --configuration ./configuration/phpunit.xml --testsuite All",
-        "metrics": "phpmetrics --report-html=documentation/phpmetrics_report ./sources",
-        "phploc": "phploc sources/ --count-tests --log-xml=./documentation/codecoverage/phploc.xml",
+        "metrics": "phpmetrics --report-html=documentation/phpmetrics_report ./src",
+        "phploc": "phploc src/ --count-tests --log-xml=./documentation/codecoverage/phploc.xml",
         "docs": "phpdox -f configuration/phpdox.xml",
-        "phan": "phan -k configuration/phan.php -C -j2 -3sources/tag"
+        "phan": "phan -k configuration/phan.php -C -j2 -3src/tag"
     }
 }

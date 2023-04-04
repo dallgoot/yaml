@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
 
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\Yaml;
 
 //Getting some document as PHP variable $YamlObject
 //the document here is a PHP file used for tests

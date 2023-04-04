@@ -6,7 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 use Dallgoot\Yaml\Dumper;
-use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\Types\YamlObject;
 
 /**
  * Class DumperTest.
@@ -49,7 +49,7 @@ class DumperTest extends TestCase
      */
     public function testToString(): void
     {
-        $this->assertEquals("- 1\n- 2\n- 3", $this->dumper->toString([1,2,3]));
+        $this->assertEquals("- 1\n- 2\n- 3", $this->dumper->toString([1, 2, 3]));
         $this->assertEquals("--- some text\n", $this->dumper->toString('some text'));
     }
 
@@ -59,7 +59,7 @@ class DumperTest extends TestCase
     public function testToFile(): void
     {
         $filename = 'dumperTest.yml';
-        $result = $this->dumper->toFile($filename, [1,2,3]);
+        $result = $this->dumper->toFile($filename, [1, 2, 3]);
         $this->assertTrue($result);
         $this->assertEquals("- 1\n- 2\n- 3", file_get_contents($filename));
         unlink($filename);
@@ -72,10 +72,10 @@ class DumperTest extends TestCase
         $this->assertEquals('', $this->dumper->dump(null, 0));
         $this->assertEquals('stream', $this->dumper->dump(fopen(__FILE__, 'r'), 0));
         $this->assertEquals('str', $this->dumper->dump('str', 0));
-        $this->assertEquals('- 1', $this->dumper->dump([1], 0));
+        $this->assertEquals('- 1', $this->dumper->dump([1], 0, false, true));
         $o = new \Stdclass;
         $o->prop = 1;
-        $this->assertEquals('prop: 1', $this->dumper->dump($o, 0));
+        $this->assertEquals('prop: 1', $this->dumper->dump($o, 0, false, true));
     }
 
 
@@ -92,19 +92,6 @@ class DumperTest extends TestCase
         unset($yamlObject->a);
         $yamlObject[0] = 'a';
         $this->assertEquals('- a', $dumpYamlObject->invoke($this->dumper, $yamlObject, 0));
-    }
-
-    /**
-     * @covers \Dallgoot\Yaml\Dumper::IteratorToString
-     */
-    public function testIteratorToString()
-    {
-        $iteratorToString = new \ReflectionMethod($this->dumper, 'iteratorToString');
-        $iteratorToString->setAccessible(true);
-        $yamlObject = new YamlObject(0);
-        $yamlObject[0] = 'a';
-        $yamlObject[1] = 'b';
-        $this->assertEquals("- a\n- b", $iteratorToString->invoke($this->dumper, $yamlObject, '-', "\n", 0));
     }
 
 }

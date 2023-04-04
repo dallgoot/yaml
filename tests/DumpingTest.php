@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\Yaml;
 
 final class DumpingTest extends TestCase
 {
@@ -22,6 +22,7 @@ final class DumpingTest extends TestCase
      * @dataProvider dumpingCasesProvider
      * @param string $fileName
      * @param string $expected
+     * @covers nothing
      */
     public function test_DumpingCases(string $fileName, string $expected)
     {

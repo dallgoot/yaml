@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
 
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\Yaml;
 
 //loading YAML as YamlObject
 $yamlObject = Yaml::parseFile('./examples/dummy.yml', $options = null, $debug = null);

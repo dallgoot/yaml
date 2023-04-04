@@ -1,6 +1,6 @@
 <?php
 
-namespace Dallgoot\Yaml;
+use Dallgoot\Yaml\Types\Compact;
 
 
 $o = new \StdClass;

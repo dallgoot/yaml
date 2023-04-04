@@ -6,14 +6,14 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 use Dallgoot\Yaml\NodeList;
-use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\Nodes\Blank;
 use Dallgoot\Yaml\Nodes\Comment;
 use Dallgoot\Yaml\Nodes\Item;
 use Dallgoot\Yaml\Nodes\Key;
 use Dallgoot\Yaml\Nodes\Literal;
 use Dallgoot\Yaml\Nodes\LiteralFolded;
-use Dallgoot\Yaml\Nodes\Literals;
+use Dallgoot\Yaml\Nodes\Generic\Literals;
 use Dallgoot\Yaml\Nodes\Quoted;
 use Dallgoot\Yaml\Nodes\Scalar;
 
@@ -25,7 +25,7 @@ use Dallgoot\Yaml\Nodes\Scalar;
  * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Nodes\Literals
+ * @covers \Dallgoot\Yaml\Nodes\Generic\Literals
  */
 class LiteralsTest extends TestCase
 {
@@ -46,7 +46,7 @@ class LiteralsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Literals::__construct
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Literals::__construct
      */
     public function testConstruct(): void
     {
@@ -78,7 +78,7 @@ class LiteralsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Literals::add
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Literals::add
      */
     public function testAdd(): void
     {
@@ -94,7 +94,7 @@ class LiteralsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Literals::litteralStripLeading
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Literals::litteralStripLeading
      */
     public function testLitteralStripLeading(): void
     {
@@ -107,7 +107,7 @@ class LiteralsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Literals::litteralStripTrailing
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Literals::litteralStripTrailing
      */
     public function testLitteralStripTrailing(): void
     {
@@ -120,7 +120,7 @@ class LiteralsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Literals::build
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Literals::build
      */
     public function testBuild(): void
     {
@@ -156,7 +156,7 @@ class LiteralsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Literals::getChildValue
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Literals::getChildValue
      */
     public function testGetChildValue(): void
     {
@@ -181,7 +181,7 @@ class LiteralsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Literals::isAwaitingChild
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Literals::isAwaitingChild
      */
     public function testIsAwaitingChild(): void
     {

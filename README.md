@@ -1,4 +1,4 @@
-# Dallgoot : YAML library for PHP - Beta !!!
+# Dallgoot : YAML library for PHP - Beta
 
 [![Build Status](https://travis-ci.org/dallgoot/yaml.svg?branch=master)](https://travis-ci.org/dallgoot/yaml) [![PHP from Packagist](https://img.shields.io/packagist/php-v/dallgoot/yaml)](https://packagist.org/packages/dallgoot/yaml) [![Packagist](https://img.shields.io/packagist/dt/dallgoot/yaml)](https://packagist.org/packages/dallgoot/yaml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/dfae4b8e665a1d728e3d/maintainability)](https://codeclimate.com/github/dallgoot/yaml/maintainability) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/dallgoot/yaml/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/dallgoot/yaml/?branch=master)
@@ -22,7 +22,7 @@ composer require --update-no-dev dallgoot/yaml
 
 See examples files in [examples folder](./examples)
 
-## Features:
+## Features
 
 - *consistent* PHP datatypes :
   - object for mappings
@@ -37,10 +37,10 @@ See examples files in [examples folder](./examples)
 - tolerant to tabulations
 - debug levels :
   - 1 : print each line Node Type class and exit
-  - 2 : print Loader global map structure and exit
+  - 2 : print Loader global tree structure and exit
   - 3 : print each document NodeList and exit
 
-## Support:
+## Support
 
 - YAML specifications [version 1.2](http://yaml.org/spec/1.2/spec.html)
 - multi-line values (simple|double quoted or not, compact mapping|sequence or JSON)
@@ -61,7 +61,7 @@ See examples files in [examples folder](./examples)
 | **Dallgoot/Yaml**                                                    | 1.2                    | ✔️                  | ✔️                 | ✔️                     | ✔️              | ✔️                       | ✔️                   |
 
 - coherent data types (see [coherence.md](./documentation/coherence.md) for explanations)
-- JSON format validation (Option, Note: if valid as per PHP function *json_encode*)
+- JSON format validation (Option, Note: if valid as per PHP function [json_encode](https://www.php.net/manual/en/function.json-encode.php))
 - complex mapping (Note: keys are JSON formatted strings)
 - real reference behaviour : changing reference value modify other reference calls
 
@@ -87,13 +87,15 @@ See examples files in [examples folder](./examples)
 - OPTION: Force renaming key names that are not valid PHP property name
 - TAG : function for 'php/object' that provides the correct namespace to build
 - NEON compatibility???
+- make immutable YamlObject
 
 ## Performances
 
-    TBD
+    - TBD
+    - improved memory using SplFixedArray instead of regular arrays where possible
 
 ## Thanks
 
-- (https://yaml.org)
-- (https://www.json2yaml.com/convert-yaml-to-json)
+- (<https://yaml.org>)
+- (<https://www.json2yaml.com/convert-yaml-to-json>)
 - [Symfony Yaml](https://symfony.com/doc/current/components/yaml.html)

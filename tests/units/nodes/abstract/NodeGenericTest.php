@@ -5,10 +5,10 @@ namespace Test\Dallgoot\Yaml\Nodes;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use Dallgoot\Yaml;
+use Dallgoot\Yaml\Yaml;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\NodeFactory;
-use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\Nodes\Blank;
 use Dallgoot\Yaml\Nodes\Item;
 use Dallgoot\Yaml\Nodes\Key;
@@ -24,7 +24,7 @@ use Dallgoot\Yaml\Nodes\Root;
  * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Nodes\NodeGeneric
+ * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric
  */
 class NodeGenericTest extends TestCase
 {
@@ -45,7 +45,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::__construct
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::__construct
      */
     public function testConstruct(): void
     {
@@ -58,7 +58,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::setParent
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::setParent
      */
     public function testSetParent(): void
     {
@@ -75,7 +75,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::getParent
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::getParent
      */
     public function testGetParent(): void
     {
@@ -96,7 +96,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::getParent
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::getParent
      */
     public function testGetParentException(): void
     {
@@ -105,7 +105,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::getRoot
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::getRoot
      */
     public function testGetRoot(): void
     {
@@ -123,7 +123,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::getRoot
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::getRoot
      */
     public function testGetRootException(): void
     {
@@ -134,7 +134,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::add
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::add
      */
     public function testAdd(): void
     {
@@ -155,7 +155,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::getDeepestNode
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::getDeepestNode
      */
     public function testGetDeepestNode(): void
     {
@@ -166,7 +166,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::specialProcess
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::specialProcess
      * @todo : test call for ALL NODETYPES using folder "types" listing and object creation
      */
     public function testSpecialProcess(): void
@@ -177,7 +177,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::getTargetOnEqualIndent
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::getTargetOnEqualIndent
      */
     public function testGetTargetOnEqualIndent(): void
     {
@@ -188,7 +188,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::getTargetOnLessIndent
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::getTargetOnLessIndent
      *
      * @todo test with more content before this one
      */
@@ -204,7 +204,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::getTargetOnMoreIndent
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::getTargetOnMoreIndent
      */
     public function testGetTargetOnMoreIndent(): void
     {
@@ -214,7 +214,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::isAwaitingChild
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::isAwaitingChild
      */
     public function testIsAwaitingChild(): void
     {
@@ -224,7 +224,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::isOneOf
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::isOneOf
      */
     public function testIsOneOf(): void
     {
@@ -235,7 +235,7 @@ class NodeGenericTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\NodeGeneric::__debugInfo
+     * @covers \Dallgoot\Yaml\Nodes\Generic\NodeGeneric::__debugInfo
      */
     public function testDebugInfo(): void
     {

@@ -5,7 +5,7 @@ namespace Test\Dallgoot\Yaml\Nodes;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use Dallgoot\Yaml\Nodes\Actions;
+use Dallgoot\Yaml\Nodes\Generic\Actions;
 use Dallgoot\Yaml\Nodes\Scalar;
 use Dallgoot\Yaml\Nodes\Tag;
 
@@ -17,7 +17,7 @@ use Dallgoot\Yaml\Nodes\Tag;
  * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml\Nodes\Actions
+ * @covers \Dallgoot\Yaml\Nodes\Generic\Actions
  */
 class ActionsTest extends TestCase
 {
@@ -38,7 +38,7 @@ class ActionsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Actions::__construct
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Actions::__construct
      */
     public function testConstruct(): void
     {
@@ -49,7 +49,7 @@ class ActionsTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml\Nodes\Actions::__construct
+     * @covers \Dallgoot\Yaml\Nodes\Generic\Actions::__construct
      */
     public function testConstructWithTag(): void
     {

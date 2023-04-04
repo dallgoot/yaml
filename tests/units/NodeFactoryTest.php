@@ -6,7 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 use Dallgoot\Yaml\NodeFactory;
-use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\Nodes\Anchor;
 use Dallgoot\Yaml\Nodes\Blank;
 use Dallgoot\Yaml\Nodes\Comment;
@@ -69,35 +69,22 @@ class NodeFactoryTest extends TestCase
      */
     public function testGetException(): void
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(\ParseError::class);
         $this->nodeFactory::get('%INVALID_DIRECTIVE  xxx', 1);
     }
 
-    /**
-     * @covers \Dallgoot\Yaml\NodeFactory::onSpecial
-     */
-    public function testOnSpecial(): void
-    {
-        $reflector = new \ReflectionClass($this->nodeFactory);
-        $method = $reflector->getMethod('onSpecial');
-        $method->setAccessible(true);
-        $nodeString = '#qsd = 3213';
-        $this->assertTrue($method->invoke(null,$nodeString[0], $nodeString, 1) instanceof Comment, 'Not a NodeComment');
-        $nodeString = '%YAML 1.2';
-        $this->assertTrue($method->invoke(null,$nodeString[0], $nodeString, 1) instanceof Directive, 'Not a NodeDirective');
-    }
 
     /**
-     * @covers \Dallgoot\Yaml\NodeFactory::onSpecial
+     * @covers \Dallgoot\Yaml\NodeFactory::onDirective
      */
-    public function testOnSpecialParseError(): void
+    public function testOnDirectiveParseError(): void
     {
         $this->expectException(\ParseError::class);
         $reflector = new \ReflectionClass($this->nodeFactory);
-        $method = $reflector->getMethod('onSpecial');
+        $method = $reflector->getMethod('onDirective');
         $method->setAccessible(true);
         $nodeString = '%INVALID_DIRECTIVE  xxx';
-        $method->invoke(null,$nodeString[0], $nodeString, 1);
+        $method->invoke(null, $nodeString, 1);
     }
 
     /**
@@ -109,33 +96,45 @@ class NodeFactoryTest extends TestCase
         $method = $reflector->getMethod('onQuoted');
         $method->setAccessible(true);
         $nodeString = '    "double quoted" ';
-        $this->assertTrue($method->invoke(null,$nodeString[0], $nodeString, 1) instanceof Quoted,
-                        'Not a NodeQuoted');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString[0], $nodeString, 1) instanceof Quoted,
+            'Not a NodeQuoted'
+        );
         $nodeString = " 'simple quoted'   ";
-        $this->assertTrue($method->invoke(null,$nodeString[0], $nodeString, 1) instanceof Quoted,
-                        'Not a NodeQuoted');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString[0], $nodeString, 1) instanceof Quoted,
+            'Not a NodeQuoted'
+        );
         $nodeString = " 'simple partial   ";
-        $this->assertTrue($method->invoke(null,$nodeString[0], $nodeString, 1) instanceof Partial,
-                        'Not a NodePartial');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString[0], $nodeString, 1) instanceof Partial,
+            'Not a NodePartial'
+        );
         $nodeString = '" double partial  ';
-        $this->assertTrue($method->invoke(null,$nodeString[0], $nodeString, 1) instanceof Partial,
-                        'Not a NodePartial');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString[0], $nodeString, 1) instanceof Partial,
+            'Not a NodePartial'
+        );
     }
 
     /**
-     * @covers \Dallgoot\Yaml\NodeFactory::onSetElement
+     * @covers \Dallgoot\Yaml\NodeFactory::onCharacter
      */
     public function testOnSetElement(): void
     {
         $reflector = new \ReflectionClass($this->nodeFactory);
-        $method = $reflector->getMethod('onSetElement');
+        $method = $reflector->getMethod('onCharacter');
         $method->setAccessible(true);
         $nodeString = '    ? some setkey ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof SetKey,
-                'Not a NodeSetKey');
+        $this->assertTrue(
+            $method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof SetKey,
+            'Not a NodeSetKey'
+        );
         $nodeString = '    : some setvalue ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof SetValue,
-                'Not a NodeSetValue');
+        $this->assertTrue(
+            $method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof SetValue,
+            'Not a NodeSetValue'
+        );
     }
 
     /**
@@ -146,8 +145,10 @@ class NodeFactoryTest extends TestCase
         $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
         $method->setAccessible(true);
         $nodeString = '["a","b","c"]';
-        $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof JSON,
-                'Not a NodeJSON');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof JSON,
+            'Not a NodeJSON'
+        );
     }
     /**
      * @covers \Dallgoot\Yaml\NodeFactory::onCompact
@@ -157,7 +158,7 @@ class NodeFactoryTest extends TestCase
         $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
         $method->setAccessible(true);
         $nodeString = '{"key":"value","key1":"value1"}';
-        $this->assertTrue($method->invoke(null, '', $nodeString, 1) instanceof JSON, 'Not a NodeJSON');
+        $this->assertTrue($method->invoke(null, $nodeString, 1) instanceof JSON, 'Not a NodeJSON');
     }
     /**
      * @covers \Dallgoot\Yaml\NodeFactory::onCompact
@@ -167,8 +168,8 @@ class NodeFactoryTest extends TestCase
         $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
         $method->setAccessible(true);
         $nodeString = '{  key :  value ,  key1  : value1  }';
-        $output = $method->invoke(null, '', $nodeString, 1);
-        $this->assertTrue($output instanceof CompactMapping, get_class($output).' instead of a NodeCompactMapping');
+        $output = $method->invoke(null, $nodeString, 1);
+        $this->assertTrue($output instanceof CompactMapping, get_class($output) . ' instead of a NodeCompactMapping');
     }
     /**
      * @covers \Dallgoot\Yaml\NodeFactory::onCompact
@@ -178,8 +179,8 @@ class NodeFactoryTest extends TestCase
         $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
         $method->setAccessible(true);
         $nodeString = '[a,b,c]';
-        $output = $method->invoke(null, '', $nodeString, 1);
-        $this->assertTrue($output instanceof CompactSequence, get_class($output).' instead of a NodeCompactSequence');
+        $output = $method->invoke(null, $nodeString, 1);
+        $this->assertTrue($output instanceof CompactSequence, get_class($output) . ' instead of a NodeCompactSequence');
     }
     /**
      * @covers \Dallgoot\Yaml\NodeFactory::onCompact
@@ -189,8 +190,8 @@ class NodeFactoryTest extends TestCase
         $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
         $method->setAccessible(true);
         $nodeString = ' { a: b, ';
-        $output = $method->invoke(null, '', $nodeString, 1);
-        $this->assertTrue($output instanceof Partial, get_class($output).' instead of a Partial');
+        $output = $method->invoke(null, $nodeString, 1);
+        $this->assertTrue($output instanceof Partial, get_class($output) . ' instead of a Partial');
     }
     /**
      * @covers \Dallgoot\Yaml\NodeFactory::onCompact
@@ -200,8 +201,8 @@ class NodeFactoryTest extends TestCase
         $method = new \ReflectionMethod($this->nodeFactory, 'onCompact');
         $method->setAccessible(true);
         $nodeString = ' [ a, b, ';
-        $output = $method->invoke(null, '', $nodeString, 1);
-        $this->assertTrue($output instanceof Partial, get_class($output).' instead of a Partial');
+        $output = $method->invoke(null, $nodeString, 1);
+        $this->assertTrue($output instanceof Partial, get_class($output) . ' instead of a Partial');
     }
 
     /**
@@ -213,17 +214,25 @@ class NodeFactoryTest extends TestCase
         $method = $reflector->getMethod('onHyphen');
         $method->setAccessible(true);
         $nodeString = '- ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Item,
-                'Not a NodeItem');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof Item,
+            'Not a NodeItem'
+        );
         $nodeString = '-- ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Scalar,
-                'Not a NodeScalar');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof Scalar,
+            'Not a NodeScalar'
+        );
         $nodeString = '---';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof DocStart,
-                'Not a NodeDocStart');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof DocStart,
+            'Not a NodeDocStart'
+        );
         $nodeString = '  - simpleitem  ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Item,
-                'Not a NodeItem');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof Item,
+            'Not a NodeItem'
+        );
     }
 
     /**
@@ -234,50 +243,60 @@ class NodeFactoryTest extends TestCase
         $method = new \ReflectionMethod($this->nodeFactory, 'onNodeAction');
         $method->setAccessible(true);
         $nodeString = '***';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Scalar,
-                'Not a NodeScalar');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof Scalar,
+            'Not a NodeScalar'
+        );
         $nodeString = '&emptyanchor';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Anchor,
-                'Not a NodeAnchor'.get_class($method->invoke(null, trim($nodeString)[0], $nodeString, 1)));
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof Anchor,
+            'Not a NodeAnchor' . get_class($method->invoke(null, $nodeString, 1))
+        );
         $nodeString = '&anchor [1,2,3]';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Anchor,
-                'Not a NodeAnchor');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof Anchor,
+            'Not a NodeAnchor'
+        );
         $nodeString = '*anchorcall ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Anchor,
-                'Not a NodeAnchor');
+        $this->assertTrue(
+            $method->invoke(null, $nodeString, 1) instanceof Anchor,
+            'Not a NodeAnchor'
+        );
+
+    }
+
+    public function testOnCharacter(): void
+    {
+        $method = new \ReflectionMethod($this->nodeFactory, 'onCharacter');
+        $method->setAccessible(true);
         $nodeString = '!!emptytag';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Tag,
-                'Not a NodeTag');
+        $tagged = $method->invoke(null, $nodeString[0], $nodeString, 1);
+        $this->assertTrue($tagged instanceof Tag, 'Not a NodeTag');
+        $this->assertEquals('!!emptytag', $tagged->tag);
         $nodeString = '!!str   345  ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Tag,
-                'Not a NodeTag');
+        $result = $method->invoke(null, $nodeString[0], $nodeString, 1);
+        $this->assertTrue($result instanceof Tag,'Not a NodeTag:'.get_class($result));
+        $this->assertEquals('!!str', $result->tag);
     }
 
 
     /**
-     * @covers \Dallgoot\Yaml\NodeFactory::onLiteral
+     * @covers \Dallgoot\Yaml\NodeFactory::onCharacter
      */
     public function testOnLiteral(): void
     {
-        $method = new \ReflectionMethod($this->nodeFactory, 'onLiteral');
+        $method = new \ReflectionMethod($this->nodeFactory, 'onCharacter');
         $method->setAccessible(true);
         $nodeString = '  |-   ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Literal,
-                'Not a NodeLit');
+        $this->assertTrue(
+            $method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof Literal,
+            'Not a NodeLit'
+        );
         $nodeString = '  >+   ';
-        $this->assertTrue($method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof LiteralFolded,
-                'Not a NodeLitFolded');
+        $this->assertTrue(
+            $method->invoke(null, trim($nodeString)[0], $nodeString, 1) instanceof LiteralFolded,
+            'Not a NodeLitFolded'
+        );
     }
 
-    /**
-     * @covers \Dallgoot\Yaml\NodeFactory::onLiteral
-     */
-    public function testOnLiteralFail(): void
-    {
-        $method = new \ReflectionMethod($this->nodeFactory, 'onLiteral');
-        $method->setAccessible(true);
-        $nodeString = ' x ';
-        $this->expectException(\ParseError::class);
-        $method->invoke(null, trim($nodeString)[0], $nodeString, 1);
-    }
 }

@@ -5,7 +5,7 @@ namespace Test\Dallgoot\Yaml\Nodes;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use Dallgoot\Yaml\Compact;
+use Dallgoot\Yaml\Types\Compact;
 use Dallgoot\Yaml\NodeList;
 use Dallgoot\Yaml\Nodes\CompactMapping;
 use Dallgoot\Yaml\Nodes\Key;

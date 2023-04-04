@@ -6,9 +6,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 use Dallgoot\Yaml\Builder;
-use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\Types\YamlObject;
 use Dallgoot\Yaml\NodeList;
-use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\Nodes\Blank;
 use Dallgoot\Yaml\Nodes\DocStart;
 use Dallgoot\Yaml\Nodes\DocEnd;
@@ -41,7 +41,7 @@ class BuilderTest extends TestCase
     protected function setUp(): void
     {
         /** @todo Maybe add some arguments to this constructor */
-        $this->builder = new Builder(0,0);
+        $this->builder = new Builder(0, 0);
     }
 
     private function buildSimpleMapping()
@@ -88,9 +88,9 @@ class BuilderTest extends TestCase
         $this->assertEquals($this->builder->buildContent(new Root), null);
         ob_end_clean();
     }
-     /**
+    /**
      * @covers \Dallgoot\Yaml\Builder::buildContent
-    */
+     */
     public function testBuildContentMAPPING(): void
     {
         //test simple mapping
@@ -98,11 +98,11 @@ class BuilderTest extends TestCase
         $this->assertTrue($yamlMapping instanceof YamlObject);
         $this->assertTrue(property_exists($yamlMapping, 'key'));
         $this->assertEquals($yamlMapping->key, 'value');
-     }
+    }
 
     /**
      * @covers \Dallgoot\Yaml\Builder::buildContent
-    */
+     */
     public function testBuildContentSEQUENCE(): void
     {   //test simple sequence
         $yamlSequence = $this->buildSimpleSequence();
@@ -111,9 +111,9 @@ class BuilderTest extends TestCase
         $this->assertEquals($yamlSequence[0], 'itemvalue');
     }
 
-     /**
+    /**
      * @covers \Dallgoot\Yaml\Builder::buildContent
-    */
+     */
     public function testBuildContentMULTIDOC(): void
     {
         // test multi document
@@ -160,30 +160,30 @@ class BuilderTest extends TestCase
     public function testBuildDocumentDebug(): void
     {
         $output =
-                "Document #0\n".
-                "Dallgoot\Yaml\Nodes\Root Object\n".
-                "(\n".
-                "    [line->indent] =>  -> -1\n".
-                "    [value] => Dallgoot\Yaml\NodeList Object\n".
-                "        (\n".
-                "            [type] => \n".
-                "            [flags:SplDoublyLinkedList:private] => 0\n".
-                "            [dllist:SplDoublyLinkedList:private] => Array\n".
-                "                (\n".
-                "                )\n".
-                "\n".
-                "        )\n".
-                "\n".
-                "    [raw] => \n".
-                "    [parent] => NO PARENT!!!\n".
-                ")\n";
+            "Document #0\n" .
+            "Dallgoot\Yaml\Nodes\Root Object\n" .
+            "(\n" .
+            "    [line->indent] => 0 -> -1\n" .
+            "    [value] => Dallgoot\Yaml\NodeList Object\n" .
+            "        (\n" .
+            "            [type] => \n" .
+            "            [flags:SplDoublyLinkedList:private] => 0\n" .
+            "            [dllist:SplDoublyLinkedList:private] => Array\n" .
+            "                (\n" .
+            "                )\n" .
+            "\n" .
+            "        )\n" .
+            "\n" .
+            "    [raw] => \n" .
+            "    [parent] => NO PARENT!!!\n" .
+            ")\n";
         $debug = new \ReflectionProperty(Builder::class, '_debug');
         $debug->setAccessible(true);
-        $debug->setValue($this->builder,3);
+        $debug->setValue($this->builder, 3);
         $list = new NodeList;
         $this->builder->buildDocument($list, 0);
         $this->expectOutputString($output);
-        $debug->setValue($this->builder,0);
+        $debug->setValue($this->builder, 0);
     }
 
     /**

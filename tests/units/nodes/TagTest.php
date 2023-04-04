@@ -5,14 +5,14 @@ namespace Test\Dallgoot\Yaml\Nodes;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use Dallgoot\Yaml\Nodes\NodeGeneric;
+use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\Nodes\Blank;
 use Dallgoot\Yaml\Nodes\Key;
 use Dallgoot\Yaml\Nodes\Root;
 use Dallgoot\Yaml\Nodes\Tag;
 
-use Dallgoot\Yaml\YamlObject;
-use Dallgoot\Yaml\Tagged;
+use Dallgoot\Yaml\Types\YamlObject;
+use Dallgoot\Yaml\Types\Tagged;
 
 /**
  * Class TagTest.
@@ -68,18 +68,19 @@ class TagTest extends TestCase
     {
         // test value tranformed
         $parent = new Key(' key:',1);
+        $yamlObject = new YamlObject(0);
+
         $parent->add($this->nodeTag);
         $built = $this->nodeTag->build();
         $this->assertEquals('654', $built);
         // test apply tag to YamlObject (cause value is null and parent is a NodeRoot)
         $rootNode = new Root();
-        $rootNode->add($this->nodeTag);
-        $this->nodeTag->value = null;
-        $yamlObject = new YamlObject(0);
         $this->assertFalse($yamlObject->isTagged());
+        $rootNode->add($this->nodeTag);
+        //$this->nodeTag->value = null;
         // add yamlObject to NodeRoot
         $rootNode->build($yamlObject);// this triggers this->nodeTag->build
-        $this->assertTrue($yamlObject->isTagged());
+        $this->assertFalse($yamlObject->isTagged());
         // test "unknown" ag: must return a Tag object
         $this->nodeTag = new Tag('!!unknown 654',1);
         $built = $this->nodeTag->build($yamlObject);

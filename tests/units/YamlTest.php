@@ -5,8 +5,8 @@ namespace Test\Dallgoot\Yaml;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use Dallgoot\Yaml;
-use Dallgoot\Yaml\YamlObject;
+use Dallgoot\Yaml\Yaml;
+use Dallgoot\Yaml\Types\YamlObject;
 use Dallgoot\Yaml\Nodes\Root;
 
 /**
@@ -58,7 +58,7 @@ class YamlTest extends TestCase
      */
     public function testParseFile(): void
     {
-        $this->assertTrue($this->yaml::parseFile(__DIR__."/../definitions/parsing_tests.yml") instanceof YamlObject);
+        $this->assertTrue($this->yaml::parseFile(__DIR__ . "/../definitions/parsing_tests.yml") instanceof YamlObject);
     }
 
     /**
@@ -75,7 +75,7 @@ class YamlTest extends TestCase
      */
     public function testDump(): void
     {
-        $this->assertEquals("- 1\n- 2\n- 3", $this->yaml::dump([1,2,3]));
+        $this->assertEquals("- 1\n- 2\n- 3", $this->yaml::dump([1, 2, 3]));
         $this->assertEquals("--- some text\n", $this->yaml::dump('some text'));
     }
 
@@ -94,7 +94,7 @@ class YamlTest extends TestCase
     public function testDumpFile(): void
     {
         $filename = 'dumperTest.yml';
-        $result = $this->yaml::dumpFile($filename, [1,2,3]);
+        $result = $this->yaml::dumpFile($filename, [1, 2, 3]);
         $this->assertTrue($result);
         $this->assertEquals("- 1\n- 2\n- 3", file_get_contents($filename));
         unlink($filename);

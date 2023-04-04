@@ -32,11 +32,10 @@ COMPOSER_CURRENT=$(composer show 'phpunit/phpunit' | grep -Eow "[0-9\.]+" -m 1 )
 # fi
 declare -A versions
 # 7.key.value
-# versions[0]=33
-versions[1]=33
-versions[2]=25
-versions[3]=12
-versions[4]=0
+versions[0]=27
+versions[1]=14
+versions[2]=1
+
 
 onlyMinor=1
 
@@ -47,7 +46,7 @@ command="vendor/bin/phpunit \
 
 for minor in "${!versions[@]}"
 do
-    echo "********************* testing PHP 7.$minor ***************************"
+    echo "********************* testing PHP 8.$minor ***************************"
     tag="cli-alpine"
     if test $minor -eq 0
     then
@@ -57,13 +56,13 @@ do
     then
         for patch in `seq 0 ${versions[$minor]}`
         do
-            displayTitle "7.$minor.$patch"
-            docker run --rm -v $(pwd):/app -w /app php:7.$minor.$patch-$tag $command
+            displayTitle "8.$minor.$patch"
+            docker run --rm -v $(pwd):/app -w /app php:8.$minor.$patch-$tag $command
         done
     else
         patch=${versions[$minor]}
-        displayTitle "7.$minor.$patch"
-        docker run --rm -v $(pwd):/app -w /app php:7.$minor.$patch-$tag $command
+        displayTitle "8.$minor.$patch"
+        docker run --rm -v $(pwd):/app -w /app php:8.$minor.$patch-$tag $command
     fi
 done
 
