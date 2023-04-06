@@ -1,6 +1,6 @@
 <?php
 
-$yaml = new stdClass;
+$yaml = new \stdClass;
 $yaml->str = "☺";
 
 return $yaml;

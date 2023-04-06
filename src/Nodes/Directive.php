@@ -25,10 +25,8 @@ class Directive extends NodeGeneric
      * @param      object|array       $parent  The parent
      *
      * @throws     \ParseError  If Tag handle has been already set before.
-     *
-     * @return     null
      */
-    public function build(&$parent = null)
+    public function build(&$parent = null): void
     {
         if (preg_match(Regex::DIRECTIVE_TAG, $this->raw, $matches)) {
             try {
@@ -50,7 +48,7 @@ class Directive extends NodeGeneric
         //         trigger_error(sprintf(self::WARNING_LOWER_VERSION, $matches['version']), \E_USER_NOTICE );
         //     }
         // }
-        return null;
+        return;
     }
 
     public function add(NodeGeneric $child): NodeGeneric

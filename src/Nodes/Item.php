@@ -63,9 +63,8 @@ class Item extends NodeGeneric
      * @param array|YamlObject|null $parent The parent
      *
      * @throws \Exception  if parent is another type than array or object Iterator
-     * @return null|array
      */
-    public function build(&$parent = null)
+    public function build(&$parent = null): ?array
     {
         if (!is_null($parent) && !is_array($parent) && !($parent instanceof YamlObject)) {
             throw new \Exception("parent must be an array or YamlObject not " .
@@ -80,6 +79,7 @@ class Item extends NodeGeneric
             // $key = count($numKeys) > 0 ? max($numKeys) + 1 : 0;
             // $parent[$key] = $value;
             $parent[] = $value;
+            return null;
         }
     }
 

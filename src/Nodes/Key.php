@@ -35,7 +35,7 @@ class Key extends NodeGeneric
         }
     }
 
-    public function setIdentifier(string $keyString)
+    public function setIdentifier(string $keyString): void
     {
         if ($keyString === '') {
             throw new \ParseError(sprintf(self::ERROR_NO_KEYNAME, $this->line));
@@ -116,9 +116,8 @@ class Key extends NodeGeneric
      * @param object|array $parent The parent
      *
      * @throws \ParseError if Key has no name(identifier) Note: empty string is allowed
-     * @return null|stdClass
      */
-    public function build(&$parent = null)
+    public function build(&$parent = null): ?object
     {
         if ($this->value instanceof Anchor) {
             $result = &$this->value->build();
@@ -126,11 +125,12 @@ class Key extends NodeGeneric
             $result = is_null($this->value) ? null : $this->value->build();
         }
         if (is_null($parent)) {
-            $parent = new stdClass;
+            $parent = new \stdClass;
             $parent->{$this->identifier} = &$result;
             return $parent;
         } else {
             $parent->{$this->identifier} = &$result;
+            return null;
         }
     }
 }

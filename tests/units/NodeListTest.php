@@ -136,7 +136,7 @@ class NodeListTest extends TestCase
     {
         $arr = [];
         $this->assertEquals($arr, $this->nodeList->buildList($arr));
-        $obj = new stdClass;
+        $obj = new \stdClass;
         $this->assertEquals($obj, $this->nodeList->buildList($obj));
     }
 

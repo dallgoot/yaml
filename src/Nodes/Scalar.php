@@ -112,7 +112,7 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
         return array_key_exists(strtolower($v), $types) ? $types[strtolower($v)] : $this->replaceSequences($v);
     }
 
-    public function replaceSequences($value = '')
+    public function replaceSequences(string $value = ''): string
     {
         $replaceUnicodeSeq = function ($matches) {
             return json_decode('"' . $matches[1] . '"');
@@ -133,8 +133,6 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
 
     /**
      * Returns the correct PHP type according to the string value
-     *
-     * @param string $v a string value
      *
      * @return int|float   The scalar value with appropriate PHP type
      * @todo or scientific notation matching the regular expression -? [1-9] ( \. [0-9]* [1-9] )? ( e [-+] [1-9] [0-9]* )?

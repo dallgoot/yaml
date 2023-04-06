@@ -57,7 +57,7 @@ class CoreSchema implements SchemaInterface
      *
      * @return string the value of Node converted to string if needed
      */
-    public function str($node, &$parent = null)
+    public function str($node, &$parent = null): string
     {
         if ($node instanceof Literals) {
             $node = $node->value;
@@ -104,7 +104,7 @@ class CoreSchema implements SchemaInterface
         if (!($node instanceof NodeList)) {
             throw new \LogicException(self::ERROR_SET);
         } else {
-            $list = $parent ?? new stdClass;
+            $list = $parent ?? new \stdClass;
             $node->rewind();
             foreach ($node as $key => $item) {
                 $this->omap($item, $list);
