@@ -9,6 +9,7 @@ namespace Dallgoot\Yaml\Types;
  * @license Apache 2.0
  * @link    https://github.com/dallgoot/yaml
  */
+#[AllowDynamicProperties]
 class Compact extends \ArrayIterator implements \JsonSerializable
 {
     /**

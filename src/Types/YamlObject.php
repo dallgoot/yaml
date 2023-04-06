@@ -11,6 +11,7 @@ use Dallgoot\Yaml\YamlProperties;
  * @license Apache 2.0
  * @link    https://github.com/dallgoot/yaml
  */
+#[AllowDynamicProperties]
 class YamlObject extends \ArrayIterator implements \JsonSerializable
 {
     private YamlProperties $__yaml__object__api;

@@ -118,7 +118,6 @@ class Key extends NodeGeneric
      * @throws \ParseError if Key has no name(identifier) Note: empty string is allowed
      * @return null|\StdClass
      */
-    #[AllowDynamicProperties]
     public function build(&$parent = null)
     {
         if ($this->value instanceof Anchor) {
