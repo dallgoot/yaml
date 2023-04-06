@@ -43,8 +43,6 @@
         "test": "phpunit -c ./configuration/phpunit.xml --no-coverage --testsuite All",
         "coverage": "XDEBUG_MODE=coverage phpunit -c ./configuration/phpunit.xml --testsuite All",
         "metrics": "phpmetrics --report-html=documentation/phpmetrics_report ./src",
-        "phploc": "phploc src/ --count-tests --log-xml=./documentation/codecoverage/phploc.xml",
-        "docs": "phpdox -f configuration/phpdox.xml",
         "phan": "phan -k configuration/phan.php -C -j2 -3src/Tag"
     }
 }
