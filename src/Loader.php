@@ -68,19 +68,7 @@ final class Loader
         }
         $this->filePath = $absolutePath;
 
-        $is_php81 = (version_compare(PHP_VERSION, '8.1.0') >= 0);
-
-        // auto_detect_line_endings
-        $adle_setting = "auto_detect_line_endings";
-        if (!$is_php81) {
-            ini_set($adle_setting, "true");
-        }
-
         $content = @file($absolutePath, FILE_IGNORE_NEW_LINES);
-
-        if (!$is_php81) {
-            ini_restore($adle_setting);
-        }
 
         if (is_bool($content)) {
             throw new \Exception(sprintf(self::EXCEPTION_READ_ERROR, $absolutePath));
