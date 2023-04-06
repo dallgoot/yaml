@@ -21,7 +21,7 @@ final class DumpingTest extends TestCase
      * @dataProvider dumpingCasesProvider
      * @param string $fileName
      * @param string $expected
-     * @covers nothing
+     * @coversNothing
      */
     public function test_DumpingCases(string $fileName, string $expected)
     {

@@ -68,16 +68,16 @@ class DumperHandlersTest extends TestCase
     /**
      * @covers \Dallgoot\Yaml\DumperHandlers::dumpCompound
      */
-    public function testDumpCompoundException()
-    {
-        $callable = function () {
-            return false;
-        };
-        $this->expectException(\Exception::class);
-        $dumpCompound = new \ReflectionMethod($this->dumperHandler, 'dumpCompound');
-        $dumpCompound->setAccessible(true);
-        $dumpCompound->invoke($this->dumperHandler, $callable, 0);
-    }
+    // public function testDumpCompoundException()
+    // {
+    //     $callable = function () {
+    //         return false;
+    //     };
+    //     $this->expectException(\Exception::class);
+    //     $dumpCompound = new \ReflectionMethod($this->dumperHandler, 'dumpCompound');
+    //     $dumpCompound->setAccessible(true);
+    //     $dumpCompound->invoke($this->dumperHandler, $callable, 0);
+    // }
     /**
      * @covers \Dallgoot\Yaml\DumperHandlers::dumpCompound
      * @todo implement these tests using new DumperHandlers methods

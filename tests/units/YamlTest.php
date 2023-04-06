@@ -17,8 +17,7 @@ use Dallgoot\Yaml\Nodes\Root;
  * @link https://github.com/dallgoot/yaml
  * @since File available since Release 1.0.0
  *
- * @covers \Dallgoot\Yaml
- */
+ * @covers \Dallgoot\Yaml\Yaml */
 class YamlTest extends TestCase
 {
     /**
@@ -36,7 +35,7 @@ class YamlTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml::parse
+     * @covers \Dallgoot\Yaml\Yaml::parse
      */
     public function testParse(): void
     {
@@ -45,7 +44,7 @@ class YamlTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml::parse
+     * @covers \Dallgoot\Yaml\Yaml::parse
      */
     public function testParseException(): void
     {
@@ -54,7 +53,7 @@ class YamlTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml::parseFile
+     * @covers \Dallgoot\Yaml\Yaml::parseFile
      */
     public function testParseFile(): void
     {
@@ -62,7 +61,7 @@ class YamlTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml::parseFile
+     * @covers \Dallgoot\Yaml\Yaml::parseFile
      */
     public function testParseFileException(): void
     {
@@ -71,7 +70,7 @@ class YamlTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml::dump
+     * @covers \Dallgoot\Yaml\Yaml::dump
      */
     public function testDump(): void
     {
@@ -80,7 +79,7 @@ class YamlTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml::dump
+     * @covers \Dallgoot\Yaml\Yaml::dump
      */
     public function testDumpException(): void
     {
@@ -89,7 +88,7 @@ class YamlTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml::dumpFile
+     * @covers \Dallgoot\Yaml\Yaml::dumpFile
      */
     public function testDumpFile(): void
     {
@@ -101,7 +100,7 @@ class YamlTest extends TestCase
     }
 
     /**
-     * @covers \Dallgoot\Yaml::dumpFile
+     * @covers \Dallgoot\Yaml\Yaml::dumpFile
      */
     public function testDumpFileException(): void
     {

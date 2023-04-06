@@ -52,7 +52,7 @@ final class CasesTest extends TestCase
 
     /**
      * @dataProvider examplesProvider
-     * @covers nothing
+     * @coversNothing
      */
     public function testBatchExamples($fileName, $expected)
     {
@@ -78,7 +78,7 @@ final class CasesTest extends TestCase
 
     /**
      * @dataProvider parsingProvider
-     * @covers nothing
+     * @coversNothing
      * @todo verify that every test file has a result in tests/definitions/parsing.yml
      */
     public function testBatchParsing($fileName, $expected)
