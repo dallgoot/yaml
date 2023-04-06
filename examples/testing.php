@@ -21,4 +21,4 @@ $yaml = Yaml::parse($content, 0, $debug);
 
 echo memory_get_usage() . "\n";
 
-//var_dump($content);(json_encode($yaml, JSON_OPTIONS));
+print_r(json_encode($yaml, JSON_OPTIONS));
