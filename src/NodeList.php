@@ -110,7 +110,7 @@ class NodeList extends \SplDoublyLinkedList
         switch ($this->type) {
             case self::MAPPING:  //fall through
             case self::SET:
-                $collect = $parent ?? new \stdClass;
+                $collect = $parent ?? new stdClass;
                 return $this->buildList($collect);
             case self::SEQUENCE:
                 $collect = $parent ?? [];

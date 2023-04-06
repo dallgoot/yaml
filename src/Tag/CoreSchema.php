@@ -104,7 +104,7 @@ class CoreSchema implements SchemaInterface
         if (!($node instanceof NodeList)) {
             throw new \LogicException(self::ERROR_SET);
         } else {
-            $list = $parent ?? new \stdClass;
+            $list = $parent ?? new stdClass;
             $node->rewind();
             foreach ($node as $key => $item) {
                 $this->omap($item, $list);

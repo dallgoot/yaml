@@ -116,7 +116,7 @@ class Key extends NodeGeneric
      * @param object|array $parent The parent
      *
      * @throws \ParseError if Key has no name(identifier) Note: empty string is allowed
-     * @return null|\stdClass
+     * @return null|stdClass
      */
     public function build(&$parent = null)
     {
@@ -126,7 +126,7 @@ class Key extends NodeGeneric
             $result = is_null($this->value) ? null : $this->value->build();
         }
         if (is_null($parent)) {
-            $parent = new \stdClass;
+            $parent = new stdClass;
             $parent->{$this->identifier} = &$result;
             return $parent;
         } else {

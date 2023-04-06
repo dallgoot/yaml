@@ -94,7 +94,7 @@ class DumperHandlersTest extends TestCase
     //     $this->assertEquals('- a', $dumpCompound->invoke($this->dumperHandler, ['a'], 0));
     //     $compact = new Compact([1, 2, 3]);
     //     $this->assertEquals('[1, 2, 3]', $dumpCompound->invoke($this->dumperHandler, $compact, 0));
-    //     $o = new \stdclass;
+    //     $o = new stdClass;
     //     $o->a = 1;
     //     $compact = new Compact($o);
     //     $this->assertEquals('{a: 1}', $dumpCompound->invoke($this->dumperHandler, $compact, 0));
@@ -112,7 +112,7 @@ class DumperHandlersTest extends TestCase
         $o = new Compact([]);
         $o->a = 1;
         $o->b = [1, 2];
-        $o->c = new \stdclass;
+        $o->c = new stdClass;
         $o->c->ca = 1;
         $this->assertEquals("{a: 1, b: [1, 2], c: {ca: 1}}", $this->dumperHandler->dumpCompact($o, 0));
     }

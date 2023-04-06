@@ -50,7 +50,7 @@ class SetValueTest extends TestCase
      */
     public function testBuild(): void
     {
-        $parent = new \stdClass;
+        $parent = new stdClass;
         $parent->lastKey = null;
         $this->nodeSetValue->build($parent);
         $this->assertTrue(property_exists($parent, 'lastKey'));

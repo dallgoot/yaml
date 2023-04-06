@@ -6,7 +6,7 @@ use Dallgoot\Yaml\Types\Compact;
 
 $yaml = new YamlObject(0);
 
-$o = new \stdClass;
+$o = new stdClass;
 
 $o->array = [1,2,3];
 
