@@ -193,7 +193,7 @@ class BuilderTest extends TestCase
     {
         $this->expectException(\Error::class);
         $list = new NodeList();
-        $list->push(new \StdClass);
+        $list->push(new \stdClass);
         $yamlObject = $this->builder->buildDocument($list, 0);
     }
 

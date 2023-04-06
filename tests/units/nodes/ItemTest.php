@@ -148,7 +148,7 @@ class ItemTest extends TestCase
     public function testBuildWhenParentIsObject()
     {
         $this->expectException(\Exception::class);
-        $parent = new \StdClass;
+        $parent = new \stdClass;
         $this->nodeItem->build($parent);
     }
 

@@ -193,7 +193,7 @@ class KeyTest extends TestCase
         $this->assertTrue(property_exists($built, 'key'));
         $this->assertEquals('value', $built->key);
         //
-        $parent = new \StdClass;
+        $parent = new \stdClass;
         $built = $this->nodeKey->build($parent);
         $this->assertTrue(property_exists($parent, 'key'));
         $this->assertEquals('value', $parent->key);

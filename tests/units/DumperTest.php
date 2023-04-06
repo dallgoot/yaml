@@ -73,7 +73,7 @@ class DumperTest extends TestCase
         $this->assertEquals('stream', $this->dumper->dump(fopen(__FILE__, 'r'), 0));
         $this->assertEquals('str', $this->dumper->dump('str', 0));
         $this->assertEquals('- 1', $this->dumper->dump([1], 0, false, true));
-        $o = new \Stdclass;
+        $o = new \stdclass;
         $o->prop = 1;
         $this->assertEquals('prop: 1', $this->dumper->dump($o, 0, false, true));
     }

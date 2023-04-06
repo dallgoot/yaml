@@ -5,7 +5,7 @@ use Dallgoot\Yaml\Types\Compact;
 
 $yaml = new YamlObject(0);
 
-$o = new \Stdclass;
+$o = new \stdclass;
 
 $o->key = 'a';
 

@@ -50,7 +50,7 @@ class SetKeyTest extends TestCase
      */
     public function testBuild(): void
     {
-        $parent = new \StdClass;
+        $parent = new \stdClass;
         $built = $this->nodeSetKey->build($parent);
         $this->assertTrue(property_exists($parent, 'someStringKey'));
         $this->assertEquals(null, $parent->someStringKey);
