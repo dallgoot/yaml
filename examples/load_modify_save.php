@@ -8,4 +8,4 @@ $yamlObject = Yaml::parseFile('./examples/dummy.yml', $options = null, $debug = 
 //modifying some part
 $yamlObject->object->array[3]->integer = '123456789';
 //dumping the corresponding YAML
-var_dump(Yaml::dump($yamlObject, 0));
+print_r(Yaml::dump($yamlObject, 0));

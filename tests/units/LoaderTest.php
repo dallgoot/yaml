@@ -138,7 +138,7 @@ class LoaderTest extends TestCase
         $this->assertTrue($multidoc[0] instanceof YamlObject, 'array #0 is NOT a YamlObject');
         $this->assertTrue($multidoc[1] instanceof YamlObject, 'array #1 is NOT a YamlObject');
         $yamlMapping = $this->loader->parse("key:\n    insidekey: value\nlessindent: value");
-        $this->assertTrue($yamlMapping instanceof YamlObject);//var_dump($yamlMapping);die;
+        $this->assertTrue($yamlMapping instanceof YamlObject);
         $this->assertTrue(\property_exists($yamlMapping, 'key'));
     }
 

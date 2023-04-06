@@ -12,12 +12,12 @@ EOF;
 $obj = Yaml::parse($yamlContent);
 
 //printing specifically some values
-var_dump($obj->compact_object->c);
-var_dump($obj->compact_array[3]);
+print_r($obj->compact_object->c);
+print_r($obj->compact_array[3]);
 
 //modifying those same values
 $obj->compact_object->c = 3;
 $obj->compact_array[3] = 3;
 
 //printing the corresponding YAML
-var_dump(Yaml::dump($obj));
+print_r(Yaml::dump($obj));

@@ -9,7 +9,6 @@ final class DumpingTest extends TestCase
     public function dumpingCasesProvider()
     {
         $nameResultPair = get_object_vars(Yaml::parseFile(__DIR__.'/definitions/dumping_tests.yml'));
-        // var_dump($nameResultPair);//exit();
         $generator = function() use($nameResultPair) {
             foreach ($nameResultPair as $testName => $testResult) {
                 yield [$testName, $testResult];

@@ -10,7 +10,7 @@ $debug = 0;
 */
 $yaml = Yaml::parseFile('./examples/dummy.yml', 0, $debug);
 
-var_dump($yaml->object->array[0]);
+print_r($yaml->object->array[0]);
 
 $yamlContent = <<<EOF
 --- some document we don't care about
@@ -23,4 +23,4 @@ $yamlContent = <<<EOF
             - OK
 EOF;
 $second_document = Yaml::parse($yamlContent)[1];
-var_dump($second_document[1]->mapping->somekey->array[0]);
+print_r($second_document[1]->mapping->somekey->array[0]);

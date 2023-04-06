@@ -16,4 +16,4 @@ foreach($files as $key => $fileName)
     $yamlObjList[] =  $yloader->load($fileName)->parse();
 }
 
-var_dump($yamlObjList);
+print_r($yamlObjList);

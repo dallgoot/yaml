@@ -59,7 +59,6 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
         if (empty($name)) {
             throw new \UnexpectedValueException(self::UNAMED_REFERENCE);
         }
-        // var_dump("DEBUG: '$name' added as reference");
         $this->__yaml__object__api->_anchors[$name] = $value;
         return $this->__yaml__object__api->_anchors[$name];
     }
@@ -184,6 +183,7 @@ class YamlObject extends \ArrayIterator implements \JsonSerializable
      *
      * @return mixed Array (of object properties or keys) OR string if YAML object only contains LITTERAL (in self::value)
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         $prop = get_object_vars($this);

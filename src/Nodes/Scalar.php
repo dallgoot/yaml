@@ -118,10 +118,8 @@ Scalars with the “?” non-specific tag (that is, plain scalars) are matched w
             return json_decode('"' . $matches[1] . '"');
         };
         $replaceNonPrintable = function ($matches) {
-            // var_dump($matches[1]);
             return $matches[1] . "";
         };
-        // preg_match( "/[^\x{06F0}-\x{06F9}\x]+/u" , '۱۲۳۴۵۶۷۸۹۰' );
         return preg_replace_callback_array(
             [
                 '/((?<![\\\\])\\\\x[0-9a-f]{2})/i' => $replaceUnicodeSeq,

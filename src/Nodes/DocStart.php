@@ -43,11 +43,8 @@ class DocStart extends NodeGeneric
             if ($this->value instanceof Tag) {
                 preg_match(Regex::TAG_PARTS, $this->value->raw, $tagparts);
                 if (preg_match("/(?(DEFINE)" . Regex::TAG_URI . ')(?&url)/', $tagparts['tagname'], $matches)) {
-                    // throw new \UnexpectedValueException("Tag '".$this->value->raw."' is invalid", 1);
                     $parent->addTag($tagparts['handle'], $tagparts['tagname']);
-                    // var_dump('HERE');
                 } else {
-                    // var_dump('THERE');
                     $this->value->build($parent);
                 }
             } else {

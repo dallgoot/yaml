@@ -18,6 +18,6 @@ $nameResultPair = get_object_vars(Yaml::parseFile('tests/definitions/dumping_tes
 if ($nameResultPair[$testName] === $text) {
     echo 'WRITE OK !!!';
 } else {
-    var_dump('EXPECTED', $nameResultPair[$testName]);
-    var_dump('RECEIVED', $text);
+    print_r('EXPECTED', $nameResultPair[$testName]);
+    print_r('RECEIVED', $text);
 }

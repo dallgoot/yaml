@@ -160,7 +160,7 @@ class NodeGenericTest extends TestCase
     public function testGetDeepestNode(): void
     {
         $child = NodeFactory::get('    key: &anchor |', 1);
-        $this->node->add($child);//var_dump($child->getDeepestNode());
+        $this->node->add($child);
         $this->assertTrue($child->getDeepestNode() instanceof Literal);
         $this->assertTrue($this->node->getDeepestNode() instanceof Literal);
     }
