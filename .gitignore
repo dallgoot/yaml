@@ -5,9 +5,11 @@ dependencies/
 phpmetrics_report/
 runtests
 .phpunit.result.cache
+configuration/.phpunit.cache/
 configuration/daux.json
 emptyFile.test
 documentation/*
+!documentation/coherence.md
 .tool-versions
 devto_post.md
 todo.md

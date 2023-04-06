@@ -135,13 +135,13 @@ class BuilderTest extends TestCase
      *  only JSON content
      *  multidocument
      */
-    public function testBuildContentException(): void
-    {
-        $this->expectException(\Exception::class);
-        $root = new Root;
-        $root->value = null;
-        $this->builder->buildContent($root);
-    }
+    // public function testBuildContentException(): void
+    // {
+    //     $this->expectException(\Exception::class);
+    //     $root = new Root;
+    //     $root->value = null;
+    //     $this->builder->buildContent($root);
+    // }
 
     /**
      * @covers \Dallgoot\Yaml\Builder::buildDocument

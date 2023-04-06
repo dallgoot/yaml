@@ -57,7 +57,7 @@ class CoreSchema implements SchemaInterface
      *
      * @return string the value of Node converted to string if needed
      */
-    public function str($node, &$parent = null): string
+    public function str($node, &$parent = null): ?string
     {
         if ($node instanceof Literals) {
             $node = $node->value;

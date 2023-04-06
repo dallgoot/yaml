@@ -8,7 +8,7 @@ use Dallgoot\Yaml\Yaml;
 use Dallgoot\Yaml\Tag\TagFactory;
 use Dallgoot\Yaml\Loader;
 
-final class Cases extends TestCase
+final class CasesTest extends TestCase
 {
     private $testFolder = __DIR__ . "/cases/";
     // private const JSON_OPTIONS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_LINE_TERMINATORS | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_PARTIAL_OUTPUT_ON_ERROR;
@@ -18,7 +18,7 @@ final class Cases extends TestCase
     // Batch tests
     // first declare Providers
 
-    private function getGenerator($array)
+    private static function getGenerator($array)
     {
         $generator = function () use ($array) {
             foreach ($array as $key => $value) {
@@ -28,19 +28,19 @@ final class Cases extends TestCase
         return $generator();
     }
 
-    public function examplesProvider()
+    public static function examplesProvider()
     {
         $nameResultPair = get_object_vars(Yaml::parseFile(__DIR__ . '/definitions/examples_tests.yml'));
-        $this->assertArrayHasKey('Example_2_01', $nameResultPair, 'ERROR during Yaml::parseFile for ../definitions/examples_tests.yml');
-        $this->assertEquals(28, count($nameResultPair));
-        return $this->getGenerator($nameResultPair);
+        // $this->assertArrayHasKey('Example_2_01', $nameResultPair, 'ERROR during Yaml::parseFile for ../definitions/examples_tests.yml');
+        // $this->assertEquals(28, count($nameResultPair));
+        return self::getGenerator($nameResultPair);
     }
 
-    public function parsingProvider()
+    public static function parsingProvider()
     {
         $nameResultPair = get_object_vars(Yaml::parseFile(__DIR__ . '/definitions/parsing_tests.yml'));
-        $this->assertEquals(58, count($nameResultPair));
-        return $this->getGenerator($nameResultPair);
+        // $this->assertEquals(58, count($nameResultPair));
+        return self::getGenerator($nameResultPair);
     }
 
     // public function failingProvider()

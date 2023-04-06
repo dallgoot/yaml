@@ -6,7 +6,7 @@ use Dallgoot\Yaml\Yaml;
 
 final class DumpingTest extends TestCase
 {
-    public function dumpingCasesProvider()
+    public static function dumpingCasesProvider()
     {
         $nameResultPair = get_object_vars(Yaml::parseFile(__DIR__.'/definitions/dumping_tests.yml'));
         $generator = function() use($nameResultPair) {

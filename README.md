@@ -12,7 +12,7 @@ PHP library to load and parse YAML file to coherent PHP datatypes equivalent
 
 - Dependencies are only useful for building documentation or for code contribution, so the "--update-no-dev" prevent from downloading and managing packages that you probably won't use.
 
-You first need [Composer](https://getcomposer.org/) and PHP ^7.1.10
+You first need [Composer](https://getcomposer.org/) and PHP ^8.2.4
 
 ```bash
 composer require --update-no-dev dallgoot/yaml
@@ -20,7 +20,7 @@ composer require --update-no-dev dallgoot/yaml
 
 ## Usage
 
-See examples files in [examples folder](./examples)
+See [examples folder](./examples)
 
 ## Features
 
@@ -30,8 +30,8 @@ See examples files in [examples folder](./examples)
   - common scalars : string, integer, float, INF, NAN
   - JSON, DateTime(option), etc.
 - specific types (objects)
-  - **YamlObject** for each Yaml content (inherits from PHP class ArrayIterator)
-  - **Compact** for compact/short YAML syntax (inherits from PHP class ArrayIterator)
+  - **YamlObject** for each Yaml content (multi-documents YAML is an array of YamlObject)
+  - **Compact** for compact/short YAML syntax
   - **Tagged** object when tag is not determinable
 - recover from some parsing errors
 - tolerant to tabulations
@@ -46,7 +46,7 @@ See examples files in [examples folder](./examples)
 - multi-line values (simple|double quoted or not, compact mapping|sequence or JSON)
 - multiple documents in a content (file or string)
 - compact syntax for mappings and sequences
-- comments (option : enabled by default)
+- comments (not yet implemented)
 - references (option : enabled by default)
 - tags with behaviour customization (overriding for common(CoreSchema), or specifying for custom) via implementing Tag/SchemaInterface.
 
@@ -54,8 +54,8 @@ See examples files in [examples folder](./examples)
 
 |                                                                      | YAML version supported | coherent data types | multiple documents | JSON format validation | complex mapping | real reference behaviour | custom tags handling |
 | -------------------------------------------------------------------- |:----------------------:|:-------------------:|:------------------:|:----------------------:|:---------------:|:------------------------:|:--------------------:|
-| [Symfony Yaml](https://symfony.com/doc/current/components/yaml.html) | 1.2                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
-| [php-yaml](https://pecl.php.net/package/yaml)                        | 1.1                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
+| [Symfony Yaml](https://symfony.com/doc/current/components/yaml.html) | 1.2                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ✔️                    |
+| [php-yaml](https://pecl.php.net/package/yaml)                        | 1.1                    | ❌                   | ✔️                  | ❌                      | ❌               | ❌                        | ✔️                    |
 | [syck](http://pecl.php.net/package/syck)                             | 1.0                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
 | [spyc](https://github.com/mustangostang/spyc)                        | 1.0                    | ❌                   | ❌                  | ❌                      | ❌               | ❌                        | ❌                    |
 | **Dallgoot/Yaml**                                                    | 1.2                    | ✔️                  | ✔️                 | ✔️                     | ✔️              | ✔️                       | ✔️                   |
@@ -94,8 +94,11 @@ See examples files in [examples folder](./examples)
     - TBD
     - improved memory using SplFixedArray instead of regular arrays where possible
 
+
+## Support
+That is greatly appreciated : <a href="https://www.buymeacoffee.com/m23aurqwP" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 ## Thanks
 
-- (<https://yaml.org>)
-- (<https://www.json2yaml.com/convert-yaml-to-json>)
+- https://yaml.org
+- https://www.json2yaml.com/convert-yaml-to-json
 - [Symfony Yaml](https://symfony.com/doc/current/components/yaml.html)
