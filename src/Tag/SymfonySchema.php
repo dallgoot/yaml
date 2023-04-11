@@ -32,9 +32,8 @@ class SymfonySchema implements SchemaInterface
                 throw new \Exception("value for tag 'php/object' could NOT be unserialized");
             }
             return $phpObject;
-        } elseif ($node instanceof NodeList) {
-            throw new \Exception("tag 'php/object' can NOT be a NodeList");
         }
+        throw new \Exception("tag 'php/object' value must NOT be a list");
     }
 
     public function __call($name, $arguments)

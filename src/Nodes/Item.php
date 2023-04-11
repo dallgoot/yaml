@@ -6,6 +6,7 @@ use Dallgoot\Yaml\Nodes\Generic\NodeGeneric;
 use Dallgoot\Yaml\NodeFactory;
 use Dallgoot\Yaml\Regex;
 use Dallgoot\Yaml\Types\YamlObject;
+use Dallgoot\Yaml\Types\Compact;
 
 /**
  *
@@ -60,13 +61,13 @@ class Item extends NodeGeneric
     /**
      * Builds an item. Adds the item value to the parent array|Iterator
      *
-     * @param array|YamlObject|null $parent The parent
+     * @param array|YamlObject|Compact|null $parent The parent
      *
      * @throws \Exception  if parent is another type than array or object Iterator
      */
     public function build(&$parent = null): ?array
     {
-        if (!is_null($parent) && !is_array($parent) && !($parent instanceof YamlObject)) {
+        if (!is_null($parent) && !is_array($parent) && !($parent instanceof YamlObject) && !($parent instanceof Compact)) {
             throw new \Exception("parent must be an array or YamlObject not " .
                 (is_object($parent) ? get_class($parent) : gettype($parent)));
         }

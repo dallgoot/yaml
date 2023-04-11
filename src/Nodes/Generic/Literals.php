@@ -83,7 +83,7 @@ abstract class Literals extends NodeGeneric
             $result = $this->identifier === '-' ? $tmp : $tmp . "\n";
         }
         if ($this->_parent instanceof Root) {
-            $this->_parent->getYamlObject()->setText($result);
+            $this->_parent->/** @scrutinizer ignore-call */ getYamlObject()->setText($result);
             return null;
         } else {
             return $result;
@@ -112,7 +112,7 @@ abstract class Literals extends NodeGeneric
         } elseif ($value instanceof NodeList && !($child instanceof Scalar)) {
             $start = ltrim($child->raw) . "\n";
         }
-        return $start . $this->getFinalString($value, $refIndent);
+        return $start . $this->getFinalString(/** @scrutinizer ignore-type */$value, $refIndent);
     }
 
     public function isAwaitingChild(NodeGeneric $node): bool

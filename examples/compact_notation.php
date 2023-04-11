@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__.'/../vendor/autoload.php';
 
-use \Dallgoot\Yaml;
+use Dallgoot\Yaml\Yaml;
 
 $yamlContent = <<<EOF
 compact_object: {a: 1, b: 2, c: OK}

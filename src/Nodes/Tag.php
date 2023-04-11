@@ -62,7 +62,7 @@ class Tag extends Actions
             $transformed = TagFactory::transform((string) $this->tag, $value, $parent);
             return $transformed;
         } catch (\UnexpectedValueException $e) {
-            return new Tagged((string) $this->tag, is_null($value) ? null : $this->value->build($parent));
+            return new Tagged((string) $this->tag, is_null($value) ? null : ((object) $this->value)->build($parent));
         } catch (\Throwable $e) {
             throw new \Exception("Tagged value could not be transformed for tag '$this->tag'", 1, $e);;
         }

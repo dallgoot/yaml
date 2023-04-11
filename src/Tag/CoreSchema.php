@@ -52,7 +52,7 @@ class CoreSchema implements SchemaInterface
     /**
      * Specific Handler for 'str' tag
      *
-     * @param NodeGeneric|NodeList $node    The Node or NodeList
+     * @param Literals|NodeGeneric|NodeList $node    The Node or NodeList
      * @param object|array|null  $parent The parent
      *
      * @return string the value of Node converted to string if needed
@@ -128,8 +128,8 @@ class CoreSchema implements SchemaInterface
     public function omap($node, &$parent = null)
     {
         if ($node instanceof NodeGeneric) {
-            if ($node instanceof Nodes\Item && $node->value instanceof Nodes\Key) {
-                $key = $node->value;
+            $key = $node->value;
+            if ($node instanceof Nodes\Item && $key instanceof Nodes\Key) {
                 $keyName = $key->identifier;
                 $keyValue = $key->value->build();
                 if (is_null($parent)) {

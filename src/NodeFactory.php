@@ -23,7 +23,6 @@ class NodeFactory
 
     final public static function get(string $nodeString, int $line = 0, bool $debug = false): NodeGeneric
     {
-        $node = null;
         $trimmed = ltrim($nodeString);
         $match = (bool) preg_match(Regex::KEY, $trimmed, $matches);
         $node = match(true) {

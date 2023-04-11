@@ -96,7 +96,7 @@ final class Loader
         } else {
             $simplerLineFeeds = preg_replace('/(\r\n|\r)$/', "\n", (string) $strContent);
             $source = preg_split("/\n/m", $simplerLineFeeds, 0, \PREG_SPLIT_DELIM_CAPTURE);
-            if (!is_array($source) || !count($source)) {
+            if (!count($source)) {
                 throw new \Exception(self::EXCEPTION_LINE_SPLIT);
             }
             $source = \SplFixedArray::fromArray($source, false);

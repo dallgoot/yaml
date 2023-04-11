@@ -38,7 +38,7 @@ class Builder
     public function buildContent(Root $root)
     {
         switch ($this->_debug) {
-            case 2 : print_r($root);
+            case 2 : print_r($root);// fall-through
             case 1 : return null;
         }
         $documents = [];

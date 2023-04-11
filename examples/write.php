@@ -2,6 +2,7 @@
 require_once __DIR__.'/../vendor/autoload.php';
 
 use Dallgoot\Yaml\Yaml;
+use Dallgoot\Yaml\Types\YamlObject;
 
 //Getting some document as PHP variable $YamlObject
 //the document here is a PHP file used for tests
@@ -12,12 +13,12 @@ $yamlObject = (include "tests/cases/dumping/$testName.php");
 $text = Yaml::dump($yamlObject, 0);
 
 //getting the tests results
-$nameResultPair = get_object_vars(Yaml::parseFile('tests/definitions/dumping_tests.yml'));
+$nameResultPair = get_object_vars((YamlObject) Yaml::parseFile('tests/definitions/dumping_tests.yml'));
 
 //verify that the text(yaml) we got is the same as we expected for this test
 if ($nameResultPair[$testName] === $text) {
     echo 'WRITE OK !!!';
 } else {
-    print_r('EXPECTED', $nameResultPair[$testName]);
-    print_r('RECEIVED', $text);
+    print_r('EXPECTED'. $nameResultPair[$testName]);
+    print_r('RECEIVED'. $text);
 }

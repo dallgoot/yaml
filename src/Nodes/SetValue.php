@@ -31,7 +31,7 @@ class SetValue extends NodeGeneric
      */
     public function build(&$parent = null)
     {
-        $prop = array_keys(get_object_vars($parent));
+        $prop = array_keys(get_object_vars((object) $parent));
         $key = end($prop);
         $parent->{$key} = is_null($this->value) ? null : $this->value->build();
         return null;

@@ -16,8 +16,6 @@ use Dallgoot\Yaml\Nodes\Tag;
  */
 abstract class Actions extends NodeGeneric
 {
-    // public $anchor = '';
-    // public $tag = '';
 
     public function __construct(string $nodeString, int $line)
     {

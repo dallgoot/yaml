@@ -14,7 +14,6 @@ use Dallgoot\Yaml\Types\YamlObject;
 class Dumper
 {
     public const INDENT = 2;
-    // private const WIDTH  = 120; //TODO forget this feature for the moment
     private const OPTIONS = 0b00000;
     public const DATE_FORMAT = 'Y-m-d';
 
@@ -30,7 +29,7 @@ class Dumper
 
     public bool $_compactMode = false;
 
-    private ?DumperHandlers $handler;
+    private DumperHandlers $handler;
 
     public const KEY_MASK_SEQ = '- %s';
     public const KEY_MASK_MAP = '%s: %s';
@@ -110,9 +109,7 @@ class Dumper
             // && $this->$result instanceof DLL) $this->$result->push("---");
         }
         // $this->insertComments($obj->getComment());
-        $properties = get_object_vars($obj);
-        $pairs = [];
-        if (count($properties) === 0) {
+        if (count(get_object_vars($obj)) === 0) {
             return $this->handler->dumpArray($obj->getArrayCopy(), 0, false, true);
         }else {
             return $this->handler->dumpObject($obj, 0, false, true);
