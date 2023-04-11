@@ -2,7 +2,9 @@ dist: jammy
 language: php
 php:
   - 8.2
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install libonig5 libonig-dev
 before_script:
-  - apt-get install libonig5 libonig-dev
   - composer install
 script: vendor/bin/phpunit --colors=always -c ./configuration/phpunit.xml --testsuite All
