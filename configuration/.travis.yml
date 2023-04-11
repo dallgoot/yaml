@@ -1,6 +1,6 @@
 language: php
 php:
-  - '8.2.4'
+  - '8.1.14'
 before_script:
   - composer install
 script: vendor/bin/phpunit --colors=always --configuration ./configuration/phpunit.xml --testsuite All

@@ -27,7 +27,7 @@
         }
     },
     "require": {
-        "php": ">=8.2.4",
+        "php": ">=8.1.14",
         "ext-json": "*",
         "ext-pcre": "*",
         "ext-SPL": "*",

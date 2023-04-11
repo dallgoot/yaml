@@ -40,7 +40,7 @@ versions[2]=1
 onlyMinor=1
 
 command="vendor/bin/phpunit \
-                            --configuration ./configuration/phpunit.xml \
+                            -c ./configuration/phpunit.xml \
                             --testsuite All --no-coverage --columns 160 --disallow-test-output"
                             # --testsuite units --no-coverage --columns 160 --disallow-test-output --no-logging"
 

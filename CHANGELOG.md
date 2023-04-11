@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- minimum PHP version supported is now 8.0.0
+- minimum PHP version supported is now 8.1.14
 - autoloading for PSR-4 (sorry to have polluted autoloads files worldwide 😢)
 - parsing in NodeFactory
 - logic in Dallgoot\Yaml\Dumper
 
 ### Removed
 
-- support for PHP before 8.0.0
+- support for PHP before 8.1.14
 - some dev dependencies
 - Dallgoot\Yaml class replaced by Dallgoot\Yaml\Yaml
 
