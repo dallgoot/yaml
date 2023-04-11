@@ -1,4 +1,4 @@
-dist: xenial
+dist: jammy
 language: php
 php:
   - 8.2
