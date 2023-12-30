@@ -47,7 +47,8 @@ class Item extends NodeGeneric
     public function getTargetOnEqualIndent(NodeGeneric &$node): NodeGeneric
     {
         $supposedParent = $this->getParent();
-        if ($node->indent === $supposedParent->indent) {
+        // Note: the check for indent = 0 is to support Items WITH indent that are NOT at the root of the document (indent > 0)
+        if ($node->indent === 0 && $node->indent === $supposedParent->indent) {
             return $supposedParent->getParent();
         }
         return $supposedParent;
