@@ -21,8 +21,8 @@ class Regex
     const WORD   = "(?'word'[[:alnum:] _\\-\\.]+)";
     const RC     = "(?'rc'\\*\\w+)"; //reference call
     // const RC     = "(?'rc'\\*[^ *&]+)"; //reference call
-    const RD     = "(?'rd'&\\w+)"; //reference definition
-    // const RD     = "(?'rd'&[^ &*]+)"; //reference definition
+    // const RD     = "(?'rd'&\\w+)"; //reference definition
+    const RD     = "(?'rd'&[^ ]+)"; //reference definition
     // const TAG    = "(?'tag'!!?[\\w\\/\\-]+!?)";
     const TAG    = "(?'tag'!!?[^! ]+!?)";
     const ALL    = "(?'all'(?:(?:(?&rd)|(?&tag)) +)?(?:(?&quot)|(?&rc)|(?&word)|(?&map)|(?&seq)))";

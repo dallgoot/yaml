@@ -3,6 +3,8 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 use Dallgoot\Yaml\Loader;
 
+$debug = 0;
+
 
 // array of YAML content per file
 $yamlObjList = [];

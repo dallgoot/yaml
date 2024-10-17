@@ -6,6 +6,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Dallgoot\Yaml\Types\YamlObject;
 use Dallgoot\Yaml\YamlProperties;
+use Dallgoot\Yaml\Yaml;
 use ReflectionProperty;
 
 /**
@@ -93,6 +94,17 @@ class YamlObjectTest extends TestCase
         $this->assertEquals($this->yamlObject->getAllReferences(), []);
         $this->yamlObject->addReference('referenceName', $this->refValue);
         $this->assertEquals($this->yamlObject->getAllReferences(), ['referenceName' => $this->refValue]);
+        $yamlContent = <<<EOF
+        anchor_definition: &anchor-name OK
+
+        anchor_call: *anchor-name
+        EOF;
+        $obj = Yaml::parse($yamlContent);
+        $propReflector = new ReflectionProperty($obj,'__yaml__object__api');
+        $propReflector->setAccessible(true);
+        $yamlProperties = $propReflector->getValue($obj);
+        // var_dump($yamlProperties) . PHP_EOL;
+        $this->assertArrayHasKey('anchor-name', $yamlProperties->_anchors);
     }
 
     /**

@@ -139,6 +139,8 @@ class DumperHandlers
         }
         foreach ($a as $value) {
             $dumpedValue = $this->dumper->dump($value, 0, $value instanceof Compact, false);
+            // TODO : seems ok but make tests to double check : fixed by PR from Delkano
+            $dumpedValue = $this->dumper->dump($value, $realIndent, $value instanceof Compact, false);
             $pairs[] = sprintf("%s- %s", str_repeat(' ', $realIndent), $dumpedValue);
         }
         return implode(PHP_EOL, $pairs);
