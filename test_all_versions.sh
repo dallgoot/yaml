@@ -9,11 +9,11 @@ function version_gt() {
     test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1";
 }
 echo Checking Docker is running...
-docker version
-docker_status=$?
-if test $docker_status -gt 0
+podman version
+podman_status=$?
+if test $podman_status -gt 0
 then
-    echo "Error: Docker is not running correctly ???"
+    echo "Error: podman is not running correctly ???"
     exit 1
 fi
 # i=0
@@ -32,10 +32,9 @@ COMPOSER_CURRENT=$(composer show 'phpunit/phpunit' | grep -Eow "[0-9\.]+" -m 1 )
 # fi
 declare -A versions
 # 7.key.value
-versions[0]=27
-versions[1]=14
-versions[2]=1
-
+versions[1]=30
+versions[2]=24
+versions[3]=12
 
 onlyMinor=1
 
@@ -57,12 +56,12 @@ do
         for patch in `seq 0 ${versions[$minor]}`
         do
             displayTitle "8.$minor.$patch"
-            docker run --rm -v $(pwd):/app -w /app php:8.$minor.$patch-$tag $command
+            podman run --rm --privileged -v $(pwd):/app -w /app php:8.$minor.$patch-$tag $command
         done
     else
         patch=${versions[$minor]}
         displayTitle "8.$minor.$patch"
-        docker run --rm -v $(pwd):/app -w /app php:8.$minor.$patch-$tag $command
+        podman run --rm --privileged -v $(pwd):/app -w /app php:8.$minor.$patch-$tag $command
     fi
 done
 
