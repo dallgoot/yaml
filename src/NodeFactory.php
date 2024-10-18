@@ -35,6 +35,25 @@ class NodeFactory
         return $node;
     }
 
+    /**
+     * This is a slimmer version og NodeFactory::get
+     * in the case of a Key value we can ignore certain cases and remove ambiguity and errors
+     * 
+     * @param string $nodeString
+     * @param int $line
+     * @param bool $debug
+     * @return \Dallgoot\Yaml\Nodes\Generic\NodeGeneric
+     */
+    public static function getKeyValue(string $nodeString, int $line = 0, bool $debug = false): NodeGeneric
+    {
+        $trimmed = ltrim($nodeString);
+        $node = match(true) {
+            $trimmed === '' => new Blank($nodeString, $line),
+            default => self::onCharacter($trimmed[0], $nodeString, $line)
+        };
+        if ($debug) echo $line . ":" . get_class($node) . "\n";
+        return $node;
+    }
 
     private static function onCharacter(string $first, string $nodeString, int $line): NodeGeneric
     {

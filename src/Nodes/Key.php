@@ -29,7 +29,7 @@ class Key extends NodeGeneric
 
         $value = isset($matches[2]) ? trim($matches[2]) : null;
         if (!empty($value)) {
-            $child = NodeFactory::get($value, $line);
+            $child = NodeFactory::getKeyValue($value, $line);
             $child->indent = null;
             $this->add($child);
         }
