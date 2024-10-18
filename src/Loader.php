@@ -94,7 +94,7 @@ final class Loader
                 $source = $this->content;
             }
         } else {
-            $simplerLineFeeds = preg_replace('/(\r\n|\r)$/', "\n", (string) $strContent);
+            $simplerLineFeeds = preg_replace('/(\r\n|\r)/', "\n", (string) $strContent);
             $source = preg_split("/\n/m", $simplerLineFeeds, 0, \PREG_SPLIT_DELIM_CAPTURE);
             if (!count($source)) {
                 throw new \Exception(self::EXCEPTION_LINE_SPLIT);
