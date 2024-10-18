@@ -176,6 +176,9 @@ final class Loader
             return $deepest->specialProcess($current,  $this->_blankBuffer);
         } elseif (!($current instanceof Nodes\Partial)) {
             return $current->specialProcess($previous, $this->_blankBuffer);
+            if($current instanceof Nodes\Comment) {
+                return true;
+            }
         }
         return false;
     }

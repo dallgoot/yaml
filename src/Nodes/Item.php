@@ -46,6 +46,9 @@ class Item extends NodeGeneric
 
     public function getTargetOnEqualIndent(NodeGeneric &$node): NodeGeneric
     {
+        if($node instanceof Key ) {
+            return $this->getParent()->getParent();
+        }
         $supposedParent = $this->getParent();
         // Note: the check for indent = 0 is to support Items WITH indent that are NOT at the root of the document (indent > 0)
         if ($node->indent === 0 && $node->indent === $supposedParent->indent) {
@@ -68,7 +71,11 @@ class Item extends NodeGeneric
      */
     public function build(&$parent = null): ?array
     {
-        if (!is_null($parent) && !is_array($parent) && !($parent instanceof YamlObject) && !($parent instanceof Compact)) {
+        if (!is_null($parent)
+            && !is_array($parent)
+            && !($parent instanceof YamlObject)
+            && !($parent instanceof Compact)
+        ) {
             throw new \Exception("parent must be an array or YamlObject not " .
                 (is_object($parent) ? get_class($parent) : gettype($parent)));
         }
