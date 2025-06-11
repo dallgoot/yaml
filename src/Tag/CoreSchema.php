@@ -85,7 +85,7 @@ class CoreSchema implements SchemaInterface
      *
      * @return string  The value considered as 'binary' Note: the difference with strHandler is that multiline have not separation
      */
-    public function binary($node, NodeGeneric &$parent = null)
+    public function binary($node, ?NodeGeneric &$parent = null)
     {
         return $this->str($node, $parent);
     }

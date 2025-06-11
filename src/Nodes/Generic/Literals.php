@@ -24,7 +24,7 @@ abstract class Literals extends NodeGeneric
     public $value;
     public $identifier;
 
-    abstract protected function getFinalString(NodeList $list, int $refIndent = null): string;
+    abstract protected function getFinalString(NodeList $list, ?int $refIndent = null): string;
 
     public function __construct(string $nodeString, int $line)
     {

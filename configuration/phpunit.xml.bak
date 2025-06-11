@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd" backupGlobals="true" bootstrap="../vendor/autoload.php" processIsolation="false" stopOnError="true" stopOnFailure="true" stopOnIncomplete="false" stopOnSkipped="true" stopOnRisky="true" timeoutForSmallTests="1" timeoutForMediumTests="10" timeoutForLargeTests="60" colors="true" cacheDirectory=".phpunit.cache" backupStaticProperties="false" requireCoverageMetadata="true">
+  <coverage>
+    <include>
+      <directory suffix=".php">../src</directory>
+    </include>
+    <report>
+      <clover outputFile="../documentation/codecoverage/coverage-clover.xml"/>
+      <html outputDirectory="../documentation/codecoverage/php-code-coverage" lowUpperBound="40" highLowerBound="80"/>
+      <xml outputDirectory="../documentation/codecoverage/phpunit"/>
+    </report>
+  </coverage>
+  <testsuites>
+    <testsuite name="All">
+      <directory>../tests/units/</directory>
+      <file>../tests/CasesTest.php</file>
+      <file>../tests/DumpingTest.php</file>
+    </testsuite>
+    <testsuite name="units">
+      <directory>../tests/units/</directory>
+    </testsuite>
+    <testsuite name="cases">
+      <file>../tests/CasesTest.php</file>
+    </testsuite>
+    <testsuite name="dumper">
+      <file>../tests/DumpingTest.php</file>
+    </testsuite>
+    <testsuite name="symfony">
+      <file>../tests/SymfonyYamlTest.php</file>
+    </testsuite>
+  </testsuites>
+  <logging>
+    <!-- <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/> -->
+  </logging>
+</phpunit>

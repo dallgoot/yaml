@@ -32,9 +32,10 @@ COMPOSER_CURRENT=$(composer show 'phpunit/phpunit' | grep -Eow "[0-9\.]+" -m 1 )
 # fi
 declare -A versions
 # 7.key.value
-versions[1]=30
-versions[2]=24
-versions[3]=12
+versions[1]=32
+versions[2]=28
+versions[3]=22
+versions[4]=8
 
 onlyMinor=1
 

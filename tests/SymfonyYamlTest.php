@@ -12,7 +12,7 @@ final class SymfonyYamlTest extends TestCase
     // Batch tests
     // first declare Providers
 
-    private function getGenerator($array) {
+    private static function getGenerator($array) {
         $generator = function() use($array) {
             foreach ($array as $key => $value) {
                 yield [$key, rtrim($value)];
@@ -21,27 +21,27 @@ final class SymfonyYamlTest extends TestCase
         return $generator();
     }
 
-    public function examplestestSymfonyProvider()
+    public static function examplestestSymfonyProvider()
     {
         $nameResultPair = Yaml::parseFile(__DIR__.'/definitions/examples_tests.yml');
-        $this->assertArrayHasKey('Example_2_01', $nameResultPair, 'ERROR during Yaml::parseFile for ../definitions/examples_tests.yml');
-        return $this->getGenerator($nameResultPair);
+        self::assertArrayHasKey('Example_2_01', $nameResultPair, 'ERROR during Yaml::parseFile for ../definitions/examples_tests.yml');
+        return self::getGenerator($nameResultPair);
     }
 
-    public function parsingtestSymfonyProvider()
+    public static function parsingtestSymfonyProvider()
     {
         $nameResultPair = Yaml::parseFile(__DIR__.'/definitions/parsing_tests.yml');
-        return $this->getGenerator($nameResultPair);
+        return self::getGenerator($nameResultPair);
     }
 
     public function failingtestSymfonyProvider()
     {
         $nameResultPair = Yaml::parseFile(__DIR__.'/definitions/failing_tests.yml');
-        return $this->getGenerator($nameResultPair);
+        return self::getGenerator($nameResultPair);
     }
 
     /**
-     * @dataProvider examplesProvider
+     * @dataProvider examplestestSymfonyProvider
      * @group cases
      */
     public function testSymfonyBatchExamples($fileName, $expected)

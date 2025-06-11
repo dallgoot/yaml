@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.9.0.0
+## 1.0.1
+- fix version to be proper semver
+- fix some deprecated arg declarations requiring the "?" when default is null
+
+## 0.9.0
 
 ### Changed
 
@@ -25,6 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PHP Notice reported by <https://github.com/stephanedupont> in <https://github.com/dallgoot/yaml/issues/9>
 - dumping bug in Dallgoot\Yaml\DumperHandlers reported by <https://github.com/albosmart-ro> in <https://github.com/dallgoot/yaml/issues/7>>
 
-## 0.3.2.0
+## 0.3.2
 
 this version is not stable enough, nor finished, nor fully tested to be used in production, please prefer the 1.0.0

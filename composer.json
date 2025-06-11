@@ -37,7 +37,8 @@
         "ext-Reflection": "*",
         "phan/phan": "*",
         "phpmetrics/phpmetrics": "*",
-        "phpunit/phpunit": "*"
+        "phpunit/phpunit": "^10",
+        "symfony/yaml": "^7.3"
     },
     "scripts": {
         "test": "phpunit -c ./configuration/phpunit.xml --no-coverage --testsuite All",
