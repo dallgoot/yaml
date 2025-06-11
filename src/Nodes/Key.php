@@ -17,7 +17,7 @@ class Key extends NodeGeneric
 {
     const ERROR_NO_KEYNAME = self::class . ": key has NO IDENTIFIER on line %d";
 
-    public function __construct(string $nodeString, int $line, array $matches = null)
+    public function __construct(string $nodeString, int $line, ?array $matches = null)
     {
         parent::__construct($nodeString, $line);
         if (is_null($matches)) {
