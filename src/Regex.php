@@ -45,7 +45,7 @@ class Regex
     const SEQUENCE = "/".Regex::ALLDEF."^(?&seq)$/i";
     const SEQUENCE_VALUES = "/".Regex::ALLDEF."(?'item'(?&all)) *,? */i";
 
-    const KEY  = "/^([\\w'\"~!][\\w'\" \\-.\\/~!]*[ \\t]*)(?::([ \\t]+[^\\n]+)|:[ \\t]*)$/i";
+    const KEY  = "/^([\\w'\"~!][\\w'\" \\-.\\/~!]*[ \\t\*]*)(?::([ \\t]+[^\\n]+)|:[ \\t]*)$/i";
     # const KEY  = '/^([^:#]+)[ \t]*:([ \t]+.+)*$/iu';
     const ITEM = '/^-([ \t]+(.*))?$/';
 
