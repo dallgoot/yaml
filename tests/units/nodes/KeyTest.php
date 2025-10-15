@@ -208,4 +208,12 @@ class KeyTest extends TestCase
         $this->assertTrue(property_exists($built, 'key'));
         $this->assertEquals(null, $built->key);
     }
+
+    public function testAstersiskInKey(): void
+    {
+        $this->nodeKey = new Key("key*: value", 1);
+        $built = $this->nodeKey->build();
+        $this->assertTrue(property_exists($built, 'key*'));
+        $this->assertEquals('value', $built->{'key*'});
+    }
 }
